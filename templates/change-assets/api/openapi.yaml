@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: TODO - replace with feature API title
+  version: 0.1.0
+  description: TODO - define the API scope.
+servers:
+  - url: https://TODO.example.com
+paths: {}
+x-api-scope: none # Set to "defined" when this Change adds/modifies APIs; then every operation must have operationId and API→IO mappings.
+# TODO: for API changes add paths, stable operationId, security, request/response schemas and error responses.

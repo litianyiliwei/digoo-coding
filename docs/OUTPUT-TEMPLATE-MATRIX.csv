@@ -1,0 +1,37 @@
+﻿phase,output_name,template_level,template_path,required_traceability,validator_or_gate,notes,applicability
+需求分析,需求分析报告,L2,docs/product/requirements-analysis.md,来源/事实/假设/冲突 → FLOW/UC/US/AC,人工评审 + check-requirements.py,总览报告；详细实体清单放在对应产品基线文件,项目启动或产品需求变化时更新；功能 Change 只引用其相关段落/ID，不复制整份基线
+需求分析,业务流程,L2,docs/product/workflows.md,FLOW → UC/US/BR/AC,人工评审 + check-requirements.py,需求梳理,项目启动或流程变化时更新；功能 Change 只引用/更新受影响 FLOW ID
+需求分析,功能用例,L1,docs/product/use-cases.md,UC → FLOW/US/BR/AC,check-requirements.py,功能级输入,项目启动或用例变化时更新；功能 Change 只引用/更新受影响 UC ID
+需求分析,用户故事与验收标准,L1,docs/product/user-stories.md,US → AC → REQ,check-requirements.py,开发与验收,项目级故事清单按需求变更维护；每个 Change 引用关联 US/AC ID，必要时提出修改
+需求分析,业务规则,L1,docs/product/business-rules.md,BR ID / 来源 / 状态,check-requirements.py,全局与功能级规则,跨功能规则变更时维护；功能专属规则优先写在对应 Change 的 delta spec
+需求澄清,未决问题清单,L2,docs/product/open-questions.md,问题 → 负责人 → 决策,人工确认,不允许 AI 猜测,需求澄清期间或出现新问题时维护，已决问题记录决策并关闭
+项目基线,术语表,L2,docs/product/glossary.md,术语 ID/名称/定义,人工评审,统一词汇,项目启动/术语变化时维护；功能 Change 不重写全表
+项目基线,系统上下文与模块边界,L2,docs/architecture/system-context.md,边界/信任区/依赖,人工架构评审,项目级,项目启动或系统边界改变时更新；普通 Change 只引用基线
+项目基线,技术选型决策/ADR,L2,docs/architecture/technology-decisions.md;docs/adr/README.md,决策/备选/理由/代价,人工架构审批,项目级,项目启动或技术决策/基线改变时更新；普通 Change 不重复论证已有决策
+项目基线,部署与容器设计,L2,docs/architecture/containers-and-deployment.md,环境/拓扑/配置/回滚,人工架构评审,项目级,项目启动或部署拓扑改变时更新
+项目基线,数据流,L2,docs/architecture/data-flows.md,DF ID/同步异步/失败/事务,人工架构评审,项目级,项目启动或跨系统/关键数据流变化时更新；功能级调用链放在 Change 设计中
+项目基线,逻辑 ERD,L2,docs/architecture/logical-erd.md,实体 ID/关系/数据所有权,人工架构评审,不是功能物理 DDL,项目启动或核心实体关系/数据所有权改变时更新；功能物理 DDL 留在 Change
+项目基线,领域边界,L2,docs/architecture/domain-boundaries.md,DOM ID/职责/不变量,人工架构评审,项目级,项目启动或领域职责/依赖方向改变时更新
+项目基线,API 约定,L2,docs/architecture/api-conventions.md,operationId/鉴权/错误/兼容,人工架构评审,项目级,项目启动或公共 API 规则改变时更新；单个 API 契约放在 Change
+项目基线,前端规范,L2,docs/architecture/frontend-conventions.md,目录/组件/状态/请求层,人工架构评审,项目级,项目启动或公共前端工程约定改变时更新
+项目基线,测试策略,L2,docs/architecture/test-strategy.md,层级/命令/环境/门禁,人工评审,项目级,项目启动或测试体系/质量门禁改变时更新
+提案,OpenSpec proposal,L1,OpenSpec 内置 schema: proposal.md,目标/范围/影响/非目标,openspec validate,Change 级,始终适用；若某项不适用，记录 N/A 及原因
+提案,OpenSpec delta spec,L1,OpenSpec 内置 schema: specs/<capability>/spec.md,Requirement + Scenario,openspec validate + 人工评审,外部可观察行为,当 Change 改变外部可观察行为时必须生成；纯文档/工具/重构变更按 OpenSpec 约定评估是否 skip_specs
+提案,OpenSpec design,L1,OpenSpec 内置 schema: design.md,上下文/决策/风险/问题,人工技术评审,引用辅助详细设计,当 Change 存在重要技术决策/数据/集成/安全/性能影响时生成；若无设计决策按 active schema 的规则处理
+提案,OpenSpec tasks,L1,OpenSpec 内置 schema: tasks.md,- [ ] 可验证任务,openspec validate / task check,小步可验证,所有需要实现或验证的 Change 必须生成可勾选任务；纯说明性变更按实际工作拆分
+页面设计,页面清单,L1,templates/change-assets/design/page-inventory.csv,PAGE ID/需求/状态/路由,check-inventory.py,每 Change 一份,当本 Change 涉及页面或 UI 状态；无 UI 时在 Change 设计中说明 N/A 原因
+页面设计,交互事件清单,L1,templates/change-assets/design/interaction-map.csv,EVT/ELEM/PAGE/operationId,check-inventory.py,每 Change 一份,当本 Change 涉及交互/用户操作；无交互时说明 N/A 原因
+UI 设计,Figma 审计,L2,templates/change-assets/design/figma-audit.md,页面/元素到 node/component 映射,人工设计评审,记录 MCP 实际可读范围,当 UI/视觉设计发生变化；不涉及 UI 时说明 N/A 原因
+API 设计,OpenAPI 契约,L1,templates/change-assets/api/openapi.yaml,operationId/请求/响应/错误,validate-openapi.sh,唯一 API 契约来源,当本 Change 新增/修改 API；无 API 时 x-api-scope: none
+前端设计,前端详细设计,L1,templates/change-assets/design/frontend-design.md,组件/状态/函数/API 调用,check-design-assets.sh,与 OpenAPI 保持一致,当本 Change 修改前端代码；否则说明 N/A 原因
+后端设计,后端详细设计,L1,templates/change-assets/design/backend-design.md,接口链/领域/Mapper/IO/事务,check-design-assets.sh,每接口显式映射 IO,当本 Change 修改后端代码；否则说明 N/A 原因
+后端设计,API→IO 映射表,L1,templates/change-assets/design/api-io-mapping.csv,每 operationId 1+ IO ID,check-api-io-mapping.py,强制门禁,当 OpenAPI 有 operationId；每个 operationId 至少一个 IO ID
+后端设计,IO 操作目录,L1,templates/change-assets/design/io-catalog.csv,每个 IO 的契约/超时/重试/错误/测试,check-api-io-mapping.py,数据库与非数据库 IO,当 OpenAPI 有 operationId；每个 IO ID 都要被接口映射引用
+测试设计,测试设计/测试矩阵,L1,templates/change-assets/design/test-design.md,AC/REQ/API/IO → TEST ID,check-design-assets.sh + 测试运行,覆盖正反边界,每个 Change 均需要；不适用的测试层要说明原因
+追踪设计,需求追踪矩阵,L1,templates/change-assets/traceability.csv,source → target → evidence,check-traceability.py,不适用要有理由,每个行为变更 Change 均需要
+开发验证,代码审查记录,L1,templates/change-assets/evidence/code-review.md,问题/严重级/结论/证据,人工审查,Superpowers review,每个代码变更均需要；纯文档变更可记录 N/A 原因
+验收,验收记录,L1,templates/change-assets/evidence/acceptance.md,AC/证据/结果/签字,check-acceptance.py,产品责任人批准,每个可交付功能 Change 均需要
+交付复核,完成前检查,L1,scripts/verify-before-completion.sh,测试/构建/差异/未跟踪文件,实际命令退出码,不得伪报完成,每次合并/归档前
+阶段报告,基线审计报告,L2,templates/project-baseline/baseline-audit-report.md,缺口/矛盾/待决/冻结项,人工评审,报告只记录结论,每次项目基线冻结/重大更新时生成；不是每个 feature Change 都要生成
+阶段报告,提案路线图,L2,docs/product/proposal-roadmap.md,Change/价值/依赖/顺序,check-roadmap.py,产品与技术负责人审批,项目启动和提案范围/依赖/优先级变化时更新；单个 Change 执行时只回写状态，不重写整个路线图
+项目初始化,工具链检查报告,L2,templates/project-baseline/toolchain-report.md,工具/版本/命令/退出码/阻断项,人工检查 + check-package.py,初始化工具链与仓库约定盘点,项目启动或工具链变化时更新

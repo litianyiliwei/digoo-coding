@@ -1,0 +1,469 @@
+{
+  "version": "1.0",
+  "principles": [
+    "上一步正式产物是下一步输入；聊天记录不是正式输入。",
+    "workflow-state.json 是索引，不是事实来源。",
+    "未经审批的产物不得被下游当作已批准输入。",
+    "每一步结束必须展示文件路径、内容摘要、自检结果、待审批项与下一步输入。",
+    "缺失/冲突/过期输入必须阻断或显式标记，不得编造。"
+  ],
+  "steps": [
+    {
+      "step": "00",
+      "skill": "workflow-orchestrator",
+      "prompt": "prompts/00-next-step.md",
+      "title": "下一步编排",
+      "scope": "项目级与功能级通用",
+      "inputs": [
+        "workflow-state.json",
+        "docs/PROCESS-MAP.md",
+        "docs/STEP-ARTIFACT-CONTRACTS.json",
+        "docs/OUTPUT-TEMPLATE-MATRIX.csv",
+        "真实产物与审批记录",
+        "OpenSpec CLI 当前状态（如已初始化）"
+      ],
+      "outputs": [
+        "下一阶段判定报告（对话展示；必要时写入 docs/workflow/next-step-report.md）",
+        "workflow-state.json（仅在真实状态变化时更新）"
+      ],
+      "next_inputs": [
+        "所选阶段的 Input Contract 中全部文件"
+      ],
+      "approval": "不得越过 pending_approvals、blocked_items、缺失输入或失败门禁",
+      "gate": "核验真实文件/审批/CLI；只选择一个阶段"
+    },
+    {
+      "step": "01",
+      "skill": "project-bootstrap",
+      "prompt": "prompts/01-project-bootstrap.md",
+      "title": "项目初始化与工具链检查",
+      "scope": "项目级",
+      "inputs": [
+        "用户提供的项目目标与仓库位置",
+        "仓库现有目录/配置/AGENTS.md（若存在）"
+      ],
+      "outputs": [
+        "AGENTS.md（仅缺失时创建或经批准修改）",
+        "workflow-state.json",
+        "docs/architecture/baseline-status.md",
+        "docs/project/toolchain-report.md（依据 templates/project-baseline/toolchain-report.md）"
+      ],
+      "next_inputs": [
+        "仓库约定与工具链报告",
+        "workflow-state.json"
+      ],
+      "approval": "覆盖/修改既有 AGENTS.md 或配置前需批准",
+      "gate": "仓库盘点、Skill/CLI 可用性检查、基础文件检查"
+    },
+    {
+      "step": "02",
+      "skill": "requirements-analysis",
+      "prompt": "prompts/02-requirements-analysis.md",
+      "title": "需求发现与整理",
+      "scope": "项目级",
+      "inputs": [
+        "访谈/业务材料/旧系统资料",
+        "项目目标、用户、角色、约束",
+        "既有 docs/product/*（若存在）",
+        "既有 OpenSpec specs（只读）"
+      ],
+      "outputs": [
+        "docs/product/requirements-analysis.md",
+        "docs/product/workflows.md",
+        "docs/product/use-cases.md",
+        "docs/product/user-stories.md",
+        "docs/product/business-rules.md",
+        "docs/product/open-questions.md"
+      ],
+      "next_inputs": [
+        "需求分析报告、流程、用例、故事、规则、未决问题"
+      ],
+      "approval": "业务负责人确认关键流程、范围、规则与验收标准",
+      "gate": "scripts/check-requirements.py；关键 PENDING 不得伪装确认"
+    },
+    {
+      "step": "03",
+      "skill": "prototype-audit",
+      "prompt": "prompts/03-prototype-audit.md",
+      "title": "pen.dev 原型评审与需求澄清",
+      "scope": "项目级",
+      "inputs": [
+        "docs/product/* 需求产物",
+        "pen.dev 原型链接/导出物（必须实际可访问）",
+        "需求疑问与干系人反馈"
+      ],
+      "outputs": [
+        "docs/design/prototype-audit.md",
+        "docs/product/open-questions.md（更新）",
+        "docs/product/requirements-analysis.md（经确认的修订）"
+      ],
+      "next_inputs": [
+        "原型评审结论、已确认需求修订、未决问题"
+      ],
+      "approval": "客户/产品负责人确认原型与需求差异",
+      "gate": "逐项记录原型覆盖、缺失、冲突和待决；外部链接不可访问则标阻断"
+    },
+    {
+      "step": "04",
+      "skill": "product-baseline",
+      "prompt": "prompts/04-product-baseline.md",
+      "title": "项目级产品基线",
+      "scope": "项目级",
+      "inputs": [
+        "已确认需求产物",
+        "已批准原型审计与修订记录"
+      ],
+      "outputs": [
+        "docs/product/requirements-analysis.md",
+        "docs/product/workflows.md",
+        "docs/product/use-cases.md",
+        "docs/product/user-stories.md",
+        "docs/product/business-rules.md",
+        "docs/product/glossary.md",
+        "docs/product/acceptance-policy.md"
+      ],
+      "next_inputs": [
+        "已批准产品需求基线及稳定 ID"
+      ],
+      "approval": "产品负责人批准产品基线版本",
+      "gate": "scripts/check-requirements.py --strict"
+    },
+    {
+      "step": "05",
+      "skill": "project-architecture-baseline",
+      "prompt": "prompts/05-project-architecture-baseline.md",
+      "title": "项目总体架构设计",
+      "scope": "项目级",
+      "inputs": [
+        "已批准产品基线",
+        "现有仓库结构/技术约束",
+        "非功能需求"
+      ],
+      "outputs": [
+        "docs/architecture/system-context.md",
+        "docs/architecture/domain-boundaries.md",
+        "docs/architecture/containers-and-deployment.md",
+        "docs/architecture/data-flows.md",
+        "docs/architecture/technology-decisions.md",
+        "docs/adr/README.md"
+      ],
+      "next_inputs": [
+        "系统边界、模块职责、部署拓扑、技术决策、跨模块数据流"
+      ],
+      "approval": "架构负责人批准重大技术选型与边界",
+      "gate": "架构一致性与依赖方向人工评审"
+    },
+    {
+      "step": "06",
+      "skill": "data-domain-baseline",
+      "prompt": "prompts/06-data-domain-baseline.md",
+      "title": "项目级数据与领域基线",
+      "scope": "项目级",
+      "inputs": [
+        "已批准产品基线",
+        "docs/architecture/* 架构基线",
+        "现有数据库/领域资料（若存在）"
+      ],
+      "outputs": [
+        "docs/architecture/logical-erd.md",
+        "docs/architecture/domain-boundaries.md（必要时修订）",
+        "docs/architecture/data-flows.md（必要时修订）"
+      ],
+      "next_inputs": [
+        "逻辑实体、关系、数据所有权、领域不变量、数据流"
+      ],
+      "approval": "数据/架构负责人批准核心模型与所有权",
+      "gate": "实体关系、数据所有权、领域边界一致性审查"
+    },
+    {
+      "step": "07",
+      "skill": "project-contract-baseline",
+      "prompt": "prompts/07-project-contract-baseline.md",
+      "title": "项目级接口/前端/测试规范",
+      "scope": "项目级",
+      "inputs": [
+        "已批准架构与数据领域基线",
+        "现有前后端工程规范",
+        "非功能要求"
+      ],
+      "outputs": [
+        "docs/architecture/api-conventions.md",
+        "docs/architecture/frontend-conventions.md",
+        "docs/architecture/test-strategy.md"
+      ],
+      "next_inputs": [
+        "API 公共约定、前端工程约定、测试策略与质量门禁"
+      ],
+      "approval": "技术负责人批准公共工程规范",
+      "gate": "规范可执行性与现有技术栈兼容性审查"
+    },
+    {
+      "step": "08",
+      "skill": "baseline-audit",
+      "prompt": "prompts/08-baseline-audit.md",
+      "title": "项目基线审计与冻结",
+      "scope": "项目级",
+      "inputs": [
+        "产品基线",
+        "架构基线",
+        "数据/领域基线",
+        "公共契约/测试基线",
+        "未决问题清单"
+      ],
+      "outputs": [
+        "templates/project-baseline/baseline-audit-report.md 的项目实例（建议 docs/project/baseline-audit-report.md）",
+        "docs/architecture/baseline-status.md"
+      ],
+      "next_inputs": [
+        "冻结的项目基线版本、缺口/豁免、审批记录"
+      ],
+      "approval": "产品/架构/技术负责人共同批准冻结",
+      "gate": "scripts/check-required-files.sh --strict；未决项需责任人和处理计划"
+    },
+    {
+      "step": "09",
+      "skill": "proposal-planning",
+      "prompt": "prompts/09-proposal-planning.md",
+      "title": "提案拆分、依赖排序与路线图",
+      "scope": "项目级到功能级",
+      "inputs": [
+        "已冻结项目基线",
+        "产品需求/用户故事/AC",
+        "已知技术债与依赖"
+      ],
+      "outputs": [
+        "docs/product/proposal-roadmap.md",
+        "每个候选 Change 的范围/依赖/价值说明"
+      ],
+      "next_inputs": [
+        "经批准的 Change 列表、优先级、依赖顺序"
+      ],
+      "approval": "产品与技术负责人批准路线图及首个 Change",
+      "gate": "scripts/check-roadmap.py --strict；不在此阶段伪造 Change 验证"
+    },
+    {
+      "step": "10",
+      "skill": "feature-requirements",
+      "prompt": "prompts/10-feature-requirements.md",
+      "title": "功能级 OpenSpec Change 与需求细化",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准路线图/当前 Change 范围",
+        "项目级产品/架构/数据/公共契约基线",
+        "关联 US/AC/BR/FLOW/UC",
+        "现有 OpenSpec specs"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/proposal.md",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）",
+        "openspec/changes/<change-id>/tasks.md（初步任务）",
+        "openspec/changes/<change-id>/design.md（有设计决策时）"
+      ],
+      "next_inputs": [
+        "已批准 Change proposal/specs、范围边界、验收标准、需求追踪 ID"
+      ],
+      "approval": "提案及功能范围经人工批准后才进入设计",
+      "gate": "OpenSpec instructions/status/validate；scripts/check-change.sh <change-id>"
+    },
+    {
+      "step": "11",
+      "skill": "page-interaction-inventory",
+      "prompt": "prompts/11-page-interaction-inventory.md",
+      "title": "页面、元素、按钮与交互事件清单",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准 Change proposal/specs",
+        "关联 US/AC 与业务流程",
+        "项目级 UI/前端规范"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/page-inventory.csv",
+        "openspec/changes/<change-id>/design/interaction-map.csv"
+      ],
+      "next_inputs": [
+        "PAGE/ELEM/EVT 清单、状态/跳转、事件与需求/operationId 的关联"
+      ],
+      "approval": "产品负责人确认页面与交互覆盖",
+      "gate": "scripts/check-inventory.py --change <change-id> --strict"
+    },
+    {
+      "step": "12",
+      "skill": "figma-ui-audit",
+      "prompt": "prompts/12-figma-ui-audit.md",
+      "title": "Figma UI 设计与 MCP 审计",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准页面/交互清单",
+        "已批准功能规格",
+        "Figma 文件/节点与可访问 MCP 输出",
+        "项目级设计规范"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/figma-audit.md",
+        "Figma 设计链接/节点映射及导出资源引用"
+      ],
+      "next_inputs": [
+        "页面/组件/状态的 UI 设计依据、差异与待确认项"
+      ],
+      "approval": "设计/产品负责人批准 UI",
+      "gate": "记录实际可读取的 node/component；MCP 不可用时不得声称已审计"
+    },
+    {
+      "step": "13a",
+      "skill": "feature-design",
+      "prompt": "prompts/13a-feature-design.md",
+      "title": "功能详细设计总控",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准 proposal/specs",
+        "页面/交互清单与 Figma 审计（适用时）",
+        "项目级架构/数据/公共契约基线"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design.md",
+        "功能详细设计任务分解与设计缺口清单"
+      ],
+      "next_inputs": [
+        "统一设计约束、接口范围、前后端/测试设计任务"
+      ],
+      "approval": "技术负责人确认设计范围和重大方案",
+      "gate": "scripts/check-change.sh <change-id>；辅助设计文件完整性检查"
+    },
+    {
+      "step": "13b",
+      "skill": "api-contract-design",
+      "prompt": "prompts/13b-api-contract-design.md",
+      "title": "OpenAPI 与接口逻辑设计",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准功能规格与页面交互清单",
+        "Figma 交互（适用时）",
+        "项目级 API/鉴权/错误码约定"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/api/openapi.yaml",
+        "operationId 到页面事件/AC 的追踪关系"
+      ],
+      "next_inputs": [
+        "唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义"
+      ],
+      "approval": "API 契约经前后端共同评审",
+      "gate": "scripts/validate-openapi.sh <file>；无 API 时声明 x-api-scope: none"
+    },
+    {
+      "step": "13c",
+      "skill": "frontend-detail-design",
+      "prompt": "prompts/13c-frontend-detail-design.md",
+      "title": "前端详细设计",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准 OpenAPI（或 x-api-scope: none）",
+        "页面/交互清单与 Figma 审计",
+        "前端工程规范",
+        "功能规格与 AC"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/frontend-design.md",
+        "前端测试用例/组件状态映射"
+      ],
+      "next_inputs": [
+        "组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID"
+      ],
+      "approval": "前端负责人评审",
+      "gate": "前端设计文件完整性与 operationId 对齐检查"
+    },
+    {
+      "step": "13d",
+      "skill": "backend-detail-design",
+      "prompt": "prompts/13d-backend-detail-design.md",
+      "title": "后端详细设计",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准 OpenAPI",
+        "功能规格与 AC",
+        "项目级架构/领域/数据模型/公共 Client 规范"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/backend-design.md",
+        "openspec/changes/<change-id>/design/api-io-mapping.csv",
+        "openspec/changes/<change-id>/design/io-catalog.csv"
+      ],
+      "next_inputs": [
+        "API→IO 映射、每个 IO 契约、事务/幂等/超时/重试/错误映射、测试 ID"
+      ],
+      "approval": "后端负责人/架构负责人评审 IO 边界与事务一致性",
+      "gate": "scripts/check-api-io-mapping.py 与 scripts/check-design-assets.sh --strict；每 operationId 对应一个或多个真实 IO，例外需批准"
+    },
+    {
+      "step": "13e",
+      "skill": "test-design",
+      "prompt": "prompts/13e-test-design.md",
+      "title": "测试设计与追踪矩阵",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准功能规格/AC",
+        "OpenAPI",
+        "前后端详细设计",
+        "API→IO 映射与 IO 契约",
+        "项目级测试策略"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/test-design.md",
+        "openspec/changes/<change-id>/traceability.csv"
+      ],
+      "next_inputs": [
+        "TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果"
+      ],
+      "approval": "测试负责人确认覆盖范围与质量门禁",
+      "gate": "scripts/check-traceability.py --file ... --strict；设计完整性检查"
+    },
+    {
+      "step": "14",
+      "skill": "implementation-orchestrator",
+      "prompt": "prompts/14-implementation-orchestrator.md",
+      "title": "实现、TDD、验证与代码审查",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准 tasks.md/design.md",
+        "前后端详细设计、OpenAPI、IO 契约",
+        "test-design.md 与 traceability.csv",
+        "项目级工程规范/测试策略"
+      ],
+      "outputs": [
+        "实际源代码/迁移/配置",
+        "自动化测试代码与运行结果",
+        "openspec/changes/<change-id>/design/evidence/code-review.md",
+        "实现/验证证据"
+      ],
+      "next_inputs": [
+        "代码差异、测试报告、审查结论、未解决问题"
+      ],
+      "approval": "代码审查阻断项关闭；合并按项目权限单独审批",
+      "gate": "TDD；scripts/test-all.sh；scripts/verify-before-completion.sh；真实命令退出码"
+    },
+    {
+      "step": "15",
+      "skill": "acceptance-audit",
+      "prompt": "prompts/15-acceptance-audit.md",
+      "title": "人工验收、归档与基线回写",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已实现代码与测试证据",
+        "已批准 AC/规格/追踪矩阵",
+        "代码审查记录",
+        "部署/演示或验收环境证据"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/evidence/acceptance.md",
+        "验收报告与批准记录",
+        "OpenSpec archive 结果及更新后的主规格（仅批准后）",
+        "项目路线图/基线状态回写（适用时）"
+      ],
+      "next_inputs": [
+        "已验收并归档的能力规格、验收证据、后续 Change 依赖"
+      ],
+      "approval": "产品责任人明确批准后才可归档；不得用 -y 绕过",
+      "gate": "scripts/check-acceptance.py；verify-before-completion.sh；openspec validate/archive 真实执行"
+    }
+  ]
+}
