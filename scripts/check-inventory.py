@@ -12,7 +12,7 @@ reason = None
 if "--change" in args:
     idx = args.index("--change")
     if idx + 1 >= len(args):
-        print("Usage: check-inventory.py [--change <change-id>] [--no-ui --reason <reason>] [--strict]", file=sys.stderr); sys.exit(2)
+        print("Usage: check-inventory.py --change <change-id> [--no-ui --reason <reason>] [--strict]", file=sys.stderr); sys.exit(2)
     change_id = args[idx + 1]
     if not __import__("re").fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", change_id):
         print("Invalid change-id", file=sys.stderr); sys.exit(2)
@@ -25,12 +25,14 @@ if "--reason" in args:
     args = args[:idx] + args[idx+2:]
 args = [a for a in args if a not in {"--strict", "--no-ui"}]
 if args:
-    print("Usage: check-inventory.py [--change <change-id>] [--no-ui --reason <reason>] [--strict]", file=sys.stderr); sys.exit(2)
+    print("Usage: check-inventory.py --change <change-id> [--no-ui --reason <reason>] [--strict]", file=sys.stderr); sys.exit(2)
+if not change_id:
+    print("check-inventory.py requires --change <change-id>: project-level inventories were removed; templates live in templates/change-assets/design/", file=sys.stderr); sys.exit(2)
 if NO_UI and (not change_id or not reason or not reason.strip()):
     print("--no-ui requires --change <change-id> and --reason <reason>", file=sys.stderr); sys.exit(2)
 if NO_UI and not STRICT:
     print("Use --strict with --no-ui so the explicit scope exception is checked", file=sys.stderr); sys.exit(2)
-base = ROOT / "openspec/changes" / change_id / "design" if change_id else ROOT / "docs/design"
+base = ROOT / "openspec/changes" / change_id / "design"
 PAGE_FILE = base / "page-inventory.csv"
 BLOCK_FILE = base / "block-inventory.csv"
 EVENT_FILE = base / "interaction-map.csv"

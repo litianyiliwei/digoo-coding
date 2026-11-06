@@ -26,7 +26,8 @@
       "Bash(python -c \"import json; d=json.load\\(open\\('docs/architecture/baseline-manifest.json',encoding='utf-8'\\)\\); print\\(d.get\\('status'\\)\\); print\\([f['path'] for f in d['domains']['product']['files']]\\)\")",
       "Bash(python -c \"import json; d=json.load\\(open\\('docs/architecture/baseline-manifest.json',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['domains']['product']['files'],ensure_ascii=False,indent=2\\)\\)\")",
       "Bash(python -c 'import json,pathlib *)",
-      "Bash(python -c 'import csv,pathlib *)"
+      "Bash(python -c 'import csv,pathlib *)",
+      "Bash(git status *)"
     ]
   }
 }

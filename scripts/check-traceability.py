@@ -9,7 +9,7 @@ args = [arg for arg in raw_args if arg != "--strict"]
 if "--file" in args:
     i = args.index("--file")
     if i + 1 >= len(args):
-        print("Usage: check-traceability.py [--file <csv>] [--strict]", file=sys.stderr); sys.exit(2)
+        print("Usage: check-traceability.py --file <csv> [--strict]", file=sys.stderr); sys.exit(2)
     candidate = Path(args[i + 1])
     if not candidate.is_absolute():
         # Prefer current working directory, then package/project root.
@@ -17,9 +17,9 @@ if "--file" in args:
     args = args[:i] + args[i+2:]
     path = candidate
 else:
-    path = ROOT / "docs/design/traceability.csv"
+    print("Usage: check-traceability.py --file <csv> [--strict]", file=sys.stderr); sys.exit(2)
 if args:
-    print("Usage: check-traceability.py [--file <csv>] [--strict]", file=sys.stderr); sys.exit(2)
+    print("Usage: check-traceability.py --file <csv> [--strict]", file=sys.stderr); sys.exit(2)
 if not path.is_file():
     print(f"ERROR: missing traceability file: {path}", file=sys.stderr); sys.exit(1)
 required = ["source_type", "source_id", "target_type", "target_id", "relationship", "status", "evidence", "notes"]
