@@ -10,6 +10,7 @@
 按模板生成 OpenAPI 3.x 文件、稳定 operationId、权限、请求/响应 schema、错误响应和示例。逐个 operationId 输出 API IO 需求清单，标明所需的数据库读/写、文件/对象存储、HTTP/Feign、Redis、MQ、搜索等 I/O 类别；不要在本阶段虚构具体 SQL 或 Client 方法。后续后端详细设计必须将每个 operationId 映射到一个或多个具体 IO ID。为成功、边界、校验、认证、授权、404、冲突、依赖失败和幂等生成测试用例。运行 `scripts/validate-openapi.sh <file>`。未知字段列为 PENDING + 原因，不可猜测。
 如果本 Change 不新增/修改 API，必须设置 `x-api-scope: none` 并说明原因；否则设置 `x-api-scope: defined` 并提供 operationId。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：必须遵循 `docs/architecture/api-conventions.md`。单个 API 属于 Change；改变全局错误模型、鉴权、版本、分页、幂等或兼容规则时提出 API 基线修订，不得局部静默偏离。
 ```
 
 ## 运行前要填的变量
@@ -34,4 +35,10 @@
 - 必须输出：openspec/changes/<change-id>/api/openapi.yaml；operationId 到页面事件/AC 的追踪关系。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线设计门禁（必须执行）
+
+将 API/鉴权/错误/版本/幂等等适用 Constraint ID 映射到 OpenAPI 或设计证据。执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`；不允许只在 Markdown 里声明兼容。

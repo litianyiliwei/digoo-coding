@@ -46,12 +46,25 @@ description: 后端详细设计。定义接口调用链、领域类/方法、DDL
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 架构、数据与 IO 基线约束（强制）
+
+- 详细设计前读取 `system-context.md`、`domain-boundaries.md`、`logical-erd.md`、`data-flows.md`、`technology-decisions.md` 和相关 ADR；凡涉及 API 时同时遵守 `api-conventions.md`。
+- 具体表/字段/索引/迁移、单功能事务编排、Feign/HTTP、Redis、MQ、文件/对象存储等 IO 契约留在当前 Change 的后端设计和 IO 目录。
+- 只有共享实体语义/关系/数据所有权/领域不变量、模块边界、跨模块集成策略或全局 IO 约定变化才提出数据/架构基线修订。
+- 基线约束与功能实现冲突时，不得通过局部代码绕过；在 `design/baseline-impact.md` 记录并走审批。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="backend-detail-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准 OpenAPI；功能规格与 AC；项目级架构/领域/数据模型/公共 Client 规范。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 OpenAPI；功能规格与 AC；项目级架构/领域/数据模型/公共 Client 规范。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/backend-design.md；openspec/changes/<change-id>/design/api-io-mapping.csv；openspec/changes/<change-id>/design/io-catalog.csv。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** API→IO 映射、每个 IO 契约、事务/幂等/超时/重试/错误映射、测试 ID。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 机器基线约束（强制）
+
+- 模块边界、数据所有权、共享实体、事务一致性、公共 Client、API 和可观测性规则必须逐条核验 `baseline-binding.json`；设计证据需定位到 backend-design、IO catalog、API→IO mapping 或 OpenAPI。
+- 完成本阶段时执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

@@ -1,5 +1,7 @@
 # OpenSpec + Superpowers AI 研发流程落地手册
 
+> 2026-11-06 拓扑变更：本手册为早期 15 阶段设计稿；阶段 03/04/06/07/08 已取消或合并，原型改为提案级阶段 10b，需求阶段改为“需求业务梳理”。权威阶段定义见 `docs/WORKFLOW-STAGES.json`、`docs/PROCESS-MAP.md`、`docs/STAGE-IO-OVERVIEW.md`。
+
 版本：1.0\
 适用：pen.dev + Figma MCP + OpenSpec + Superpowers + 前后端仓库\
 原则：项目级基线先行、功能级 Change
@@ -13,7 +15,7 @@
 个阶段，并增加变更影响分析、自动化质量门禁和归档复盘。
 
 1.  项目初始化与工具链检查
-2.  需求发现与整理：业务流程、用例、用户故事、约束、验收标准
+2.  需求业务梳理：业务流程（节点级角色/数据对象）、数据对象目录、RD 矩阵、约束、验收标准
 3.  pen.dev 原型评审：用页面流程检查需求遗漏，再与客户确认
 4.  项目级产品基线：术语、角色权限、业务规则、非功能需求
 5.  项目总体架构设计：前后端技术选型、部署、数据流、系统边界
@@ -21,7 +23,7 @@
 7.  项目级接口/前端/测试规范：公共契约、错误码、鉴权、测试策略
 8.  基线审计与冻结：输出可供各功能提案复用的基线
 9.  提案拆分、依赖排序与路线图
-10. 功能级 OpenSpec Change：需求细化、原型更新、验收标准、影响分析
+10. 提案级需求分析：UC/US/AC、影响分析；随后生成并评审提案原型
 11. 页面/元素/事件清单：从确认后的提案需求和 pen.dev 导出
 12. Figma UI 设计与 MCP 审计：视觉稿与页面元素映射
 13. 功能级详细设计：OpenAPI、前端设计、后端设计、测试用例
@@ -70,8 +72,8 @@ repo/
 │   ├── product/
 │   │   ├── glossary.md
 │   │   ├── workflows.md
-│   │   ├── use-cases.md
-│   │   ├── user-stories.md
+│   │   ├── data-objects.csv
+│   │   ├── rd-matrix.csv
 │   │   ├── business-rules.md
 │   │   └── acceptance-policy.md
 │   ├── architecture/
@@ -85,8 +87,9 @@ repo/
 │   │   ├── frontend-conventions.md
 │   │   └── test-strategy.md
 │   ├── design/
-│   │   ├── page-inventory.csv
-│   │   ├── interaction-map.csv
+│   │   ├── page-inventory.md
+│   │   ├── block-inventory.md
+│   │   ├── interaction-map.md
 │   │   └── figma-audit.md
 │   └── adr/
 ├── .claude/skills/
@@ -167,7 +170,7 @@ description: 初始化 AI 研发工作区，核对 OpenSpec、Superpowers、pen.
 
 ------------------------------------------------------------------------
 
-### 阶段 2：需求发现与整理
+### 阶段 2：需求业务梳理
 
 **Skill：** `requirements-analysis`
 
@@ -176,7 +179,7 @@ description: 初始化 AI 研发工作区，核对 OpenSpec、Superpowers、pen.
 ``` markdown
 ---
 name: requirements-analysis
-description: 将访谈、现有文档和业务材料整理为可追踪的业务流程、用例、用户故事与验收标准。
+description: 将访谈、现有文档和业务材料整理为完整业务流程（节点级角色与数据对象）、数据对象目录、RD 矩阵、业务规则与验收政策。
 ---
 
 # 输入
@@ -185,13 +188,14 @@ description: 将访谈、现有文档和业务材料整理为可追踪的业务�
 # 流程
 1. 区分已确认事实、合理推断、待确认问题，不得把推断写成事实。
 2. 梳理参与者、触发条件、前置条件、主流程、替代流程、异常流程、后置条件。
-3. 建立业务流程 → 用例 → 用户故事 → 验收标准的追踪 ID。
-4. 识别权限、数据范围、幂等、并发、审计、性能、安全、可访问性等非功能要求。
-5. 对每条需求检查可测试性、边界条件和失败路径。
-6. 将冲突与缺失整理成问题清单，等待产品/客户确认。
-7. 不在此阶段决定数据库表结构或实现细节。
+3. 将每个流程拆解到可执行节点，登记节点角色、输入/输出数据对象、处理动作和分支；用例/用户故事留到提案级需求分析。
+4. 建立业务流程 → 节点 → 数据对象 → RD 矩阵 → 业务规则/验收政策的追踪 ID。
+5. 识别权限、数据范围、幂等、并发、审计、性能、安全、可访问性等非功能要求。
+6. 对每条需求检查可测试性、边界条件和失败路径。
+7. 将冲突与缺失整理成问题清单，等待产品/客户确认。
+8. 不在此阶段决定数据库表结构或实现细节。
 # 输出
-docs/product/workflows.md、use-cases.md、user-stories.md、business-rules.md、open-questions.md。
+docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md。
 ```
 
 **Prompt**
@@ -480,7 +484,7 @@ description: 将产品需求切分为可独立验收的 OpenSpec Change，并按
 
 ------------------------------------------------------------------------
 
-### 阶段 10：功能级 OpenSpec Change 与需求细化
+### 阶段 10：提案级需求分析
 
 **Skill：** `feature-requirements`
 
@@ -489,7 +493,7 @@ description: 将产品需求切分为可独立验收的 OpenSpec Change，并按
 ``` markdown
 ---
 name: feature-requirements
-description: 为单个提案建立 OpenSpec Change，细化行为规格并分析对既有基线的影响。
+description: 为单个提案建立 OpenSpec Change，生成提案级 UC/US/AC、细化行为规格并分析对既有基线的影响。
 ---
 
 1. 先读取项目基线和相关已归档 Change，不凭空重新定义通用规则。

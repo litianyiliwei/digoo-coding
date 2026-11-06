@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Validate that every configured Skill has a matching Prompt and valid frontmatter."""
 from pathlib import Path
-import re, subprocess, sys, shutil
+import json, re, subprocess, sys, shutil
 ROOT = Path(__file__).resolve().parents[1]
-skills_dir = next((ROOT / d for d in (".claude/skills", ".agents/skills") if (ROOT / d).is_dir()), ROOT / ".claude/skills")
+skills_dir = ROOT / ".claude/skills" if (ROOT / ".claude/skills").is_dir() else ROOT / ".agents/skills"
 prompts_dir = ROOT / "prompts"
 errors=[]
 skill_paths=sorted(skills_dir.glob("*/SKILL.md"))
-# workflow-prompts.md is the merged overview doc, not a per-stage prompt.
-prompt_paths=sorted(p for p in prompts_dir.glob("*.md") if p.name != "workflow-prompts.md")
-if not skill_paths: errors.append(f"No {skills_dir.relative_to(ROOT)}/*/SKILL.md found")
+prompt_paths=sorted(prompts_dir.glob("*.md"))
+if not skill_paths: errors.append(f"No skills/*/SKILL.md found under {skills_dir.relative_to(ROOT)}")
 ids=set()
 for p in skill_paths:
     body=p.read_text(encoding="utf-8")
@@ -27,23 +26,11 @@ for p in skill_paths:
     ids.add(dirname)
     if len(body.strip())<500: errors.append(f"Skill suspiciously short: {p.relative_to(ROOT)}")
 missing_prompts=[]
-SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md"}
-# OpenSpec CLI wrapper skills pair with .claude/commands/opsx/<command>.md, not prompts/.
-OPSX_COMMAND_PAIRS = {
-    "openspec-apply-change": "apply",
-    "openspec-archive-change": "archive",
-    "openspec-explore": "explore",
-    "openspec-propose": "propose",
-    "openspec-sync-specs": "sync",
-    "openspec-update-change": "update",
-}
+SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "14b-independent-verification.md"}
+# openspec-* skills are OpenSpec CLI helpers, not workflow stages; they have no stage prompt.
 for skill in ids:
-    if skill in OPSX_COMMAND_PAIRS:
-        paired = (ROOT / ".claude/commands/opsx" / (OPSX_COMMAND_PAIRS[skill] + ".md")).is_file()
-    elif skill in SPECIAL_PROMPT_PAIRS:
-        paired = (prompts_dir / SPECIAL_PROMPT_PAIRS[skill]).is_file()
-    else:
-        paired = bool(list(prompts_dir.glob(f"*-{skill}.md")))
+    if skill.startswith("openspec-"): continue
+    paired = (prompts_dir / SPECIAL_PROMPT_PAIRS[skill]).is_file() if skill in SPECIAL_PROMPT_PAIRS else bool(list(prompts_dir.glob(f"*-{skill}.md")))
     if not paired:
         missing_prompts.append(skill)
 if missing_prompts: errors.append("Skills missing paired Prompt: " + ", ".join(sorted(missing_prompts)))
@@ -58,6 +45,11 @@ if contract_check.returncode:
 r = subprocess.run([sys.executable, str(ROOT / "scripts/check-output-template-matrix.py")], capture_output=True, text=True)
 if r.returncode:
     errors.append("Output template matrix check failed: " + (r.stdout + r.stderr).strip().replace("\n", " | "))
+
+# Validate the derived stage input/output overview matches the authoritative contracts.
+r = subprocess.run([sys.executable, str(ROOT / "scripts/stage-io-report.py"), "--check"], capture_output=True, text=True)
+if r.returncode:
+    errors.append("Stage I/O overview check failed: " + (r.stdout + r.stderr).strip().replace("\n", " | "))
 
 # Validate bash syntax of every shell script if bash exists.
 if shutil.which("bash"):
@@ -78,12 +70,14 @@ for p in (ROOT/"scripts").glob("__pycache__/*"):
     except OSError: pass
 try: (ROOT/"scripts/__pycache__").rmdir()
 except OSError: pass
-print(f"Skills: {len(skill_paths)} ({sum(1 for p in skill_paths if not p.parent.name.startswith('openspec-'))} stage skills); prompts: {len(prompt_paths)}")
-stage_skill_count = sum(1 for p in skill_paths if not p.parent.name.startswith("openspec-"))
-if stage_skill_count != 20: errors.append(f"Expected 20 stage Skills; found {stage_skill_count}")
-if len(prompt_paths)!=20: errors.append(f"Expected 20 Prompts; found {len(prompt_paths)}")
+print(f"Skills: {len(skill_paths)}; prompts: {len(prompt_paths)}")
+# Expected counts derive from the contract registry: one Skill per contract step,
+# plus the contract prompts and the standalone workflow-prompts.md overview.
+expected_steps = len(json.loads((ROOT / "docs/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))["steps"])
+if len(skill_paths) < expected_steps: errors.append(f"Expected at least {expected_steps} Skills (one per contract step); found {len(skill_paths)}")
+if len(prompt_paths) != expected_steps + 1: errors.append(f"Expected {expected_steps + 1} Prompts (contract prompts + workflow-prompts.md); found {len(prompt_paths)}")
 if errors:
     for e in errors: print("ERROR:",e)
     print(f"Package checks failed: {len(errors)} issue(s).")
     sys.exit(1)
-print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, template matrix, Bash/Python syntax, API→IO regression tests.")
+print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, template matrix, Bash/Python syntax, API→IO regression tests.")

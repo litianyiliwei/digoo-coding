@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "project_id": "REPLACE_WITH_PROJECT_ID",
+  "overall_version": "0.1.0",
+  "status": "DRAFT",
+  "approval": {
+    "approver": "",
+    "approved_at": "",
+    "evidence": ""
+  },
+  "constraint_registry": {
+    "path": "docs/architecture/constraint-registry.json",
+    "sha256": ""
+  },
+  "domains": {
+    "product": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/product/requirements-analysis.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/workflows.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/data-objects.csv",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/rd-matrix.csv",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/business-rules.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/glossary.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/product/acceptance-policy.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    },
+    "architecture": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/architecture/system-context.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/domain-boundaries.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/containers-and-deployment.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/data-flows.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/technology-decisions.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/adr/README.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    },
+    "data_domain": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/architecture/logical-erd.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/domain-boundaries.md",
+          "sha256": ""
+        },
+        {
+          "path": "docs/architecture/data-flows.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    },
+    "api": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/architecture/api-conventions.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    },
+    "frontend": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/architecture/frontend-conventions.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    },
+    "test_quality": {
+      "version": "0.1.0",
+      "status": "DRAFT",
+      "owner": "",
+      "approver": "",
+      "approved_at": "",
+      "effective_revision": "",
+      "files": [
+        {
+          "path": "docs/architecture/test-strategy.md",
+          "sha256": ""
+        }
+      ],
+      "approval_evidence": ""
+    }
+  },
+  "amendment_history": []
+}

@@ -1,93 +1,25 @@
-# 每个自建 Skill 的调用 Prompt 索引
+# 每个流程阶段的 Prompt 索引
 
-将尖括号占位符替换为当前项目真实值；Prompt 会显示在对应的 `SKILL.md` 中，这里方便快速复制。
+Prompt 文件位于 `prompts/`，与 `.claude/skills/<skill-id>/SKILL.md` 一一对应；执行前把尖括号占位符替换为当前项目真实值。流程入口是 `prompts/00-next-step.md`。
 
-## project-bootstrap
+| 阶段 | Prompt | Skill |
+|---|---|---|
+| 00 下一步编排 | `prompts/00-next-step.md` | `workflow-orchestrator` |
+| 01 项目初始化与工具链检查 | `prompts/01-project-bootstrap.md` | `project-bootstrap` |
+| 02 需求业务梳理 | `prompts/02-requirements-analysis.md` | `requirements-analysis` |
+| 05 项目总体架构设计 | `prompts/05-project-architecture-baseline.md` | `project-architecture-baseline` |
+| 09 提案拆分、依赖排序与路线图 | `prompts/09-proposal-planning.md` | `proposal-planning` |
+| 10 提案级需求分析 | `prompts/10-feature-requirements.md` | `feature-requirements` |
+| 10b 提案原型生成与评审 | `prompts/10b-prototype-generation.md` | `prototype-generation` |
+| 11 页面、功能区块、元素与交互事件清单 | `prompts/11-page-interaction-inventory.md` | `page-interaction-inventory` |
+| 12 Figma UI 设计与 MCP 审计 | `prompts/12-figma-ui-audit.md` | `figma-ui-audit` |
+| 13a 功能详细设计总控 | `prompts/13a-feature-design.md` | `feature-design` |
+| 13b OpenAPI 与接口逻辑设计 | `prompts/13b-api-contract-design.md` | `api-contract-design` |
+| 13c 前端详细设计 | `prompts/13c-frontend-detail-design.md` | `frontend-detail-design` |
+| 13d 后端详细设计 | `prompts/13d-backend-detail-design.md` | `backend-detail-design` |
+| 13e 测试设计与追踪矩阵 | `prompts/13e-test-design.md` | `test-design` |
+| 14 实现、TDD、验证与代码审查 | `prompts/14-implementation-orchestrator.md` | `implementation-orchestrator` |
+| 14b 独立验证与验收证据 | `prompts/14b-independent-verification.md` | `independent-verifier` |
+| 15 人工验收、归档与基线回写 | `prompts/15-acceptance-audit.md` | `acceptance-audit` |
 
-```text
-执行项目初始化和工具盘点。先只读检查仓库、Git 状态、OpenSpec 版本/配置、已有官方与自建 Skill、构建测试命令及项目规则。给出最小初始化方案和冲突清单；不要覆盖已有文件。仅在获准后创建必要骨架。输出真实检查证据、缺口、需确认事项和下一步。
-```
-
-## project-discovery
-
-```text
-根据现有材料建立项目需求基线。提取产品目标、角色、流程、用例、用户故事、优先级、依赖、明确不做范围及可验证验收条件。区分已确认/推断/待确认，给 REQ/UC/US 分配稳定 ID，先查重。输出追踪矩阵和问题清单；不要设计具体 API、数据库字段或代码方法。
-```
-
-## prototype-sync
-
-```text
-使用当前已确认需求检查原型覆盖。逐条映射用户故事到入口、关键步骤、成功/失败/取消/返回路径和页面状态，标出完整/部分/缺失/不适用并附证据。先输出缺口和修改建议，获准后才修改原型。同步页面 ID 与链接；不要推断 API 或数据库方案。
-```
-
-## product-baseline
-
-```text
-读取需求、原型、Figma 和现有追踪文档，建立/更新页面、组件、事件清单。复用现有 ID，查重，记录事件前置条件、权限、成功/失败结果和 REQ/US 映射。只为已确认的服务交互登记 API 待定义关系，不猜 endpoint。输出孤立页面/事件和追踪缺口。
-```
-
-## ui-design
-
-```text
-基于已确认需求、原型、页面/组件/事件 ID 和风格参考，先盘点可复用 Figma 组件。定义/沿用设计 token 与共用组件，设计本次需要的页面和状态，检查响应式、可访问性与错误反馈。关联 PAGE/COMP/EVT ID；无 UI 变化则记录不变。不要通过 UI 自行改变业务规则，也不要写代码。
-```
-
-## project-architecture-baseline
-
-```text
-设计项目级总体架构基线：系统上下文、技术栈、部署与模块边界、领域归属、核心实体关系、数据库总体策略、分层/事务/安全/可观测性原则及 ADR。区分全局约束、待确认事项和功能级细节。不要生成所有功能的 DDL、SQL、Mapper、类方法或 Feign/Redis/MQ 具体接口。检查首个功能能否据此设计。
-```
-
-## project-contract-baseline
-
-```text
-建立项目级公共契约与 I/O 接入规范：API 版本、认证授权、统一响应、错误码、分页、幂等、限流、超时、兼容；前端 Client/状态与错误映射；后端分层、事务、异常与观测；实际使用的数据库、文件、HTTP/Feign、Redis、MQ 的超时/重试/资源/安全/一致性规则。只定义跨功能约束，不设计具体业务 endpoint；与架构冲突时列差异。
-```
-
-## test-strategy-design
-
-```text
-盘点项目现有测试与 CI，定义单元、组件、契约、数据库/I/O 集成、E2E、回归及非功能测试的适用范围。建立提交/合并/发布三级门禁、测试数据与环境策略、跳过测试记录规则和验收条件到测试证据的映射。提供真实命令或标记待配置，不编造执行结果。
-```
-
-## baseline-audit
-
-```text
-对当前项目基线或功能设计做语义审查。交叉核对需求、原型/UI、OpenSpec 规格、API、前后端设计、数据库/I/O 和测试追踪关系；识别领域所有权、模块依赖、租户/安全及公共契约冲突。每项问题给证据、影响、等级、修复文件和关闭条件。结论只能是通过/有条件通过/阻塞，不得静默批准基线变更。
-```
-
-## feature-impact-analysis
-
-```text
-分析功能 <名称/US-ID> 的实现影响。读取产品需求、OpenSpec 规格、项目架构/契约、相关代码/测试及未完成 Change。划分范围、依赖、页面/事件/API/领域/数据库/I/O/权限/测试影响，判断基线冲突，并列出本次必须调用和可跳过的 Skill。先交付影响矩阵，不写代码、不静默改全局基线。
-```
-
-## api-contract-design
-
-```text
-为 <change-name> 设计本功能具体 API。遵守项目 API 标准；明确 Method/Path、权限、参数类型和校验、请求/响应 Schema、示例、错误码、幂等/重试、分页/兼容与并发语义。映射到 US/EVT、后端方法和契约测试。先报告不确定项，评审通过后再更新唯一权威 OpenAPI；不要猜测业务字段。
-```
-
-## frontend-detail-design
-
-```text
-基于已批准的规格、UI 和 API，为 <change-name> 输出前端详细设计。列出修改文件、组件树、Props/事件、状态所有者与数据流、API 调用、校验/加载/成功/失败处理、关键函数契约及测试场景。考虑重复提交、竞态、取消和卸载等适用边界。遵守现有技术栈，不写生产代码，不私自改 API。
-```
-
-## backend-detail-design
-
-```text
-为 <change-name> 设计可实现的后端详细方案。覆盖领域/应用方法签名、输入/输出/异常/副作用/事务/并发，具体表字段/约束/索引/SQL/迁移/回滚，Mapper/Repository 接口，以及本功能实际需要的文件 I/O、Feign/HTTP、Redis、MQ Client 契约。每个 I/O 说明 DTO、超时、错误映射、重试/幂等、资源与一致性。列出测试映射；不涉及项明确排除。发现全局规则变化则停止并提出基线变更，不写代码。
-```
-
-## feature-design
-
-```text
-协调 <change-name> 的功能级设计。依据影响矩阵只调用必要的 UI/API/前端/后端/数据库/I/O Skill，将权威设计路径记录在 Change design.md，避免重复文档。交叉核对 specs、验收条件、UI、API、数据模型、错误语义和测试。发现全局基线冲突则暂停受影响部分并交 baseline-audit。输出缺口、修订责任和设计准入结论；不写生产代码。
-```
-
-## acceptance-audit
-
-```text
-对 <change-name> 做验收审查。逐条把 OpenSpec 验收条件映射到真实测试/操作证据；分别检查规格、代码、自动化测试、API/DB/I/O 集成和产品体验。分类问题并写出证据、影响、复现与关闭条件。未运行或未实际观察的项必须标未验证。不要伪造结果或代替产品负责人最终验收；输出归档准入结论。
-```
+输入、输出、审批点与门禁以 `docs/STEP-ARTIFACT-CONTRACTS.json` 为准；阶段总览见 `docs/STAGE-IO-OVERVIEW.md`。

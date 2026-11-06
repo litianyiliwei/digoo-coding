@@ -18,7 +18,7 @@ ADR 目录：docs/adr/
 
 ## 执行工具协议（必须遵守）
 
-- **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
+- **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.agents/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
 - **Superpowers：** 按需要使用 Superpowers `brainstorming` 讨论方案；架构决策/产品规则未获批准前不能标为冻结。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时说明并执行等价步骤，禁止声称调用了未安装技能。
 - **OpenSpec：** 若 OpenSpec 已初始化，读取相关现有 specs/changes 作为约束；此项目基线阶段不擅自创建或归档功能 Change。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行，不得假装验证通过。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。

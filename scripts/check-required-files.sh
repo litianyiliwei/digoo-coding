@@ -11,8 +11,8 @@ required=(
   "docs/product/requirements-analysis.md"
   "docs/product/glossary.md"
   "docs/product/workflows.md"
-  "docs/product/use-cases.md"
-  "docs/product/user-stories.md"
+  "docs/product/data-objects.csv"
+  "docs/product/rd-matrix.csv"
   "docs/product/business-rules.md"
   "docs/product/acceptance-policy.md"
   "docs/product/open-questions.md"
@@ -26,6 +26,7 @@ required=(
   "docs/architecture/frontend-conventions.md"
   "docs/architecture/test-strategy.md"
   "docs/architecture/baseline-status.md"
+  "docs/project/baseline-audit-report.md"
   "docs/TEMPLATE-POLICY.md"
   "docs/OUTPUT-TEMPLATE-MATRIX.csv"
 )

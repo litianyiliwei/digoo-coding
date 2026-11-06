@@ -3,12 +3,14 @@
 ```text
 执行 `@acceptance-audit`，Change：<change-id>。
 
+独立验证报告与 JSON：<independent-verification-report-and-json>
 AC/specs：<spec-paths>
 测试/构建报告：<evidence-paths>
 Figma/原型审计：<design-evidence>
 
-逐条验收 AC，记录结果、证据和责任人；核对 UI、接口、数据迁移、权限与可观测性。将发现分类为缺陷、需求变更或已批准偏差。列出阻断项、遗留风险、回滚/发布事项。只有门禁通过才建议按当前 OpenSpec CLI 流程归档并回写通用基线；不要用 `-y` 绕过未完成任务或确认。
+先确认阶段 14b 的独立验证 Verdict=PASS，且验证 revision 与当前代码一致；不满足则停止验收。然后逐条验收 AC，记录结果、证据和责任人；核对 UI、接口、数据迁移、权限与可观测性。将发现分类为缺陷、需求变更或已批准偏差。列出阻断项、遗留风险、回滚/发布事项。验收通过后先判断并回写已批准的项目基线修订（更新基线域版本/审批/生效日期/在途 Change 复核），再单独执行 OpenSpec archive 合并行为规格。两者不是同一动作；功能专属细节保留在 Change。不要用 `-y` 绕过未完成任务或确认。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：仅将已批准、已实现、已验证且具有跨功能复用价值的决策回写项目基线。功能专属 API、页面、表迁移、IO 和测试保留在归档 Change。更新基线版本和审批记录，并列出需重新核对的在途 Change。OpenSpec 主规格归档与项目设计基线回写是两项独立判断。
 ```
 
 ## 运行前要填的变量
@@ -33,4 +35,15 @@ Figma/原型审计：<design-evidence>
 - 必须输出：openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；OpenSpec archive 结果及更新后的主规格（仅批准后）；项目路线图/基线状态回写（适用时）。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：已验收并归档的能力规格、验收证据、后续 Change 依赖。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 独立验证前置门禁（P0）
+
+阶段 15 必须读取阶段 14b 的 `independent-verification-report.md` 和 `.json`。若不是 PASS、验证后代码有变化或报告缺失，必须退回阶段 14b 重新验证，不得继续归档。
+
+
+## 机器基线验收门禁（必须执行）
+
+验收/归档前逐条核对基线绑定的实现验证证据、已批准例外和当前 rebase 结论；为每条 ACTIVE 约束单独填写 `acceptance_verification`（PASS/NOT_APPLICABLE、方法、真实验收证据），不得直接复制实现阶段的 PASS。执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase acceptance`。未覆盖的 ACTIVE 约束、PENDING 例外、缺少验收证据或未完成 rebase 均阻断归档。

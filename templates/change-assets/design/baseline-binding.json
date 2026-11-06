@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "change_id": "REPLACE_WITH_CHANGE_ID",
+  "created_at": "",
+  "baseline_snapshot": {
+    "overall_version": "",
+    "overall_status": "FROZEN",
+    "manifest_sha256": "",
+    "domains": {}
+  },
+  "constraints": [],
+  "rebase_reviews": {},
+  "approval": {
+    "status": "PENDING",
+    "reviewer": "",
+    "reviewed_at": "",
+    "evidence": ""
+  }
+}

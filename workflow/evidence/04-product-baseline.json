@@ -1,0 +1,80 @@
+{
+  "step_id": "04-product-baseline",
+  "change_id": null,
+  "baseline_version": "product-baseline-v1.0",
+  "outputs": [
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "status": "verified",
+      "required": true,
+      "role": "requirements-baseline"
+    },
+    {
+      "path": "docs/product/workflows.md",
+      "status": "verified",
+      "required": true,
+      "role": "workflows-baseline"
+    },
+    {
+      "path": "docs/product/use-cases.md",
+      "status": "verified",
+      "required": true,
+      "role": "use-cases-baseline"
+    },
+    {
+      "path": "docs/product/user-stories.md",
+      "status": "verified",
+      "required": true,
+      "role": "user-stories-and-ac-baseline"
+    },
+    {
+      "path": "docs/product/business-rules.md",
+      "status": "verified",
+      "required": true,
+      "role": "business-rules-baseline"
+    },
+    {
+      "path": "docs/product/glossary.md",
+      "status": "updated",
+      "required": true,
+      "role": "glossary"
+    },
+    {
+      "path": "docs/product/acceptance-policy.md",
+      "status": "updated",
+      "required": true,
+      "role": "acceptance-policy"
+    }
+  ],
+  "checks": [
+    {
+      "name": "requirements-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-check-requirements.log"
+    },
+    {
+      "name": "required-baseline-files",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-required-files.sh",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-check-required-files.log"
+    },
+    {
+      "name": "product-baseline-review-approved-by-owner",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "用户（welly，代行产品负责人）",
+      "evidence": "docs/product/acceptance-policy.md"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "用户（welly，代行产品负责人）",
+    "approved_at": "2026-11-05"
+  }
+}

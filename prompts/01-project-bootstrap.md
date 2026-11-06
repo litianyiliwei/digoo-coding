@@ -7,7 +7,7 @@
 项目摘要：<project-summary>
 当前 Agent/IDE：<agent-and-ide>
 
-先检查现有 README、目录、构建/CI 文件、Git 状态、OpenSpec CLI 和 Superpowers 实际安装状态。提出最小初始化方案，不覆盖既有配置，不安装/删除/提交任何内容。输出工具状态、已发现约定、缺口、拟创建/修改清单和未执行检查。
+先检查现有 README、目录、构建/CI 文件、Git 状态、OpenSpec CLI 和 Superpowers 实际安装状态。提出最小初始化方案，不覆盖既有配置，不安装/删除/提交任何内容。输出工具状态、已发现约定、缺口、拟创建/修改清单和未执行检查。初始化 `docs/architecture/baseline-status.md` 时必须使用 `templates/project-baseline/baseline-status.md`，建立产品/架构/数据领域/API/前端/测试质量各域的版本、状态和审批登记；未知值写 DRAFT/PENDING，不得伪造 FROZEN。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 ```
 

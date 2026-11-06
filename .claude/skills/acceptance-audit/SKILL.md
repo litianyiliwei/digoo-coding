@@ -9,18 +9,19 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 当流程进入“人工验收、归档与基线回写”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-实现分支、AC、测试/构建报告、Figma/原型审计、OpenAPI 与风险清单。
+阶段 14b 的独立验证 PASS 报告与 JSON 证据（必须）；实现分支、AC、测试/构建报告、Figma/原型审计、OpenAPI、`design/baseline-impact.md`、当前 `baseline-status.md` 与已批准基线修订证据。
 
 ## 执行流程
-1. 逐条记录 AC 的通过/失败/不适用及证据链接。
-2. 核对页面/事件、API 契约、数据迁移、权限、日志和可观测性。
-3. 把发现分类为缺陷、需求变更或已批准偏差；需求变化另开/更新 Change。
-4. 检查阻断项、遗留风险、上线/回滚及人工验收人。
-5. 仅在验收门禁通过后按当前 OpenSpec CLI 流程归档；不要对未完成任务使用自动确认参数绕过检查。
-6. 把跨提案通用的已批准决策更新到项目基线，功能特有细节保留在 Change 归档。
+1. 先核验 `design/evidence/independent-verification-report.md` 与 `.json` 存在且 Verdict=PASS，并确认验证 revision 与当前待验收 revision 一致；缺失/FAIL/BLOCKED 时拒绝验收。
+2. 逐条记录 AC 的通过/失败/不适用及证据链接。
+3. 核对页面/事件、API 契约、数据迁移、权限、日志和可观测性。
+4. 把发现分类为缺陷、需求变更或已批准偏差；需求变化另开/更新 Change。
+5. 检查阻断项、遗留风险、上线/回滚及人工验收人。
+6. 验收门禁通过后先处理已批准的基线回写：更新对应基线文档、域版本和状态登记，并复核在途 Change。
+7. 再按当前 OpenSpec CLI 流程归档，将功能行为 delta 合并到主规格；OpenSpec archive 与项目设计基线回写是独立判断。不要对未完成任务使用自动确认参数绕过检查。
 
 ## 输出
-`evidence/acceptance.md`、AC 验收矩阵、遗留风险、归档建议和基线回写项。
+`evidence/acceptance.md`、AC 验收矩阵、遗留风险、归档建议、基线回写项、更新后的基线版本登记（适用时）和在途 Change 复核清单。
 
 ## 质量与安全边界
 每个 AC 有证据或明确阻断；未验收不得宣称完成；归档前先查看差异与验证结果。
@@ -42,12 +43,34 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 验收时的基线回写规则（强制）
+
+- 验收时逐项复核 `design/baseline-impact.md` 中的候选修订；只回写已批准、已实现、已验证且有跨功能复用价值的内容。
+- 功能专属 API、页面、物理表字段/迁移、IO 和测试用例留在归档 Change；不得复制到全局基线。
+- 需要回写时更新对应产品/架构/数据/公共契约/测试基线及 `docs/architecture/baseline-status.md` 的版本、审批人、生效日期、关联 Change/ADR；运行基线审计。
+- OpenSpec archive 更新行为主规格，不等于所有 Change 都要修改项目设计基线。两类更新分别判断和记录。
+- 基线更新后，列出受影响的在途 Change 并要求复核；禁止静默改变其既有基线快照。
+- 详细规则见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="acceptance-audit"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；代码审查记录；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；OpenSpec archive 结果及更新后的主规格（仅批准后）；项目路线图/基线状态回写（适用时）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；条件适用的项目基线文档/版本登记/在途 Change 复核；OpenSpec archive 结果及更新后的主规格（仅批准后）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已验收并归档的能力规格、验收证据、后续 Change 依赖。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 独立验证前置门禁（P0）
+
+- 阶段 15 必须消费阶段 14b 的独立验证报告和 JSON；Builder 自己的总结、单元测试结果或代码审查报告不能替代独立 Verifier。
+- 验证报告必须是 PASS，且被测 revision 与当前验收代码一致；若代码在验证后变化，必须重新执行阶段 14b。
+
+
+## 验收阶段的机器基线门禁（强制）
+
+- 验收时逐条核对 `baseline-binding.json` 中每条 ACTIVE 约束的最终验证状态和证据，并单独填写 `acceptance_verification`；不能简单复制 Builder 的 `implementation_verification`。例外仅在其批准范围内有效。
+- 基线版本或指纹变化必须有受影响域的当前 rebase 评审；不得静默沿用旧快照。
+- OpenSpec 归档/验收完成前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase acceptance`。

@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "registry_version": "0.1.0",
+  "description": "项目级机器可读约束目录。示例规则必须经项目负责人审查后从 DRAFT 改为 ACTIVE；不可直接把示例当成已批准规范。",
+  "constraints": [
+    {
+      "id": "ARCH-BOUNDARY-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "跨模块调用必须经过显式模块契约",
+      "rule": "模块间调用必须经过已声明的模块接口或集成契约，不得依赖对方未声明的内部实现。",
+      "rationale": "保持模块边界稳定，降低跨模块变更的隐性影响。",
+      "source": {
+        "file": "docs/architecture/domain-boundaries.md",
+        "section": "领域边界与数据所有权"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "DATA-OWNERSHIP-001",
+      "domain": "data_domain",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "PROHIBITED",
+      "scope": "ALL_CHANGES",
+      "title": "禁止跨模块直接写入他方拥有的数据",
+      "rule": "功能不得绕过数据所有者的模块契约，直接写入其他模块拥有的数据；批准的共享数据库例外必须显式登记。",
+      "rationale": "保证数据所有权和业务不变量由唯一责任域维护。",
+      "source": {
+        "file": "docs/architecture/domain-boundaries.md",
+        "section": "领域边界与数据所有权"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "API-AUTH-001",
+      "domain": "api",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "公共 API 必须明确认证授权策略",
+      "rule": "每个新增或修改的公共 API 必须声明认证、授权、匿名访问例外和权限失败语义。",
+      "rationale": "避免 API 因遗漏鉴权定义而形成权限边界缺口。",
+      "source": {
+        "file": "docs/architecture/api-conventions.md",
+        "section": "API 契约规范"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "API-ERROR-001",
+      "domain": "api",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "公共 API 必须遵循统一错误契约",
+      "rule": "新增或修改的公共 API 必须遵循项目批准的错误响应结构、错误码和可观测性约定。",
+      "rationale": "保持客户端处理行为和监控告警的一致性。",
+      "source": {
+        "file": "docs/architecture/api-conventions.md",
+        "section": "API 契约规范"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "FE-REQUEST-001",
+      "domain": "frontend",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "前端请求必须通过统一请求层",
+      "rule": "前端业务组件不得自行创建绕过项目统一请求层的网络客户端；特殊通道必须经批准登记。",
+      "rationale": "统一认证、错误处理、追踪、重试和请求治理。",
+      "source": {
+        "file": "docs/architecture/frontend-conventions.md",
+        "section": "前端工程规范"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "QUALITY-TEST-001",
+      "domain": "test_quality",
+      "revision": "1.0",
+      "status": "DRAFT",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "每个行为变更必须具有可追踪的验证证据",
+      "rule": "每个行为变更必须把验收标准映射到测试或明确的人工验证证据；未执行的测试不得标记为通过。",
+      "rationale": "保证需求、实现和验证之间可追踪。",
+      "source": {
+        "file": "docs/architecture/test-strategy.md",
+        "section": "测试策略"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    }
+  ]
+}

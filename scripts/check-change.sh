@@ -30,11 +30,13 @@ if [[ -s "$CHANGE_DIR/tasks.md" ]] && ! grep -Eq '^[-*][[:space:]]+\[[ xX]\][[:s
 fi
 if (( missing )); then echo "Change structure check failed." >&2; exit 1; fi
 if (( ! SKIP_OPENSPEC )); then
-  if ! command -v openspec >/dev/null 2>&1; then
-    echo "OpenSpec CLI not found. Install/configure it or explicitly pass --no-openspec for structural-only validation." >&2
-    exit 2
+  if (( SKIP_OPENSPEC == 0 )); then
+    if ! command -v openspec >/dev/null 2>&1; then
+      echo "OpenSpec CLI not found. Install/configure it or explicitly pass --no-openspec for structural-only validation." >&2
+      exit 2
+    fi
+    (cd "$ROOT" && openspec validate "$CHANGE_ID" --strict)
   fi
-  (cd "$ROOT" && openspec validate "$CHANGE_ID" --strict)
 else
   echo "WARNING: OpenSpec semantic validation explicitly skipped (--no-openspec)."
 fi

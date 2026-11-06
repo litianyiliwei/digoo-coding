@@ -1,0 +1,34 @@
+schema: spec-driven
+context: |
+  使用项目级基线 docs/product/ 和 docs/architecture/。
+  项目输出语言默认中文；代码、API 字段和标识符遵循仓库已有规范。
+  需求必须区分已确认事实、假设和待决策项；不得虚构业务规则或工具读取结果。
+  项目级稳定决策放在 docs/ 和 docs/adr/；功能级行为变化用 OpenSpec Change 记录。
+  规格描述外部可观察行为，不包含类名、框架选择或步骤式实现计划。
+  详细前后端设计可作为辅助文件保存在各 Change 目录中，并由 design.md 引用。
+rules:
+  proposal:
+    - 先读取 openspec/config.yaml、相关 specs 和已有 Change；复用现有 capability 路径。
+    - 明确 Why、What Changes、Capabilities、Impact、非目标与关联需求 ID。
+    - 没有行为规格变化的纯重构/工具/文档变更，按当前 OpenSpec 约定显式使用 skip_specs: true；不得伪造需求。
+  specs:
+    - 每个 capability 使用 specs/<capability-path>/spec.md，并按 OpenSpec Delta Spec 语法编写。
+    - 每个 Requirement 至少包含一个可测试的 Scenario，覆盖正常和必要的异常/权限边界。
+    - 只写外部可观察行为；具体类、框架、数据库 Mapper 和实现步骤放在 design.md。
+  design:
+    - 说明复用的项目级基线与本 Change 新增/变更内容。
+    - 若修改技术选型、领域边界或公共 API 约定，先记录待审批 ADR/基线变更。
+    - API、前端、后端和测试设计之间必须共享稳定 ID，避免重复定义接口契约。
+  tasks:
+    - 每个任务必须使用 Markdown 复选框，例如 - [ ] 1.1 实现某行为。
+    - 任务尽量小且可验证，包含对应测试/检查；不要将所有任务写成普通 bullet。
+operations:
+  apply:
+    - 实施前阅读批准的规格、设计、任务和项目规范。
+    - 遵循 Superpowers 可用的 TDD、系统化调试、代码审查和完成前验证技能；先确认技能确实已安装。
+    - 每项任务完成后更新复选框并报告实际运行的命令与结果。
+    - 不得擅自修改业务规格或 OpenAPI；冲突时暂停并提出 Change 更新。
+  archive:
+    - 归档前检查所有阻断验收项、测试、构建、OpenAPI 校验与审查证据。
+    - 不使用自动确认参数绕过未完成任务或规格更新审查。
+    - 归档后把已批准的通用决策回写 docs/ 基线，功能特有细节保留在 archive。

@@ -9,9 +9,9 @@
 
 | 产物 | 路径 | 完整性 | 交叉一致性 | 结论/证据 |
 |---|---|---|---|---|
-| 产品基线 | `docs/product/*` | TODO | TODO | TODO |
-| 系统架构 | `docs/architecture/*` | TODO | TODO | TODO |
-| ADR | `docs/adr/*` | TODO | TODO | TODO |
+| 需求业务梳理 | `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md` | TODO | 节点↔RD↔DO↔BR 引用闭合 | TODO |
+| 系统架构与数据流转 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`logical-erd.md`、`technology-decisions.md` | TODO | 边界↔数据流↔ERD↔DO 一致 | TODO |
+| 公共契约与 ADR | `docs/architecture/api-conventions.md`、`frontend-conventions.md`、`test-strategy.md`、`docs/adr/*` | TODO | 契约↔架构↔测试策略一致 | TODO |
 
 ## 2. 问题与风险
 

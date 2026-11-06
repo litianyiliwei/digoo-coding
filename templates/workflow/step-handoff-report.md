@@ -38,7 +38,19 @@
 - 假设/冲突：
 - 未执行项（含原因）：
 
-## 6. 下一阶段交接
+
+## 6. 基线适用性与变更交接
+
+- 当前基线版本/状态：
+- 本阶段读取的基线域/文件/章节：
+- 本 Change 的基线分类：CHANGE_ONLY / BASELINE_CHANGE_REQUIRED / BASELINE_UPDATE_AFTER_ACCEPTANCE / N/A
+- 当前结论：COMPATIBLE / BLOCKED_PENDING_BASELINE_CHANGE / APPROVED_BASELINE_AMENDMENT
+- 复核结论：NO_IMPACT / REBASE_REQUIRED / N/A
+- BCR / ADR 路径与审批状态：
+- 需要更新的基线文件及版本（无则写 N/A）：
+- 受影响的在途 Change：
+
+## 7. 下一阶段交接
 
 - 下一阶段：
 - 下一阶段必须读取：

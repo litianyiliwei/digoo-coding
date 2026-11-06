@@ -10,6 +10,7 @@ Figma 审计：<figma-audit>
 
 先生成详细设计目录和依赖顺序：API 契约 → 前端设计 → 后端设计 → 测试设计。确保设计项均关联 REQ/AC/PAGE/EVT 或写明 N/A 原因。后端设计必须将每个 OpenAPI operationId 映射到一个或多个具体 IO ID，并登记在 `design/api-io-mapping.csv`；所有 IO ID 必须在 `design/io-catalog.csv` 有输入/输出、数据库/Client 操作、事务/一致性、超时、重试、错误处理及测试 ID。运行 `scripts/check-design-assets.sh <change-id> --strict --lint-api` 验证后再进入实现。识别跨基线影响，不要让前后端各自发明字段。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：重新核验 `design/baseline-impact.md` 与当前 `baseline-status.md`。任何基线版本变化都要写明 `NO_IMPACT` 或 `REBASE_REQUIRED`；违反基线的方案必须先走 ADR/基线修订审批，批准后才能冻结详细设计。完成复核后运行 `python3 scripts/check-baseline-impact.py <change-id> --strict`。
 ```
 
 ## 运行前要填的变量
@@ -34,4 +35,10 @@ Figma 审计：<figma-audit>
 - 必须输出：openspec/changes/<change-id>/design.md；功能详细设计任务分解与设计缺口清单。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：统一设计约束、接口范围、前后端/测试设计任务。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线设计门禁（必须执行）
+
+详细设计必须逐条处理 `design/baseline-binding.json`：适用约束须为 COMPLIANT 或 EXCEPTION_APPROVED，并关联真实设计证据；N/A 必须有理由；例外必须有批准人/日期/证据。阶段 13a 转出时执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

@@ -1,0 +1,75 @@
+{
+  "step_id": "02-requirements-analysis",
+  "change_id": null,
+  "baseline_version": "",
+  "outputs": [
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "status": "updated",
+      "required": true,
+      "role": "requirements-report"
+    },
+    {
+      "path": "docs/product/workflows.md",
+      "status": "updated",
+      "required": true,
+      "role": "business-workflows"
+    },
+    {
+      "path": "docs/product/use-cases.md",
+      "status": "updated",
+      "required": true,
+      "role": "use-cases"
+    },
+    {
+      "path": "docs/product/user-stories.md",
+      "status": "updated",
+      "required": true,
+      "role": "user-stories-and-acceptance-criteria"
+    },
+    {
+      "path": "docs/product/business-rules.md",
+      "status": "updated",
+      "required": true,
+      "role": "business-rules"
+    },
+    {
+      "path": "docs/product/open-questions.md",
+      "status": "updated",
+      "required": true,
+      "role": "open-questions"
+    }
+  ],
+  "checks": [
+    {
+      "name": "package-self-check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-package.py",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-check-package.log"
+    },
+    {
+      "name": "requirements-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-check-requirements.log"
+    },
+    {
+      "name": "openspec-specs-readonly",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-openspec-specs.log"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "用户（welly，代行业务负责人）",
+    "approved_at": "2026-11-05"
+  }
+}

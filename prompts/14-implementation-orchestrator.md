@@ -7,6 +7,7 @@
 
 一次完成一个可验证小任务：先写测试并观察预期失败，再实现最小代码、复测、重构、更新 tasks。不得擅改规格/OpenAPI；规格冲突先暂停并更新 Change。最终报告真实执行命令、退出码、测试/构建结果和未执行项，未执行不能写通过。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：实施前复核 `design/baseline-impact.md` 和当前基线版本。若实现中发现冲突/缺口，暂停受影响任务、提交基线修订请求/ADR；不得直接编辑冻结基线。基线获批更新后，刷新 Change 的基线快照、设计和测试；实施前运行 `python3 scripts/check-baseline-impact.py <change-id> --strict`。
 ```
 
 ## 运行前要填的变量
@@ -32,3 +33,13 @@
 - 下一步输入：代码差异、测试报告、审查结论、未解决问题。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 独立验证交接（新增强制要求）
+
+Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `14b-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
+
+
+## 机器基线实现门禁（必须执行）
+
+编码前先通过 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。实现后为每条适用约束补充 PASS、验证方法和真实证据文件；阶段 14 转出前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`。

@@ -30,13 +30,20 @@
 ## 4. 哪些输出必须模板化
 
 L1 强制模板包含（仅在矩阵中的适用条件成立时强制；不适用必须留下有原因的 N/A 记录）：
-- 需求：业务流程、用例、用户故事、验收标准、业务规则和待确认问题。
+- 需求：业务流程（节点表）、业务数据对象目录、RD 矩阵、提案级用例/用户故事/验收标准、业务规则和待确认问题。
 - OpenSpec：proposal、delta specs、design、tasks。
 - 设计：页面清单、交互事件清单、Figma 审计、OpenAPI、前端详细设计、后端详细设计、API→IO 映射、IO 目录、测试设计、需求追踪矩阵。
 - 验证：自动化检查结果、代码审查记录、人工验收矩阵、归档清单。
 
 L2 推荐模板包含：系统上下文、技术选型/ADR、部署与模块边界、数据流、逻辑 ERD、领域边界、API 约定、前端规范、测试策略、提案路线图和基线审计报告。
 
-## 5. AI 生成规则
+## 5. 项目基线与功能 Change 的交互
+
+- 每个功能 Change 必须使用 `templates/change-assets/design/baseline-impact.md` 记录当前基线版本、适用约束、复用项、冲突、归属分类和审批状态。
+- 仅跨功能共享规则、系统/模块边界、核心领域模型、公共 API/前端规范或全局质量门禁变化才提出基线修订；单功能 API、页面、字段迁移、IO 和测试保留在 Change。
+- 基线修订使用 `templates/project-baseline/baseline-change-request.md`，获批后更新 `templates/project-baseline/baseline-status.md` 对应项目实例及正式基线文档。
+- 具体边界、时点和审批规则以 `docs/BASELINE-FEATURE-INTERACTION.md` 为准。
+
+## 6. AI 生成规则
 
 每份 Markdown 正式产物开头必须注明：Change ID（若适用）、状态、来源基线、关联需求/AC ID、生成日期或版本；CSV 通过列字段表达状态/来源，OpenAPI 通过 `info` 与约定扩展字段表达元数据。输出前先读取对应模板；不得自创同义字段替代模板字段，不得自行删除无法填写的字段；未知内容写 `PENDING + 原因 + 责任人/阻塞条件`。生成后运行矩阵中指定的校验器，并报告实际命令与真实结果。

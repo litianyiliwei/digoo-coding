@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Independent Verification Evidence",
+  "type": "object",
+  "required": [
+    "change_id",
+    "verdict",
+    "source_revision",
+    "revision_stable",
+    "read_only",
+    "acceptance_checks",
+    "test_runs",
+    "findings",
+    "verifier_identity",
+    "builder_identity"
+  ],
+  "properties": {
+    "change_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED"
+      ]
+    },
+    "source_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision_stable": {
+      "type": "boolean"
+    },
+    "read_only": {
+      "type": "boolean"
+    },
+    "acceptance_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "result",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN",
+              "PENDING",
+              "SKIPPED"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "test_runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "command",
+          "exit_code"
+        ],
+        "properties": {
+          "command": {
+            "type": "string"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "log": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "severity",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "BLOCKER",
+              "CRITICAL",
+              "MAJOR",
+              "MINOR",
+              "INFO"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verifier_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "builder_identity": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

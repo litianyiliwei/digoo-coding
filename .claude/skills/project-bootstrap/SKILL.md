@@ -18,7 +18,7 @@ description: 项目初始化与工具链检查。初始化仓库上下文与工�
 4. 对缺失文件提出最小补充方案；任何覆盖、安装、删除、提交和 CI 修改均需用户明确授权。
 
 ## 输出
-工具状态表、现有目录/规则摘要、冲突与缺口清单、最小初始化计划。
+工具状态表、现有目录/规则摘要、冲突与缺口清单、最小初始化计划；初始化 `docs/architecture/baseline-status.md` 时以 `templates/project-baseline/baseline-status.md` 为模板，不得仅写一个未版本化的 TODO 状态。
 
 ## 质量与安全边界
 不覆盖已有文件；不把“找不到命令”写成“已安装”；所有未执行检查明确标记。
@@ -45,7 +45,7 @@ description: 项目初始化与工具链检查。初始化仓库上下文与工�
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="project-bootstrap"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
 - **本阶段输入：** 用户提供的项目目标与仓库位置；仓库现有目录/配置/AGENTS.md（若存在）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** AGENTS.md（仅缺失时创建或经批准修改）；workflow-state.json；docs/architecture/baseline-status.md；工具链检查报告（docs/project/toolchain-report.md）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输出：** AGENTS.md（仅缺失时创建或经批准修改）；workflow-state.json；docs/architecture/baseline-status.md（依据 `templates/project-baseline/baseline-status.md` 建立域版本登记）；工具链检查报告（docs/project/toolchain-report.md）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 仓库约定与工具链报告；workflow-state.json。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。

@@ -44,12 +44,24 @@ OpenAPI 可解析；响应 schema 与示例一致；每个操作有 operationId�
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 公共 API 基线约束（强制）
+
+- 生成 OpenAPI 前读取并引用 `docs/architecture/api-conventions.md`，核验认证授权、版本、错误 envelope、分页、幂等、兼容和公共字段约定。
+- 单个 operationId / endpoint / schema 属于当前 Change；改变所有 API 应遵循的公共规则才提出公共 API 基线变更。
+- 若必须改变公共 API 规则，更新 `design/baseline-impact.md` 并创建基线变更请求/ADR；未批准前不得将偏离约定的契约标记为可实施。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="api-contract-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准功能规格与页面交互清单；Figma 交互（适用时）；项目级 API/鉴权/错误码约定。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准功能规格与页面交互清单；Figma 交互（适用时）；项目级 API/鉴权/错误码约定。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/api/openapi.yaml；operationId 到页面事件/AC 的追踪关系。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 机器基线约束（强制）
+
+- API 约束必须逐条映射到 `design/baseline-binding.json` 的 Constraint ID；鉴权、错误模型、幂等、版本兼容等适用规则需有 OpenAPI/设计章节证据。
+- 完成本阶段时执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`；不得以 Markdown 影响清单替代机器绑定。

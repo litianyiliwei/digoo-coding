@@ -4,11 +4,12 @@
 执行 `@proposal-planning`。
 
 批准的基线：<baseline>
-用户故事/AC：<stories-and-acceptance>
+需求业务梳理/RD 矩阵：<requirements-and-rd>
 优先级/约束：<priorities>
 
-按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、US/AC、依赖、风险、数据迁移、兼容和排序理由。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
+按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、风险、数据迁移、兼容和排序理由；提案级 UC/US/AC 在阶段 10 细化。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：为每个候选 Change 标注适用的产品/架构/数据/公共 API/前端/测试基线版本、需复用约束和潜在基线修订。功能局部变化留在 Change；跨功能公共约束变化列为基线变更候选，不得默认为已批准。
 ```
 
 ## 运行前要填的变量
@@ -33,4 +34,10 @@
 - 必须输出：docs/product/proposal-roadmap.md；每个候选 Change 的范围/依赖/价值说明。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：经批准的 Change 列表、优先级、依赖顺序。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线约束（必须执行）
+
+提案拆分前运行 `python3 scripts/baseline-governance.py audit --require-frozen`。读取 Constraint Registry，为每个候选 Change 标注可能适用的 Constraint ID、受影响域和基线变更候选；不得修改冻结基线，也不得将 DRAFT 规则作为已批准约束。

@@ -5,9 +5,7 @@
     "01-project-bootstrap"
   ],
   "current_step": "02-requirements-analysis",
-  "pending_approvals": [
-    "02-requirements-analysis DRAFT v0.3 待用户整体确认（关键流程/规则/AC 均基于网络调研提案；Q-001~Q-008 八项关键决策已由用户于 2026-10-30 确认）；check-requirements.py 退出码 0"
-  ],
+  "pending_approvals": [],
   "blocked_items": [],
   "last_completed_outputs": [
     "docs/product/requirements-analysis.md",
@@ -15,8 +13,219 @@
     "docs/product/use-cases.md",
     "docs/product/user-stories.md",
     "docs/product/business-rules.md",
-    "docs/product/open-questions.md"
+    "docs/product/glossary.md",
+    "docs/product/acceptance-policy.md"
   ],
-  "last_updated": "2026-10-30",
-  "notes": "此文件是流程状态记录，不是事实来源；每次继续前必须核验真实文件与工具状态。阶段 02：无客户材料，以网络调研替代输入（经用户同意）；八项关键决策（定位含政府监管端、一期含核心四模块+溯源+农资、不含经营模块、种植+畜牧+水产、IoT 模拟起步、Web 后台+uniApp、小规模 NFR、强制报告+批次码）已确认。阶段 03（原型评审）需要用户先提供 pen.dev 原型链接或决定跳过。"
+  "last_updated": "2026-11-06T02:13:21+00:00",
+  "notes": "2026-11-06 工作流重构后状态迁移：已完成 02b/03/04 保留在 transition_history 与 legacy_completed_steps；current_step 回到 02，按新契约（业务流程节点数据对象/角色、RD 矩阵）重新梳理并审批后再进入 05。",
+  "state_schema_version": "1.0",
+  "transition_history": [
+    {
+      "step_id": "02-requirements-analysis",
+      "completed_at": "2026-11-05T06:09:42+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/02-requirements-analysis.json",
+      "outputs": [
+        "docs/product/requirements-analysis.md",
+        "docs/product/workflows.md",
+        "docs/product/use-cases.md",
+        "docs/product/user-stories.md",
+        "docs/product/business-rules.md",
+        "docs/product/open-questions.md"
+      ],
+      "checks": [
+        {
+          "name": "package-self-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "openspec-specs-readonly",
+          "status": "passed",
+          "exit_code": 0
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行业务负责人）",
+        "approved_at": "2026-11-05"
+      }
+    },
+    {
+      "step_id": "02b-prototype-generation",
+      "completed_at": "2026-11-05T06:19:32+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/02b-prototype-generation.json",
+      "outputs": [
+        "docs/design/prototype-build.md",
+        "docs/design/prototype.pen",
+        "docs/design/exports/PAGE-015-login.png",
+        "docs/design/exports/PAGE-016-workbench.png",
+        "docs/design/exports/PAGE-017-tasks.png",
+        "docs/design/exports/PAGE-018-task-detail.png",
+        "docs/design/exports/PAGE-019-monitoring.png",
+        "docs/design/exports/PAGE-020-alerts.png",
+        "docs/design/exports/PAGE-021-trace.png"
+      ],
+      "checks": [
+        {
+          "name": "prototype-build-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "pen-dev-render-verification",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": false,
+        "status": "not-required",
+        "approver": "",
+        "approved_at": ""
+      }
+    },
+    {
+      "step_id": "03-prototype-audit",
+      "completed_at": "2026-11-05T07:39:32+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/03-prototype-audit.json",
+      "outputs": [
+        "docs/design/prototype-audit.md",
+        "docs/product/open-questions.md",
+        "docs/product/requirements-analysis.md"
+      ],
+      "checks": [
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "prototype-build-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "prototype-review-approved-by-user",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行产品负责人）",
+        "approved_at": "2026-11-05"
+      }
+    },
+    {
+      "step_id": "04-product-baseline",
+      "completed_at": "2026-11-05T08:44:59+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/04-product-baseline.json",
+      "outputs": [
+        "docs/product/requirements-analysis.md",
+        "docs/product/workflows.md",
+        "docs/product/use-cases.md",
+        "docs/product/user-stories.md",
+        "docs/product/business-rules.md",
+        "docs/product/glossary.md",
+        "docs/product/acceptance-policy.md"
+      ],
+      "checks": [
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "required-baseline-files",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "product-baseline-review-approved-by-owner",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行产品负责人）",
+        "approved_at": "2026-11-05"
+      }
+    }
+  ],
+  "last_transition": {
+    "step_id": "04-product-baseline",
+    "completed_at": "2026-11-05T08:44:59+00:00",
+    "change_id": null,
+    "evidence_path": "workflow/evidence/04-product-baseline.json",
+    "outputs": [
+      "docs/product/requirements-analysis.md",
+      "docs/product/workflows.md",
+      "docs/product/use-cases.md",
+      "docs/product/user-stories.md",
+      "docs/product/business-rules.md",
+      "docs/product/glossary.md",
+      "docs/product/acceptance-policy.md"
+    ],
+    "checks": [
+      {
+        "name": "requirements-structure-strict",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "required-baseline-files",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "product-baseline-review-approved-by-owner",
+        "status": "passed",
+        "exit_code": null
+      }
+    ],
+    "approval": {
+      "required": true,
+      "status": "approved",
+      "approver": "用户（welly，代行产品负责人）",
+      "approved_at": "2026-11-05"
+    }
+  },
+  "legacy_completed_steps": [
+    "02-requirements-analysis",
+    "02b-prototype-generation",
+    "03-prototype-audit",
+    "04-product-baseline"
+  ],
+  "topology_migrations": [
+    {
+      "at": "2026-11-06T02:13:21+00:00",
+      "reason": "2026-11-06 流程重构：原型移至提案级，合并架构/数据/契约，取消独立产品/数据/基线审计阶段；02 需求业务梳理需按新契约重跑",
+      "legacy_steps": [
+        "02-requirements-analysis",
+        "02b-prototype-generation",
+        "03-prototype-audit",
+        "04-product-baseline"
+      ],
+      "reset_steps": [
+        "02-requirements-analysis"
+      ],
+      "completed_steps": [
+        "01-project-bootstrap"
+      ],
+      "current_step": "02-requirements-analysis"
+    }
+  ]
 }

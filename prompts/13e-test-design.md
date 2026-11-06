@@ -9,6 +9,7 @@ OpenAPI/前后端设计：<design-paths>
 
 输出测试矩阵，字段包含 REQ/AC、用例 ID、层级、前置条件、数据、步骤、预期、自动化方式和清理方式。覆盖正常、边界、错误、权限、幂等、并发/一致性/超时（适用时）。每条 AC 至少映射一个测试，否则 `N/A + 原因`。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：必须读取 `docs/architecture/test-strategy.md` 并沿用项目测试分层和质量门禁；功能测试用例留在 Change。若需修改全局门禁，先提出基线修订，不得以单功能静默豁免。
 ```
 
 ## 运行前要填的变量
@@ -33,4 +34,10 @@ OpenAPI/前后端设计：<design-paths>
 - 必须输出：openspec/changes/<change-id>/design/test-design.md；openspec/changes/<change-id>/traceability.csv。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线设计门禁（必须执行）
+
+将测试分层、覆盖要求、质量门禁、可观测性等适用约束映射到 test-design/traceability/test matrix，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

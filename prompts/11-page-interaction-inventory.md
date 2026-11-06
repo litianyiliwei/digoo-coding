@@ -3,10 +3,10 @@
 ```text
 执行 `@page-interaction-inventory`，Change：<change-id>。
 
-规格：<spec-paths>
-pen.dev：<prototype-link-or-export>
+规格：<proposal-and-user-story-paths>
+提案原型：<prototype-build-and-audit-path>
 
-生成/更新 `openspec/changes/<change-id>/design/page-inventory.csv` 与 `interaction-map.csv`，并按模板更新该 Change 的 `traceability.csv`。页面用 PAGE-xxx、业务元素用 ELEM-xxx、事件用 EVT-xxx；记录路由、权限、可见/禁用条件、入参、前置条件、步骤、输出、错误、状态变化及 operationId（若适用）。检查 ID 唯一、引用闭合、AC 覆盖和未定义内容。如果本 Change 明确不涉及 UI，仍保留 Change 内两份清单模板并说明原因，用 `--no-ui --reason "<原因>" --strict` 验证。不要将每个纯视觉图层都列为业务元素。完成后按范围运行：涉及 UI 时执行 `python3 scripts/check-inventory.py --change <change-id> --strict`；明确无 UI 时执行 `python3 scripts/check-inventory.py --change <change-id> --no-ui --reason "<原因>" --strict`。
+生成/更新 `openspec/changes/<change-id>/design/page-inventory.csv`、`block-inventory.csv` 与 `interaction-map.csv`，并按模板更新该 Change 的 `traceability.csv`。页面从已批准的提案原型（prototype-build.md/prototype-audit.md）与提案级 UC/US 推导；页面用 PAGE-xxx、功能区块用 BLOCK-xxx、业务元素用 ELEM-xxx、事件用 EVT-xxx；先为每个页面拆出功能区块（导航/筛选/表单/列表/详情/统计/操作区/弹窗/空态等）并登记区块名称、类型、职责和页面内顺序，再在 `interaction-map.csv` 的 `block_id` 中登记每个按钮/可交互元素唯一所属的区块；不得跨页或跨区块归属。记录路由、权限、可见/禁用条件、入参、前置条件、步骤、输出、错误、状态变化及 operationId（若适用）。检查 ID 唯一、页面/区块/元素引用闭合、区块归属一致、AC 覆盖和未定义内容，且每个页面至少有一个区块。如果本 Change 明确不涉及 UI，仍保留 Change 内三份清单模板并说明原因，用 `--no-ui --reason "<原因>" --strict` 验证。不要将每个纯视觉图层都列为业务元素，也不要按视觉图层切分功能区块。完成后按范围运行：涉及 UI 时执行 `python scripts/check-inventory.py --change <change-id> --strict`；明确无 UI 时执行 `python scripts/check-inventory.py --change <change-id> --no-ui --reason "<原因>" --strict`。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 ```
 
@@ -29,7 +29,9 @@ pen.dev：<prototype-link-or-export>
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="page-interaction-inventory"` 的记录。
 
 - 输入核验：已批准 Change proposal/specs；关联 US/AC 与业务流程；项目级 UI/前端规范。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：openspec/changes/<change-id>/design/page-inventory.csv；openspec/changes/<change-id>/design/interaction-map.csv。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：PAGE/ELEM/EVT 清单、状态/跳转、事件与需求/operationId 的关联。在报告中明确这些文件如何被下游消费。
+- 必须输出：openspec/changes/<change-id>/design/page-inventory.csv；openspec/changes/<change-id>/design/block-inventory.csv；openspec/changes/<change-id>/design/interaction-map.csv。按模板写入仓库，不要只在聊天中展示。
+- 下一步输入：PAGE/BLOCK/ELEM/EVT 清单、每个区块包含的元素/按钮、状态/跳转、事件与需求/operationId 的关联。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+**项目基线约束（只读继承）：** 执行前读取当前 Change 的 `design/baseline-binding.json`、Manifest 和 Constraint Registry。页面/元素/事件只能在已批准约束范围内细化；不得自行修改约束适用性、规则或审批状态。发现冲突时记录约束 ID、冲突证据并暂停相关设计，提交例外或 BCR。完成后执行 `python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`，失败不得推进。

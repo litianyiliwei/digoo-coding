@@ -1,0 +1,17 @@
+WARN PLACEHOLDER: docs/product/requirements-analysis.md
+WARN PLACEHOLDER: docs/product/workflows.md
+WARN PLACEHOLDER: docs/product/use-cases.md
+WARN PLACEHOLDER: docs/product/business-rules.md
+WARN PLACEHOLDER: docs/product/open-questions.md
+WARN PLACEHOLDER: docs/architecture/system-context.md
+WARN PLACEHOLDER: docs/architecture/technology-decisions.md
+WARN PLACEHOLDER: docs/architecture/containers-and-deployment.md
+WARN PLACEHOLDER: docs/architecture/data-flows.md
+WARN PLACEHOLDER: docs/architecture/logical-erd.md
+WARN PLACEHOLDER: docs/architecture/domain-boundaries.md
+WARN PLACEHOLDER: docs/architecture/api-conventions.md
+WARN PLACEHOLDER: docs/architecture/frontend-conventions.md
+WARN PLACEHOLDER: docs/architecture/test-strategy.md
+WARN PLACEHOLDER: docs/TEMPLATE-POLICY.md
+Required baseline file presence check passed.
+Warning: placeholders remain. Use --strict to enforce a fully populated baseline.

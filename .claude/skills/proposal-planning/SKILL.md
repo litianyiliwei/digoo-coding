@@ -9,11 +9,11 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 当流程进入“提案拆分、依赖排序与路线图”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-已审基线、用户故事、流程、风险、依赖和产品优先级。
+已审并冻结的项目总体架构基线、业务流程/节点/RD 矩阵、业务规则、验收政策、风险、依赖和产品优先级。
 
 ## 执行流程
 1. 按用户可感知且可独立验收的业务能力切分 Change，不按前端/后端/数据库横向切分。
-2. 每项明确价值、目标、非目标、用户故事、AC、依赖、数据迁移、风险与发布策略。
+2. 每项明确价值、目标、非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、数据迁移、风险与发布策略；提案级 UC/US/AC 在阶段 10 细化，不在本阶段伪造。
 3. 优先选纵向切片，尽早贯穿 UI/API/domain/persistence/test。
 4. 识别基础设施型 Change 的独立理由和前置依赖。
 5. 排序时解释业务价值、风险、解锁关系和可并行性。
@@ -42,6 +42,14 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 项目基线与功能拆分的交互（强制）
+
+- 在拆分每个 Change 时，读取 `docs/architecture/baseline-status.md` 和已冻结的产品/架构/数据/公共契约/测试基线；按候选功能的影响面检查相关章节。
+- 在 `docs/product/proposal-roadmap.md` 为每个候选 Change 增加“基线适用域、需复用的基线约束、潜在基线冲突/修订、审批前置条件”列。
+- 将变化初步分类为 `CHANGE_ONLY`、`BASELINE_CHANGE_REQUIRED`、`BASELINE_UPDATE_AFTER_ACCEPTANCE` 或 `N/A`。不要因为功能使用新组件/新字段/新 API 就自动提升为基线变更。
+- 如果基线状态不是 FROZEN、存在未决修订或冲突，明确列为风险/阻断；不得把 DRAFT/PENDING 规则当作已批准约束。
+- 详细规则见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="proposal-planning"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
@@ -51,3 +59,10 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 - **下游交接：** 经批准的 Change 列表、优先级、依赖顺序。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 机器基线约束（强制）
+
+- 路线图拆分前运行 `python3 scripts/baseline-governance.py audit --require-frozen`，读取 Manifest 与 Constraint Registry。
+- 为每个候选 Change 记录可能适用的 Constraint ID、潜在例外和基线修订候选；不得把 DRAFT 约束当成现行规则，也不得跳过 ACTIVE 约束。
+- 不得修改冻结基线；基线修订只能走 BCR/ADR 和 `open-amendment`。

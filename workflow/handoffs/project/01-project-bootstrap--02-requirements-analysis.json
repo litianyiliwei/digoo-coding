@@ -1,0 +1,32 @@
+{
+  "version": "1.0",
+  "from_step": "01-project-bootstrap",
+  "to_step": "02-requirements-analysis",
+  "change_id": null,
+  "created_at": "2026-11-05T06:09:29+00:00",
+  "baseline_version": "",
+  "approval": {
+    "status": "not-recorded"
+  },
+  "checks": [],
+  "artifacts": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "b6017c49920c493e375fc7a5a89327f85c0e03be9e22abe95d7fd19c2623ac64",
+      "size_bytes": 3084,
+      "role": "output"
+    },
+    {
+      "path": "docs/architecture/baseline-status.md",
+      "sha256": "d7391fa4e55de895f4547255a6794359187ed0f664dc67f358418d7ee004fb85",
+      "size_bytes": 3573,
+      "role": "output"
+    },
+    {
+      "path": "docs/project/toolchain-report.md",
+      "sha256": "63fb94556bb622af9659d5d9e9566db7eafbc650a1b108a8833d3e95b3c63a90",
+      "size_bytes": 5528,
+      "role": "output"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ if [[ $# -lt 1 ]]; then
   exit 2
 fi
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON="$(command -v python3 || command -v python)" || { echo "python3/python not found in PATH" >&2; exit 2; }
 ran=0
 failed=0
 
@@ -41,9 +42,7 @@ for input_dir in "$@"; do
     else echo "Gradle unavailable for $dir" >&2; exit 2; fi
     kind="gradle"
   elif [[ -f "$dir/pyproject.toml" || -f "$dir/pytest.ini" || -d "$dir/tests" ]]; then
-    PY="$(command -v python3 || command -v python)" || true
-    [[ -n "$PY" ]] || { echo "Neither python3 nor python is available" >&2; exit 2; }
-    (cd "$dir" && "$PY" -m pytest) || failed=1
+    (cd "$dir" && "$PYTHON" -m pytest) || failed=1
     kind="pytest"
   elif [[ -f "$dir/go.mod" ]]; then
     command -v go >/dev/null 2>&1 || { echo "go unavailable" >&2; exit 2; }

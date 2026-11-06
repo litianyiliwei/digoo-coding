@@ -42,12 +42,28 @@ description: 功能详细设计总控。协调 API、前端、后端和测试设
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 基线约束复核（强制）
+
+- 设计开始前重新核验 Change 的 `design/baseline-impact.md` 与 `docs/architecture/baseline-status.md`；不能只相信功能需求阶段的快照。
+- API 设计必须遵守 `api-conventions.md`；前端设计必须遵守 `frontend-conventions.md`；后端设计必须遵守模块边界、逻辑 ERD、数据所有权和数据流约束；测试设计必须遵守 `test-strategy.md`。
+- 若当前基线版本已变化，按变化域复核并写明 `NO_IMPACT` 或 `REBASE_REQUIRED`；后者必须更新设计并重新评审。
+- 若设计要求打破基线，创建/更新基线变更请求/ADR；受影响的详细设计不得在批准前冻结。
+- 详细规则见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准 proposal/specs；页面/交互清单与 Figma 审计（适用时）；项目级架构/数据/公共契约基线。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** openspec/changes/<change-id>/design.md；功能详细设计任务分解与设计缺口清单。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 proposal/specs；页面/交互清单与 Figma 审计（适用时）；项目级架构/数据/公共契约基线。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** openspec/changes/<change-id>/design.md；复核后的 openspec/changes/<change-id>/design/baseline-impact.md；功能详细设计任务分解与设计缺口清单。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 统一设计约束、接口范围、前后端/测试设计任务。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 设计阶段的机器基线门禁（强制）
+
+- `design/baseline-binding.json` 必须覆盖当前全部 ACTIVE 约束；逐条填写 COMPLIANT / NOT_APPLICABLE / EXCEPTION_APPROVED，并关联仓库内真实设计证据。
+- EXCEPTION_APPROVED 必须记录例外编号、范围、理由、批准人、日期及证据；Change 级例外不改变项目基线。
+- 阶段 13a 转出前、13b–13e 交接前运行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。
+- 基线版本或指纹变化必须有当前 fingerprint 对应的 NO_IMPACT 证据，或完成 REBASE_COMPLETED 后执行 refresh-binding 并重新审批。

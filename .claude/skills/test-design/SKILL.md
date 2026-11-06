@@ -41,12 +41,24 @@ AC、OpenAPI、前后端设计、领域/IO 风险与质量目标。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
 
+## 测试与质量基线约束（强制）
+
+- 测试设计必须读取 `docs/architecture/test-strategy.md`，沿用其测试分层、契约测试、环境、覆盖要求和质量门禁；功能特有的 TEST ID、测试数据和断言留在当前 Change。
+- 若功能发现全局门禁缺失/不合理，先提出质量基线变更及影响分析；不得只在当前 Change 静默豁免全局强制规则。
+- 在 `design/baseline-impact.md` 记录所采用的测试基线版本。
+
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="test-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准功能规格/AC；OpenAPI；前后端详细设计；API→IO 映射与 IO 契约；项目级测试策略。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准功能规格/AC；OpenAPI；前后端详细设计；API→IO 映射与 IO 契约；项目级测试策略。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/test-design.md；openspec/changes/<change-id>/traceability.csv。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+
+## 机器基线约束（强制）
+
+- 测试策略、质量门禁、测试层级和覆盖要求必须逐条映射至 `baseline-binding.json`；设计证据定位到 test-design/traceability/test matrix。
+- 完成本阶段时执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

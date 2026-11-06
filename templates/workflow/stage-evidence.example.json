@@ -1,0 +1,29 @@
+{
+  "step_id": "01-project-bootstrap",
+  "change_id": null,
+  "baseline_version": "",
+  "outputs": [
+    {
+      "path": "AGENTS.md",
+      "status": "created",
+      "required": true,
+      "role": "project-instructions"
+    }
+  ],
+  "checks": [
+    {
+      "name": "replace-with-real-check-name",
+      "kind": "automated",
+      "status": "passed",
+      "command": "replace with the exact command actually executed",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/replace-with-real-command.log"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "status": "not-required",
+    "approver": "",
+    "approved_at": ""
+  }
+}

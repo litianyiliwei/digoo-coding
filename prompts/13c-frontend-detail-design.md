@@ -4,12 +4,13 @@
 执行 `@frontend-detail-design`，Change：<change-id>。
 
 OpenAPI：<openapi-path>
-页面/事件清单：<inventory-paths>
+页面/区块/事件清单：<inventory-paths>
 Figma 审计：<figma-audit>
 前端基线：<frontend-conventions>
 
-输出路由/目录、页面组件树、组件职责与传参、状态管理、事件处理函数入参/返回/副作用/错误处理，以及 operationId 映射。覆盖加载/空/错误/成功/禁用/无权限状态和组件/页面/E2E 测试。禁止重复定义 API 契约。
+输出路由/目录、按 PAGE→BLOCK→组件组织的页面组件树、组件职责与传参、状态管理、事件处理函数入参/返回/副作用/错误处理，以及 operationId 映射。每个功能区块必须对应明确的组件/容器边界，区块内每个按钮/元素必须映射到具体组件和处理函数，事件归属与 `interaction-map.csv` 的 `block_id` 一致。覆盖加载/空/错误/成功/禁用/无权限状态和组件/页面/区块/E2E 测试。禁止重复定义 API 契约。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：必须读取并遵守 `docs/architecture/frontend-conventions.md` 和批准的设计系统。功能页面/组件留在 Change；通用组件、全局路由/状态/设计 token 规范变化须提出前端基线修订。
 ```
 
 ## 运行前要填的变量
@@ -30,8 +31,14 @@ Figma 审计：<figma-audit>
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="frontend-detail-design"` 的记录。
 
-- 输入核验：已批准 OpenAPI（或 x-api-scope: none）；页面/交互清单与 Figma 审计；前端工程规范；功能规格与 AC。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：openspec/changes/<change-id>/design/frontend-design.md；前端测试用例/组件状态映射。按模板写入仓库，不要只在聊天中展示。
+- 输入核验：已批准 OpenAPI（或 x-api-scope: none）；页面/区块/交互清单与 Figma 审计；前端工程规范；功能规格与 AC。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 必须输出：openspec/changes/<change-id>/design/frontend-design.md；PAGE→BLOCK→组件树、前端测试用例/组件状态映射。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线设计门禁（必须执行）
+
+将前端请求层、组件、路由、状态和错误处理约束映射到 frontend-design 文件/章节，逐条检查 `baseline-binding.json`，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

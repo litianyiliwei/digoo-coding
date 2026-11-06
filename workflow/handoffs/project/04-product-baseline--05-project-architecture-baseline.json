@@ -1,0 +1,83 @@
+{
+  "version": "1.0",
+  "from_step": "04-product-baseline",
+  "to_step": "05-project-architecture-baseline",
+  "change_id": null,
+  "created_at": "2026-11-05T08:44:59+00:00",
+  "baseline_version": "product-baseline-v1.0",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "用户（welly，代行产品负责人）",
+    "approved_at": "2026-11-05"
+  },
+  "checks": [
+    {
+      "name": "requirements-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-check-requirements.log"
+    },
+    {
+      "name": "required-baseline-files",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-required-files.sh",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-check-required-files.log"
+    },
+    {
+      "name": "product-baseline-review-approved-by-owner",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "用户（welly，代行产品负责人）",
+      "evidence": "docs/product/acceptance-policy.md"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "sha256": "7d0f29f74e8d36ffa74979834e84c94f539f8ee3dc84fc605bf59680cce5adea",
+      "size_bytes": 15026,
+      "role": "requirements-baseline"
+    },
+    {
+      "path": "docs/product/workflows.md",
+      "sha256": "184aaa7cd97e463294fff34ae932f7992ee551d76584c61e5e86931275c90994",
+      "size_bytes": 7199,
+      "role": "workflows-baseline"
+    },
+    {
+      "path": "docs/product/use-cases.md",
+      "sha256": "cbe46048834716607add6f28809c1dd4d659ed0fa8535c5838f5a6910451cde8",
+      "size_bytes": 8513,
+      "role": "use-cases-baseline"
+    },
+    {
+      "path": "docs/product/user-stories.md",
+      "sha256": "835f007f618f9f18ea47100ab3392bd3b3e962474b212e839c130596998acf5a",
+      "size_bytes": 7855,
+      "role": "user-stories-and-ac-baseline"
+    },
+    {
+      "path": "docs/product/business-rules.md",
+      "sha256": "d263563ade731f86de947d2bd76eb58b53019bf0215166d280f78dc77862dc6e",
+      "size_bytes": 2737,
+      "role": "business-rules-baseline"
+    },
+    {
+      "path": "docs/product/glossary.md",
+      "sha256": "1cade665b9873802e1630d8bc6d43320cd467bde73dbcffe04eecc0ee00d624e",
+      "size_bytes": 4910,
+      "role": "glossary"
+    },
+    {
+      "path": "docs/product/acceptance-policy.md",
+      "sha256": "cc5e04299657d41b6748cbd4a0424ff5e4e4f6cb8b6916622c0f67b826206031",
+      "size_bytes": 3378,
+      "role": "acceptance-policy"
+    }
+  ]
+}

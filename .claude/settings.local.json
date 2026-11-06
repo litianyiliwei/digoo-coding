@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -)",
+      "Bash(python scripts/check-package.py)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(python scripts/check-inventory.py)",
+      "Bash(python scripts/check-prototype-build.py)",
+      "Bash(python scripts/test-workflow-runtime.py)",
+      "Bash(echo \"workflow-runtime EXIT=$?\")",
+      "Bash(python scripts/workflow.py status)",
+      "Bash(echo \"workflow status EXIT=$?\")",
+      "Bash(python scripts/check-step-contracts.py)",
+      "Bash(python scripts/check-output-template-matrix.py)",
+      "Bash(python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md)",
+      "Bash(python scripts/stage-io-report.py --check)",
+      "Bash(python scripts/_apply_contracts_md.py)",
+      "Bash(rm -rf .claude/skills/prototype-audit .claude/skills/product-baseline .claude/skills/data-domain-baseline .claude/skills/project-contract-baseline .claude/skills/baseline-audit *)",
+      "Bash(python -c 'import pathlib *)",
+      "Bash(python -c \"import hashlib,pathlib; print\\(hashlib.sha256\\(pathlib.Path\\('docs/project/toolchain-report.md'\\).read_bytes\\(\\)\\).hexdigest\\(\\)\\)\")",
+      "Bash(docs/product/user-stories.md)",
+      "Bash(docs/design/prototype-audit.md)",
+      "Bash(openspec/changes/)",
+      "Bash(python -c \"import json; s=json.load\\(open\\('workflow-state.json',encoding='utf-8'\\)\\); print\\('current',s['current_step']\\); print\\('completed',s['completed_steps']\\); print\\('legacy',s.get\\('legacy_completed_steps'\\)\\); print\\('migrations',json.dumps\\(s.get\\('topology_migrations'\\),ensure_ascii=False,indent=2\\)\\); print\\('notes',s.get\\('notes'\\)\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d['current_step'], d['completed_steps']\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('docs/architecture/baseline-manifest.json',encoding='utf-8'\\)\\); print\\(d.get\\('status'\\)\\); print\\([f['path'] for f in d['domains']['product']['files']]\\)\")",
+      "Bash(python -c \"import json; d=json.load\\(open\\('docs/architecture/baseline-manifest.json',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['domains']['product']['files'],ensure_ascii=False,indent=2\\)\\)\")",
+      "Bash(python -c 'import json,pathlib *)",
+      "Bash(python -c 'import csv,pathlib *)"
+    ]
+  }
+}

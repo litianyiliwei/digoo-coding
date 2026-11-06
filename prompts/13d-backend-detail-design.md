@@ -25,6 +25,7 @@
 `bash scripts/check-design-assets.sh <change-id> --strict --lint-api`
 如未实际运行，不得声称通过。未知内容标为 PENDING，说明负责人和阻塞条件，不要猜测。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+基线交互要求：必须读取 system-context、domain-boundaries、logical-erd、data-flows、technology-decisions、相关 ADR 和 api-conventions。功能物理表/字段/迁移及 IO 留在 Change；共享实体语义、数据所有权、领域不变量、模块边界或公共集成策略变化须提出基线修订。
 ```
 
 ## 执行前变量
@@ -50,4 +51,10 @@
 - 必须输出：openspec/changes/<change-id>/design/backend-design.md；openspec/changes/<change-id>/design/api-io-mapping.csv；openspec/changes/<change-id>/design/io-catalog.csv。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：API→IO 映射、每个 IO 契约、事务/幂等/超时/重试/错误映射、测试 ID。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 10 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+
+
+## 机器基线设计门禁（必须执行）
+
+将模块边界、数据所有权、事务、领域模型、公共 Client 和数据流约束映射到 backend-design、IO catalog、API→IO mapping 或 OpenAPI，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。

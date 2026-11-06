@@ -22,3 +22,17 @@ Most scripts resolve the project root from their own location; file arguments to
 | `verify-before-completion.sh <id> ...` | Run strict OpenSpec, diff and optional API/tests checks | Configured checks ran successfully | Human acceptance/release approval complete |
 
 The scripts are intentionally fail-closed when they cannot run a required check. Adapt for Windows PowerShell if the repository does not use Bash/WSL/macOS/Linux.
+
+| `workflow.py status` | 展示工作流状态 | 状态 JSON 可读取且阶段 ID 合法 | 业务产物真实完成 |
+| `workflow.py check-entry --step <id>` | 阶段进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff | 阶段满足进入条件 | 当前阶段产物质量正确 |
+| `workflow.py transition --step <id> --evidence <json>` | 校验输出/门禁/审批，生成下游 handoff 并原子推进状态 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
+| `workflow.py handoff-verify --manifest <json>` | 校验交接包文件 SHA-256 | 交接文件未变化 | 文件语义正确 |
+| `check-independent-verification.py` | 验证独立验证报告和结构化证据 | AC/测试/revision/只读/发现项满足 PASS 规则 | 不能证明 Verifier Agent 身份真实独立 |
+| `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；14b 必须保留独立验证 checker 证据 |
+
+| `baseline-governance.py audit [--require-frozen]` | 校验机器 Manifest、域状态、文件/注册表 SHA-256、约束 ID/来源/审批；`--require-frozen` 用于功能阶段 | 基线元数据与文件完整性通过 | 不等于企业身份认证；需配合 CI/受保护分支 |
+| `baseline-governance.py init-binding --change-id <id>` | 从冻结基线生成 Change 约束绑定，覆盖当前全部 ACTIVE Constraint ID | 初始绑定完整生成 | 适用性、设计结论、证据和审批仍需人/Agent填写 |
+| `baseline-governance.py check-change --change-id <id> --phase <requirement\|design\|implementation\|acceptance>` | 按阶段检查基线快照、约束覆盖、例外审批、设计和实现证据、rebase 结论 | 当前阶段无基线治理阻断 | 不证明业务判断正确；证据语义仍需独立审查 |
+| `baseline-governance.py open-amendment --request-id <id> --domains <csv>` | 冻结前置修订状态，阻断功能门禁 | 修订窗口已打开 | 不负责自动审批或自动升级版本 |
+| `baseline-governance.py refresh-hashes` | 在 DRAFT/UNDER_AMENDMENT 状态刷新基线文件与约束目录哈希 | 哈希登记已更新 | FROZEN 状态下拒绝执行 |
+| `baseline-governance.py refresh-binding --change-id <id>` | 完成 REBASE_COMPLETED 审核后刷新 Change 快照，重置变更域判定并撤销旧绑定审批 | Change 进入重新评审 | 不会替代人工重新批准 |

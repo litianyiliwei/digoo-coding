@@ -1,11 +1,14 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "principles": [
     "上一步正式产物是下一步输入；聊天记录不是正式输入。",
     "workflow-state.json 是索引，不是事实来源。",
     "未经审批的产物不得被下游当作已批准输入。",
     "每一步结束必须展示文件路径、内容摘要、自检结果、待审批项与下一步输入。",
-    "缺失/冲突/过期输入必须阻断或显式标记，不得编造。"
+    "缺失/冲突/过期输入必须阻断或显式标记，不得编造。",
+    "阶段状态只能通过 scripts/workflow.py transition 原子推进；不得由 Skill 直接编辑 completed_steps/current_step。",
+    "阶段交接必须生成 SHA-256 manifest，下游入口核验文件哈希。",
+    "实现阶段之后必须由独立只读 Verifier 生成机器可检查证据，PASS 才可进入人工验收。"
   ],
   "steps": [
     {
@@ -45,7 +48,7 @@
       "outputs": [
         "AGENTS.md（仅缺失时创建或经批准修改）",
         "workflow-state.json",
-        "docs/architecture/baseline-status.md",
+        "docs/architecture/baseline-status.md（依据 templates/project-baseline/baseline-status.md）",
         "docs/project/toolchain-report.md（依据 templates/project-baseline/toolchain-report.md）"
       ],
       "next_inputs": [
@@ -59,7 +62,7 @@
       "step": "02",
       "skill": "requirements-analysis",
       "prompt": "prompts/02-requirements-analysis.md",
-      "title": "需求发现与整理",
+      "title": "需求业务梳理",
       "scope": "项目级",
       "inputs": [
         "访谈/业务材料/旧系统资料",
@@ -69,64 +72,19 @@
       ],
       "outputs": [
         "docs/product/requirements-analysis.md",
-        "docs/product/workflows.md",
-        "docs/product/use-cases.md",
-        "docs/product/user-stories.md",
+        "docs/product/workflows.md（每个 FLOW 必须含完整节点表：节点角色、输入/输出数据对象、前置条件、处理动作、异常/分支、下一节点）",
+        "docs/product/data-objects.csv（业务数据对象目录）",
+        "docs/product/rd-matrix.csv（需求-数据对象矩阵：需求/规则 → 流程节点 → 角色 → 数据对象）",
         "docs/product/business-rules.md",
+        "docs/product/glossary.md",
+        "docs/product/acceptance-policy.md",
         "docs/product/open-questions.md"
       ],
       "next_inputs": [
-        "需求分析报告、流程、用例、故事、规则、未决问题"
+        "业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题"
       ],
-      "approval": "业务负责人确认关键流程、范围、规则与验收标准",
-      "gate": "scripts/check-requirements.py；关键 PENDING 不得伪装确认"
-    },
-    {
-      "step": "03",
-      "skill": "prototype-audit",
-      "prompt": "prompts/03-prototype-audit.md",
-      "title": "pen.dev 原型评审与需求澄清",
-      "scope": "项目级",
-      "inputs": [
-        "docs/product/* 需求产物",
-        "pen.dev 原型链接/导出物（必须实际可访问）",
-        "需求疑问与干系人反馈"
-      ],
-      "outputs": [
-        "docs/design/prototype-audit.md",
-        "docs/product/open-questions.md（更新）",
-        "docs/product/requirements-analysis.md（经确认的修订）"
-      ],
-      "next_inputs": [
-        "原型评审结论、已确认需求修订、未决问题"
-      ],
-      "approval": "客户/产品负责人确认原型与需求差异",
-      "gate": "逐项记录原型覆盖、缺失、冲突和待决；外部链接不可访问则标阻断"
-    },
-    {
-      "step": "04",
-      "skill": "product-baseline",
-      "prompt": "prompts/04-product-baseline.md",
-      "title": "项目级产品基线",
-      "scope": "项目级",
-      "inputs": [
-        "已确认需求产物",
-        "已批准原型审计与修订记录"
-      ],
-      "outputs": [
-        "docs/product/requirements-analysis.md",
-        "docs/product/workflows.md",
-        "docs/product/use-cases.md",
-        "docs/product/user-stories.md",
-        "docs/product/business-rules.md",
-        "docs/product/glossary.md",
-        "docs/product/acceptance-policy.md"
-      ],
-      "next_inputs": [
-        "已批准产品需求基线及稳定 ID"
-      ],
-      "approval": "产品负责人批准产品基线版本",
-      "gate": "scripts/check-requirements.py --strict"
+      "approval": "业务/产品负责人确认业务流程完整性、节点数据对象与角色、RD 矩阵覆盖",
+      "gate": "scripts/check-requirements.py --strict（FLOW/NODE/DO/RD/BR 结构、引用闭合与节点覆盖）"
     },
     {
       "step": "05",
@@ -135,90 +93,32 @@
       "title": "项目总体架构设计",
       "scope": "项目级",
       "inputs": [
-        "已批准产品基线",
+        "已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md",
         "现有仓库结构/技术约束",
-        "非功能需求"
+        "非功能需求",
+        "用户/技术负责人明确的技术选型偏好（本阶段必须显式询问并记录，不得默认或自行假设）"
       ],
       "outputs": [
         "docs/architecture/system-context.md",
         "docs/architecture/domain-boundaries.md",
         "docs/architecture/containers-and-deployment.md",
-        "docs/architecture/data-flows.md",
-        "docs/architecture/technology-decisions.md",
-        "docs/adr/README.md"
-      ],
-      "next_inputs": [
-        "系统边界、模块职责、部署拓扑、技术决策、跨模块数据流"
-      ],
-      "approval": "架构负责人批准重大技术选型与边界",
-      "gate": "架构一致性与依赖方向人工评审"
-    },
-    {
-      "step": "06",
-      "skill": "data-domain-baseline",
-      "prompt": "prompts/06-data-domain-baseline.md",
-      "title": "项目级数据与领域基线",
-      "scope": "项目级",
-      "inputs": [
-        "已批准产品基线",
-        "docs/architecture/* 架构基线",
-        "现有数据库/领域资料（若存在）"
-      ],
-      "outputs": [
-        "docs/architecture/logical-erd.md",
-        "docs/architecture/domain-boundaries.md（必要时修订）",
-        "docs/architecture/data-flows.md（必要时修订）"
-      ],
-      "next_inputs": [
-        "逻辑实体、关系、数据所有权、领域不变量、数据流"
-      ],
-      "approval": "数据/架构负责人批准核心模型与所有权",
-      "gate": "实体关系、数据所有权、领域边界一致性审查"
-    },
-    {
-      "step": "07",
-      "skill": "project-contract-baseline",
-      "prompt": "prompts/07-project-contract-baseline.md",
-      "title": "项目级接口/前端/测试规范",
-      "scope": "项目级",
-      "inputs": [
-        "已批准架构与数据领域基线",
-        "现有前后端工程规范",
-        "非功能要求"
-      ],
-      "outputs": [
+        "docs/architecture/data-flows.md（数据流转：DF ID、同步/异步、事务边界、失败与补偿）",
+        "docs/architecture/logical-erd.md（逻辑实体、关系、数据所有权、领域不变量）",
+        "docs/architecture/technology-decisions.md（含技术选型访谈记录、候选比较、用户确认人与日期）",
         "docs/architecture/api-conventions.md",
         "docs/architecture/frontend-conventions.md",
-        "docs/architecture/test-strategy.md"
+        "docs/architecture/test-strategy.md",
+        "docs/adr/README.md",
+        "docs/architecture/baseline-status.md（经本阶段结束审计的各域版本/冻结状态）",
+        "docs/architecture/baseline-manifest.json（机器权威版本/冻结状态/域文件 SHA-256）",
+        "docs/architecture/constraint-registry.json（稳定约束 ID 与审批状态）",
+        "docs/project/baseline-audit-report.md（本阶段结束审计报告）"
       ],
       "next_inputs": [
-        "API 公共约定、前端工程约定、测试策略与质量门禁"
+        "冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录"
       ],
-      "approval": "技术负责人批准公共工程规范",
-      "gate": "规范可执行性与现有技术栈兼容性审查"
-    },
-    {
-      "step": "08",
-      "skill": "baseline-audit",
-      "prompt": "prompts/08-baseline-audit.md",
-      "title": "项目基线审计与冻结",
-      "scope": "项目级",
-      "inputs": [
-        "产品基线",
-        "架构基线",
-        "数据/领域基线",
-        "公共契约/测试基线",
-        "未决问题清单"
-      ],
-      "outputs": [
-        "templates/project-baseline/baseline-audit-report.md 的项目实例（建议 docs/project/baseline-audit-report.md）",
-        "docs/architecture/baseline-status.md"
-      ],
-      "next_inputs": [
-        "冻结的项目基线版本、缺口/豁免、审批记录"
-      ],
-      "approval": "产品/架构/技术负责人共同批准冻结",
-      "gate": "scripts/check-required-files.sh --strict；未决项需责任人和处理计划"
+      "approval": "产品/架构/技术负责人共同确认系统边界、数据流转与公共契约，并批准基线冻结",
+      "gate": "scripts/check-required-files.sh --strict；跨文档一致性审计（系统边界/数据流转/ERD/公共契约/术语）；scripts/baseline-governance.py audit --require-frozen（阶段结束冻结审计）"
     },
     {
       "step": "09",
@@ -227,64 +127,119 @@
       "title": "提案拆分、依赖排序与路线图",
       "scope": "项目级到功能级",
       "inputs": [
-        "已冻结项目基线",
-        "产品需求/用户故事/AC",
-        "已知技术债与依赖"
+        "已批准并冻结的项目总体架构与基线（阶段 05 结束审计）",
+        "需求业务梳理、RD 矩阵、业务规则与验收政策",
+        "已知技术债与依赖",
+        "docs/architecture/baseline-status.md",
+        "相关架构/数据/API/前端/测试基线版本与审批信息"
       ],
       "outputs": [
         "docs/product/proposal-roadmap.md",
-        "每个候选 Change 的范围/依赖/价值说明"
+        "每个候选 Change 的范围/依赖/价值说明",
+        "候选 Change 基线适用域/潜在修订摘要（写入 docs/product/proposal-roadmap.md）"
       ],
       "next_inputs": [
         "经批准的 Change 列表、优先级、依赖顺序"
       ],
       "approval": "产品与技术负责人批准路线图及首个 Change",
-      "gate": "scripts/check-roadmap.py --strict；不在此阶段伪造 Change 验证"
+      "gate": "scripts/check-roadmap.py --strict；不在此阶段伪造 Change 验证",
+      "baseline_interaction": {
+        "read": [
+          "docs/architecture/baseline-status.md",
+          "相关产品/架构/数据/公共契约/测试基线",
+          "openspec/specs/**"
+        ],
+        "produce": [
+          "docs/product/proposal-roadmap.md 中每个 Change 的基线适用域和候选修订"
+        ],
+        "mode": "候选 Change 拆分时做初步基线影响识别；不修改冻结基线"
+      }
     },
     {
       "step": "10",
       "skill": "feature-requirements",
       "prompt": "prompts/10-feature-requirements.md",
-      "title": "功能级 OpenSpec Change 与需求细化",
+      "title": "提案级需求分析",
       "scope": "单个功能 Change",
       "inputs": [
         "已批准路线图/当前 Change 范围",
-        "项目级产品/架构/数据/公共契约基线",
-        "关联 US/AC/BR/FLOW/UC",
-        "现有 OpenSpec specs"
+        "docs/architecture/baseline-status.md 与相关架构/数据/公共契约/测试基线",
+        "关联 FLOW/BR/AC 与项目 RD 矩阵",
+        "现有 OpenSpec specs",
+        "docs/architecture/baseline-manifest.json 与 docs/architecture/constraint-registry.json（机器权威来源）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/proposal.md",
         "openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）",
         "openspec/changes/<change-id>/tasks.md（初步任务）",
-        "openspec/changes/<change-id>/design.md（有设计决策时）"
+        "openspec/changes/<change-id>/design.md（有设计决策时）",
+        "openspec/changes/<change-id>/design/user-stories.md（提案级用户故事与 AC）",
+        "openspec/changes/<change-id>/design/use-cases.md（提案级功能用例）",
+        "openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，逐条绑定 ACTIVE Constraint ID）"
       ],
       "next_inputs": [
-        "已批准 Change proposal/specs、范围边界、验收标准、需求追踪 ID"
+        "已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定"
       ],
-      "approval": "提案及功能范围经人工批准后才进入设计",
-      "gate": "OpenSpec instructions/status/validate；scripts/check-change.sh <change-id>"
+      "approval": "产品负责人批准提案级需求与验收标准；技术负责人确认范围与基线影响",
+      "gate": "scripts/check-requirements.py --change <change-id> --strict（提案级 UC/US/AC 结构与引用闭合）；openspec validate <change-id> --strict；scripts/check-baseline-impact.py <change-id>；scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement",
+      "baseline_interaction": {
+        "read": [
+          "docs/architecture/baseline-status.md",
+          "相关产品/架构/数据/API/前端/测试基线",
+          "相关 openspec/specs/**"
+        ],
+        "produce": [
+          "openspec/changes/<change-id>/design/baseline-impact.md"
+        ],
+        "gate": "若功能设计依赖未批准的架构/数据/公共契约/质量基线变化，阻断进入详细设计/实现"
+      }
+    },
+    {
+      "step": "10b",
+      "skill": "prototype-generation",
+      "prompt": "prompts/10b-prototype-generation.md",
+      "title": "提案原型生成与评审",
+      "scope": "单个功能 Change",
+      "inputs": [
+        "已批准的提案级需求（proposal/specs/design/user-stories/use-cases）",
+        "docs/product/open-questions.md（只读，生成时不擅自决策）",
+        "pen.dev MCP 实际可访问能力（pencil 工具）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（只读继承）"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/prototype-build.md",
+        "openspec/changes/<change-id>/design/prototype-audit.md",
+        "pen.dev 原型页面（链接登记到构建记录；导出快照若支持）"
+      ],
+      "next_inputs": [
+        "已批准原型链接/导出物、PAGE→UC/US/FLOW/BR 映射、原型评审结论与需求澄清"
+      ],
+      "approval": "产品/设计负责人确认原型与需求差异；原型与需求修订在阶段结束审计中一并批准",
+      "gate": "scripts/check-prototype-build.py --change <change-id> --strict（构建记录 + 页面映射 + 原型评审记录）；MCP 不可用时如实阻断"
     },
     {
       "step": "11",
       "skill": "page-interaction-inventory",
       "prompt": "prompts/11-page-interaction-inventory.md",
-      "title": "页面、元素、按钮与交互事件清单",
+      "title": "页面、功能区块、元素与交互事件清单",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准 Change proposal/specs",
-        "关联 US/AC 与业务流程",
-        "项目级 UI/前端规范"
+        "已批准的提案级需求（proposal/specs/design/user-stories/use-cases）",
+        "已批准的提案原型构建记录与评审结论（openspec/changes/<change-id>/design/prototype-build.md、prototype-audit.md）",
+        "项目级业务流程/数据对象/RD 矩阵与 UI/前端规范",
+        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 10 已审批的约束绑定；本阶段只读继承）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/page-inventory.csv",
+        "openspec/changes/<change-id>/design/block-inventory.csv",
         "openspec/changes/<change-id>/design/interaction-map.csv"
       ],
       "next_inputs": [
-        "PAGE/ELEM/EVT 清单、状态/跳转、事件与需求/operationId 的关联"
+        "PAGE/BLOCK/ELEM/EVT 清单、页面内区块顺序与职责、每个按钮/元素唯一所属区块、状态/跳转、事件与需求/operationId 的关联"
       ],
       "approval": "产品负责人确认页面与交互覆盖",
-      "gate": "scripts/check-inventory.py --change <change-id> --strict"
+      "gate": "scripts/check-inventory.py --change <change-id> --strict；workflow.py 自动复核 baseline-binding.json（requirement phase）"
     },
     {
       "step": "12",
@@ -293,20 +248,21 @@
       "title": "Figma UI 设计与 MCP 审计",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准页面/交互清单",
+        "已批准页面/区块/交互清单（含 block_id 归属）",
         "已批准功能规格",
         "Figma 文件/节点与可访问 MCP 输出",
-        "项目级设计规范"
+        "项目级设计规范",
+        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 10 已审批的约束绑定；本阶段只读继承）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/figma-audit.md",
         "Figma 设计链接/节点映射及导出资源引用"
       ],
       "next_inputs": [
-        "页面/组件/状态的 UI 设计依据、差异与待确认项"
+        "页面/区块/组件/状态的 UI 设计依据、区块覆盖差异与待确认项"
       ],
       "approval": "设计/产品负责人批准 UI",
-      "gate": "记录实际可读取的 node/component；MCP 不可用时不得声称已审计"
+      "gate": "记录实际可读取的 node/component；MCP 不可用时不得声称已审计；workflow.py 自动复核 baseline-binding.json（requirement phase）"
     },
     {
       "step": "13a",
@@ -317,7 +273,10 @@
       "inputs": [
         "已批准 proposal/specs",
         "页面/交互清单与 Figma 审计（适用时）",
-        "项目级架构/数据/公共契约基线"
+        "项目级架构/数据/公共契约基线",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design.md",
@@ -327,7 +286,18 @@
         "统一设计约束、接口范围、前后端/测试设计任务"
       ],
       "approval": "技术负责人确认设计范围和重大方案",
-      "gate": "scripts/check-change.sh <change-id>；辅助设计文件完整性检查"
+      "gate": "scripts/check-change.sh <change-id>；辅助设计文件完整性检查；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "baseline_interaction": {
+        "read": [
+          "当前 Change 的 design/baseline-impact.md",
+          "docs/architecture/baseline-status.md",
+          "本设计域适用的项目基线"
+        ],
+        "produce": [
+          "更新 baseline-impact.md 的复核结论/受影响域/NO_IMPACT 或 REBASE_REQUIRED"
+        ],
+        "gate": "发现冲突必须提出基线修订；受影响设计在审批前不得冻结"
+      }
     },
     {
       "step": "13b",
@@ -338,7 +308,10 @@
       "inputs": [
         "已批准功能规格与页面交互清单",
         "Figma 交互（适用时）",
-        "项目级 API/鉴权/错误码约定"
+        "项目级 API/鉴权/错误码约定",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/api/openapi.yaml",
@@ -348,7 +321,18 @@
         "唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义"
       ],
       "approval": "API 契约经前后端共同评审",
-      "gate": "scripts/validate-openapi.sh <file>；无 API 时声明 x-api-scope: none"
+      "gate": "scripts/validate-openapi.sh <file>；无 API 时声明 x-api-scope: none；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "baseline_interaction": {
+        "read": [
+          "当前 Change 的 design/baseline-impact.md",
+          "docs/architecture/baseline-status.md",
+          "本设计域适用的项目基线"
+        ],
+        "produce": [
+          "更新 baseline-impact.md 的复核结论/受影响域/NO_IMPACT 或 REBASE_REQUIRED"
+        ],
+        "gate": "发现冲突必须提出基线修订；受影响设计在审批前不得冻结"
+      }
     },
     {
       "step": "13c",
@@ -358,19 +342,33 @@
       "scope": "单个功能 Change",
       "inputs": [
         "已批准 OpenAPI（或 x-api-scope: none）",
-        "页面/交互清单与 Figma 审计",
+        "页面/区块/交互清单（含 block_id 归属）与 Figma 审计",
         "前端工程规范",
-        "功能规格与 AC"
+        "功能规格与 AC",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/frontend-design.md",
         "前端测试用例/组件状态映射"
       ],
       "next_inputs": [
-        "组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID"
+        "PAGE→BLOCK→组件树、区块与元素归属、组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID"
       ],
       "approval": "前端负责人评审",
-      "gate": "前端设计文件完整性与 operationId 对齐检查"
+      "gate": "前端设计文件完整性与 operationId 对齐检查；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "baseline_interaction": {
+        "read": [
+          "当前 Change 的 design/baseline-impact.md",
+          "docs/architecture/baseline-status.md",
+          "本设计域适用的项目基线"
+        ],
+        "produce": [
+          "更新 baseline-impact.md 的复核结论/受影响域/NO_IMPACT 或 REBASE_REQUIRED"
+        ],
+        "gate": "发现冲突必须提出基线修订；受影响设计在审批前不得冻结"
+      }
     },
     {
       "step": "13d",
@@ -381,7 +379,10 @@
       "inputs": [
         "已批准 OpenAPI",
         "功能规格与 AC",
-        "项目级架构/领域/数据模型/公共 Client 规范"
+        "项目级架构/领域/数据模型/公共 Client 规范",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/backend-design.md",
@@ -392,7 +393,18 @@
         "API→IO 映射、每个 IO 契约、事务/幂等/超时/重试/错误映射、测试 ID"
       ],
       "approval": "后端负责人/架构负责人评审 IO 边界与事务一致性",
-      "gate": "scripts/check-api-io-mapping.py 与 scripts/check-design-assets.sh --strict；每 operationId 对应一个或多个真实 IO，例外需批准"
+      "gate": "scripts/check-api-io-mapping.py 与 scripts/check-design-assets.sh --strict；每 operationId 对应一个或多个真实 IO，例外需批准；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "baseline_interaction": {
+        "read": [
+          "当前 Change 的 design/baseline-impact.md",
+          "docs/architecture/baseline-status.md",
+          "本设计域适用的项目基线"
+        ],
+        "produce": [
+          "更新 baseline-impact.md 的复核结论/受影响域/NO_IMPACT 或 REBASE_REQUIRED"
+        ],
+        "gate": "发现冲突必须提出基线修订；受影响设计在审批前不得冻结"
+      }
     },
     {
       "step": "13e",
@@ -405,7 +417,10 @@
         "OpenAPI",
         "前后端详细设计",
         "API→IO 映射与 IO 契约",
-        "项目级测试策略"
+        "项目级测试策略",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/test-design.md",
@@ -415,7 +430,18 @@
         "TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果"
       ],
       "approval": "测试负责人确认覆盖范围与质量门禁",
-      "gate": "scripts/check-traceability.py --file ... --strict；设计完整性检查"
+      "gate": "scripts/check-traceability.py --file ... --strict；设计完整性检查；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "baseline_interaction": {
+        "read": [
+          "当前 Change 的 design/baseline-impact.md",
+          "docs/architecture/baseline-status.md",
+          "本设计域适用的项目基线"
+        ],
+        "produce": [
+          "更新 baseline-impact.md 的复核结论/受影响域/NO_IMPACT 或 REBASE_REQUIRED"
+        ],
+        "gate": "发现冲突必须提出基线修订；受影响设计在审批前不得冻结"
+      }
     },
     {
       "step": "14",
@@ -427,19 +453,60 @@
         "已批准 tasks.md/design.md",
         "前后端详细设计、OpenAPI、IO 契约",
         "test-design.md 与 traceability.csv",
-        "项目级工程规范/测试策略"
+        "项目级工程规范/测试策略",
+        "openspec/changes/<change-id>/design/baseline-impact.md（已批准的基线快照）",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）"
       ],
       "outputs": [
         "实际源代码/迁移/配置",
         "自动化测试代码与运行结果",
         "openspec/changes/<change-id>/design/evidence/code-review.md",
-        "实现/验证证据"
+        "实现/验证证据",
+        "条件适用：基线变更请求/ADR 草案（发现冲突时；未经批准不更新冻结基线）"
       ],
       "next_inputs": [
         "代码差异、测试报告、审查结论、未解决问题"
       ],
       "approval": "代码审查阻断项关闭；合并按项目权限单独审批",
-      "gate": "TDD；scripts/test-all.sh；scripts/verify-before-completion.sh；真实命令退出码"
+      "gate": "TDD；scripts/test-all.sh；scripts/verify-before-completion.sh；真实命令退出码；baseline-governance.py check-change --phase implementation",
+      "baseline_interaction": {
+        "read": [
+          "已批准的 design/baseline-impact.md",
+          "当前 docs/architecture/baseline-status.md 版本"
+        ],
+        "produce": [
+          "实现中发现的基线冲突记录、适用时的基线变更请求/ADR"
+        ],
+        "gate": "不得直接修改冻结基线；未批准时暂停受影响任务；批准后刷新 Change 快照并重新验证"
+      }
+    },
+    {
+      "step": "14b",
+      "skill": "independent-verifier",
+      "prompt": "prompts/14b-independent-verification.md",
+      "title": "独立验证与验收证据",
+      "scope": "功能级",
+      "inputs": [
+        "已实现代码及 revision/diff 指纹",
+        "已批准 proposal/specs/design/tasks",
+        "已批准基线快照与 baseline-impact.md",
+        "OpenAPI、API-IO 映射、IO catalog（适用时）",
+        "前后端详细设计、测试设计、Builder 测试和审查报告",
+        "openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）"
+      ],
+      "outputs": [
+        "openspec/changes/<change-id>/design/evidence/independent-verification-report.md",
+        "openspec/changes/<change-id>/design/evidence/independent-verification.json"
+      ],
+      "next_inputs": [
+        "独立验证报告与 JSON 证据",
+        "AC 逐项验证结果",
+        "测试命令与退出码",
+        "发现项和未执行项"
+      ],
+      "approval": "独立验证 PASS；Verifier 不得是本次 Builder 的同一执行上下文；失败/阻断退回实现阶段",
+      "gate": "scripts/check-independent-verification.py；所有适用 AC PASS、测试退出码 0、revision 稳定、只读、无 BLOCKER/CRITICAL；baseline-governance.py check-change --phase implementation"
     },
     {
       "step": "15",
@@ -448,22 +515,65 @@
       "title": "人工验收、归档与基线回写",
       "scope": "单个功能 Change",
       "inputs": [
+        "阶段 14b 的 independent-verification-report.md 与 independent-verification.json（必须 PASS，revision 必须与当前验收代码一致）",
         "已实现代码与测试证据",
         "已批准 AC/规格/追踪矩阵",
         "代码审查记录",
-        "部署/演示或验收环境证据"
+        "部署/演示或验收环境证据",
+        "openspec/changes/<change-id>/design/baseline-impact.md",
+        "docs/architecture/baseline-status.md（当前版本）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（所有适用约束有最终验证证据）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/evidence/acceptance.md",
         "验收报告与批准记录",
         "OpenSpec archive 结果及更新后的主规格（仅批准后）",
-        "项目路线图/基线状态回写（适用时）"
+        "项目路线图/基线状态回写（适用时）",
+        "条件适用：更新项目级基线文档与 baseline-status.md（仅批准/实现/验证完成后）"
       ],
       "next_inputs": [
         "已验收并归档的能力规格、验收证据、后续 Change 依赖"
       ],
       "approval": "产品责任人明确批准后才可归档；不得用 -y 绕过",
-      "gate": "scripts/check-acceptance.py；verify-before-completion.sh；openspec validate/archive 真实执行"
+      "gate": "scripts/check-acceptance.py；verify-before-completion.sh；openspec validate/archive 真实执行；阶段 14b 独立验证必须 PASS 且 revision 未变化；baseline-governance.py check-change --phase acceptance",
+      "baseline_interaction": {
+        "read": [
+          "design/baseline-impact.md",
+          "当前基线状态",
+          "已批准的 ADR/基线变更请求"
+        ],
+        "produce": [
+          "条件性更新项目基线文档和 baseline-status.md",
+          "在途 Change 影响复核清单"
+        ],
+        "gate": "只回写已批准/已实现/已验证的跨功能决策；功能细节留在 Change"
+      }
     }
-  ]
+  ],
+  "baseline_feature_interaction": {
+    "authority": "docs/BASELINE-FEATURE-INTERACTION.md",
+    "feature_record_template": "templates/change-assets/design/baseline-impact.md",
+    "rules": [
+      "每个功能 Change 在阶段 10 创建基线适用性/影响清单，记录各域基线版本、读取文件/章节/ID、约束与复用项。",
+      "局部行为/端点/页面/物理迁移/IO/测试留在 Change；共享业务规则、架构边界、核心领域模型、公共契约和全局质量门禁变化才提出基线修订。",
+      "基线变更须通过相应负责人审批并版本化；若影响功能设计或实现，必须先批准基线修订再继续受影响工作。",
+      "实施中发现冲突时暂停受影响任务，不得直接修改冻结基线；批准后刷新 Change 快照/设计/测试。",
+      "验收归档时只回写已批准、已实现、已验证且跨功能复用的决策；功能特有设计留在归档 Change。",
+      "基线版本变化后，在途 Change 必须进行 NO_IMPACT / REBASE_REQUIRED 复核。"
+    ],
+    "classifications": [
+      "CHANGE_ONLY",
+      "BASELINE_CHANGE_REQUIRED",
+      "BASELINE_UPDATE_AFTER_ACCEPTANCE",
+      "N/A"
+    ],
+    "baseline_domains": [
+      "product",
+      "architecture",
+      "data_domain",
+      "api",
+      "frontend",
+      "test_quality"
+    ]
+  }
 }

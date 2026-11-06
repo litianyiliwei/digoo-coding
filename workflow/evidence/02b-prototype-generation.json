@@ -1,0 +1,60 @@
+{
+  "step_id": "02b-prototype-generation",
+  "change_id": null,
+  "baseline_version": "",
+  "outputs": [
+    {
+      "path": "docs/design/prototype-build.md",
+      "status": "updated",
+      "required": true,
+      "role": "prototype-build-record"
+    },
+    {
+      "path": "docs/design/prototype.pen",
+      "status": "updated",
+      "required": true,
+      "role": "pen-dev-canvas"
+    },
+    {"path": "docs/design/exports/PAGE-001-login.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-002-dashboard.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-003-env-monitoring.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-004-device-control.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-005-alert-config.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-006-plans-templates.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-007-task-review.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-009-inventory.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-010-batches-trace.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-012-regulator-board.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-013-system-admin.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-016-workbench.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-017-tasks.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-018-task-detail.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-019-monitoring.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-020-alerts.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-021-trace.png", "status": "created", "required": true, "role": "snapshot"},
+    {"path": "docs/design/exports/PAGE-022-admin-hub.png", "status": "created", "required": true, "role": "snapshot"}
+  ],
+  "checks": [
+    {
+      "name": "prototype-build-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-prototype-build.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02b-check-prototype-build.log"
+    },
+    {
+      "name": "pen-dev-render-verification",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "Claude Code（逐屏 TakeScreenshot 与 get_app_state 核验，18 屏）",
+      "evidence": "docs/design/exports/PAGE-022-admin-hub.png"
+    }
+  ],
+  "approval": {
+    "required": false,
+    "status": "not-required",
+    "approver": "",
+    "approved_at": ""
+  }
+}

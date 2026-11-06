@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+  "from_step": "02-requirements-analysis",
+  "to_step": "02b-prototype-generation",
+  "change_id": null,
+  "created_at": "2026-11-05T06:09:42+00:00",
+  "baseline_version": "",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "用户（welly，代行业务负责人）",
+    "approved_at": "2026-11-05"
+  },
+  "checks": [
+    {
+      "name": "package-self-check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-package.py",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-check-package.log"
+    },
+    {
+      "name": "requirements-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-check-requirements.log"
+    },
+    {
+      "name": "openspec-specs-readonly",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-openspec-specs.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "sha256": "1277ce6aedf4cc54324749e1778719ae8d614306df59d303efd6749689139532",
+      "size_bytes": 12738,
+      "role": "requirements-report"
+    },
+    {
+      "path": "docs/product/workflows.md",
+      "sha256": "184aaa7cd97e463294fff34ae932f7992ee551d76584c61e5e86931275c90994",
+      "size_bytes": 7199,
+      "role": "business-workflows"
+    },
+    {
+      "path": "docs/product/use-cases.md",
+      "sha256": "cbe46048834716607add6f28809c1dd4d659ed0fa8535c5838f5a6910451cde8",
+      "size_bytes": 8513,
+      "role": "use-cases"
+    },
+    {
+      "path": "docs/product/user-stories.md",
+      "sha256": "835f007f618f9f18ea47100ab3392bd3b3e962474b212e839c130596998acf5a",
+      "size_bytes": 7855,
+      "role": "user-stories-and-acceptance-criteria"
+    },
+    {
+      "path": "docs/product/business-rules.md",
+      "sha256": "d263563ade731f86de947d2bd76eb58b53019bf0215166d280f78dc77862dc6e",
+      "size_bytes": 2737,
+      "role": "business-rules"
+    },
+    {
+      "path": "docs/product/open-questions.md",
+      "sha256": "f9856904ec089774eb025a6cd71d5ff12cda78c3f6a9b29b3e18574c99857f19",
+      "size_bytes": 4967,
+      "role": "open-questions"
+    }
+  ]
+}

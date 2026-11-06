@@ -6,13 +6,14 @@
 
 ## AC/API/IO test matrix
 
-| AC/REQ ID | Test ID | operationId | IO ID(s) | Layer | Preconditions/data | Steps | Expected result/assertion | Failure injection | Automation/command | Cleanup |
-|---|---|---|---|---|---|---|---|---|---|---|
-| AC-001 | TEST-001 | `getExample` | `IO-DB-001` | Integration | TODO | TODO | TODO | DB timeout/not found | TODO | TODO |
+| AC/REQ ID | PAGE/BLOCK IDs | Test ID | operationId | IO ID(s) | Layer | Preconditions/data | Steps | Expected result/assertion | Failure injection | Automation/command | Cleanup |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| AC-001 | PAGE-001/BLOCK-001 | TEST-001 | `getExample` | `IO-DB-001` | Integration | TODO | TODO | TODO | DB timeout/not found | TODO | TODO |
 
 ## Coverage rules
 
 - Every acceptance criterion must map to at least one test, or record `N/A` with a reason and reviewer.
+- Every PAGE/BLOCK in `page-inventory.csv`/`block-inventory.csv` must have UI/E2E coverage or a documented manual verification row.
 - Every OpenAPI `operationId` must have contract/API tests.
 - Every `io_id` in `api-io-mapping.csv` must be covered by one or more relevant unit/integration/failure-injection tests.
 - Side-effecting I/O must test success and important failure behavior; database I/O covers constraints, transaction rollback and concurrency where applicable.

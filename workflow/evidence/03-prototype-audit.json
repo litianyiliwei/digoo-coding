@@ -1,0 +1,56 @@
+{
+  "step_id": "03-prototype-audit",
+  "change_id": null,
+  "baseline_version": "",
+  "outputs": [
+    {
+      "path": "docs/design/prototype-audit.md",
+      "status": "updated",
+      "required": true,
+      "role": "prototype-audit-record"
+    },
+    {
+      "path": "docs/product/open-questions.md",
+      "status": "updated",
+      "required": true,
+      "role": "open-questions"
+    },
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "status": "updated",
+      "required": true,
+      "role": "requirements-revision"
+    }
+  ],
+  "checks": [
+    {
+      "name": "requirements-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-check-requirements.log"
+    },
+    {
+      "name": "prototype-build-structure-strict",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-prototype-build.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-check-prototype-build.log"
+    },
+    {
+      "name": "prototype-review-approved-by-user",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "用户（welly，代行产品负责人）",
+      "evidence": "docs/design/prototype-audit.md"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "用户（welly，代行产品负责人）",
+    "approved_at": "2026-11-05"
+  }
+}
