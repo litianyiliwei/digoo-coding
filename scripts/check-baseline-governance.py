@@ -36,10 +36,10 @@ for sid in ('proposal-planning','feature-requirements','feature-design','api-con
     body = p.read_text(encoding='utf-8')
     if 'BASELINE-FEATURE-INTERACTION.md' not in body and '基线' not in body:
         errors.append(f'Skill does not mention baseline interaction: {sid}')
-for fn in ('09-proposal-planning.md','10-feature-requirements.md','13a-feature-design.md',
-           '13b-api-contract-design.md','13c-frontend-detail-design.md',
-           '13d-backend-detail-design.md','13e-test-design.md',
-           '14-implementation-orchestrator.md','15-acceptance-audit.md'):
+for fn in ('04-proposal-planning.md','05-feature-requirements.md','09-feature-design.md',
+           '10-api-contract-design.md','11-frontend-detail-design.md',
+           '12-backend-detail-design.md','13-test-design.md',
+           '14-implementation-orchestrator.md','16-acceptance-audit.md'):
     p = ROOT / 'prompts' / fn
     if not p.is_file() or '基线交互要求' not in p.read_text(encoding='utf-8'):
         errors.append(f'Prompt missing explicit baseline interaction instructions: {fn}')

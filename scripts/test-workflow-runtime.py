@@ -59,29 +59,29 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertTrue(any('Hash mismatch' in e for e in errors),errors)
     def test_dependency_guard_blocks_skipped_stage(self):
         state=w.load_state()
-        errors=w.check_entry('05-project-architecture-baseline',state,verify_handoffs=False)
+        errors=w.check_entry('03-project-architecture-baseline',state,verify_handoffs=False)
         self.assertTrue(any('Uncompleted dependencies' in e for e in errors),errors)
     def test_project_proposal_entry_runs_frozen_baseline_guard(self):
-        state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis','05-project-architecture-baseline'],
-               'current_step':'09-proposal-planning','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis','03-project-architecture-baseline'],
+               'current_step':'04-proposal-planning','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
         calls=[]
         original=w.run_baseline_gate
         w.run_baseline_gate=lambda args,label: calls.append((args,label)) or ''
         try:
-            errors=w.check_entry('09-proposal-planning',state,verify_handoffs=False)
+            errors=w.check_entry('04-proposal-planning',state,verify_handoffs=False)
         finally:
             w.run_baseline_gate=original
         self.assertEqual([],errors)
         self.assertEqual(['audit','--require-frozen'],calls[0][0])
 
     def test_feature_entry_runs_manifest_and_change_binding_guards(self):
-        state={'project_name':'test','active_change_id':'demo-feature','completed_steps':['09-proposal-planning'],
-               'current_step':'10-feature-requirements','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        state={'project_name':'test','active_change_id':'demo-feature','completed_steps':['04-proposal-planning'],
+               'current_step':'05-feature-requirements','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
         calls=[]
         original=w.run_baseline_gate
         w.run_baseline_gate=lambda args,label: calls.append(args) or ''
         try:
-            errors=w.check_entry('10-feature-requirements',state,verify_handoffs=False)
+            errors=w.check_entry('05-feature-requirements',state,verify_handoffs=False)
         finally:
             w.run_baseline_gate=original
         self.assertEqual([],errors)
@@ -90,7 +90,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
 
     def test_baseline_freeze_transition_requires_manifest_and_registry_outputs(self):
         state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis'],
-               'current_step':'05-project-architecture-baseline','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+               'current_step':'03-project-architecture-baseline','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
         (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
         (self.root/'docs/architecture/baseline-manifest.json').write_text('{}',encoding='utf-8')
@@ -100,29 +100,29 @@ class WorkflowRuntimeTests(unittest.TestCase):
         w.check_entry=lambda *a,**k: []
         w.run_baseline_gate=lambda args,label: calls.append(args) or ''
         try:
-            evidence={'step_id':'05-project-architecture-baseline','outputs':[
+            evidence={'step_id':'03-project-architecture-baseline','outputs':[
                 {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
                 {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
                 'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
                 'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
             ep=self.root/'baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
-            args=type('Args',(),{'step':'05-project-architecture-baseline','evidence':str(ep),'change_id':None})()
+            args=type('Args',(),{'step':'03-project-architecture-baseline','evidence':str(ep),'change_id':None})()
             self.assertEqual(0,w.cmd_transition(args))
         finally:
             w.check_entry,w.run_baseline_gate=original_check,original_gate
         self.assertEqual([['audit','--require-frozen']],calls)
-        self.assertIn('05-project-architecture-baseline',w.load_state()['completed_steps'])
+        self.assertIn('03-project-architecture-baseline',w.load_state()['completed_steps'])
 
     def test_human_approval_required_for_feature_stage(self):
-        stage=w.BY_ID['10-feature-requirements']
+        stage=w.BY_ID['05-feature-requirements']
         self.assertTrue(stage['human_approval_required'])
     def test_feature_transition_rejects_missing_human_approval(self):
-        evidence={'step_id':'10-feature-requirements','change_id':'sample-change',
+        evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self.root/'feature-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'Human approval required'):
-            w.parse_evidence(str(ep),'10-feature-requirements','sample-change')
+            w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
 
 if __name__=='__main__': unittest.main(verbosity=2)

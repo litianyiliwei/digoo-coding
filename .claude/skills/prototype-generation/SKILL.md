@@ -12,8 +12,8 @@ description: 提案原型生成与评审。根据提案级需求通过 pen.dev M
 已批准的提案级需求（proposal/specs/design/user-stories.md/use-cases.md）、项目业务流程与 RD 矩阵（只读）、未决问题清单（只读）、pen.dev MCP 的实际可访问能力。
 
 ## 执行流程
-1. 通读已批准的提案级 US/UC/AC 与项目 FLOW/NODE/DO；从用例与业务流程推导本 Change 需要的页面清单，先在 `openspec/changes/<change-id>/design/prototype-build.md` 的页面清单中登记 PAGE ID、名称与状态。
-2. 加载 pen.dev MCP 的设计指引（如 `read_skill`），按指引确认当前画布状态（`get_app_state`），再逐页绘制（`execute`）：布局、导航、核心控件优先，视觉细节从简。页面按功能区块组织（导航/筛选/表单/列表/详情/统计/操作区/弹窗等），区块名称与页面清单说明列保持一致，供阶段 11 拆解 BLOCK 清单。
+1. 通读已批准的提案级 US/UC/AC 与项目 FLOW/NODE/DO；从用例与业务流程推导本 Change 需要的页面清单，先在 `openspec/changes/<change-id>/design/prototype-build.md` 的页面清单中登记 PAGE ID、名称与状态。该清单是草案，批准后的权威页面清单由阶段 07 生成。
+2. 加载 pen.dev MCP 的设计指引（如 `read_skill`），按指引确认当前画布状态（`get_app_state`），再逐页绘制（`execute`）：布局、导航、核心控件优先，视觉细节从简。页面按功能区块组织（导航/筛选/表单/列表/详情/统计/操作区/弹窗等），区块名称与页面清单说明列保持一致，供阶段 07 拆解 BLOCK 清单。
 3. 每页绘制后用 `get_app_state` 核验页面真实渲染；不把未验证的页面登记为已完成。
 4. 页面必须覆盖提案级 UC/US 中每个入口/操作/结果路径；映射表逐行登记 PAGE ID → UC/US/FLOW/BR ID，并引用项目 NODE/DO ID（适用时）。
 5. **原型评审（阶段结束审计）：** 逐页核对默认、加载、空数据、成功、失败、无权限、禁用、边界值和重复提交状态；核查返回/取消/关闭/刷新/未保存提示/导航/表单校验；列出原型有但需求没有的业务行为、需求有但原型缺失的页面/元素/状态；在 `design/prototype-audit.md` 记录差异、决策、负责人、日期与原型版本/快照标识。
@@ -49,6 +49,6 @@ description: 提案原型生成与评审。根据提案级需求通过 pen.dev M
 
 - **本阶段输入：** 已批准的提案级需求（proposal/specs/design/user-stories/use-cases）；docs/product/open-questions.md（只读）；pen.dev MCP 实际可访问能力；当前 Change 的 baseline-binding.json（只读继承）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/prototype-build.md；openspec/changes/<change-id>/design/prototype-audit.md；pen.dev 原型页面（链接登记到构建记录）。如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
-- **下游交接：** 已批准原型链接/导出物、PAGE→UC/US/FLOW/BR 映射、原型评审结论与需求澄清。明确指出阶段 11 消费哪些文件/字段。
+- **下游交接：** 已批准原型链接/导出物、PAGE→UC/US/FLOW/BR 映射、原型评审结论与需求澄清。明确指出阶段 07 消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成；原型批准发生在阶段 10b 结束审计。
+- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成；原型批准发生在阶段 06 结束审计。

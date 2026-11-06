@@ -28,14 +28,14 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 
 ## 基线交互提示（强制）
 
-- 选择功能级阶段时，除检查普通输入外，必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 和当前 `docs/architecture/baseline-status.md`。阶段 10 创建 baseline-impact；阶段 13 复核；阶段 14 不直接修改冻结基线；阶段 15 按审批结果回写。
+- 选择功能级阶段时，除检查普通输入外，必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 和当前 `docs/architecture/baseline-status.md`。阶段 05 创建 baseline-impact；阶段 09–13 复核；阶段 14 不直接修改冻结基线；阶段 16 按审批结果回写。
 
 ## 输入/输出/交接契约（强制）
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="workflow-orchestrator"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
 - **本阶段输入：** workflow-state.json；docs/PROCESS-MAP.md；docs/STEP-ARTIFACT-CONTRACTS.json；docs/OUTPUT-TEMPLATE-MATRIX.csv；真实产物与审批记录；OpenSpec CLI 当前状态（如已初始化）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** 下一阶段判定报告（对话展示；必要时写入 docs/workflow/next-step-report.md）；workflow-state.json（仅在真实状态变化时更新）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输出：** 下一阶段判定报告（对话展示；不强制落盘）；workflow-state.json（仅在真实状态变化时由 transition 更新）。
 - **下游交接：** 所选阶段的 Input Contract 中全部文件。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
@@ -47,4 +47,4 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 - 执行前运行 `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；非 0 退出码表示禁止执行。
 - 阶段完成后生成符合 `workflow/evidence/<step-id>.json` 结构的证据，调用 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`。禁止直接编辑 `completed_steps/current_step`。
 - transition 会生成 SHA-256 handoff；下一阶段必须核验全部上游 manifest。文件哈希变化时退回上游重审，不得静默刷新。
-- 阶段 14 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 15。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。
+- 阶段 14 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 16。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。

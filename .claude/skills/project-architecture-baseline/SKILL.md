@@ -9,7 +9,7 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 当流程进入“项目总体架构设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-已批准的 `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`；现有仓库结构/技术约束；非功能需求；用户/技术负责人明确的技术选型偏好（本阶段必须显式询问，不得默认或自行拍板）。
+已批准的 `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`（只读）；现有仓库结构/技术约束；非功能需求；用户/技术负责人明确的技术选型偏好（本阶段必须显式询问，不得默认或自行拍板）。
 
 ## 执行流程
 1. **强制技术选型访谈（前置门禁）：** 在产出任何技术决策前，必须向用户逐项询问希望采用的选型及其约束，至少覆盖：后端语言/框架、前端框架/UI 组件库、数据库与存储、缓存/消息/任务调度、部署与运行环境（云/自托管/容器/信创）、认证与权限、构建/测试/CI 工具、既有系统集成、许可与成本、团队熟悉度与运维能力。先给出候选方案与权衡，再请用户确认；用户表示“无偏好”时也必须记录，并把推荐方案列为待确认候选。
@@ -47,9 +47,9 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="project-architecture-baseline"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md；现有仓库结构/技术约束；非功能需求；用户/技术负责人技术选型偏好。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md（只读）；现有仓库结构/技术约束；非功能需求；用户/技术负责人技术选型偏好。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** docs/architecture/system-context.md；domain-boundaries.md；containers-and-deployment.md；data-flows.md；logical-erd.md；technology-decisions.md；api-conventions.md；frontend-conventions.md；test-strategy.md；docs/adr/README.md；baseline-status.md；baseline-manifest.json；constraint-registry.json；docs/project/baseline-audit-report.md。按模板生成并落盘。
-- **下游交接：** 冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录。明确指出阶段 09/10 消费哪些文件/字段。
+- **下游交接：** 冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录。明确指出阶段 04/05 消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
 
@@ -62,7 +62,7 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
   2. 完成 Constraint Registry：逐条审查 ID、来源章节、等级、范围、执行类型和 validator；正式批准的规则设为 `ACTIVE` 并填写 owner/approved_by/approved_at；明确废弃的设为 `RETIRED`；至少有一条 ACTIVE 约束。
   3. 真实审批证据文件落盘后执行 `python scripts/baseline-governance.py refresh-hashes`。
   4. 由负责人执行 `python scripts/baseline-governance.py freeze --approved-by <负责人> --approved-at <ISO日期> --evidence <审批证据路径>`。
-  5. 再执行 `python scripts/baseline-governance.py audit --require-frozen`；通过后才能提交阶段 05 Evidence。
-- 阶段 05 转换的 Evidence 必须包含 Manifest 与 Constraint Registry 两个输出；`workflow.py transition` 会再次进行冻结门禁。
+  5. 再执行 `python scripts/baseline-governance.py audit --require-frozen`；通过后才能提交阶段 03 Evidence。
+- 阶段 03 转换的 Evidence 必须包含 Manifest 与 Constraint Registry 两个输出；`workflow.py transition` 会再次进行冻结门禁。
 - 审计报告必须区分“基线正文已更新”“Change 局部记录”“待批准修订”，并检查 OpenSpec 主规格与项目设计基线是否一致。
 - 冻结后不得直接改文件；必须先 `open-amendment`。

@@ -9,7 +9,7 @@ description: 测试设计。把每条验收标准映射到单元、契约、集�
 当流程进入“测试设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-AC、OpenAPI、前后端设计、领域/IO 风险与质量目标。
+提案级 US/UC/AC、OpenAPI、`design/api-traceability.csv`、`design.md` 与 `design/design-plan.md`、前后端设计、领域/IO 风险、项目测试策略与 `docs/product/acceptance-policy.md`。
 
 ## 执行流程
 1. 逐条将 AC 映射到用例；不能自动化的检查写明人工验证原因。
@@ -51,9 +51,9 @@ AC、OpenAPI、前后端设计、领域/IO 风险与质量目标。
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="test-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准功能规格/AC；OpenAPI；前后端详细设计；API→IO 映射与 IO 契约；项目级测试策略。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** openspec/changes/<change-id>/design/test-design.md；openspec/changes/<change-id>/traceability.csv。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
-- **下游交接：** TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果。明确指出下一阶段消费哪些文件/字段。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准提案级 US/UC/AC；design.md、design/design-plan.md、design/api-traceability.csv；已批准功能规格/AC；OpenAPI；前后端详细设计；API→IO 映射与 IO 契约；项目级测试策略与 docs/product/acceptance-policy.md。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** openspec/changes/<change-id>/design/test-design.md；openspec/changes/<change-id>/traceability.csv（合并 api-traceability 与测试映射）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **下游交接：** TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果；traceability.csv 为唯一追踪聚合文件。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
 

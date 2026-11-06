@@ -120,7 +120,7 @@ AI 不应无差别把所有文档全文塞入上下文；必须先读取基线�
 - 在途 Change 的 rebase 结论；
 - 结论：`COMPATIBLE`、`BLOCKED_PENDING_BASELINE_CHANGE` 或 `APPROVED_BASELINE_AMENDMENT`。
 
-这个文件从阶段 10 开始建立，在 13a–13e 设计时复核，在阶段 14 实现时仅追加发现，不擅自修改基线，在阶段 15 验收时完成回写核验。
+这个文件从阶段 03 开始建立，在 09–13 设计时复核，在阶段 14 实现时仅追加发现，不擅自修改基线，在阶段 16 验收时完成回写核验。
 
 ## 8. 角色和审批责任
 
@@ -146,7 +146,7 @@ AI 可以分析、提出候选修改和生成文档，不可代替负责人批�
 
 ### 9.1 冻结条件
 
-项目总体架构设计阶段 05 的结束审计只有在以下条件全部满足时才允许转换：
+项目总体架构设计阶段 03 的结束审计只有在以下条件全部满足时才允许转换：
 
 1. Manifest `status=FROZEN`，且六个必需域均为 `FROZEN`。
 2. 每个域具备语义版本、owner、approver、approved_at、effective_revision。
@@ -154,7 +154,7 @@ AI 可以分析、提出候选修改和生成文档，不可代替负责人批�
 4. 约束 ID 唯一、等级合法、来源文件属于对应域且来源章节真实存在。
 5. 不允许 DRAFT 约束混入冻结基线；ACTIVE 约束必须有 owner、approved_by、approved_at。
 6. 总体审批必须有 approver、approved_at 和仓库内 evidence 文件。
-7. 阶段 05 的 Evidence 必须将 Manifest 和 Constraint Registry 作为输出交接。
+7. 阶段 03 的 Evidence 必须将 Manifest 和 Constraint Registry 作为输出交接。
 
 ### 9.2 约束注册表规则
 
@@ -186,11 +186,11 @@ python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 | 阶段 | 机器检查 | 目的 |
 |---|---|---|
 | 08 基线冻结 | `audit --require-frozen` | 校验 Manifest、约束目录、哈希与审批 |
-| 09 提案规划 | `audit --require-frozen` | 确保项目基线仍有效 |
+| 04 提案规划 | `audit --require-frozen` | 确保项目基线仍有效 |
 | 10 需求细化 | `check-change --phase requirement` | 约束覆盖完整、适用性已判定、基线绑定已审批 |
 | 11–12 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
-| 13a 转出及 13b–13e | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
-| 14 / 14b | `check-change --phase implementation` | 适用约束有实现验证证据 |
+| 09 转出及 10–13 | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
+| 14 / 15 | `check-change --phase implementation` | 适用约束有实现验证证据 |
 | 15 | `check-change --phase acceptance` | 所有约束完成最终验证 |
 
 ### 9.4 基线演进和在途 Change rebase

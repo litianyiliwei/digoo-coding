@@ -12,7 +12,7 @@ description: 页面、功能区块、元素、按钮与交互事件清单。建�
 批准的提案需求（proposal/specs/design/user-stories.md/use-cases.md）、已批准的提案原型（prototype-build.md、prototype-audit.md）、项目业务流程/RD 矩阵。
 
 ## 执行流程
-1. 为页面、功能区块、业务相关元素、事件分配稳定 ID：PAGE-xxx、BLOCK-xxx、ELEM-xxx、EVT-xxx；层级固定为 PAGE → BLOCK → ELEM/EVT，不得跨层引用。
+1. 为页面、功能区块、业务相关元素、事件分配稳定 ID：PAGE-xxx、BLOCK-xxx、ELEM-xxx、EVT-xxx；层级固定为 PAGE → BLOCK → ELEM/EVT，不得跨层引用。本阶段生成的 page-inventory.csv 是批准后的唯一权威页面清单；traceability.csv 由本阶段初始化，13b/13e 只追加不重建。
 2. 页面清单记录路由/入口、权限、核心状态和关联需求；只纳入有业务/交互/测试意义的元素。
 3. 每个页面必须拆出功能区块（BLOCK-xxx）并写入区块清单：区块名称、类型、职责说明、页面内顺序、关联需求。建议类型：导航、筛选、表单、列表/表格、详情、统计、操作区、弹窗/抽屉、空态/错误态、其他；按页面真实结构命名，不要按视觉图层切块。
 4. 每个按钮/可交互元素（ELEM-xxx）必须且只能归属一个功能区块；事件清单用 `block_id` 记录归属，并校验区块属于同一页面。同一元素的多个事件可以存在，但不得被拆到不同区块。

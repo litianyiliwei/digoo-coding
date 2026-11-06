@@ -9,7 +9,7 @@ description: 后端详细设计。定义接口调用链、领域类/方法、DDL
 当流程进入“后端详细设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-规格、OpenAPI、接口逻辑、领域/数据/架构基线。
+规格、OpenAPI、接口逻辑、`design.md` 与 `design/design-plan.md`、`design/api-traceability.csv`、领域/数据/架构基线、`io-catalog.csv` 模板。
 
 ## 执行流程
 1. 按 operationId 梳理 Controller → Application Service → Domain → Repository/Client 的调用链和依赖方向。
@@ -36,7 +36,7 @@ description: 后端详细设计。定义接口调用链、领域类/方法、DDL
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
-`阶段 13a–13e 全部设计产物完成后运行 scripts/check-design-assets.sh <change-id> --strict`；该检查会逐个核对 OpenAPI operationId 是否均映射到一个或多个 IO ID。
+`阶段 09–13 全部设计产物完成后运行 scripts/check-design-assets.sh <change-id> --strict`；该检查会逐个核对 OpenAPI operationId 是否均映射到一个或多个 IO ID。
 
 
 ## 实际工具调用要求
@@ -57,7 +57,7 @@ description: 后端详细设计。定义接口调用链、领域类/方法、DDL
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="backend-detail-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 OpenAPI；功能规格与 AC；项目级架构/领域/数据模型/公共 Client 规范。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 OpenAPI；功能规格与 AC；openspec/changes/<change-id>/design.md 与 design/design-plan.md（统一设计约束/任务）；design/api-traceability.csv；项目级架构/领域/数据模型/公共 Client 规范。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/backend-design.md；openspec/changes/<change-id>/design/api-io-mapping.csv；openspec/changes/<change-id>/design/io-catalog.csv。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** API→IO 映射、每个 IO 契约、事务/幂等/超时/重试/错误映射、测试 ID。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。

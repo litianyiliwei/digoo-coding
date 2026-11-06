@@ -26,7 +26,7 @@ for p in skill_paths:
     ids.add(dirname)
     if len(body.strip())<500: errors.append(f"Skill suspiciously short: {p.relative_to(ROOT)}")
 missing_prompts=[]
-SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "14b-independent-verification.md"}
+SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "15-independent-verification.md"}
 # openspec-* skills are OpenSpec CLI helpers, not workflow stages; they have no stage prompt.
 for skill in ids:
     if skill.startswith("openspec-"): continue
@@ -50,6 +50,11 @@ if r.returncode:
 r = subprocess.run([sys.executable, str(ROOT / "scripts/stage-io-report.py"), "--check"], capture_output=True, text=True)
 if r.returncode:
     errors.append("Stage I/O overview check failed: " + (r.stdout + r.stderr).strip().replace("\n", " | "))
+
+# Validate every file output has a declared consumer or is explicitly evidence-only.
+r = subprocess.run([sys.executable, str(ROOT / "scripts/check-output-consumption.py")], capture_output=True, text=True)
+if r.returncode:
+    errors.append("Output consumption check failed: " + (r.stdout + r.stderr).strip().replace("\n", " | "))
 
 # Validate bash syntax of every shell script if bash exists.
 if shutil.which("bash"):
@@ -80,4 +85,4 @@ if errors:
     for e in errors: print("ERROR:",e)
     print(f"Package checks failed: {len(errors)} issue(s).")
     sys.exit(1)
-print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, template matrix, Bash/Python syntax, API→IO regression tests.")
+print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, output consumption, template matrix, Bash/Python syntax, API→IO regression tests.")

@@ -9,4 +9,4 @@ graph TD
   A[TODO: Change A] --> B[TODO: Change B]
 ```
 
-> 本路线图只做候选 Change 的初步基线影响识别；提案级 UC/US/AC 在阶段 10 细化；每个实际 Change 仍必须在阶段 10 形成详细的 `design/baseline-impact.md`。
+> 本路线图只做候选 Change 的初步基线影响识别；提案级 UC/US/AC 在阶段 05 细化；每个实际 Change 仍必须在阶段 05 形成详细的 `design/baseline-impact.md`。

@@ -2,7 +2,7 @@
 
 - Change ID：`<change-id>`
 - 状态：DRAFT / REVIEW / APPROVED / BLOCKED
-- 建立阶段：10-feature-requirements
+- 建立阶段：05-feature-requirements
 - 最后复核阶段：
 - 当前基线版本：
 - 关联 US / AC / BR / FLOW / UC：

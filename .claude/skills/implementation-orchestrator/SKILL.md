@@ -65,7 +65,7 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 
 ## 独立验证交接（新增强制要求）
 
-Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `14b-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
+Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `15-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
 
 
 ## 实现阶段的机器基线门禁（强制）

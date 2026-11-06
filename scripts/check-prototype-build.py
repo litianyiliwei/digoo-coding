@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check a Change-scoped pen.dev prototype build record and its review record (stage 10b)."""
+"""Check a Change-scoped pen.dev prototype build record and its review record (stage 06)."""
 from pathlib import Path
 import re, sys
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,7 +46,7 @@ if no_ui:
 errors, warnings = [], []
 if not BUILD.is_file():
     print(f'ERROR: missing prototype build record: {BUILD.relative_to(ROOT)}')
-    print('Stage 10b has not produced its artifact; prototype generation not verifiable.')
+    print('Stage 06 has not produced its artifact; prototype generation not verifiable.')
     sys.exit(1)
 if not AUDIT.is_file():
     errors.append(f'missing prototype review record: {AUDIT.relative_to(ROOT)}')
@@ -124,7 +124,7 @@ for pid, refs, _, line_no in mapping_rows:
         if ref not in req_ids:
             errors.append(f'{BUILD.relative_to(ROOT)}:{line_no}: {pid} 引用了不存在的需求 ID: {ref}')
 if mapping_rows and not req_ids:
-    warnings.append('提案级 UC/US 或项目 FLOW/BR 尚未声明稳定 ID；映射表引用无法核验，阶段 10/02 产物需先补齐')
+    warnings.append('提案级 UC/US 或项目 FLOW/BR 尚未声明稳定 ID；映射表引用无法核验，阶段 05/02 产物需先补齐')
 
 PENCIL_TOOLS = ('execute', 'get_app_state', 'get_style', 'read_skill')
 mcp_rows = []

@@ -9,11 +9,11 @@ description: 提案级需求分析。按 Change 生成用户故事、功能用�
 当流程进入“提案级需求分析”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/验收政策）、冻结基线、相关 openspec/specs。
+Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/验收政策）、open-questions（只读）、冻结基线、相关 openspec/specs。
 
 ## 执行流程
 1. 先运行 `openspec status --change <id>`、`openspec list --specs` 并读取相关规格全文；遵循当前 OpenSpec CLI/Schema 指引。
-2. 从项目业务流程、RD 矩阵与 Change 范围推导**提案级功能用例**（`design/use-cases.md`，UC ID）和**用户故事与 AC**（`design/user-stories.md`，US/AC ID）；不得复制项目级历史 UC/US 清单，只保留与本 Change 相关的条目并保持稳定 ID。
+2. 从项目业务流程、RD 矩阵与 Change 范围推导**提案级功能用例**（`design/use-cases.md`，UC ID）和**用户故事与 AC**（`design/user-stories.md`，US/AC ID）；不得复制项目级历史 UC/US 清单，只保留与本 Change 相关的条目并保持稳定 ID。specs 是规范行为的唯一来源；UC/US 只写场景、AC 与追踪 ID，不复制完整规格。
 3. 每个 UC 必须写清触发、角色、前置条件、主流程、替代/异常流程、后置条件，并引用项目 FLOW/NODE/DO/BR ID。
 4. 每个 US 写可验证的 Given/When/Then；每个关键故事至少一个 AC，覆盖权限、空值、边界、异常、重复提交和并发（适用时）。
 5. 完善 `proposal.md` 的 Why、What Changes、Capabilities、Impact；capability 路径使用 kebab-case 并复用既有路径。
@@ -58,7 +58,7 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-requirements"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md；openspec/changes/<change-id>/design/use-cases.md；openspec/changes/<change-id>/design/baseline-impact.md（每个 Change 强制）；openspec/changes/<change-id>/design/baseline-binding.json。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
@@ -70,4 +70,4 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 - 开始需求细化前必须通过 `python3 scripts/baseline-governance.py audit --require-frozen`。
 - Change 辅助资产创建后，必须存在 `design/baseline-binding.json`；若使用 `new-change-assets.sh` 会自动从冻结注册表生成，亦可运行 `python3 scripts/baseline-governance.py init-binding --change-id <id>`。
 - 不得删除/合并/改写机器生成的约束 ID；对每个 ACTIVE 约束填写 APPLICABLE 或 NOT_APPLICABLE 和具体理由。
-- 阶段 10 人工审批绑定后运行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement`；此门禁和 Markdown `baseline-impact.md` 同时通过才可交接。
+- 阶段 05 人工审批绑定后运行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement`；此门禁和 Markdown `baseline-impact.md` 同时通过才可交接。

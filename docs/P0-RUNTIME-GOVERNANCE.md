@@ -14,7 +14,7 @@ python3 scripts/workflow.py status
 
 ```bash
 python3 scripts/workflow.py check-entry --step 01-project-bootstrap
-python3 scripts/workflow.py check-entry --step 10-feature-requirements --change-id <change-id>
+python3 scripts/workflow.py check-entry --step 05-feature-requirements --change-id <change-id>
 ```
 
 阶段完成后，先准备 evidence JSON，再执行唯一允许的状态转换入口：
@@ -54,7 +54,7 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 }
 ```
 
-项目级转功能级时，阶段 10 的 evidence 必须包含真实 `change_id`；状态机据此绑定后续功能交接包。
+项目级转功能级时，阶段 05 的 evidence 必须包含真实 `change_id`；状态机据此绑定后续功能交接包。
 
 ## 2. SHA-256 交接包
 
@@ -62,8 +62,8 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 
 ```text
 workflow/handoffs/
-├── project/09-proposal-planning--10-feature-requirements.json
-└── <change-id>/13b-api-contract-design--13c-frontend-detail-design.json
+├── project/04-proposal-planning--05-feature-requirements.json
+└── <change-id>/10-api-contract-design--11-frontend-detail-design.json
 ```
 
 每个 manifest 记录源/目标阶段、Change ID、基线版本、审批/门禁摘要，以及每个输出文件的 SHA-256 和大小。SHA-256 计算会先把 CRLF 归一化为 LF，避免 Windows/Linux 检出差异被误报为漂移；内容变化仍会阻断。下游 `check-entry` 自动核验所有前置交接包。文件被修改、删除或路径越界都会阻断进入。
@@ -71,14 +71,14 @@ workflow/handoffs/
 手动检查：
 
 ```bash
-python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/13b-api-contract-design--13c-frontend-detail-design.json
+python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/10-api-contract-design--11-frontend-detail-design.json
 ```
 
-`handoff-create` 仅用于人工确认的恢复/重建；不可用它绕过失败门禁或审批。若状态已经提交但进程在生成 manifest 前中断，应使用原阶段的已批准 evidence 重新生成：`python3 scripts/workflow.py handoff-create --from-step <from> --to-step <to> --change-id <id> --evidence <original-stage-evidence.json>`。对于项目级阶段不传 `--change-id`；不得使用手工 `--file` 方式重建 14b Verifier 交接，因为必须保留独立验证器检查证据。
+`handoff-create` 仅用于人工确认的恢复/重建；不可用它绕过失败门禁或审批。若状态已经提交但进程在生成 manifest 前中断，应使用原阶段的已批准 evidence 重新生成：`python3 scripts/workflow.py handoff-create --from-step <from> --to-step <to> --change-id <id> --evidence <original-stage-evidence.json>`。对于项目级阶段不传 `--change-id`；不得使用手工 `--file` 方式重建 15 Verifier 交接，因为必须保留独立验证器检查证据。
 
 ## 3. 独立 Verifier
 
-阶段 14 Builder 完成后，必须执行新增阶段 `14b-independent-verification`，然后才能进入阶段 15 人工验收。Verifier 使用与 Builder 不同的 Agent/独立会话标识，以只读方式检查代码和设计，只允许写报告；结构化证据必须记录 `verifier_identity` 与 `builder_identity` 且二者不同；不得修复实现或测试。
+阶段 14 Builder 完成后，必须执行新增阶段 `15-independent-verification`，然后才能进入阶段 16 人工验收。Verifier 使用与 Builder 不同的 Agent/独立会话标识，以只读方式检查代码和设计，只允许写报告；结构化证据必须记录 `verifier_identity` 与 `builder_identity` 且二者不同；不得修复实现或测试。
 
 输出：
 - `openspec/changes/<change-id>/design/evidence/independent-verification-report.md`

@@ -15,8 +15,8 @@ Most scripts resolve the project root from their own location; file arguments to
 | `new-change-assets.sh <id>` | Add supplemental design/evidence templates to an existing Change without overwriting files | Custom asset skeletons exist | OpenSpec artifacts are created/valid |
 | `check-design-assets.sh <id> [--strict] [--lint-api]` | Required API/frontend/backend/test/API→IO/catalog/traceability files; validates every operationId mapping | Detail-design assets exist and API→IO references are consistent | Design quality and runtime behavior are correct |
 | `check-change.sh <id> [--no-openspec]` | Change structure/tasks/specs and OpenSpec validation | Change structure validates | AC/business completeness is proven |
-| `check-inventory.py [--change <id>] [--strict]` or `--change <id> --no-ui --reason "..." --strict` | Page/event CSV columns, IDs and page references; with `--change` use that Change's design inventory | Inventory links are structurally sound | UI/interaction behavior is correct |
-| `check-traceability.py [--file <csv>] [--strict]` | Traceability CSV columns, duplicate links and states | Trace edges are structurally sound | All semantic coverage exists |
+| `check-inventory.py --change <id> [--strict]` or `--change <id> --no-ui --reason "..." --strict` | Page/block/event CSV columns, IDs and reference closure within that Change's design inventory | Inventory links are structurally sound | UI/interaction behavior is correct |
+| `check-traceability.py --file <csv> [--strict]` | Traceability CSV columns, duplicate links and states | Trace edges are structurally sound | All semantic coverage exists |
 | `validate-openapi.sh <file>` | Redocly OpenAPI lint | Linter accepts the contract | Business semantics are correct |
 | `test-all.sh <dir>...` | Run detected test entrypoints | All requested detected test commands passed | Lint/build/E2E ran unless included in command |
 | `verify-before-completion.sh <id> ...` | Run strict OpenSpec, diff and optional API/tests checks | Configured checks ran successfully | Human acceptance/release approval complete |
@@ -28,7 +28,7 @@ The scripts are intentionally fail-closed when they cannot run a required check.
 | `workflow.py transition --step <id> --evidence <json>` | 校验输出/门禁/审批，生成下游 handoff 并原子推进状态 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
 | `workflow.py handoff-verify --manifest <json>` | 校验交接包文件 SHA-256 | 交接文件未变化 | 文件语义正确 |
 | `check-independent-verification.py` | 验证独立验证报告和结构化证据 | AC/测试/revision/只读/发现项满足 PASS 规则 | 不能证明 Verifier Agent 身份真实独立 |
-| `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；14b 必须保留独立验证 checker 证据 |
+| `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；15 必须保留独立验证 checker 证据 |
 
 | `baseline-governance.py audit [--require-frozen]` | 校验机器 Manifest、域状态、文件/注册表 SHA-256、约束 ID/来源/审批；`--require-frozen` 用于功能阶段 | 基线元数据与文件完整性通过 | 不等于企业身份认证；需配合 CI/受保护分支 |
 | `baseline-governance.py init-binding --change-id <id>` | 从冻结基线生成 Change 约束绑定，覆盖当前全部 ACTIVE Constraint ID | 初始绑定完整生成 | 适用性、设计结论、证据和审批仍需人/Agent填写 |

@@ -9,7 +9,7 @@ description: 前端详细设计。定义路由、组件、状态、函数、事�
 当流程进入“前端详细设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-OpenAPI、页面/区块/元素/事件清单（含 block_id 归属）、Figma 审计和前端工程基线。
+OpenAPI、页面/区块/元素/事件清单（含 block_id 归属）、Figma 审计、`design.md` 与 `design/design-plan.md`、`design/api-traceability.csv`、前端工程基线。
 
 ## 执行流程
 1. 沿用项目路由、目录、请求层和状态管理规范；偏离时注明原因。
@@ -33,7 +33,7 @@ OpenAPI、页面/区块/元素/事件清单（含 block_id 归属）、Figma 审
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
-`阶段 13a–13e 全部设计产物完成后运行 scripts/check-design-assets.sh <change-id>`
+`阶段 09–13 全部设计产物完成后运行 scripts/check-design-assets.sh <change-id>`
 
 
 ## 实际工具调用要求
@@ -53,8 +53,8 @@ OpenAPI、页面/区块/元素/事件清单（含 block_id 归属）、Figma 审
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="frontend-detail-design"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 OpenAPI（或 x-api-scope: none）；页面/区块/交互清单与 Figma 审计；前端工程规范；功能规格与 AC。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** openspec/changes/<change-id>/design/frontend-design.md；前端测试用例/组件状态映射。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输入：** openspec/changes/<change-id>/design/baseline-impact.md 与当前 docs/architecture/baseline-status.md；已批准 OpenAPI（或 x-api-scope: none）；页面/区块/交互清单与 Figma 审计；openspec/changes/<change-id>/design.md 与 design/design-plan.md（统一设计约束/任务）；design/api-traceability.csv；前端工程规范；功能规格与 AC。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** openspec/changes/<change-id>/design/frontend-design.md（含 PAGE→BLOCK→组件树、组件状态与测试映射章节）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。

@@ -51,22 +51,22 @@ def run_baseline_gate(args, *, label):
     return result.stdout.strip()
 
 def baseline_phase_for_entry(step_id):
-    if step_id in ('10-feature-requirements','10b-prototype-generation','11-page-interaction-inventory','12-figma-ui-audit','13a-feature-design'):
+    if step_id in ('05-feature-requirements','06-prototype-generation','07-page-interaction-inventory','08-figma-ui-audit','09-feature-design'):
         return 'requirement'
-    if step_id in ('13b-api-contract-design','13c-frontend-detail-design','13d-backend-detail-design','13e-test-design','14-implementation-orchestrator'):
+    if step_id in ('10-api-contract-design','11-frontend-detail-design','12-backend-detail-design','13-test-design','14-implementation-orchestrator'):
         return 'design'
-    if step_id=='14b-independent-verification':
+    if step_id=='15-independent-verification':
         return 'implementation'
-    if step_id=='15-acceptance-audit':
+    if step_id=='16-acceptance-audit':
         return 'acceptance'
     return None
 
 def baseline_phase_for_transition(step_id):
-    if step_id=='10b-prototype-generation' or step_id=='13a-feature-design' or step_id in ('13b-api-contract-design','13c-frontend-detail-design','13d-backend-detail-design','13e-test-design'):
-        return 'design' if step_id != '10b-prototype-generation' else 'requirement'
-    if step_id in ('14-implementation-orchestrator','14b-independent-verification'):
+    if step_id=='06-prototype-generation' or step_id=='09-feature-design' or step_id in ('10-api-contract-design','11-frontend-detail-design','12-backend-detail-design','13-test-design'):
+        return 'design' if step_id != '06-prototype-generation' else 'requirement'
+    if step_id in ('14-implementation-orchestrator','15-independent-verification'):
         return 'implementation'
-    if step_id=='15-acceptance-audit':
+    if step_id=='16-acceptance-audit':
         return 'acceptance'
     return None
 
@@ -96,7 +96,7 @@ def verify_manifest(path):
     for check in m.get('checks',[]):
         if check.get('status')!='passed': errors.append(f"Handoff contains failed check: {check.get('name','unnamed')}")
         if check.get('kind','automated')=='automated' and check.get('exit_code')!=0: errors.append(f"Handoff contains non-zero check: {check.get('name','unnamed')}")
-    if m.get('from_step')=='14b-independent-verification':
+    if m.get('from_step')=='15-independent-verification':
         paths={a.get('path','') for a in m.get('artifacts',[])}
         if not any(x.endswith('independent-verification-report.md') for x in paths): errors.append('Verifier handoff missing Markdown report')
         if not any(x.endswith('independent-verification.json') for x in paths): errors.append('Verifier handoff missing JSON evidence')
@@ -130,7 +130,7 @@ def check_entry(step_id,state,change_id=None,verify_handoffs=True):
     if state.get('current_step')!=step_id: errors.append(f"current_step is {state.get('current_step')}, not {step_id}")
     cid=change_id or state.get('active_change_id') or None
     if stage['scope']=='change' and not cid: errors.append('Change-scoped stage requires active_change_id / --change-id')
-    if step_id=='09-proposal-planning' or stage['scope']=='change':
+    if step_id=='04-proposal-planning' or stage['scope']=='change':
         try:
             run_baseline_gate(['audit','--require-frozen'],label='Project baseline gate')
         except Exception as exc:
@@ -194,14 +194,14 @@ def parse_evidence(path,step_id,change_id):
             else:
                 if not pp.is_file(): failed.append(c.get('name','unnamed check')+f': proof file missing: {proof}')
     if failed: raise ValueError('Gate checks failed: '+'; '.join(failed))
-    if step_id=='14b-independent-verification':
+    if step_id=='15-independent-verification':
         paths={a['path'] for a in artifacts}
         required_suffixes=('independent-verification-report.md','independent-verification.json')
         for suffix in required_suffixes:
             if not any(p.endswith(suffix) for p in paths):
                 raise ValueError(f'Independent verifier must output {suffix}')
         if not any('check-independent-verification.py' in c.get('command','') and c.get('exit_code')==0 for c in checks):
-            raise ValueError('14b requires a real check-independent-verification.py gate with exit_code=0')
+            raise ValueError('15 requires a real check-independent-verification.py gate with exit_code=0')
     stage=BY_ID[step_id]
     approval=e.get('approval',{})
     if (stage['human_approval_required'] or approval.get('required') is True) and approval.get('status')!='approved':
@@ -232,13 +232,13 @@ def cmd_transition(args):
         print('TRANSITION_BLOCKED'); [print(' - '+e) for e in errs]; return 3
     e,artifacts=parse_evidence(args.evidence,sid,args.change_id)
     cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
-    if sid=='05-project-architecture-baseline':
+    if sid=='03-project-architecture-baseline':
         run_baseline_gate(['audit','--require-frozen'],label='Baseline freeze gate')
         artifact_paths={a['path'] for a in artifacts}
         required_baseline_artifacts={'docs/architecture/baseline-manifest.json','docs/architecture/constraint-registry.json'}
         missing=required_baseline_artifacts-artifact_paths
         if missing:
-            raise ValueError('05-project-architecture-baseline evidence must hand off machine baseline artifacts: '+', '.join(sorted(missing)))
+            raise ValueError('03-project-architecture-baseline evidence must hand off machine baseline artifacts: '+', '.join(sorted(missing)))
     transition_phase=baseline_phase_for_transition(sid)
     if stage['scope']=='change' and transition_phase and cid:
         run_baseline_gate(['check-change','--change-id',cid,'--phase',transition_phase],label=f'Change baseline transition gate ({transition_phase})')
@@ -283,7 +283,7 @@ def cmd_handoff_create(args):
         evidence_data,artifacts=parse_evidence(args.evidence,args.from_step,cid)
         checks=evidence_data.get('checks',[]); approval=evidence_data.get('approval',{}); baseline_version=evidence_data.get('baseline_version','')
     else:
-        if args.from_step=='14b-independent-verification': raise ValueError('Verifier handoff recovery requires --evidence so PASS proof is preserved')
+        if args.from_step=='15-independent-verification': raise ValueError('Verifier handoff recovery requires --evidence so PASS proof is preserved')
         if BY_ID[args.from_step]['human_approval_required'] and not args.approved:
             raise ValueError('Source stage requires --approved or an approved --evidence file')
         artifacts=[]

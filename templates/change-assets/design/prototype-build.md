@@ -1,6 +1,6 @@
 # pen.dev 提案原型构建记录
 
-> 状态：DRAFT（阶段 10b 产出，阶段 10b 结束评审批准前不得作为正式输入）
+> 状态：DRAFT（阶段 06 产出，阶段 06 结束评审批准前不得作为正式输入）
 > Change ID：<change-id>
 > 来源需求：proposal.md、specs/<capability>/spec.md、design/user-stories.md、design/use-cases.md
 > 工具：pen.dev MCP（pencil 工具：get_app_state / execute / get_style / read_skill）

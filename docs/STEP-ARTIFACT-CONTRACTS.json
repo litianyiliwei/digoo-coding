@@ -26,7 +26,7 @@
         "OpenSpec CLI 当前状态（如已初始化）"
       ],
       "outputs": [
-        "下一阶段判定报告（对话展示；必要时写入 docs/workflow/next-step-report.md）",
+        "下一阶段判定报告（对话展示；不强制落盘）",
         "workflow-state.json（仅在真实状态变化时更新）"
       ],
       "next_inputs": [
@@ -87,16 +87,18 @@
       "gate": "scripts/check-requirements.py --strict（FLOW/NODE/DO/RD/BR 结构、引用闭合与节点覆盖）"
     },
     {
-      "step": "05",
+      "step": "03",
       "skill": "project-architecture-baseline",
-      "prompt": "prompts/05-project-architecture-baseline.md",
+      "prompt": "prompts/03-project-architecture-baseline.md",
       "title": "项目总体架构设计",
       "scope": "项目级",
       "inputs": [
         "已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md",
         "现有仓库结构/技术约束",
         "非功能需求",
-        "用户/技术负责人明确的技术选型偏好（本阶段必须显式询问并记录，不得默认或自行假设）"
+        "用户/技术负责人明确的技术选型偏好（本阶段必须显式询问并记录，不得默认或自行假设）",
+        "docs/product/open-questions.md（只读；未决问题不得由架构阶段擅自关闭）",
+        "docs/project/toolchain-report.md（工具链、测试命令与环境约束）"
       ],
       "outputs": [
         "docs/architecture/system-context.md",
@@ -121,22 +123,22 @@
       "gate": "scripts/check-required-files.sh --strict；跨文档一致性审计（系统边界/数据流转/ERD/公共契约/术语）；scripts/baseline-governance.py audit --require-frozen（阶段结束冻结审计）"
     },
     {
-      "step": "09",
+      "step": "04",
       "skill": "proposal-planning",
-      "prompt": "prompts/09-proposal-planning.md",
+      "prompt": "prompts/04-proposal-planning.md",
       "title": "提案拆分、依赖排序与路线图",
       "scope": "项目级到功能级",
       "inputs": [
-        "已批准并冻结的项目总体架构与基线（阶段 05 结束审计）",
-        "需求业务梳理、RD 矩阵、业务规则与验收政策",
+        "已批准并冻结的项目总体架构与基线：docs/architecture/baseline-manifest.json、constraint-registry.json、baseline-status.md、docs/project/baseline-audit-report.md",
+        "docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md（需求业务梳理全量输入）",
         "已知技术债与依赖",
         "docs/architecture/baseline-status.md",
-        "相关架构/数据/API/前端/测试基线版本与审批信息"
+        "相关架构/数据/API/前端/测试基线版本与审批信息",
+        "docs/product/open-questions.md（未决问题与阻塞条件）",
+        "docs/project/baseline-audit-report.md（阶段 03 审计发现的缺口、待批项与冻结结论）"
       ],
       "outputs": [
-        "docs/product/proposal-roadmap.md",
-        "每个候选 Change 的范围/依赖/价值说明",
-        "候选 Change 基线适用域/潜在修订摘要（写入 docs/product/proposal-roadmap.md）"
+        "docs/product/proposal-roadmap.md（含每个候选 Change 的范围/依赖/价值/基线适用域与潜在修订摘要）"
       ],
       "next_inputs": [
         "经批准的 Change 列表、优先级、依赖顺序"
@@ -156,17 +158,18 @@
       }
     },
     {
-      "step": "10",
+      "step": "05",
       "skill": "feature-requirements",
-      "prompt": "prompts/10-feature-requirements.md",
+      "prompt": "prompts/05-feature-requirements.md",
       "title": "提案级需求分析",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准路线图/当前 Change 范围",
+        "docs/product/proposal-roadmap.md（当前 Change 所在行与依赖）、当前 Change 范围",
         "docs/architecture/baseline-status.md 与相关架构/数据/公共契约/测试基线",
-        "关联 FLOW/BR/AC 与项目 RD 矩阵",
-        "现有 OpenSpec specs",
-        "docs/architecture/baseline-manifest.json 与 docs/architecture/constraint-registry.json（机器权威来源）"
+        "docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md（关联 FLOW/BR/AC 与 RD 矩阵）",
+        "openspec/specs/**（只读）",
+        "docs/architecture/baseline-manifest.json 与 docs/architecture/constraint-registry.json（机器权威来源）",
+        "docs/product/open-questions.md（只读；提案需求不得替用户决策）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/proposal.md",
@@ -176,10 +179,12 @@
         "openspec/changes/<change-id>/design/user-stories.md（提案级用户故事与 AC）",
         "openspec/changes/<change-id>/design/use-cases.md（提案级功能用例）",
         "openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md）",
-        "openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，逐条绑定 ACTIVE Constraint ID）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，逐条绑定 ACTIVE Constraint ID）",
+        "提案级 UC/US 只保留场景、AC 与追踪 ID，不复制 specs 的完整行为描述；specs 是规范行为的唯一来源"
       ],
       "next_inputs": [
-        "已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定"
+        "已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定",
+        "specs 为规范行为唯一来源；UC/US 用于场景、AC 与追踪，不作为重复规格"
       ],
       "approval": "产品负责人批准提案级需求与验收标准；技术负责人确认范围与基线影响",
       "gate": "scripts/check-requirements.py --change <change-id> --strict（提案级 UC/US/AC 结构与引用闭合）；openspec validate <change-id> --strict；scripts/check-baseline-impact.py <change-id>；scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement",
@@ -196,13 +201,13 @@
       }
     },
     {
-      "step": "10b",
+      "step": "06",
       "skill": "prototype-generation",
-      "prompt": "prompts/10b-prototype-generation.md",
+      "prompt": "prompts/06-prototype-generation.md",
       "title": "提案原型生成与评审",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准的提案级需求（proposal/specs/design/user-stories/use-cases）",
+        "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md、design/use-cases.md（已批准的提案级需求）",
         "docs/product/open-questions.md（只读，生成时不擅自决策）",
         "pen.dev MCP 实际可访问能力（pencil 工具）",
         "openspec/changes/<change-id>/design/baseline-binding.json（只读继承）"
@@ -213,77 +218,80 @@
         "pen.dev 原型页面（链接登记到构建记录；导出快照若支持）"
       ],
       "next_inputs": [
-        "已批准原型链接/导出物、PAGE→UC/US/FLOW/BR 映射、原型评审结论与需求澄清"
+        "已批准原型链接/导出物、PAGE→UC/US/FLOW/BR 映射、原型评审结论与需求澄清；原型页面清单仅作草案，批准后的权威页面清单由 11 生成"
       ],
       "approval": "产品/设计负责人确认原型与需求差异；原型与需求修订在阶段结束审计中一并批准",
       "gate": "scripts/check-prototype-build.py --change <change-id> --strict（构建记录 + 页面映射 + 原型评审记录）；MCP 不可用时如实阻断"
     },
     {
-      "step": "11",
+      "step": "07",
       "skill": "page-interaction-inventory",
-      "prompt": "prompts/11-page-interaction-inventory.md",
+      "prompt": "prompts/07-page-interaction-inventory.md",
       "title": "页面、功能区块、元素与交互事件清单",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准的提案级需求（proposal/specs/design/user-stories/use-cases）",
+        "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md、design/use-cases.md（已批准的提案级需求）",
         "已批准的提案原型构建记录与评审结论（openspec/changes/<change-id>/design/prototype-build.md、prototype-audit.md）",
-        "项目级业务流程/数据对象/RD 矩阵与 UI/前端规范",
-        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 10 已审批的约束绑定；本阶段只读继承）"
+        "docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md（业务流程/数据对象/RD 矩阵）；docs/architecture/frontend-conventions.md（UI/前端规范）",
+        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 05 已审批的约束绑定；本阶段只读继承）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/page-inventory.csv",
         "openspec/changes/<change-id>/design/block-inventory.csv",
-        "openspec/changes/<change-id>/design/interaction-map.csv"
+        "openspec/changes/<change-id>/design/interaction-map.csv",
+        "openspec/changes/<change-id>/traceability.csv（初始化 PAGE/BLOCK/ELEM/EVT → US/UC/AC 追踪行）"
       ],
       "next_inputs": [
-        "PAGE/BLOCK/ELEM/EVT 清单、页面内区块顺序与职责、每个按钮/元素唯一所属区块、状态/跳转、事件与需求/operationId 的关联"
+        "PAGE/BLOCK/ELEM/EVT 权威清单、页面内区块顺序与职责、每个按钮/元素唯一所属区块、状态/跳转、事件与需求/operationId 的关联；page-inventory.csv 为唯一权威页面清单，12 只核对映射、不重定义 PAGE ID",
+        "traceability.csv 由 11 初始化，10/13 只追加，不重建"
       ],
       "approval": "产品负责人确认页面与交互覆盖",
       "gate": "scripts/check-inventory.py --change <change-id> --strict；workflow.py 自动复核 baseline-binding.json（requirement phase）"
     },
     {
-      "step": "12",
+      "step": "08",
       "skill": "figma-ui-audit",
-      "prompt": "prompts/12-figma-ui-audit.md",
+      "prompt": "prompts/08-figma-ui-audit.md",
       "title": "Figma UI 设计与 MCP 审计",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准页面/区块/交互清单（含 block_id 归属）",
-        "已批准功能规格",
+        "openspec/changes/<change-id>/design/page-inventory.csv、block-inventory.csv、interaction-map.csv（含 block_id 归属）",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（已批准功能规格与 AC）",
         "Figma 文件/节点与可访问 MCP 输出",
         "项目级设计规范",
-        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 10 已审批的约束绑定；本阶段只读继承）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（阶段 05 已审批的约束绑定；本阶段只读继承）",
+        "以 11 的 page/block 清单为唯一权威；Figma 审计只做 node/component 映射与差异核对，不新增/重命名 PAGE/BLOCK"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/figma-audit.md",
         "Figma 设计链接/节点映射及导出资源引用"
       ],
       "next_inputs": [
-        "页面/区块/组件/状态的 UI 设计依据、区块覆盖差异与待确认项"
+        "页面/区块/组件/状态的 UI 设计依据、区块覆盖差异与待确认项；差异回到 11 修订清单"
       ],
       "approval": "设计/产品负责人批准 UI",
       "gate": "记录实际可读取的 node/component；MCP 不可用时不得声称已审计；workflow.py 自动复核 baseline-binding.json（requirement phase）"
     },
     {
-      "step": "13a",
+      "step": "09",
       "skill": "feature-design",
-      "prompt": "prompts/13a-feature-design.md",
+      "prompt": "prompts/09-feature-design.md",
       "title": "功能详细设计总控",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准 proposal/specs",
-        "页面/交互清单与 Figma 审计（适用时）",
-        "项目级架构/数据/公共契约基线",
+        "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design/user-stories.md、design/use-cases.md、tasks.md（提案级需求与任务）",
+        "openspec/changes/<change-id>/design/page-inventory.csv、block-inventory.csv、interaction-map.csv、figma-audit.md（页面/交互清单与 Figma 审计，适用时）",
+        "docs/architecture/system-context.md、domain-boundaries.md、containers-and-deployment.md、data-flows.md、logical-erd.md、technology-decisions.md、api-conventions.md、frontend-conventions.md、test-strategy.md、docs/adr/README.md 与 docs/adr/*（逐文件读取，不得只看聚合描述）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
         "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design.md",
-        "功能详细设计任务分解与设计缺口清单"
+        "openspec/changes/<change-id>/design/design-plan.md（设计范围、任务分解、接口范围草案、设计缺口与准入结论）"
       ],
       "next_inputs": [
-        "统一设计约束、接口范围、前后端/测试设计任务"
+        "统一设计约束、接口范围、前后端/测试设计任务与缺口，见 design.md 与 design/design-plan.md"
       ],
       "approval": "技术负责人确认设计范围和重大方案",
       "gate": "scripts/check-change.sh <change-id>；辅助设计文件完整性检查；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
@@ -300,28 +308,30 @@
       }
     },
     {
-      "step": "13b",
+      "step": "10",
       "skill": "api-contract-design",
-      "prompt": "prompts/13b-api-contract-design.md",
+      "prompt": "prompts/10-api-contract-design.md",
       "title": "OpenAPI 与接口逻辑设计",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准功能规格与页面交互清单",
-        "Figma 交互（适用时）",
-        "项目级 API/鉴权/错误码约定",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（功能规格与 AC）；design/page-inventory.csv、block-inventory.csv、interaction-map.csv（页面/区块/交互清单）",
+        "openspec/changes/<change-id>/design.md（09 统一设计决策与约束）",
+        "openspec/changes/<change-id>/design/design-plan.md（设计范围、接口范围与缺口）",
+        "openspec/changes/<change-id>/design/figma-audit.md（Figma 交互/状态差异，适用时）",
+        "docs/architecture/api-conventions.md、system-context.md、domain-boundaries.md、data-flows.md、docs/adr/*（API 相关基线）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
         "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/api/openapi.yaml",
-        "operationId 到页面事件/AC 的追踪关系"
+        "openspec/changes/<change-id>/design/api-traceability.csv（operationId → PAGE/EVT/AC 映射，供 13 合并）"
       ],
       "next_inputs": [
-        "唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义"
+        "唯一 OpenAPI 契约、operationId、请求响应/错误/权限定义、operationId → 页面事件/AC 追踪行"
       ],
       "approval": "API 契约经前后端共同评审",
-      "gate": "scripts/validate-openapi.sh <file>；无 API 时声明 x-api-scope: none；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "gate": "scripts/validate-openapi.sh <openapi-file>；有 API 时 scripts/check-traceability.py --file openspec/changes/<change-id>/design/api-traceability.csv --strict；x-api-scope: none 时在 design.md 记录 N/A + 理由；scripts/baseline-governance.py check-change --change-id <id> --phase design",
       "baseline_interaction": {
         "read": [
           "当前 Change 的 design/baseline-impact.md",
@@ -335,23 +345,25 @@
       }
     },
     {
-      "step": "13c",
+      "step": "11",
       "skill": "frontend-detail-design",
-      "prompt": "prompts/13c-frontend-detail-design.md",
+      "prompt": "prompts/11-frontend-detail-design.md",
       "title": "前端详细设计",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准 OpenAPI（或 x-api-scope: none）",
-        "页面/区块/交互清单（含 block_id 归属）与 Figma 审计",
-        "前端工程规范",
-        "功能规格与 AC",
+        "openspec/changes/<change-id>/api/openapi.yaml（或 x-api-scope: none）",
+        "openspec/changes/<change-id>/design/page-inventory.csv、block-inventory.csv、interaction-map.csv（含 block_id 归属）、figma-audit.md",
+        "docs/architecture/frontend-conventions.md、containers-and-deployment.md、data-flows.md、docs/adr/*（前端相关基线）",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（AC）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
-        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）",
+        "openspec/changes/<change-id>/design.md（09 统一设计决策）",
+        "openspec/changes/<change-id>/design/design-plan.md（设计任务与缺口）",
+        "openspec/changes/<change-id>/design/api-traceability.csv（operationId → EVT/AC 映射）"
       ],
       "outputs": [
-        "openspec/changes/<change-id>/design/frontend-design.md",
-        "前端测试用例/组件状态映射"
+        "openspec/changes/<change-id>/design/frontend-design.md（含 PAGE→BLOCK→组件树、组件状态与测试映射章节）"
       ],
       "next_inputs": [
         "PAGE→BLOCK→组件树、区块与元素归属、组件职责、状态管理、API 调用映射、错误/加载/空状态、测试 ID"
@@ -371,18 +383,22 @@
       }
     },
     {
-      "step": "13d",
+      "step": "12",
       "skill": "backend-detail-design",
-      "prompt": "prompts/13d-backend-detail-design.md",
+      "prompt": "prompts/12-backend-detail-design.md",
       "title": "后端详细设计",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准 OpenAPI",
-        "功能规格与 AC",
-        "项目级架构/领域/数据模型/公共 Client 规范",
+        "openspec/changes/<change-id>/api/openapi.yaml",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（AC）",
+        "docs/architecture/system-context.md、domain-boundaries.md、logical-erd.md、data-flows.md、technology-decisions.md、api-conventions.md、docs/adr/README.md 与 docs/adr/*（后端相关基线）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
-        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）",
+        "openspec/changes/<change-id>/design.md（09 统一设计决策）",
+        "openspec/changes/<change-id>/design/design-plan.md（设计任务与缺口）",
+        "openspec/changes/<change-id>/design/api-traceability.csv（operationId → EVT/AC 映射）",
+        "openspec/changes/<change-id>/design/interaction-map.csv（页面事件/operationId 关联）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/backend-design.md",
@@ -407,27 +423,31 @@
       }
     },
     {
-      "step": "13e",
+      "step": "13",
       "skill": "test-design",
-      "prompt": "prompts/13e-test-design.md",
+      "prompt": "prompts/13-test-design.md",
       "title": "测试设计与追踪矩阵",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准功能规格/AC",
-        "OpenAPI",
-        "前后端详细设计",
-        "API→IO 映射与 IO 契约",
-        "项目级测试策略",
+        "已批准的提案级 US/UC/AC：design/user-stories.md、design/use-cases.md",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（AC）",
+        "openspec/changes/<change-id>/design.md 与 design/design-plan.md",
+        "openspec/changes/<change-id>/api/openapi.yaml、design/api-traceability.csv",
+        "openspec/changes/<change-id>/design/frontend-design.md、backend-design.md",
+        "openspec/changes/<change-id>/design/api-io-mapping.csv、io-catalog.csv",
+        "docs/architecture/test-strategy.md 与 docs/product/acceptance-policy.md（验收口径）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
-        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（逐条约束、设计证据和例外审批）",
+        "openspec/changes/<change-id>/traceability.csv（11 初始化的页面追踪行；合并前读取）",
+        "openspec/changes/<change-id>/design/page-inventory.csv、block-inventory.csv（页面/区块覆盖）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/test-design.md",
-        "openspec/changes/<change-id>/traceability.csv"
+        "openspec/changes/<change-id>/traceability.csv（合并 11 的页面追踪、10 的 api-traceability 与测试映射；唯一追踪聚合文件）"
       ],
       "next_inputs": [
-        "TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果"
+        "TEST ID、覆盖的 AC/API/IO、测试数据/环境/命令、预期结果；traceability.csv 为唯一追踪聚合文件"
       ],
       "approval": "测试负责人确认覆盖范围与质量门禁",
       "gate": "scripts/check-traceability.py --file ... --strict；设计完整性检查；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
@@ -450,10 +470,10 @@
       "title": "实现、TDD、验证与代码审查",
       "scope": "单个功能 Change",
       "inputs": [
-        "已批准 tasks.md/design.md",
-        "前后端详细设计、OpenAPI、IO 契约",
-        "test-design.md 与 traceability.csv",
-        "项目级工程规范/测试策略",
+        "openspec/changes/<change-id>/tasks.md、design.md（已批准）",
+        "openspec/changes/<change-id>/design/frontend-design.md、backend-design.md、api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv",
+        "openspec/changes/<change-id>/design/test-design.md、traceability.csv",
+        "docs/architecture/frontend-conventions.md、api-conventions.md、test-strategy.md",
         "openspec/changes/<change-id>/design/baseline-impact.md（已批准的基线快照）",
         "docs/architecture/baseline-status.md（当前版本）",
         "openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）"
@@ -482,18 +502,20 @@
       }
     },
     {
-      "step": "14b",
+      "step": "15",
       "skill": "independent-verifier",
-      "prompt": "prompts/14b-independent-verification.md",
+      "prompt": "prompts/15-independent-verification.md",
       "title": "独立验证与验收证据",
       "scope": "功能级",
       "inputs": [
         "已实现代码及 revision/diff 指纹",
-        "已批准 proposal/specs/design/tasks",
+        "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、tasks.md、design/user-stories.md、design/use-cases.md（已批准需求与设计）",
         "已批准基线快照与 baseline-impact.md",
-        "OpenAPI、API-IO 映射、IO catalog（适用时）",
-        "前后端详细设计、测试设计、Builder 测试和审查报告",
-        "openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）"
+        "openspec/changes/<change-id>/api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv（适用时）",
+        "openspec/changes/<change-id>/design/frontend-design.md、backend-design.md、test-design.md、evidence/code-review.md、Builder 测试与验证证据",
+        "openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）",
+        "openspec/changes/<change-id>/design/user-stories.md、design/use-cases.md（提案级 US/UC/AC）",
+        "openspec/changes/<change-id>/traceability.csv（追踪矩阵）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/evidence/independent-verification-report.md",
@@ -509,20 +531,23 @@
       "gate": "scripts/check-independent-verification.py；所有适用 AC PASS、测试退出码 0、revision 稳定、只读、无 BLOCKER/CRITICAL；baseline-governance.py check-change --phase implementation"
     },
     {
-      "step": "15",
+      "step": "16",
       "skill": "acceptance-audit",
-      "prompt": "prompts/15-acceptance-audit.md",
+      "prompt": "prompts/16-acceptance-audit.md",
       "title": "人工验收、归档与基线回写",
       "scope": "单个功能 Change",
       "inputs": [
-        "阶段 14b 的 independent-verification-report.md 与 independent-verification.json（必须 PASS，revision 必须与当前验收代码一致）",
+        "openspec/changes/<change-id>/design/evidence/independent-verification-report.md 与 independent-verification.json（必须 PASS，revision 必须与当前验收代码一致）",
         "已实现代码与测试证据",
-        "已批准 AC/规格/追踪矩阵",
-        "代码审查记录",
+        "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md、design/use-cases.md、traceability.csv（已批准 AC/规格/追踪）",
+        "openspec/changes/<change-id>/design/evidence/code-review.md",
         "部署/演示或验收环境证据",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
-        "openspec/changes/<change-id>/design/baseline-binding.json（所有适用约束有最终验证证据）"
+        "openspec/changes/<change-id>/design/baseline-binding.json（所有适用约束有最终验证证据）",
+        "openspec/changes/<change-id>/design/user-stories.md、design/use-cases.md（提案级 US/UC/AC）",
+        "docs/product/acceptance-policy.md（项目级验收口径）",
+        "openspec/changes/<change-id>/design/test-design.md（测试覆盖依据）"
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/evidence/acceptance.md",
@@ -535,7 +560,7 @@
         "已验收并归档的能力规格、验收证据、后续 Change 依赖"
       ],
       "approval": "产品责任人明确批准后才可归档；不得用 -y 绕过",
-      "gate": "scripts/check-acceptance.py；verify-before-completion.sh；openspec validate/archive 真实执行；阶段 14b 独立验证必须 PASS 且 revision 未变化；baseline-governance.py check-change --phase acceptance",
+      "gate": "scripts/check-acceptance.py；verify-before-completion.sh；openspec validate/archive 真实执行；阶段 15 独立验证必须 PASS 且 revision 未变化；baseline-governance.py check-change --phase acceptance",
       "baseline_interaction": {
         "read": [
           "design/baseline-impact.md",
@@ -575,5 +600,622 @@
       "frontend",
       "test_quality"
     ]
-  }
+  },
+  "output_consumption": [
+    {
+      "step": "00",
+      "artifact": "workflow-state.json",
+      "consumed_by": [
+        "SYSTEM"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "01",
+      "artifact": "AGENTS.md",
+      "consumed_by": [
+        "ALL"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "01",
+      "artifact": "workflow-state.json",
+      "consumed_by": [
+        "SYSTEM"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "01",
+      "artifact": "docs/architecture/baseline-status.md",
+      "consumed_by": [
+        "04",
+        "05",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "01",
+      "artifact": "docs/project/toolchain-report.md",
+      "consumed_by": [
+        "03"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/requirements-analysis.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/workflows.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/data-objects.csv",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/rd-matrix.csv",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/business-rules.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/glossary.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/acceptance-policy.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "13",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/open-questions.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "06"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/system-context.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/domain-boundaries.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/containers-and-deployment.md",
+      "consumed_by": [
+        "09",
+        "11"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/data-flows.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/logical-erd.md",
+      "consumed_by": [
+        "09",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/technology-decisions.md",
+      "consumed_by": [
+        "09",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/api-conventions.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "12",
+        "14"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/frontend-conventions.md",
+      "consumed_by": [
+        "07",
+        "09",
+        "11",
+        "14"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/test-strategy.md",
+      "consumed_by": [
+        "09",
+        "13",
+        "14"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/adr/README.md",
+      "consumed_by": [
+        "09",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/baseline-status.md",
+      "consumed_by": [
+        "04",
+        "05",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/baseline-manifest.json",
+      "consumed_by": [
+        "04",
+        "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/architecture/constraint-registry.json",
+      "consumed_by": [
+        "04",
+        "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
+      "artifact": "docs/project/baseline-audit-report.md",
+      "consumed_by": [
+        "04"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "04",
+      "artifact": "docs/product/proposal-roadmap.md",
+      "consumed_by": [
+        "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/proposal.md",
+      "consumed_by": [
+        "06",
+        "07",
+        "09",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/specs/<capability>/spec.md",
+      "consumed_by": [
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/tasks.md",
+      "consumed_by": [
+        "09",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/design.md",
+      "consumed_by": [
+        "06",
+        "07",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/design/user-stories.md",
+      "consumed_by": [
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/design/use-cases.md",
+      "consumed_by": [
+        "06",
+        "07",
+        "09",
+        "13",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "templates/change-assets/design/baseline-impact.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "05",
+      "artifact": "openspec/changes/<change-id>/design/baseline-binding.json",
+      "consumed_by": [
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "06",
+      "artifact": "openspec/changes/<change-id>/design/prototype-build.md",
+      "consumed_by": [
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "06",
+      "artifact": "openspec/changes/<change-id>/design/prototype-audit.md",
+      "consumed_by": [
+        "07"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
+      "artifact": "openspec/changes/<change-id>/design/page-inventory.csv",
+      "consumed_by": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "13"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
+      "artifact": "openspec/changes/<change-id>/design/block-inventory.csv",
+      "consumed_by": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "13"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
+      "artifact": "openspec/changes/<change-id>/design/interaction-map.csv",
+      "consumed_by": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
+      "artifact": "openspec/changes/<change-id>/traceability.csv",
+      "consumed_by": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "08",
+      "artifact": "openspec/changes/<change-id>/design/figma-audit.md",
+      "consumed_by": [
+        "09",
+        "10",
+        "11"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "09",
+      "artifact": "openspec/changes/<change-id>/design.md",
+      "consumed_by": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "09",
+      "artifact": "openspec/changes/<change-id>/design/design-plan.md",
+      "consumed_by": [
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "10",
+      "artifact": "openspec/changes/<change-id>/api/openapi.yaml",
+      "consumed_by": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "10",
+      "artifact": "openspec/changes/<change-id>/design/api-traceability.csv",
+      "consumed_by": [
+        "11",
+        "12",
+        "13"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "11",
+      "artifact": "openspec/changes/<change-id>/design/frontend-design.md",
+      "consumed_by": [
+        "13",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "12",
+      "artifact": "openspec/changes/<change-id>/design/backend-design.md",
+      "consumed_by": [
+        "13",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "12",
+      "artifact": "openspec/changes/<change-id>/design/api-io-mapping.csv",
+      "consumed_by": [
+        "13",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "12",
+      "artifact": "openspec/changes/<change-id>/design/io-catalog.csv",
+      "consumed_by": [
+        "13",
+        "14",
+        "15"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "13",
+      "artifact": "openspec/changes/<change-id>/design/test-design.md",
+      "consumed_by": [
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "13",
+      "artifact": "openspec/changes/<change-id>/traceability.csv",
+      "consumed_by": [
+        "14",
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "14",
+      "artifact": "openspec/changes/<change-id>/design/evidence/code-review.md",
+      "consumed_by": [
+        "15",
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "15",
+      "artifact": "openspec/changes/<change-id>/design/evidence/independent-verification-report.md",
+      "consumed_by": [
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "15",
+      "artifact": "openspec/changes/<change-id>/design/evidence/independent-verification.json",
+      "consumed_by": [
+        "16"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "16",
+      "artifact": "openspec/changes/<change-id>/design/evidence/acceptance.md",
+      "consumed_by": [
+        "FUTURE"
+      ],
+      "evidence_only": false
+    }
+  ]
 }

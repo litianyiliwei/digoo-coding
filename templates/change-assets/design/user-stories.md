@@ -1,8 +1,9 @@
 # 提案级用户故事与验收标准
 
 > Change ID：<change-id>
-> 状态：DRAFT（阶段 10 提案级需求分析产出）
+> 状态：DRAFT（阶段 05 提案级需求分析产出）
 > 来源：项目业务流程/RD 矩阵、proposal.md、specs/<capability>/spec.md
+> 边界：specs 是规范行为的唯一来源；本文件只保留场景、AC 与追踪 ID，不复制完整规格。
 
 | US ID | 用户角色 | 故事/价值 | 关联 UC/FLOW/NODE/BR | AC IDs | 状态 | 来源/审批 |
 |---|---|---|---|---|---|---|

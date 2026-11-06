@@ -22,10 +22,10 @@
       "human_approval_required": true
     },
     {
-      "id": "05-project-architecture-baseline",
+      "id": "03-project-architecture-baseline",
       "title": "项目总体架构设计",
       "skill": "project-architecture-baseline",
-      "prompt": "prompts/05-project-architecture-baseline.md",
+      "prompt": "prompts/03-project-architecture-baseline.md",
       "dependencies": [
         "02-requirements-analysis"
       ],
@@ -33,112 +33,112 @@
       "human_approval_required": true
     },
     {
-      "id": "09-proposal-planning",
+      "id": "04-proposal-planning",
       "title": "提案拆分、依赖排序与路线图",
       "skill": "proposal-planning",
-      "prompt": "prompts/09-proposal-planning.md",
+      "prompt": "prompts/04-proposal-planning.md",
       "dependencies": [
-        "05-project-architecture-baseline"
+        "03-project-architecture-baseline"
       ],
       "scope": "project",
       "human_approval_required": true
     },
     {
-      "id": "10-feature-requirements",
+      "id": "05-feature-requirements",
       "title": "提案级需求分析",
       "skill": "feature-requirements",
-      "prompt": "prompts/10-feature-requirements.md",
+      "prompt": "prompts/05-feature-requirements.md",
       "dependencies": [
-        "09-proposal-planning"
+        "04-proposal-planning"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "10b-prototype-generation",
+      "id": "06-prototype-generation",
       "title": "提案原型生成与评审",
       "skill": "prototype-generation",
-      "prompt": "prompts/10b-prototype-generation.md",
+      "prompt": "prompts/06-prototype-generation.md",
       "dependencies": [
-        "10-feature-requirements"
+        "05-feature-requirements"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "11-page-interaction-inventory",
+      "id": "07-page-interaction-inventory",
       "title": "页面、功能区块、元素与交互事件清单",
       "skill": "page-interaction-inventory",
-      "prompt": "prompts/11-page-interaction-inventory.md",
+      "prompt": "prompts/07-page-interaction-inventory.md",
       "dependencies": [
-        "10b-prototype-generation"
+        "06-prototype-generation"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "12-figma-ui-audit",
+      "id": "08-figma-ui-audit",
       "title": "Figma UI 设计与 MCP 审计",
       "skill": "figma-ui-audit",
-      "prompt": "prompts/12-figma-ui-audit.md",
+      "prompt": "prompts/08-figma-ui-audit.md",
       "dependencies": [
-        "11-page-interaction-inventory"
+        "07-page-interaction-inventory"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "13a-feature-design",
+      "id": "09-feature-design",
       "title": "功能详细设计总控",
       "skill": "feature-design",
-      "prompt": "prompts/13a-feature-design.md",
+      "prompt": "prompts/09-feature-design.md",
       "dependencies": [
-        "12-figma-ui-audit"
+        "08-figma-ui-audit"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "13b-api-contract-design",
+      "id": "10-api-contract-design",
       "title": "OpenAPI 与接口逻辑设计",
       "skill": "api-contract-design",
-      "prompt": "prompts/13b-api-contract-design.md",
+      "prompt": "prompts/10-api-contract-design.md",
       "dependencies": [
-        "13a-feature-design"
+        "09-feature-design"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "13c-frontend-detail-design",
+      "id": "11-frontend-detail-design",
       "title": "前端详细设计",
       "skill": "frontend-detail-design",
-      "prompt": "prompts/13c-frontend-detail-design.md",
+      "prompt": "prompts/11-frontend-detail-design.md",
       "dependencies": [
-        "13b-api-contract-design"
+        "10-api-contract-design"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "13d-backend-detail-design",
+      "id": "12-backend-detail-design",
       "title": "后端详细设计",
       "skill": "backend-detail-design",
-      "prompt": "prompts/13d-backend-detail-design.md",
+      "prompt": "prompts/12-backend-detail-design.md",
       "dependencies": [
-        "13b-api-contract-design"
+        "10-api-contract-design"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "13e-test-design",
+      "id": "13-test-design",
       "title": "测试设计",
       "skill": "test-design",
-      "prompt": "prompts/13e-test-design.md",
+      "prompt": "prompts/13-test-design.md",
       "dependencies": [
-        "13c-frontend-detail-design",
-        "13d-backend-detail-design"
+        "11-frontend-detail-design",
+        "12-backend-detail-design"
       ],
       "scope": "change",
       "human_approval_required": true
@@ -149,16 +149,16 @@
       "skill": "implementation-orchestrator",
       "prompt": "prompts/14-implementation-orchestrator.md",
       "dependencies": [
-        "13e-test-design"
+        "13-test-design"
       ],
       "scope": "change",
       "human_approval_required": false
     },
     {
-      "id": "14b-independent-verification",
+      "id": "15-independent-verification",
       "title": "独立验证与验收证据",
       "skill": "independent-verifier",
-      "prompt": "prompts/14b-independent-verification.md",
+      "prompt": "prompts/15-independent-verification.md",
       "dependencies": [
         "14-implementation-orchestrator"
       ],
@@ -166,12 +166,12 @@
       "human_approval_required": false
     },
     {
-      "id": "15-acceptance-audit",
+      "id": "16-acceptance-audit",
       "title": "人工验收、归档与基线回写",
       "skill": "acceptance-audit",
-      "prompt": "prompts/15-acceptance-audit.md",
+      "prompt": "prompts/16-acceptance-audit.md",
       "dependencies": [
-        "14b-independent-verification"
+        "15-independent-verification"
       ],
       "scope": "change",
       "human_approval_required": true

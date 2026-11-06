@@ -5,7 +5,7 @@
 ## 使用规则
 
 1. 创建 Change 后运行 `python3 scripts/baseline-governance.py init-binding --change-id <change-id>`，从当前冻结基线和 ACTIVE 约束目录生成 JSON 初稿。
-2. 阶段 10 为每条约束填写 `applicability`（APPLICABLE / NOT_APPLICABLE）和理由；不得删除约束行。N/A 必须给出具体理由。
+2. 阶段 05 为每条约束填写 `applicability`（APPLICABLE / NOT_APPLICABLE）和理由；不得删除约束行。N/A 必须给出具体理由。
 3. 对适用约束，在设计阶段填写 `decision`（COMPLIANT / EXCEPTION_APPROVED）、`design_evidence`；例外必须同时填写审批人、批准日期、范围、理由和证据路径。
 4. 实现阶段补充 `implementation_verification`：PASS 或有理由的 NOT_APPLICABLE，并给出真实证据文件路径。PENDING、NOT_RUN、SKIPPED 不得算通过。
 5. 验收阶段另行补充 `acceptance_verification`：必须基于验收/独立验证结果重新确认约束遵守情况；不能简单复制实现阶段的 PASS。每条适用约束需 PASS、方法和真实验收证据；N/A 需给理由。
@@ -14,7 +14,7 @@
 
 ## 检查命令
 
-- 阶段 10：`python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`
+- 阶段 05：`python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`
 - 详细设计：`python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase design`
 - 实现交接：`python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase implementation`
 - 验收归档：`python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase acceptance`

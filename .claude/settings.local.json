@@ -27,7 +27,16 @@
       "Bash(python -c \"import json; d=json.load\\(open\\('docs/architecture/baseline-manifest.json',encoding='utf-8'\\)\\); print\\(json.dumps\\(d['domains']['product']['files'],ensure_ascii=False,indent=2\\)\\)\")",
       "Bash(python -c 'import json,pathlib *)",
       "Bash(python -c 'import csv,pathlib *)",
-      "Bash(git status *)"
+      "Bash(git status *)",
+      "Bash(python scripts/_io_audit.py)",
+      "Bash(python scripts/_apply_p1c.py)",
+      "Bash(python scripts/_apply_p1d.py)",
+      "Bash(python scripts/check-output-consumption.py)",
+      "Bash(python scripts/_apply_p2.py)",
+      "Bash(set -e)",
+      "Bash(python -c \"import json; d=json.load\\(open\\('docs/WORKFLOW-STAGES.json',encoding='utf-8'\\)\\); print\\([s for s in d['stages'] if s['id']=='01-project-bootstrap']\\)\")",
+      "Bash(python -c \"import json; m=json.load\\(open\\('workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json',encoding='utf-8'\\)\\); print\\([a['path'] for a in m['artifacts']]\\)\")",
+      "Bash(python -c \"import json; s=json.load\\(open\\('workflow-state.json',encoding='utf-8'\\)\\); print\\(s['current_step'], s['completed_steps']\\)\")"
     ]
   }
 }

@@ -3,7 +3,7 @@
   "from_step": "01-project-bootstrap",
   "to_step": "02-requirements-analysis",
   "change_id": null,
-  "created_at": "2026-11-05T06:09:29+00:00",
+  "created_at": "2026-11-06T07:47:54+00:00",
   "baseline_version": "",
   "approval": {
     "status": "not-recorded"
@@ -24,8 +24,8 @@
     },
     {
       "path": "docs/project/toolchain-report.md",
-      "sha256": "63fb94556bb622af9659d5d9e9566db7eafbc650a1b108a8833d3e95b3c63a90",
-      "size_bytes": 5528,
+      "sha256": "c1a537611c6bd35dabc32e7445aa9e4acbb4f65938434de1ba2b46c7efd5eaeb",
+      "size_bytes": 5577,
       "role": "output"
     }
   ]

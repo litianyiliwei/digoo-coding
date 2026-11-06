@@ -36,15 +36,15 @@ description: 以只读、独立视角验证一个 OpenSpec Change 的实现是�
 - NOT_RUN、SKIPPED、PENDING 均不是 PASS。
 
 ## 输出与门禁
-报告必须列出验证范围、revision、AC 逐项结果、测试命令与退出码、API→IO/数据/安全检查、发现项、未执行项和最终判定。运行 `python3 scripts/check-independent-verification.py --report <change>/design/evidence/independent-verification.md --evidence <change>/design/evidence/independent-verification.json`。只有检查通过且 verdict=PASS 才能交接至阶段 15。
+报告必须列出验证范围、revision、AC 逐项结果、测试命令与退出码、API→IO/数据/安全检查、发现项、未执行项和最终判定。运行 `python3 scripts/check-independent-verification.py --report <change>/design/evidence/independent-verification.md --evidence <change>/design/evidence/independent-verification.json`。只有检查通过且 verdict=PASS 才能交接至阶段 16。
 
 ## 输入/输出/交接契约（强制）
 
-执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="independent-verifier"` 的契约。输入必须来自已批准 Change 和阶段 14 的真实实现证据；输出必须落盘为 Markdown 报告与 JSON 证据；下游阶段 15 只消费 Verdict=PASS 且校验脚本退出码为 0 的报告。缺少输入、AC 证据或测试运行记录时阻断。
+执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="independent-verifier"` 的契约。输入必须来自已批准 Change（含 `design/user-stories.md`、`design/use-cases.md` 的提案级 US/UC/AC 与 `docs/product/acceptance-policy.md`）和阶段 14 的真实实现证据；输出必须落盘为 Markdown 报告与 JSON 证据；下游阶段 16 只消费 Verdict=PASS 且校验脚本退出码为 0 的报告。缺少输入、AC 证据或测试运行记录时阻断。
 
 
 ## 独立基线约束验证（强制）
 
 - Verifier 必须独立读取当前 Manifest、Constraint Registry 和 Change `baseline-binding.json`，核验每条适用约束是否与实际代码/配置/数据库迁移/接口一致。
 - 不得信任 Builder 自填的 PASS；Verifier 应重新执行对应的自动检查或记录独立人工核验依据，并在报告中列出约束 ID 与结果。
-- 阶段 14b 转出前，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`；报告未覆盖约束的检查结论时应判 BLOCKED。
+- 阶段 15 转出前，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`；报告未覆盖约束的检查结论时应判 BLOCKED。
