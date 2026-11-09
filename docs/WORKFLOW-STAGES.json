@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "2.0",
   "stages": [
     {
       "id": "01-project-bootstrap",
@@ -55,10 +55,10 @@
       "human_approval_required": true
     },
     {
-      "id": "06-prototype-generation",
-      "title": "提案原型生成与评审",
-      "skill": "prototype-generation",
-      "prompt": "prompts/06-prototype-generation.md",
+      "id": "06-ui-prototype-inventory",
+      "title": "原型、页面与交互清单",
+      "skill": "ui-prototype-inventory",
+      "prompt": "prompts/06-ui-prototype-inventory.md",
       "dependencies": [
         "05-feature-requirements"
       ],
@@ -66,112 +66,45 @@
       "human_approval_required": true
     },
     {
-      "id": "07-page-interaction-inventory",
-      "title": "页面、功能区块、元素与交互事件清单",
-      "skill": "page-interaction-inventory",
-      "prompt": "prompts/07-page-interaction-inventory.md",
+      "id": "07-detailed-design",
+      "title": "详细设计、接口与测试设计",
+      "skill": "detailed-design",
+      "prompt": "prompts/07-detailed-design.md",
       "dependencies": [
-        "06-prototype-generation"
+        "06-ui-prototype-inventory"
       ],
       "scope": "change",
       "human_approval_required": true
     },
     {
-      "id": "08-figma-ui-audit",
-      "title": "Figma UI 设计与 MCP 审计",
-      "skill": "figma-ui-audit",
-      "prompt": "prompts/08-figma-ui-audit.md",
-      "dependencies": [
-        "07-page-interaction-inventory"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "09-feature-design",
-      "title": "功能详细设计总控",
-      "skill": "feature-design",
-      "prompt": "prompts/09-feature-design.md",
-      "dependencies": [
-        "08-figma-ui-audit"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "10-api-contract-design",
-      "title": "OpenAPI 与接口逻辑设计",
-      "skill": "api-contract-design",
-      "prompt": "prompts/10-api-contract-design.md",
-      "dependencies": [
-        "09-feature-design"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "11-frontend-detail-design",
-      "title": "前端详细设计",
-      "skill": "frontend-detail-design",
-      "prompt": "prompts/11-frontend-detail-design.md",
-      "dependencies": [
-        "10-api-contract-design"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "12-backend-detail-design",
-      "title": "后端详细设计",
-      "skill": "backend-detail-design",
-      "prompt": "prompts/12-backend-detail-design.md",
-      "dependencies": [
-        "10-api-contract-design"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "13-test-design",
-      "title": "测试设计",
-      "skill": "test-design",
-      "prompt": "prompts/13-test-design.md",
-      "dependencies": [
-        "11-frontend-detail-design",
-        "12-backend-detail-design"
-      ],
-      "scope": "change",
-      "human_approval_required": true
-    },
-    {
-      "id": "14-implementation-orchestrator",
+      "id": "08-implementation-orchestrator",
       "title": "实现、TDD、验证与代码审查",
       "skill": "implementation-orchestrator",
-      "prompt": "prompts/14-implementation-orchestrator.md",
+      "prompt": "prompts/08-implementation-orchestrator.md",
       "dependencies": [
-        "13-test-design"
+        "07-detailed-design"
       ],
       "scope": "change",
       "human_approval_required": false
     },
     {
-      "id": "15-independent-verification",
+      "id": "09-independent-verification",
       "title": "独立验证与验收证据",
       "skill": "independent-verifier",
-      "prompt": "prompts/15-independent-verification.md",
+      "prompt": "prompts/09-independent-verification.md",
       "dependencies": [
-        "14-implementation-orchestrator"
+        "08-implementation-orchestrator"
       ],
       "scope": "change",
       "human_approval_required": false
     },
     {
-      "id": "16-acceptance-audit",
+      "id": "10-acceptance-audit",
       "title": "人工验收、归档与基线回写",
       "skill": "acceptance-audit",
-      "prompt": "prompts/16-acceptance-audit.md",
+      "prompt": "prompts/10-acceptance-audit.md",
       "dependencies": [
-        "15-independent-verification"
+        "09-independent-verification"
       ],
       "scope": "change",
       "human_approval_required": true

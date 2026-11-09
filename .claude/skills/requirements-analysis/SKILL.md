@@ -1,6 +1,6 @@
 ---
 name: requirements-analysis
-description: 需求业务梳理。输出完整业务流程（节点级角色与数据对象）、业务数据对象目录、RD 矩阵、业务规则与验收政策；用户故事/用例统一留到提案级。
+description: 需求业务梳理。输出完整业务流程（节点级角色与数据对象）、业务数据对象目录、RD 矩阵、业务规则与验收政策；用户故事与 AC 统一留到提案级，本阶段不产出用例。
 ---
 
 # 需求业务梳理
@@ -19,12 +19,13 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 5. 建立业务数据对象目录：`DO-xxx` 稳定 ID、名称、定义、关键属性、业务所有者、来源/消费节点。数据对象是业务概念，不是数据库表。
 6. **输出 RD 矩阵**：逐行登记 R（需求/业务规则/流程节点）→ D（数据对象）的读写关系，包含所属 FLOW/NODE、角色、访问类型（读/写/读写/校验）和验收要求；每个节点至少有一条 RD 记录，或明确写 `N/A` + 理由。
 7. 统一术语、角色、权限、跨流程状态和验收政策；只把全局复用的规则放入项目级业务规则，功能细节留到提案级。
-8. **本阶段不输出用户故事与用例**：UC/US/AC 在阶段 05「提案级需求分析」按 Change 生成；本阶段只保留流程、节点、数据对象、RD 矩阵、业务规则和验收政策。
-9. 检查流程/节点/数据对象/RD/规则 ID 唯一、引用闭合、节点全覆盖；未确认内容进入 open-questions，不擅自决策。
-10. 不在需求阶段提前决定数据库表、类、框架或 API 细节。
+8. **本阶段不输出用户故事、用例或 AC**：US/AC 在阶段 05「提案级需求分析」按 Change 生成；用例场景写入提案级 spec 的 Scenario，不单独产出 `use-cases` 文件。本阶段只保留流程、节点、数据对象、RD 矩阵、业务规则和验收政策。
+9. **维护项目级常驻基线**：生成 `BASELINE-BRIEF.md`（≤1 页入口）、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`lessons.md`、`id-conventions.md`；运行 `scripts/gen-baseline-index.py --write` 生成 `BASELINE-INDEX.md`。
+10. 检查流程/节点/数据对象/RD/规则 ID 唯一、引用闭合、节点全覆盖；未确认内容进入 open-questions，不擅自决策。
+11. 不在需求阶段提前决定数据库表、类、框架或 API 细节。
 
 ## 输出
-`docs/product/requirements-analysis.md`、`workflows.md`（含节点表）、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`。
+`docs/product/requirements-analysis.md`、`workflows.md`（含节点表）、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`、`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`lessons.md`、`id-conventions.md`、`BASELINE-INDEX.md`（由脚本生成）。
 
 ## 质量与安全边界
 每条需求有来源和状态；每个流程的每个节点都有角色与数据对象；RD 矩阵引用闭合且覆盖全部节点；未确认项有负责人与阻塞条件。
@@ -50,7 +51,7 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="requirements-analysis"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
 - **本阶段输入：** 访谈/业务材料/旧系统资料；项目目标、用户、角色、约束；既有 docs/product/*（若存在）；既有 OpenSpec specs（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** docs/product/requirements-analysis.md；docs/product/workflows.md；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md。按模板生成并落盘。
+- **本阶段输出：** docs/product/requirements-analysis.md；docs/product/workflows.md；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（脚本生成）。按模板生成并落盘。
 - **下游交接：** 业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。

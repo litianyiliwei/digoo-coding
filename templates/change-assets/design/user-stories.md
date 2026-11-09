@@ -5,7 +5,7 @@
 > 来源：项目业务流程/RD 矩阵、proposal.md、specs/<capability>/spec.md
 > 边界：specs 是规范行为的唯一来源；本文件只保留场景、AC 与追踪 ID，不复制完整规格。
 
-| US ID | 用户角色 | 故事/价值 | 关联 UC/FLOW/NODE/BR | AC IDs | 状态 | 来源/审批 |
+| US ID | 用户角色 | 故事/价值 | 关联 FLOW/NODE/BR | AC IDs | 状态 | 来源/审批 |
 |---|---|---|---|---|---|---|
 | US-001 | PENDING | PENDING | PENDING | AC-001 | DRAFT | PENDING |
 

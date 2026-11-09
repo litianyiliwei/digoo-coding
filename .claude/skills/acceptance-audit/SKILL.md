@@ -9,7 +9,7 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 当流程进入“人工验收、归档与基线回写”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-阶段 15 的独立验证 PASS 报告与 JSON 证据（必须）；实现分支、AC、`design/user-stories.md`/`design/use-cases.md`、`docs/product/acceptance-policy.md`、测试/构建报告、Figma/原型审计、OpenAPI、`design/baseline-impact.md`、当前 `baseline-status.md` 与已批准基线修订证据。
+阶段 09 的独立验证 PASS 报告与 JSON 证据（必须）；实现分支、AC、`design/user-stories.md`、`docs/product/acceptance-policy.md`、测试/构建报告、Figma/原型审计、OpenAPI、`design/baseline-impact.md`、当前 `baseline-status.md` 与已批准基线修订证据。
 
 ## 执行流程
 1. 先核验 `design/evidence/independent-verification-report.md` 与 `.json` 存在且 Verdict=PASS，并确认验证 revision 与当前待验收 revision 一致；缺失/FAIL/BLOCKED 时拒绝验收。
@@ -56,7 +56,7 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="acceptance-audit"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；openspec/changes/<change-id>/design/user-stories.md、design/use-cases.md（提案级 US/UC/AC）；docs/product/acceptance-policy.md；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；openspec/changes/<change-id>/design/user-stories.md（提案级 US/AC）、design/test-cases.csv（TEST 覆盖），以及涉及 UI 时的 design/figma-audit.md、design/design-spec.json 与 Figma 设计；docs/product/acceptance-policy.md；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；条件适用的项目基线文档/版本登记/在途 Change 复核；OpenSpec archive 结果及更新后的主规格（仅批准后）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已验收并归档的能力规格、验收证据、后续 Change 依赖。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
@@ -65,8 +65,8 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 
 ## 独立验证前置门禁（P0）
 
-- 阶段 16 必须消费阶段 15 的独立验证报告和 JSON；Builder 自己的总结、单元测试结果或代码审查报告不能替代独立 Verifier。
-- 验证报告必须是 PASS，且被测 revision 与当前验收代码一致；若代码在验证后变化，必须重新执行阶段 15。
+- 阶段 10 必须消费阶段 09 的独立验证报告和 JSON；Builder 自己的总结、单元测试结果或代码审查报告不能替代独立 Verifier。
+- 验证报告必须是 PASS，且被测 revision 与当前验收代码一致；若代码在验证后变化，必须重新执行阶段 09。
 
 
 ## 验收阶段的机器基线门禁（强制）

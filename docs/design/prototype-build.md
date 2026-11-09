@@ -1,8 +1,9 @@
 # pen.dev 原型构建记录
 
-> 历史记录：2026-11-05 项目级原型；自 2026-11-06 起原型按提案级（阶段 10b）在 `openspec/changes/<change-id>/design/` 生成，本文件仅作为历史输入保留。
-> 状态：DRAFT（阶段 02b 产出；原型批准发生在阶段 03 原型评审）
-> 来源需求：docs/product/requirements-analysis.md、workflows.md、use-cases.md、user-stories.md、business-rules.md（APPROVED v0.4，2026-11-05）
+> 历史记录：2026-11-05 项目级原型；自 2026-11-06 起原型按提案级在 `openspec/changes/<change-id>/design/` 生成，本文件仅作为历史参考保留，不作为当前阶段输入。
+> 状态：DRAFT（历史产物；原型批准发生在当时的评审阶段）
+> 来源需求：docs/product/requirements-analysis.md、workflows.md、business-rules.md（APPROVED v0.4，2026-11-05）；历史 use-cases.md/user-stories.md 已归档，不作为输入。
+> 追踪说明：下表 UC/US/AC 列仅为 2026-11-05 的历史追踪，已废止；现行流程不产出 use-cases 文件，提案级 US/AC 在阶段 05 重新生成。
 > 本轮范围：按用户 2026-11-05 指示，全部页面改为手机端，合并为一套统一外壳与单一登录页，在 9 个页面增加 GIS 地图区块，并按角色标注页面、按角色裁剪标签栏；共 18 屏
 > 工具：pen.dev MCP（pencil：get_app_state / execute / get_style / read_skill），编辑器账号已登录
 

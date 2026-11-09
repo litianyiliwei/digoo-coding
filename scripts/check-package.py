@@ -26,7 +26,7 @@ for p in skill_paths:
     ids.add(dirname)
     if len(body.strip())<500: errors.append(f"Skill suspiciously short: {p.relative_to(ROOT)}")
 missing_prompts=[]
-SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "15-independent-verification.md"}
+SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "09-independent-verification.md"}
 # openspec-* skills are OpenSpec CLI helpers, not workflow stages; they have no stage prompt.
 for skill in ids:
     if skill.startswith("openspec-"): continue

@@ -1,44 +1,24 @@
 {
   "step_id": "02-requirements-analysis",
   "change_id": null,
-  "baseline_version": "",
+  "baseline_version": "v0.6-DRAFT",
   "outputs": [
-    {
-      "path": "docs/product/requirements-analysis.md",
-      "status": "updated",
-      "required": true,
-      "role": "requirements-report"
-    },
-    {
-      "path": "docs/product/workflows.md",
-      "status": "updated",
-      "required": true,
-      "role": "business-workflows"
-    },
-    {
-      "path": "docs/product/use-cases.md",
-      "status": "updated",
-      "required": true,
-      "role": "use-cases"
-    },
-    {
-      "path": "docs/product/user-stories.md",
-      "status": "updated",
-      "required": true,
-      "role": "user-stories-and-acceptance-criteria"
-    },
-    {
-      "path": "docs/product/business-rules.md",
-      "status": "updated",
-      "required": true,
-      "role": "business-rules"
-    },
-    {
-      "path": "docs/product/open-questions.md",
-      "status": "updated",
-      "required": true,
-      "role": "open-questions"
-    }
+    {"path": "docs/product/requirements-analysis.md", "status": "updated", "required": true, "role": "requirements-report"},
+    {"path": "docs/product/workflows.md", "status": "updated", "required": true, "role": "business-workflows-node-level"},
+    {"path": "docs/product/data-objects.csv", "status": "created", "required": true, "role": "business-data-objects"},
+    {"path": "docs/product/rd-matrix.csv", "status": "created", "required": true, "role": "requirement-data-object-matrix"},
+    {"path": "docs/product/business-rules.md", "status": "updated", "required": true, "role": "business-rules"},
+    {"path": "docs/product/glossary.md", "status": "updated", "required": true, "role": "glossary"},
+    {"path": "docs/product/acceptance-policy.md", "status": "updated", "required": true, "role": "acceptance-policy"},
+    {"path": "docs/product/open-questions.md", "status": "updated", "required": true, "role": "open-questions"},
+    {"path": "docs/product/BASELINE-BRIEF.md", "status": "updated", "required": true, "role": "baseline-brief"},
+    {"path": "docs/product/role-permission-matrix.csv", "status": "updated", "required": true, "role": "role-permission-matrix"},
+    {"path": "docs/product/change-sizing.md", "status": "verified", "required": true, "role": "change-sizing"},
+    {"path": "docs/product/decisions.md", "status": "updated", "required": true, "role": "decision-log"},
+    {"path": "docs/product/assumptions.md", "status": "verified", "required": true, "role": "assumptions"},
+    {"path": "docs/product/lessons.md", "status": "verified", "required": true, "role": "lessons"},
+    {"path": "docs/product/id-conventions.md", "status": "updated", "required": true, "role": "id-conventions"},
+    {"path": "docs/product/BASELINE-INDEX.md", "status": "updated", "required": true, "role": "baseline-index"}
   ],
   "checks": [
     {
@@ -58,18 +38,33 @@
       "log": "workflow/evidence/logs/02-check-requirements.log"
     },
     {
+      "name": "baseline-index-check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/gen-baseline-index.py --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-baseline-index.log"
+    },
+    {
       "name": "openspec-specs-readonly",
       "kind": "automated",
       "status": "passed",
       "command": "openspec list --specs",
       "exit_code": 0,
       "log": "workflow/evidence/logs/02-openspec-specs.log"
+    },
+    {
+      "name": "product-owner-approval",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "用户（welly，代行业务负责人）",
+      "evidence": "workflow/evidence/02-approval.md"
     }
   ],
   "approval": {
     "required": true,
     "status": "approved",
     "approver": "用户（welly，代行业务负责人）",
-    "approved_at": "2026-11-05"
+    "approved_at": "2026-11-09"
   }
 }

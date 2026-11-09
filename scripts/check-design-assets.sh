@@ -9,19 +9,71 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON="$(command -v python3 || command -v python)" || { echo "python3/python not found in PATH" >&2; exit 2; }
 DIR="$ROOT/openspec/changes/$CHANGE_ID"
 [[ -d "$DIR" ]] || { echo "Change not found: $DIR" >&2; exit 1; }
-required=("$DIR/api/openapi.yaml" "$DIR/design/frontend-design.md" "$DIR/design/backend-design.md" "$DIR/design/test-design.md" "$DIR/design/api-io-mapping.csv" "$DIR/design/io-catalog.csv" "$DIR/traceability.csv")
-missing=0; placeholders=0
+
+DESIGN="$DIR/design.md"
+TRACE="$DIR/traceability.csv"
+TEST_CASES="$DIR/design/test-cases.csv"
+OPENAPI="$DIR/api/openapi.yaml"
+API_MAP="$DIR/design/api-io-mapping.csv"
+IO_CATALOG="$DIR/design/io-catalog.csv"
+
+required=("$DESIGN" "$TRACE" "$TEST_CASES")
+missing=0
 for f in "${required[@]}"; do
-  if [[ ! -s "$f" ]]; then echo "ERROR MISSING: ${f#$ROOT/}"; missing=1; continue; fi
+  if [[ ! -s "$f" ]]; then echo "ERROR MISSING: ${f#$ROOT/}"; missing=1; fi
+done
+if (( missing )); then echo "Core design assets missing." >&2; exit 1; fi
+
+# design.md must carry the five unified sections.
+for section in '## 设计决策' '## 接口设计' '## 前端详细设计' '## 后端详细设计' '## 测试设计'; do
+  if ! grep -qF "$section" "$DESIGN"; then echo "ERROR MISSING SECTION: design.md -> $section"; missing=1; fi
+done
+if (( missing )); then echo "design.md is missing unified design sections." >&2; exit 1; fi
+
+# API assets are conditional: required only when OpenAPI actually defines operations.
+API_SCOPE_NONE=0
+if [[ -f "$OPENAPI" ]] && grep -Eq 'x-api-scope:[[:space:]]*none' "$OPENAPI"; then API_SCOPE_NONE=1; fi
+if [[ ! -f "$OPENAPI" || $API_SCOPE_NONE -eq 0 ]]; then
+  for f in "$OPENAPI" "$API_MAP" "$IO_CATALOG"; do
+    if [[ ! -s "$f" ]]; then echo "ERROR MISSING: ${f#$ROOT/}"; missing=1; fi
+  done
+fi
+if (( missing )); then echo "API design assets missing (or use x-api-scope: none)." >&2; exit 1; fi
+
+placeholders=0
+for f in "$DESIGN" "$TRACE" "$TEST_CASES" "$API_MAP" "$IO_CATALOG"; do
+  [[ -f "$f" ]] || continue
   if grep -nE 'TODO|TBD|PENDING|待确认|待补充' "$f" >/dev/null; then echo "WARN PLACEHOLDER: ${f#$ROOT/}"; placeholders=1; fi
 done
-if (( missing )); then echo "Detailed design assets missing." >&2; exit 1; fi
 if (( STRICT && placeholders )); then echo "Strict mode failed: design placeholders remain." >&2; exit 1; fi
-trace_args=(--file "$DIR/traceability.csv")
+
+trace_args=(--file "$TRACE")
 if (( STRICT )); then trace_args+=(--strict); fi
 "$PYTHON" "$ROOT/scripts/check-traceability.py" "${trace_args[@]}"
-io_args=("$DIR/api/openapi.yaml" "$DIR/design/api-io-mapping.csv" "$DIR/design/io-catalog.csv")
-if (( STRICT )); then io_args+=(--strict); fi
-"$PYTHON" "$ROOT/scripts/check-api-io-mapping.py" "${io_args[@]}"
-if (( LINT_API )); then bash "$ROOT/scripts/validate-openapi.sh" "$DIR/api/openapi.yaml"; fi
-echo "Detailed design asset structure and API→IO mapping passed."
+
+test_args=(--change "$CHANGE_ID")
+if (( STRICT )); then test_args+=(--strict); fi
+"$PYTHON" "$ROOT/scripts/check-test-cases.py" "${test_args[@]}"
+
+section_args=(--change "$CHANGE_ID")
+if (( STRICT )); then section_args+=(--strict); fi
+"$PYTHON" "$ROOT/scripts/check-design-sections.py" "${section_args[@]}"
+
+api_trace_args=(--change "$CHANGE_ID")
+if (( STRICT )); then api_trace_args+=(--strict); fi
+"$PYTHON" "$ROOT/scripts/check-api-traceability.py" "${api_trace_args[@]}"
+
+# UI-bearing Changes must have consumed the real Figma design (not screenshots/guesses).
+figma_args=(--change "$CHANGE_ID")
+if (( STRICT )); then figma_args+=(--strict); fi
+"$PYTHON" "$ROOT/scripts/check-figma-audit.py" "${figma_args[@]}"
+
+if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
+  io_args=("$OPENAPI" "$API_MAP" "$IO_CATALOG")
+  if (( STRICT )); then io_args+=(--strict); fi
+  "$PYTHON" "$ROOT/scripts/check-api-io-mapping.py" "${io_args[@]}"
+  if (( LINT_API )); then bash "$ROOT/scripts/validate-openapi.sh" "$OPENAPI"; fi
+else
+  echo "API scope: none (x-api-scope: none); API→IO checks skipped."
+fi
+echo "Unified design (design.md sections), test-case matrix, traceability and API→IO mapping passed."

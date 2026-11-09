@@ -28,7 +28,7 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 
 ## 基线交互提示（强制）
 
-- 选择功能级阶段时，除检查普通输入外，必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 和当前 `docs/architecture/baseline-status.md`。阶段 05 创建 baseline-impact；阶段 09–13 复核；阶段 14 不直接修改冻结基线；阶段 16 按审批结果回写。
+- 选择功能级阶段时，除检查普通输入外，必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 和当前 `docs/architecture/baseline-status.md`。阶段 05 创建 baseline-impact；阶段 06–07 复核；阶段 08 不直接修改冻结基线；阶段 10 按审批结果回写。
 
 ## 输入/输出/交接契约（强制）
 
@@ -47,4 +47,4 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 - 执行前运行 `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；非 0 退出码表示禁止执行。
 - 阶段完成后生成符合 `workflow/evidence/<step-id>.json` 结构的证据，调用 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`。禁止直接编辑 `completed_steps/current_step`。
 - transition 会生成 SHA-256 handoff；下一阶段必须核验全部上游 manifest。文件哈希变化时退回上游重审，不得静默刷新。
-- 阶段 14 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 16。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。
+- 阶段 08 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 10。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。

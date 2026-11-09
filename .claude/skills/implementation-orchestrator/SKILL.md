@@ -56,7 +56,7 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="implementation-orchestrator"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准的 design/baseline-impact.md 与当前 baseline-status.md；已批准 tasks.md/design.md；前后端详细设计、OpenAPI、IO 契约；test-design.md 与 traceability.csv；项目级工程规范/测试策略。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已批准的 design/baseline-impact.md 与当前 baseline-status.md；已批准 tasks.md/design.md；design.md（含前端/后端/测试设计节）、design/test-cases.csv、OpenAPI、IO 契约与 traceability.csv；涉及 UI 时 `design/figma-audit.md`、`design/design-spec.json` 与 Figma 实际设计；项目级工程规范/测试策略。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** 实际源代码/迁移/配置；条件适用的基线变更请求/ADR 草案（未经批准不更新冻结基线）；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md；实现/验证证据。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 代码差异、测试报告、审查结论、未解决问题。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
@@ -65,11 +65,11 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 
 ## 独立验证交接（新增强制要求）
 
-Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `15-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
+Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `09-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
 
 
 ## 实现阶段的机器基线门禁（强制）
 
 - 编码前必须通过 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。
 - 实现完成后，为每条 APPLICABLE 约束记录 `implementation_verification.status=PASS`、验证方法和仓库内真实证据路径；纯设计约束需显式记录 NOT_APPLICABLE 与理由。
-- 阶段 14 转出前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`。缺证据、NOT_RUN、PENDING 均阻断。
+- 阶段 08 转出前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`。缺证据、NOT_RUN、PENDING 均阻断。

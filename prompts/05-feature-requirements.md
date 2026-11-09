@@ -5,10 +5,12 @@
 
 业务目标：<goal>
 项目需求业务梳理：<product-paths>
+常驻基线/角色矩阵/切片规则：<baseline-brief-and-sizing>
+决策/假设/教训：<decisions-assumptions-lessons>
 未决问题：<open-questions>
-关联 FLOW/NODE/DO/BR：<ids>
+关联 FLOW/NODE/DO/BR/ROLE/CAP：<ids>
 
-先查 `openspec status --change <change-id>`、`openspec list --specs` 并读取相关规格全文。按当前 OpenSpec schema 完成 proposal、spec delta、design、tasks；同时从项目业务流程、RD 矩阵和 Change 范围推导提案级 `design/use-cases.md`（UC）与 `design/user-stories.md`（US/AC），不得复制项目级历史 UC/US 清单。specs 是规范行为的唯一来源；UC/US 只写场景、AC 与追踪 ID，不重复完整规格。spec 仅写外部可观察行为；每个 Requirement 含至少一个 Scenario；tasks 使用 `- [ ]` 复选框。列出基线影响和审批问题。完成后运行 `python scripts/check-requirements.py --change <change-id> --strict` 与 `openspec validate <change-id> --strict`。创建 Change 后运行 `bash scripts/new-change-assets.sh <change-id>`，确保生成 `design/baseline-impact.md`，再填充并评审；不得开始详细设计/编码直到提案需求与基线影响结论获批。
+先读 `docs/product/BASELINE-BRIEF.md`（≤1 页）、`change-sizing.md`、`role-permission-matrix.csv`、`decisions.md`、`assumptions.md`、`lessons.md`；再查 `openspec status --change <change-id>`、`openspec list --specs` 并读取相关规格全文。按当前 OpenSpec schema 完成 proposal、spec delta、design、tasks；同时从项目业务流程、RD 矩阵和 Change 范围推导提案级 `design/user-stories.md`（US/AC），不得复制项目级历史故事清单。specs 是规范行为的唯一来源，场景写在 spec 的 Scenario 中；user-stories 只写 US、AC 与追踪 ID，不重复完整规格；不单独产出 `design/use-cases.md`，用例场景一律写入 spec 的 Scenario。权限相关 AC 必须引用 ROLE/CAP，数据类 AC 引用 DO。spec 仅写外部可观察行为；每个 Requirement 含至少一个 Scenario；tasks 使用 `- [ ]` 复选框。用 `change-sizing.md` 的预算检查范围，超过必须拆分或记录理由与验收人；完成后核对 DoD。列出基线影响和审批问题。完成后运行 `python scripts/check-requirements.py --change <change-id> --strict` 与 `openspec validate <change-id> --strict`。创建 Change 后运行 `bash scripts/new-change-assets.sh <change-id>`，确保生成 `design/baseline-impact.md`，再填充并评审；不得开始详细设计/编码直到提案需求与基线影响结论获批。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 基线交互要求：先核验 `docs/architecture/baseline-status.md`，读取相关产品/架构/数据/公共契约/测试基线及现行 OpenSpec specs。必须按 `templates/change-assets/design/baseline-impact.md` 创建 `openspec/changes/<change-id>/design/baseline-impact.md`，记录版本、约束 ID/章节、复用项、冲突和归属分类。若关键设计依赖尚未批准的基线变化，标记阻断，不进入详细设计/实现。填完后运行 `python scripts/check-baseline-impact.py <change-id>` 做结构检查；此时尚未审批的草案不得使用 `--strict`。
 ```
@@ -31,9 +33,9 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-requirements"` 的记录。
 
-- 输入核验：已批准路线图/当前 Change 范围；项目需求业务梳理与冻结基线；关联 FLOW/NODE/DO/BR；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须先执行 `bash scripts/new-change-assets.sh <change-id>` 创建辅助模板（若已存在则保留），再输出：openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md；openspec/changes/<change-id>/design/use-cases.md。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线绑定。在报告中明确这些文件如何被下游（阶段 06 原型生成与评审）消费。
+- 输入核验：已批准路线图/当前 Change 范围；项目需求业务梳理与冻结基线；常驻基线简报、角色权限矩阵、切片规则与 DoD、决策/假设/教训；关联 FLOW/NODE/DO/BR/ROLE/CAP；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 必须先执行 `bash scripts/new-change-assets.sh <change-id>` 创建辅助模板（若已存在则保留），再输出：openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md（US/AC）。按模板写入仓库，不要只在聊天中展示。
+- 下一步输入：已批准的提案级 US/AC、场景与业务规则、范围边界、需求追踪 ID、基线绑定。在报告中明确这些文件如何被下游（阶段 06 原型、页面与交互清单）消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 基线交互：必须按 `docs/BASELINE-FEATURE-INTERACTION.md` 核验基线读取/变更归属；阶段 05 创建/更新 `design/baseline-impact.md`，后续阶段复核；未经批准不得修改冻结基线。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。

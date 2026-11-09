@@ -2,22 +2,32 @@
   "project_name": "智慧农业项目",
   "active_change_id": "",
   "completed_steps": [
-    "01-project-bootstrap"
+    "01-project-bootstrap",
+    "02-requirements-analysis"
   ],
-  "current_step": "02-requirements-analysis",
+  "current_step": "03-project-architecture-baseline",
   "pending_approvals": [],
   "blocked_items": [],
   "last_completed_outputs": [
     "docs/product/requirements-analysis.md",
     "docs/product/workflows.md",
-    "docs/product/use-cases.md",
-    "docs/product/user-stories.md",
+    "docs/product/data-objects.csv",
+    "docs/product/rd-matrix.csv",
     "docs/product/business-rules.md",
     "docs/product/glossary.md",
-    "docs/product/acceptance-policy.md"
+    "docs/product/acceptance-policy.md",
+    "docs/product/open-questions.md",
+    "docs/product/BASELINE-BRIEF.md",
+    "docs/product/role-permission-matrix.csv",
+    "docs/product/change-sizing.md",
+    "docs/product/decisions.md",
+    "docs/product/assumptions.md",
+    "docs/product/lessons.md",
+    "docs/product/id-conventions.md",
+    "docs/product/BASELINE-INDEX.md"
   ],
-  "last_updated": "2026-11-06T02:13:21+00:00",
-  "notes": "2026-11-06 工作流重构后状态迁移：已完成 02b/03/04 保留在 transition_history 与 legacy_completed_steps；current_step 回到 02，按新契约（业务流程节点数据对象/角色、RD 矩阵）重新梳理并审批后再进入 05。",
+  "last_updated": "2026-11-09T09:31:16+00:00",
+  "notes": "2026-11-09 vibe 流程重构：当前 DAG 为 01–10；已完成 01，current_step 02 已按新契约重跑并等待产品负责人批准。旧 06–16 拆分阶段保留于 legacy 目录与历史记录。",
   "state_schema_version": "1.0",
   "transition_history": [
     {
@@ -163,35 +173,111 @@
         "approver": "用户（welly，代行产品负责人）",
         "approved_at": "2026-11-05"
       }
+    },
+    {
+      "step_id": "02-requirements-analysis",
+      "completed_at": "2026-11-09T09:31:16+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/02-requirements-analysis.json",
+      "outputs": [
+        "docs/product/requirements-analysis.md",
+        "docs/product/workflows.md",
+        "docs/product/data-objects.csv",
+        "docs/product/rd-matrix.csv",
+        "docs/product/business-rules.md",
+        "docs/product/glossary.md",
+        "docs/product/acceptance-policy.md",
+        "docs/product/open-questions.md",
+        "docs/product/BASELINE-BRIEF.md",
+        "docs/product/role-permission-matrix.csv",
+        "docs/product/change-sizing.md",
+        "docs/product/decisions.md",
+        "docs/product/assumptions.md",
+        "docs/product/lessons.md",
+        "docs/product/id-conventions.md",
+        "docs/product/BASELINE-INDEX.md"
+      ],
+      "checks": [
+        {
+          "name": "package-self-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-index-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "openspec-specs-readonly",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "product-owner-approval",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行业务负责人）",
+        "approved_at": "2026-11-09"
+      }
     }
   ],
   "last_transition": {
-    "step_id": "04-product-baseline",
-    "completed_at": "2026-11-05T08:44:59+00:00",
+    "step_id": "02-requirements-analysis",
+    "completed_at": "2026-11-09T09:31:16+00:00",
     "change_id": null,
-    "evidence_path": "workflow/evidence/04-product-baseline.json",
+    "evidence_path": "workflow/evidence/02-requirements-analysis.json",
     "outputs": [
       "docs/product/requirements-analysis.md",
       "docs/product/workflows.md",
-      "docs/product/use-cases.md",
-      "docs/product/user-stories.md",
+      "docs/product/data-objects.csv",
+      "docs/product/rd-matrix.csv",
       "docs/product/business-rules.md",
       "docs/product/glossary.md",
-      "docs/product/acceptance-policy.md"
+      "docs/product/acceptance-policy.md",
+      "docs/product/open-questions.md",
+      "docs/product/BASELINE-BRIEF.md",
+      "docs/product/role-permission-matrix.csv",
+      "docs/product/change-sizing.md",
+      "docs/product/decisions.md",
+      "docs/product/assumptions.md",
+      "docs/product/lessons.md",
+      "docs/product/id-conventions.md",
+      "docs/product/BASELINE-INDEX.md"
     ],
     "checks": [
+      {
+        "name": "package-self-check",
+        "status": "passed",
+        "exit_code": 0
+      },
       {
         "name": "requirements-structure-strict",
         "status": "passed",
         "exit_code": 0
       },
       {
-        "name": "required-baseline-files",
+        "name": "baseline-index-check",
         "status": "passed",
         "exit_code": 0
       },
       {
-        "name": "product-baseline-review-approved-by-owner",
+        "name": "openspec-specs-readonly",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "product-owner-approval",
         "status": "passed",
         "exit_code": null
       }
@@ -199,8 +285,8 @@
     "approval": {
       "required": true,
       "status": "approved",
-      "approver": "用户（welly，代行产品负责人）",
-      "approved_at": "2026-11-05"
+      "approver": "用户（welly，代行业务负责人）",
+      "approved_at": "2026-11-09"
     }
   },
   "legacy_completed_steps": [
@@ -226,6 +312,77 @@
         "01-project-bootstrap"
       ],
       "current_step": "02-requirements-analysis"
+    },
+    {
+      "at": "2026-11-09T03:47:46+00:00",
+      "reason": "2026-11-09 vibe 流程重构：17→10 阶段；合并 06+07+08 为原型/页面清单，合并 09–13 为详细设计；use-cases 并入 specs/user-stories；前端/后端/测试设计并入 design.md 五节",
+      "legacy_steps": [
+        "06-prototype-generation",
+        "07-page-interaction-inventory",
+        "08-figma-ui-audit",
+        "09-feature-design",
+        "10-api-contract-design",
+        "11-frontend-detail-design",
+        "12-backend-detail-design",
+        "13-test-design",
+        "14-implementation-orchestrator",
+        "15-independent-verification",
+        "16-acceptance-audit"
+      ],
+      "reset_steps": [],
+      "completed_steps": [
+        "01-project-bootstrap"
+      ],
+      "current_step": "02-requirements-analysis"
     }
-  ]
+  ],
+  "baseline": {
+    "manifest": "docs/architecture/baseline-manifest.json",
+    "constraint_registry": "docs/architecture/constraint-registry.json",
+    "status": "docs/architecture/baseline-status.md",
+    "domains": {
+      "product": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      },
+      "architecture": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      },
+      "data_domain": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      },
+      "api": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      },
+      "frontend": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      },
+      "test_quality": {
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
+      }
+    }
+  }
 }

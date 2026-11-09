@@ -38,7 +38,7 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="project-architecture-baseline"` 的记录。
 
-- 输入核验：已批准的 requirements-analysis/workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy/open-questions；现有仓库结构/技术约束；非功能需求；技术选型偏好。逐项报告存在、版本和批准状态；不满足时暂停。
+- 输入核验：已批准的 requirements-analysis/workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy/open-questions；BASELINE-BRIEF/role-permission-matrix/change-sizing/decisions/assumptions/id-conventions/BASELINE-INDEX（常驻基线）；现有仓库结构/技术约束；非功能需求；技术选型偏好。逐项报告存在、版本和批准状态；不满足时暂停。
 - 必须输出：docs/architecture/system-context.md；domain-boundaries.md；containers-and-deployment.md；data-flows.md；logical-erd.md；technology-decisions.md；api-conventions.md；frontend-conventions.md；test-strategy.md；docs/adr/README.md；baseline-status.md；baseline-manifest.json；constraint-registry.json；docs/project/baseline-audit-report.md。按模板写入仓库。
 - 下一步输入：冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录。在报告中明确阶段 04/05 如何消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。

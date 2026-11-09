@@ -1,6 +1,6 @@
 ---
 name: feature-requirements
-description: 提案级需求分析。按 Change 生成用户故事、功能用例与 AC，并细化为可测试的 OpenSpec 行为规格。
+description: 提案级需求分析。按 Change 生成用户故事与 AC，并细化为可测试的 OpenSpec 行为规格；不产出独立用例文件，场景写入 spec 的 Scenario。
 ---
 
 # 提案级需求分析
@@ -9,12 +9,12 @@ description: 提案级需求分析。按 Change 生成用户故事、功能用�
 当流程进入“提案级需求分析”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/验收政策）、open-questions（只读）、冻结基线、相关 openspec/specs。
+Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/验收政策）、`BASELINE-BRIEF.md`/`change-sizing.md`/`role-permission-matrix.csv`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md`（常驻基线）、open-questions（只读）、冻结基线、相关 openspec/specs。
 
 ## 执行流程
 1. 先运行 `openspec status --change <id>`、`openspec list --specs` 并读取相关规格全文；遵循当前 OpenSpec CLI/Schema 指引。
-2. 从项目业务流程、RD 矩阵与 Change 范围推导**提案级功能用例**（`design/use-cases.md`，UC ID）和**用户故事与 AC**（`design/user-stories.md`，US/AC ID）；不得复制项目级历史 UC/US 清单，只保留与本 Change 相关的条目并保持稳定 ID。specs 是规范行为的唯一来源；UC/US 只写场景、AC 与追踪 ID，不复制完整规格。
-3. 每个 UC 必须写清触发、角色、前置条件、主流程、替代/异常流程、后置条件，并引用项目 FLOW/NODE/DO/BR ID。
+2. 从项目业务流程、RD 矩阵与 Change 范围推导**提案级用户故事与 AC**（`design/user-stories.md`，US/AC ID）；不得复制项目级历史故事清单，只保留与本 Change 相关的条目并保持稳定 ID。specs 是规范行为的唯一来源，场景写在 spec 的 Scenario 中；user-stories 只写 US、AC 与追踪 ID，不复制完整规格。
+3. 每个用户场景必须写清触发、角色、前置条件、主流程、替代/异常流程、后置条件，并引用项目 FLOW/NODE/DO/BR ID；场景正文写入 `specs/<capability>/spec.md` 的 Scenario，不单独产出 `design/use-cases.md`，也不使用 UC ID 做追踪。
 4. 每个 US 写可验证的 Given/When/Then；每个关键故事至少一个 AC，覆盖权限、空值、边界、异常、重复提交和并发（适用时）。
 5. 完善 `proposal.md` 的 Why、What Changes、Capabilities、Impact；capability 路径使用 kebab-case 并复用既有路径。
 6. 把外部可观察行为写入 `specs/<capability>/spec.md`，使用规范的 ADDED/MODIFIED/REMOVED/RENAMED Requirements 和 Scenario。
@@ -24,10 +24,10 @@ Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/�
 10. 完成后执行 `python scripts/check-requirements.py --change <change-id> --strict` 与 `openspec validate <change-id> --strict`，处理所有错误/警告。
 
 ## 输出
-OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`design/use-cases.md`、`design/baseline-impact.md`、`design/baseline-binding.json`、基线修订请求（条件适用）和待审批清单。
+OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`design/baseline-impact.md`、`design/baseline-binding.json`、基线修订请求（条件适用）和待审批清单。
 
 ## 质量与安全边界
-规格描述 WHAT，不夹带类名/框架等实现细节；每条 Requirement 至少有一个 Scenario；tasks 使用 `- [ ]`；提案级 UC/US 必须引用项目 FLOW/BR/DO 且能被 AC 验证。
+规格描述 WHAT，不夹带类名/框架等实现细节；每条 Requirement 至少有一个 Scenario；tasks 使用 `- [ ]`；提案级 US/AC 必须引用项目 FLOW/BR/DO 且能被 AC 验证；不产出用例文件，场景统一写在 spec 的 Scenario。
 
 ## 与 OpenSpec / Superpowers 的边界
 - OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
@@ -58,8 +58,8 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-requirements"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md；openspec/changes/<change-id>/design/use-cases.md；openspec/changes/<change-id>/design/baseline-impact.md（每个 Change 强制）；openspec/changes/<change-id>/design/baseline-binding.json。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
+- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；docs/product/BASELINE-BRIEF.md、change-sizing.md、role-permission-matrix.csv、decisions.md、assumptions.md、lessons.md、id-conventions.md（常驻基线）；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md（US/AC）；openspec/changes/<change-id>/design/baseline-impact.md（每个 Change 强制）；openspec/changes/<change-id>/design/baseline-binding.json。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。

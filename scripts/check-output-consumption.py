@@ -13,12 +13,12 @@ SPECIAL = {'ALL', 'SYSTEM', 'GATE', 'FUTURE'}
 
 
 def extract(o):
-    for token in ('docs/', 'templates/', 'openspec/', 'workflow/', 'prompts/', 'scripts/'):
-        i = o.find(token)
-        if i >= 0:
-            s = o[i:]
-            s = re.split(r'[（(，,；;、\s]', s, 1)[0]
-            return s.rstrip('。.）)')
+    starts = [(o.find(t), t) for t in ('docs/', 'templates/', 'openspec/', 'workflow/', 'prompts/', 'scripts/') if t in o]
+    if starts:
+        i = min(starts)[0]
+        s = o[i:]
+        s = re.split(r'[（(，,；;、\s]', s, 1)[0]
+        return s.rstrip('。.）)')
     for special in ('workflow-state.json', 'AGENTS.md'):
         if special in o:
             return special

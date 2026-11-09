@@ -31,7 +31,7 @@ OpenSpec `openspec/specs/**` 与上述设计/治理基线互补：OpenSpec 主�
 
 - `docs/architecture/baseline-status.md`：核验是否 FROZEN、版本、生效日期、审批人与待处理修订。
 - `docs/product/acceptance-policy.md`、`docs/product/glossary.md`：核验验收和术语公共约束。
-- 与本 Change 直接关联的产品需求、业务流程、用例、用户故事、业务规则及其稳定 ID。
+- 与本 Change 直接关联的产品需求、业务流程、用户故事、业务规则及其稳定 ID。
 - `docs/architecture/system-context.md`、`docs/architecture/domain-boundaries.md`：核验涉及的系统、模块、数据所有权和依赖边界。
 - `openspec/specs/**` 中与本功能 capability / domain 相关的现行规格；如有依赖 Change，也读取其已归档规格。
 
@@ -120,7 +120,7 @@ AI 不应无差别把所有文档全文塞入上下文；必须先读取基线�
 - 在途 Change 的 rebase 结论；
 - 结论：`COMPATIBLE`、`BLOCKED_PENDING_BASELINE_CHANGE` 或 `APPROVED_BASELINE_AMENDMENT`。
 
-这个文件从阶段 03 开始建立，在 09–13 设计时复核，在阶段 14 实现时仅追加发现，不擅自修改基线，在阶段 16 验收时完成回写核验。
+这个文件从阶段 03 开始建立，在 06–07 设计时复核，在阶段 08 实现时仅追加发现，不擅自修改基线，在阶段 10 验收时完成回写核验。
 
 ## 8. 角色和审批责任
 

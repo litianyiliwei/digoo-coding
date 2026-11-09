@@ -5,7 +5,7 @@
 - 建立阶段：05-feature-requirements
 - 最后复核阶段：
 - 当前基线版本：
-- 关联 US / AC / BR / FLOW / UC：
+- 关联 US / AC / BR / FLOW：
 
 ## 1. 基线状态快照
 
@@ -25,7 +25,7 @@
 | `docs/architecture/baseline-status.md` | | | READ / MISSING | |
 | `docs/product/acceptance-policy.md` | | | READ / MISSING | |
 | `docs/product/glossary.md` | | | READ / MISSING | |
-| 相关产品需求/流程/用例/故事/业务规则 | | | READ / N/A / MISSING | |
+| 相关产品需求/流程/用户故事/业务规则 | | | READ / N/A / MISSING | |
 | `docs/architecture/system-context.md` | | | READ / MISSING | |
 | `docs/architecture/domain-boundaries.md` | | | READ / MISSING | |
 | 相关 `openspec/specs/**` | | | READ / N/A / MISSING | |

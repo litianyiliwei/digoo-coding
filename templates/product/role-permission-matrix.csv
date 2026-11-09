@@ -1,0 +1,2 @@
+role_id,role_name,capability_id,capability,data_scope,access_level,source_ids,status,notes
+ROLE-001,PENDING,CAP-001,PENDING,PENDING,READ_WRITE,PENDING,DRAFT,PENDING

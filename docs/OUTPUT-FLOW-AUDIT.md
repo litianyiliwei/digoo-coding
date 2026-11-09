@@ -1,6 +1,7 @@
 # 阶段输出流转审计
 
 > 编号说明：本文记录重编号前的分析过程（旧编号 05/09/10/10b/11/12/13a–e/14b/15）。新编号映射：05→03、09→04、10→05、10b→06、11→07、12→08、13a→09、13b→10、13c→11、13d→12、13e→13、14b→15、15→16；以 `docs/WORKFLOW-STAGES.json` 为准。
+> 2026-11-09 vibe 重构说明：阶段已进一步合并为 01–10（06=原型/页面清单，07=详细设计/接口/测试，08=实现，09=独立验证，10=验收），旧产物拆分（use-cases/design-plan/frontend-design/backend-design/test-design/api-traceability）已并入新载体。本文的阶段编号与产物清单仅保留历史分析价值；当前权威以 `docs/STAGE-IO-OVERVIEW.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 为准。
 
 - Change ID：N/A（流程审计）
 - 状态：DRAFT（分析报告，不改变阶段契约）

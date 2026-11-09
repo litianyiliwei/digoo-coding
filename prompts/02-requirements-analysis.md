@@ -13,7 +13,7 @@
 1. 业务流程必须完整、不得遗漏：覆盖全部业务域的主流程、替代流程、异常流程和后置条件；每个流程拆到可执行节点，节点 ID 用 NODE-<流程号>-<序号>。
 2. 每个节点必须登记执行角色、输入数据对象、输出/写入数据对象、前置条件、处理动作、异常/分支、下一节点、关联业务规则。
 3. 建立业务数据对象目录（DO-xxx）并输出 RD 矩阵（rd-matrix.csv）：逐行登记需求/规则 → 流程节点 → 角色 → 数据对象 → 访问类型；每个节点至少一条 RD 记录（或 N/A + 理由）。
-4. 本阶段不输出用户故事与用例：UC/US/AC 留到阶段 05 提案级需求分析，由每个 Change 生成。
+4. 本阶段不输出用户故事、用例或 AC：US/AC 留到阶段 05 提案级需求分析，由每个 Change 生成；用例场景写入提案级 spec 的 Scenario，不单独产出 `use-cases` 文件。
 5. 完成后运行 `python scripts/check-requirements.py --strict`，失败不得推进；按阶段结束审计核对流程节点与 RD 矩阵覆盖。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 ```
@@ -37,8 +37,8 @@
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="requirements-analysis"` 的记录。
 
 - 输入核验：访谈/业务材料/旧系统资料；项目目标、用户、角色、约束；既有 docs/product/*；既有 OpenSpec specs（只读）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：docs/product/requirements-analysis.md；docs/product/workflows.md（含节点表）；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题。在报告中明确这些文件如何被下游（阶段 03 项目总体架构设计）消费。
+- 必须输出：docs/product/requirements-analysis.md；docs/product/workflows.md（含节点表）；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（运行 scripts/gen-baseline-index.py --write 生成）。按模板写入仓库，不要只在聊天中展示。
+- 下一步输入：业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题；常驻基线简报、角色权限矩阵、Change 切片规则、决策/假设登记、ID 约定与基线索引。在报告中明确这些文件如何被下游（阶段 03 项目总体架构设计）消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 

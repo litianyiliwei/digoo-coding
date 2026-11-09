@@ -9,7 +9,7 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 当流程进入“提案拆分、依赖排序与路线图”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
-已审并冻结的项目总体架构基线、业务流程/节点/RD 矩阵、业务规则、验收政策、open-questions、阶段 03 基线审计报告、风险、依赖和产品优先级。
+已审并冻结的项目总体架构基线、业务流程/节点/RD 矩阵、业务规则、验收政策、open-questions、`BASELINE-BRIEF.md`/`change-sizing.md`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md`（常驻基线）、阶段 03 基线审计报告、风险、依赖和产品优先级。
 
 ## 执行流程
 1. 按用户可感知且可独立验收的业务能力切分 Change，不按前端/后端/数据库横向切分。
@@ -55,7 +55,7 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="proposal-planning"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已冻结项目基线；产品需求/用户故事/AC；已知技术债与依赖。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已冻结项目基线；产品需求/用户故事/AC；docs/product/BASELINE-BRIEF.md、role-permission-matrix.csv、change-sizing.md、decisions.md、assumptions.md、lessons.md、id-conventions.md（基线常驻层与经验回写）；已知技术债与依赖。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** docs/product/proposal-roadmap.md；每个候选 Change 的范围/依赖/价值说明。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 经批准的 Change 列表、优先级、依赖顺序。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。

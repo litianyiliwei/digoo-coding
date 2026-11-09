@@ -5,11 +5,12 @@
 
 批准的基线：<baseline>
 需求业务梳理/RD 矩阵：<requirements-and-rd>
+切片规则与教训：<change-sizing-and-lessons>
 未决问题：<open-questions>
 阶段 03 审计报告：<baseline-audit-report>
 优先级/约束：<priorities>
 
-按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、风险、数据迁移、兼容和排序理由；提案级 UC/US/AC 在阶段 05 细化。先读取 open-questions 与阶段 03 审计报告，把未决问题和基线缺口带入候选 Change 的风险/依赖，不要擅自关闭。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
+按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、风险、数据迁移、兼容和排序理由；按 `docs/product/change-sizing.md` 标注每项的规模预算，超过预算必须拆分或记录理由与验收人；提案级 UC/US/AC 在阶段 05 细化。先读取 open-questions、decisions/assumptions、lessons 与阶段 03 审计报告，把未决问题、基线缺口和已知反模式带入候选 Change 的风险/依赖，不要擅自关闭。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 基线交互要求：为每个候选 Change 标注适用的产品/架构/数据/公共 API/前端/测试基线版本、需复用约束和潜在基线修订。功能局部变化留在 Change；跨功能公共约束变化列为基线变更候选，不得默认为已批准。
 ```
@@ -32,7 +33,7 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="proposal-planning"` 的记录。
 
-- 输入核验：已冻结项目基线；产品需求/用户故事/AC；已知技术债与依赖。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 输入核验：已冻结项目基线；产品需求/节点/RD/角色权限矩阵；`BASELINE-BRIEF.md`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`lessons.md`；已知技术债与依赖。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
 - 必须输出：docs/product/proposal-roadmap.md；每个候选 Change 的范围/依赖/价值说明。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：经批准的 Change 列表、优先级、依赖顺序。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。

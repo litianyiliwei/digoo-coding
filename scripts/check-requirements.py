@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate project requirement-business artifacts or a Change's proposal-level UC/US/AC."""
+"""Validate project requirement-business artifacts or a Change's proposal-level US/AC."""
 import csv, re, sys
 from pathlib import Path
 
@@ -150,15 +150,10 @@ def check_project():
 
 def check_change(change):
     base = ROOT / 'openspec/changes' / change / 'design'
-    uc_lines = read_lines(base / 'use-cases.md')
     us_lines = read_lines(base / 'user-stories.md')
-    placeholders(uc_lines, 'use-cases.md')
     placeholders(us_lines, 'user-stories.md')
-    ucs = report_duplicates(ids_from(uc_lines, r'^##\s+(UC-\d{3})\b'), 'use-cases.md')
     uss = report_duplicates(ids_from(us_lines, r'^\|\s*(US-\d{3})\s*\|'), 'user-stories.md')
     acs = report_duplicates(ids_from(us_lines, r'^###\s+(AC-\d{3})\b'), 'user-stories.md')
-    if not ucs:
-        ERRORS.append('use-cases.md: no UC-xxx sections found')
     if not uss:
         ERRORS.append('user-stories.md: no US-xxx table rows found')
     if not acs:
@@ -183,17 +178,16 @@ def check_change(change):
     nodes = set(re.findall(r'NODE-\d{3}-\d{2}', '\n'.join(workflows)))
     rules = read_lines(ROOT / 'docs/product/business-rules.md')
     brs = set(re.findall(r'BR-\d{3}', '\n'.join(rules)))
-    for label, lines in (('use-cases.md', uc_lines), ('user-stories.md', us_lines)):
-        for ref in set(re.findall(r'FLOW-\d{3}', '\n'.join(lines))):
-            if flows and ref not in flows:
-                ERRORS.append(f'{label}: references unknown {ref}')
-        for ref in set(re.findall(r'NODE-\d{3}-\d{2}', '\n'.join(lines))):
-            if nodes and ref not in nodes:
-                ERRORS.append(f'{label}: references unknown {ref}')
-        for ref in set(re.findall(r'BR-\d{3}', '\n'.join(lines))):
-            if brs and ref not in brs:
-                ERRORS.append(f'{label}: references unknown {ref}')
-    return f'UC={len(ucs)}, US={len(uss)}, AC={len(acs)}'
+    for ref in set(re.findall(r'FLOW-\d{3}', '\n'.join(us_lines))):
+        if flows and ref not in flows:
+            ERRORS.append(f'user-stories.md: references unknown {ref}')
+    for ref in set(re.findall(r'NODE-\d{3}-\d{2}', '\n'.join(us_lines))):
+        if nodes and ref not in nodes:
+            ERRORS.append(f'user-stories.md: references unknown {ref}')
+    for ref in set(re.findall(r'BR-\d{3}', '\n'.join(us_lines))):
+        if brs and ref not in brs:
+            ERRORS.append(f'user-stories.md: references unknown {ref}')
+    return f'US={len(uss)}, AC={len(acs)}'
 
 counts = check_change(CHANGE) if CHANGE else check_project()
 for w in WARNINGS:

@@ -16,8 +16,11 @@
 ## 模板与产物规则
 
 - 正式产物遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不得删除模板字段；未知项写 `PENDING` 并说明原因与责任人/阻塞条件；不适用项写 `N/A` 并写理由。
+- 阶段 02/03/04/05/10 开始前先读 `docs/product/BASELINE-BRIEF.md`、`change-sizing.md`、`id-conventions.md`；详细基线按 Change 影响面加载，不整包塞入上下文。基线产物缺失或 `check-requirements.py` 未通过时不得进入下游阶段。
 - 项目级基线放 `docs/product/`、`docs/architecture/`、`docs/adr/`；单个功能内容放 `openspec/changes/<change-id>/`。
 - 每份 Markdown 正式产物开头注明：Change ID（若适用）、状态、来源基线、关联需求/AC ID、生成日期或版本。
+- UI 相关 Change 的后续研发必须通过 Figma MCP 读取真实 Figma 文件/节点/组件/变量；涉及 UI 时 `design/figma-audit.md` 必填，MCP 不可用或读不到真实设计时阻断，不得用截图或臆造替代。
+- 测试用例矩阵放 `design/test-cases.csv`，TEST ID 必须回链 AC/PAGE/BLOCK/API/IO，并写入唯一 `traceability.csv`；不得只把测试写在 design.md 叙述里。
 
 ## OpenSpec 约定
 

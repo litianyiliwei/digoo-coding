@@ -9,13 +9,17 @@ Most scripts resolve the project root from their own location; file arguments to
 | `test-api-io-mapping.sh` | Temporary positive/negative fixtures verify API→IO checker behavior, including explicit no-API scope | Basic checker regressions are caught | Real project API/IO design is correct |
 | `check-acceptance.py <id>` | Acceptance result, evidence, reviewer and AC rows | Evidence sheet has no pending fields and includes accepted AC rows | Business acceptance is actually justified |
 | `check-package.py` | Skill/Prompt pairing, frontmatter and syntax checks | Package structure is consistent | Content/logic is correct |
-| `check-requirements.py [--strict]` | Declared workflow/use-case/story/AC/business-rule IDs and duplicates | Required IDs exist and declarations are unique | Semantic completeness is proven |
+| `check-requirements.py [--strict]` | Declared workflow/story/AC/business-rule IDs and duplicates | Required IDs exist and declarations are unique | Semantic completeness is proven |
 | `check-roadmap.py [--strict]` | Roadmap table IDs and duplicates | Proposal plan structurally consistent | Priority/business value are correct |
 | `check-required-files.sh [--strict]` | Baseline file presence and placeholder warnings | Required baseline files exist; strict rejects placeholders | Requirements/architecture are sound |
 | `new-change-assets.sh <id>` | Add supplemental design/evidence templates to an existing Change without overwriting files | Custom asset skeletons exist | OpenSpec artifacts are created/valid |
-| `check-design-assets.sh <id> [--strict] [--lint-api]` | Required API/frontend/backend/test/API→IO/catalog/traceability files; validates every operationId mapping | Detail-design assets exist and API→IO references are consistent | Design quality and runtime behavior are correct |
+| `check-design-assets.sh <id> [--strict] [--lint-api]` | `design.md` five sections, traceability, conditional OpenAPI/API→IO/catalog, and Figma audit for UI changes | Unified design assets exist and API→IO/Figma references are consistent | Design quality and runtime behavior are correct |
 | `check-change.sh <id> [--no-openspec]` | Change structure/tasks/specs and OpenSpec validation | Change structure validates | AC/business completeness is proven |
 | `check-inventory.py --change <id> [--strict]` or `--change <id> --no-ui --reason "..." --strict` | Page/block/event CSV columns, IDs and reference closure within that Change's design inventory | Inventory links are structurally sound | UI/interaction behavior is correct |
+| `check-design-sections.py --change <id>` | `design.md` five unified sections and their required subsections (frontend/backend/API/test detail) | Detailed design is not just a heading shell | Field semantics are correct |
+| `check-api-traceability.py --change <id> [--strict]` | Every OpenAPI operationId links to PAGE/EVT/AC in traceability.csv | API-to-UI/AC trace is closed | API behavior is correct |
+| `check-test-cases.py --change <id> [--strict]` | TEST ID uniqueness, required fields, AC/page/operationId/IO coverage, and TEST IDs linked in traceability.csv | Test-case matrix is structurally complete | Test assertions actually pass |
+| `check-figma-audit.py --change <id> [--strict]` / `--no-ui --reason "..." --strict` | UI Changes must have `design/figma-audit.md` with real Figma link/node and actual Figma MCP tool records | Figma design was actually read and mapped | Figma visual quality is correct |
 | `check-traceability.py --file <csv> [--strict]` | Traceability CSV columns, duplicate links and states | Trace edges are structurally sound | All semantic coverage exists |
 | `validate-openapi.sh <file>` | Redocly OpenAPI lint | Linter accepts the contract | Business semantics are correct |
 | `test-all.sh <dir>...` | Run detected test entrypoints | All requested detected test commands passed | Lint/build/E2E ran unless included in command |

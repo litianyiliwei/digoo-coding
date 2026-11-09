@@ -51,22 +51,24 @@ def run_baseline_gate(args, *, label):
     return result.stdout.strip()
 
 def baseline_phase_for_entry(step_id):
-    if step_id in ('05-feature-requirements','06-prototype-generation','07-page-interaction-inventory','08-figma-ui-audit','09-feature-design'):
+    if step_id in ('05-feature-requirements','06-ui-prototype-inventory'):
         return 'requirement'
-    if step_id in ('10-api-contract-design','11-frontend-detail-design','12-backend-detail-design','13-test-design','14-implementation-orchestrator'):
+    if step_id in ('07-detailed-design','08-implementation-orchestrator'):
         return 'design'
-    if step_id=='15-independent-verification':
+    if step_id=='09-independent-verification':
         return 'implementation'
-    if step_id=='16-acceptance-audit':
+    if step_id=='10-acceptance-audit':
         return 'acceptance'
     return None
 
 def baseline_phase_for_transition(step_id):
-    if step_id=='06-prototype-generation' or step_id=='09-feature-design' or step_id in ('10-api-contract-design','11-frontend-detail-design','12-backend-detail-design','13-test-design'):
-        return 'design' if step_id != '06-prototype-generation' else 'requirement'
-    if step_id in ('14-implementation-orchestrator','15-independent-verification'):
+    if step_id=='06-ui-prototype-inventory':
+        return 'requirement'
+    if step_id=='07-detailed-design':
+        return 'design'
+    if step_id in ('08-implementation-orchestrator','09-independent-verification'):
         return 'implementation'
-    if step_id=='16-acceptance-audit':
+    if step_id=='10-acceptance-audit':
         return 'acceptance'
     return None
 
@@ -96,7 +98,7 @@ def verify_manifest(path):
     for check in m.get('checks',[]):
         if check.get('status')!='passed': errors.append(f"Handoff contains failed check: {check.get('name','unnamed')}")
         if check.get('kind','automated')=='automated' and check.get('exit_code')!=0: errors.append(f"Handoff contains non-zero check: {check.get('name','unnamed')}")
-    if m.get('from_step')=='15-independent-verification':
+    if m.get('from_step')=='09-independent-verification':
         paths={a.get('path','') for a in m.get('artifacts',[])}
         if not any(x.endswith('independent-verification-report.md') for x in paths): errors.append('Verifier handoff missing Markdown report')
         if not any(x.endswith('independent-verification.json') for x in paths): errors.append('Verifier handoff missing JSON evidence')
@@ -194,7 +196,7 @@ def parse_evidence(path,step_id,change_id):
             else:
                 if not pp.is_file(): failed.append(c.get('name','unnamed check')+f': proof file missing: {proof}')
     if failed: raise ValueError('Gate checks failed: '+'; '.join(failed))
-    if step_id=='15-independent-verification':
+    if step_id=='09-independent-verification':
         paths={a['path'] for a in artifacts}
         required_suffixes=('independent-verification-report.md','independent-verification.json')
         for suffix in required_suffixes:
@@ -283,7 +285,7 @@ def cmd_handoff_create(args):
         evidence_data,artifacts=parse_evidence(args.evidence,args.from_step,cid)
         checks=evidence_data.get('checks',[]); approval=evidence_data.get('approval',{}); baseline_version=evidence_data.get('baseline_version','')
     else:
-        if args.from_step=='15-independent-verification': raise ValueError('Verifier handoff recovery requires --evidence so PASS proof is preserved')
+        if args.from_step=='09-independent-verification': raise ValueError('Verifier handoff recovery requires --evidence so PASS proof is preserved')
         if BY_ID[args.from_step]['human_approval_required'] and not args.approved:
             raise ValueError('Source stage requires --approved or an approved --evidence file')
         artifacts=[]
