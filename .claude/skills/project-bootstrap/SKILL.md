@@ -26,7 +26,7 @@ description: 项目初始化与工具链检查。初始化仓库上下文与工�
 ## 与 OpenSpec / Superpowers 的边界
 - OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
 - Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- pen.dev / Figma MCP 的输入必须基于实际可访问的链接、导出物和 MCP 返回结果。
+- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查

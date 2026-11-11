@@ -1,5 +1,9 @@
 # pen.dev 原型构建记录
 
+> 历史记录（2026-11-05）：本文件描述已退役的 pen.dev 原型流程。自 2026-11-11 起阶段 06 为 Figma-only，不再使用 pen.dev、`prototype.pen` 或 `PAGE-*.html`。
+> 2026-11-11 清理：本文件引用的原型快照与 pen 文件已移至 `_trash/2026-11-11/docs/design/`；以下路径保留为 2026-11-05 的历史记录。
+
+
 > 历史记录：2026-11-05 项目级原型；自 2026-11-06 起原型按提案级在 `openspec/changes/<change-id>/design/` 生成，本文件仅作为历史参考保留，不作为当前阶段输入。
 > 状态：DRAFT（历史产物；原型批准发生在当时的评审阶段）
 > 来源需求：docs/product/requirements-analysis.md、workflows.md、business-rules.md（APPROVED v0.4，2026-11-05）；历史 use-cases.md/user-stories.md 已归档，不作为输入。

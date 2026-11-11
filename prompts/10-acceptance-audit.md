@@ -11,7 +11,7 @@ AC/specs：<spec-paths>
 测试/构建报告：<evidence-paths>
 Figma/原型审计：<design-evidence>
 
-先确认阶段 09 的独立验证 Verdict=PASS，且验证 revision 与当前代码一致；不满足则停止验收。然后逐条验收 AC，记录结果、证据和责任人；核对 UI（涉及 UI 时对照 Figma 设计与 `figma-audit.md`）、接口、数据迁移、权限与可观测性。对照 `docs/product/change-sizing.md` 的 DoD 逐项核对；验收后向 `docs/product/lessons.md` 追加本次可复用教训（无则 N/A + 理由），并更新 `decisions.md`/`assumptions.md` 中受验收结果影响的条目状态。将发现分类为缺陷、需求变更或已批准偏差。列出阻断项、遗留风险、回滚/发布事项。验收通过后先判断并回写已批准的项目基线修订（更新基线域版本/审批/生效日期/在途 Change 复核），再单独执行 OpenSpec archive 合并行为规格。两者不是同一动作；功能专属细节保留在 Change。不要用 `-y` 绕过未完成任务或确认。
+先确认阶段 09 的独立验证 Verdict=PASS，且验证 revision 与当前代码一致；不满足则停止验收。然后逐条验收 AC，记录结果、证据和责任人；核对 UI（涉及 UI 时对照 Figma 评审稿、`figma-audit.md`（Figma MCP 落盘快照））、接口、数据迁移、权限与可观测性。对照 `docs/product/change-sizing.md` 的 DoD 逐项核对；验收后向 `docs/product/lessons.md` 追加本次可复用教训（无则 N/A + 理由），并更新 `decisions.md`/`assumptions.md` 中受验收结果影响的条目状态。将发现分类为缺陷、需求变更或已批准偏差。列出阻断项、遗留风险、回滚/发布事项。验收通过后先判断是否存在已批准的项目基线修订：需要修改基线时提交基线修订请求，经审批后通过 `baseline-governance.py open-amendment/close-amendment` 执行，不直接编写冻结基线；再单独执行 OpenSpec archive 合并行为规格。两者不是同一动作；功能专属细节保留在 Change。不要用 `-y` 绕过未完成任务或确认。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 基线交互要求：仅将已批准、已实现、已验证且具有跨功能复用价值的决策回写项目基线。功能专属 API、页面、表迁移、IO 和测试保留在归档 Change。更新基线版本和审批记录，并列出需重新核对的在途 Change。OpenSpec 主规格归档与项目设计基线回写是两项独立判断。
 ```
@@ -34,7 +34,7 @@ Figma/原型审计：<design-evidence>
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="acceptance-audit"` 的记录。
 
-- 输入核验：已实现代码与测试证据；已批准 AC/规格/追踪矩阵；design/user-stories.md、design/test-cases.csv；docs/product/acceptance-policy.md、change-sizing.md、lessons.md、BASELINE-BRIEF.md；代码审查记录；涉及 UI 时 design/figma-audit.md、design/design-spec.json 与 Figma 设计；部署/演示或验收环境证据。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 输入核验：已实现代码与测试证据；已批准 AC/规格/追踪矩阵；design/user-stories.md、design/test-cases.csv；docs/product/acceptance-policy.md、change-sizing.md、lessons.md、BASELINE-BRIEF.md、open-questions.md（只读）；代码审查记录；涉及 UI 时 design/figma-audit.md（Figma MCP 落盘快照）与 Figma 评审稿；部署/演示或验收环境证据。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
 - 必须输出：openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；OpenSpec archive 结果及更新后的主规格（仅批准后）；项目路线图/基线状态回写（适用时）；更新后的 docs/product/lessons.md（以及必要的 decisions.md/assumptions.md 状态变更）。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：已验收并归档的能力规格、验收证据、后续 Change 依赖。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。

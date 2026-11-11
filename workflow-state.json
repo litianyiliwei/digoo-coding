@@ -1,33 +1,37 @@
 {
   "project_name": "智慧农业项目",
-  "active_change_id": "",
+  "active_change_id": "platform-access",
   "completed_steps": [
     "01-project-bootstrap",
-    "02-requirements-analysis"
+    "02-requirements-analysis",
+    "03-project-architecture-baseline",
+    "04-proposal-planning",
+    "05-feature-requirements"
   ],
-  "current_step": "03-project-architecture-baseline",
+  "current_step": "06-figma-design-review",
   "pending_approvals": [],
-  "blocked_items": [],
-  "last_completed_outputs": [
-    "docs/product/requirements-analysis.md",
-    "docs/product/workflows.md",
-    "docs/product/data-objects.csv",
-    "docs/product/rd-matrix.csv",
-    "docs/product/business-rules.md",
-    "docs/product/glossary.md",
-    "docs/product/acceptance-policy.md",
-    "docs/product/open-questions.md",
-    "docs/product/BASELINE-BRIEF.md",
-    "docs/product/role-permission-matrix.csv",
-    "docs/product/change-sizing.md",
-    "docs/product/decisions.md",
-    "docs/product/assumptions.md",
-    "docs/product/lessons.md",
-    "docs/product/id-conventions.md",
-    "docs/product/BASELINE-INDEX.md"
+  "blocked_items": [
+    {
+      "step_id": "06-figma-design-review",
+      "sub_step": "06",
+      "reason": "Figma 设计已通过 Figma MCP 生成并回读（fileKey DyOnrbYYYxRN0sVuMcgIMd，6 个 PAGE、11 个颜色变量、14 个文字样式）；等待用户完成 UI 评审并把 figma-audit.md 的 UI 评审状态改为 APPROVED",
+      "owner": "用户（welly，设计负责人）",
+      "since": "2026-11-10"
+    }
   ],
-  "last_updated": "2026-11-09T09:31:16+00:00",
-  "notes": "2026-11-09 vibe 流程重构：当前 DAG 为 01–10；已完成 01，current_step 02 已按新契约重跑并等待产品负责人批准。旧 06–16 拆分阶段保留于 legacy 目录与历史记录。",
+  "last_completed_outputs": [
+    "openspec/changes/platform-access/proposal.md",
+    "openspec/changes/platform-access/specs/identity-access/spec.md",
+    "openspec/changes/platform-access/specs/audit-trail/spec.md",
+    "openspec/changes/platform-access/specs/platform-operations/spec.md",
+    "openspec/changes/platform-access/design.md",
+    "openspec/changes/platform-access/tasks.md",
+    "openspec/changes/platform-access/design/user-stories.md",
+    "openspec/changes/platform-access/design/baseline-impact.md",
+    "openspec/changes/platform-access/design/baseline-binding.json"
+  ],
+  "last_updated": "2026-11-11T08:28:44+00:00",
+  "notes": "阶段 06 改为 Figma-only：唯一 UI 产物为 design/figma-audit.md；pen.dev、prototype.pen、PAGE-*.html 移出流程并归档；07–10 只消费 figma-audit 与实时 Figma；frontend/product 基线走 BCR-2026-11-11-FIGMA-ONLY 修订。",
   "state_schema_version": "1.0",
   "transition_history": [
     {
@@ -230,54 +234,229 @@
         "approver": "用户（welly，代行业务负责人）",
         "approved_at": "2026-11-09"
       }
+    },
+    {
+      "step_id": "03-project-architecture-baseline",
+      "completed_at": "2026-11-10T02:43:43+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/03-project-architecture-baseline.json",
+      "outputs": [
+        "docs/architecture/system-context.md",
+        "docs/architecture/domain-boundaries.md",
+        "docs/architecture/containers-and-deployment.md",
+        "docs/architecture/data-flows.md",
+        "docs/architecture/logical-erd.md",
+        "docs/architecture/technology-decisions.md",
+        "docs/architecture/api-conventions.md",
+        "docs/architecture/frontend-conventions.md",
+        "docs/architecture/test-strategy.md",
+        "docs/adr/README.md",
+        "docs/architecture/baseline-status.md",
+        "docs/architecture/baseline-manifest.json",
+        "docs/architecture/constraint-registry.json",
+        "docs/project/baseline-audit-report.md"
+      ],
+      "checks": [
+        {
+          "name": "required-baseline-files-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-frozen-audit",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "package-self-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-index-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "openspec-specs-and-changes",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "product-architecture-tech-approval",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行业务/架构/技术负责人）",
+        "approved_at": "2026-11-10"
+      }
+    },
+    {
+      "step_id": "04-proposal-planning",
+      "completed_at": "2026-11-10T02:53:06+00:00",
+      "change_id": null,
+      "evidence_path": "workflow/evidence/04-proposal-planning.json",
+      "outputs": [
+        "docs/product/proposal-roadmap.md"
+      ],
+      "checks": [
+        {
+          "name": "roadmap-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-frozen-audit",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "package-self-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "requirements-structure-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-index-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "product-tech-roadmap-approval",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行业务/技术负责人）",
+        "approved_at": "2026-11-10"
+      }
+    },
+    {
+      "step_id": "05-feature-requirements",
+      "completed_at": "2026-11-10T03:04:10+00:00",
+      "change_id": "platform-access",
+      "evidence_path": "workflow/evidence/05-feature-requirements.json",
+      "outputs": [
+        "openspec/changes/platform-access/proposal.md",
+        "openspec/changes/platform-access/specs/identity-access/spec.md",
+        "openspec/changes/platform-access/specs/audit-trail/spec.md",
+        "openspec/changes/platform-access/specs/platform-operations/spec.md",
+        "openspec/changes/platform-access/design.md",
+        "openspec/changes/platform-access/tasks.md",
+        "openspec/changes/platform-access/design/user-stories.md",
+        "openspec/changes/platform-access/design/baseline-impact.md",
+        "openspec/changes/platform-access/design/baseline-binding.json"
+      ],
+      "checks": [
+        {
+          "name": "openspec-validate-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "requirements-change-strict",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "change-structural-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-impact-structure",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "baseline-binding-requirement",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "package-self-check",
+          "status": "passed",
+          "exit_code": 0
+        },
+        {
+          "name": "product-tech-proposal-approval",
+          "status": "passed",
+          "exit_code": null
+        }
+      ],
+      "approval": {
+        "required": true,
+        "status": "approved",
+        "approver": "用户（welly，代行业务/技术负责人）",
+        "approved_at": "2026-11-10"
+      }
     }
   ],
   "last_transition": {
-    "step_id": "02-requirements-analysis",
-    "completed_at": "2026-11-09T09:31:16+00:00",
-    "change_id": null,
-    "evidence_path": "workflow/evidence/02-requirements-analysis.json",
+    "step_id": "05-feature-requirements",
+    "completed_at": "2026-11-10T03:04:10+00:00",
+    "change_id": "platform-access",
+    "evidence_path": "workflow/evidence/05-feature-requirements.json",
     "outputs": [
-      "docs/product/requirements-analysis.md",
-      "docs/product/workflows.md",
-      "docs/product/data-objects.csv",
-      "docs/product/rd-matrix.csv",
-      "docs/product/business-rules.md",
-      "docs/product/glossary.md",
-      "docs/product/acceptance-policy.md",
-      "docs/product/open-questions.md",
-      "docs/product/BASELINE-BRIEF.md",
-      "docs/product/role-permission-matrix.csv",
-      "docs/product/change-sizing.md",
-      "docs/product/decisions.md",
-      "docs/product/assumptions.md",
-      "docs/product/lessons.md",
-      "docs/product/id-conventions.md",
-      "docs/product/BASELINE-INDEX.md"
+      "openspec/changes/platform-access/proposal.md",
+      "openspec/changes/platform-access/specs/identity-access/spec.md",
+      "openspec/changes/platform-access/specs/audit-trail/spec.md",
+      "openspec/changes/platform-access/specs/platform-operations/spec.md",
+      "openspec/changes/platform-access/design.md",
+      "openspec/changes/platform-access/tasks.md",
+      "openspec/changes/platform-access/design/user-stories.md",
+      "openspec/changes/platform-access/design/baseline-impact.md",
+      "openspec/changes/platform-access/design/baseline-binding.json"
     ],
     "checks": [
+      {
+        "name": "openspec-validate-strict",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "requirements-change-strict",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "change-structural-check",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "baseline-impact-structure",
+        "status": "passed",
+        "exit_code": 0
+      },
+      {
+        "name": "baseline-binding-requirement",
+        "status": "passed",
+        "exit_code": 0
+      },
       {
         "name": "package-self-check",
         "status": "passed",
         "exit_code": 0
       },
       {
-        "name": "requirements-structure-strict",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "baseline-index-check",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "openspec-specs-readonly",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "product-owner-approval",
+        "name": "product-tech-proposal-approval",
         "status": "passed",
         "exit_code": null
       }
@@ -285,8 +464,8 @@
     "approval": {
       "required": true,
       "status": "approved",
-      "approver": "用户（welly，代行业务负责人）",
-      "approved_at": "2026-11-09"
+      "approver": "用户（welly，代行业务/技术负责人）",
+      "approved_at": "2026-11-10"
     }
   },
   "legacy_completed_steps": [
@@ -334,55 +513,73 @@
         "01-project-bootstrap"
       ],
       "current_step": "02-requirements-analysis"
+    },
+    {
+      "at": "2026-11-11T07:47:16+00:00",
+      "reason": "2026-11-11 阶段 06 改为 Figma-only：移除 pen.dev/06a、PAGE HTML 与 build-figma-source/check-stage06a 门禁；阶段 ID 06-ui-prototype-inventory → 06-figma-design-review",
+      "legacy_steps": [],
+      "reset_steps": [],
+      "completed_steps": [
+        "01-project-bootstrap",
+        "02-requirements-analysis",
+        "03-project-architecture-baseline",
+        "04-proposal-planning",
+        "05-feature-requirements"
+      ],
+      "current_step": "06-figma-design-review"
     }
   ],
   "baseline": {
     "manifest": "docs/architecture/baseline-manifest.json",
     "constraint_registry": "docs/architecture/constraint-registry.json",
     "status": "docs/architecture/baseline-status.md",
+    "overall_version": "1.0.2",
+    "status_value": "FROZEN",
     "domains": {
       "product": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.2",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行业务负责人）",
+        "approver": "用户（welly，代行架构/技术负责人）",
+        "approved_at": "2026-11-11"
       },
       "architecture": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.0",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行架构负责人）",
+        "approver": "用户（welly，代行业务/架构/技术负责人）",
+        "approved_at": "2026-11-10"
       },
       "data_domain": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.0",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行架构负责人）",
+        "approver": "用户（welly，代行业务/架构/技术负责人）",
+        "approved_at": "2026-11-10"
       },
       "api": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.0",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行技术负责人）",
+        "approver": "用户（welly，代行业务/架构/技术负责人）",
+        "approved_at": "2026-11-10"
       },
       "frontend": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.2",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行技术负责人）",
+        "approver": "用户（welly，代行架构/技术负责人）",
+        "approved_at": "2026-11-11"
       },
       "test_quality": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
+        "version": "1.0.0",
+        "status": "FROZEN",
+        "owner": "用户（welly，代行技术负责人）",
+        "approver": "用户（welly，代行业务/架构/技术负责人）",
+        "approved_at": "2026-11-10"
       }
     }
-  }
+  },
+  "completed_substeps": [],
+  "current_substep": "06"
 }

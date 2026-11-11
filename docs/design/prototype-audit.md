@@ -1,5 +1,9 @@
 # pen.dev 原型评审
 
+> 历史记录（2026-11-05）：本文件描述已退役的 pen.dev 原型流程。自 2026-11-11 起阶段 06 为 Figma-only，不再使用 pen.dev、`prototype.pen` 或 `PAGE-*.html`。
+> 2026-11-11 清理：本文件引用的原型快照与 pen 文件已移至 `_trash/2026-11-11/docs/design/`；以下路径保留为 2026-11-05 的历史记录。
+
+
 > 历史记录：2026-11-05 项目级原型评审；自 2026-11-06 起原型评审按提案级（阶段 10b）在 `openspec/changes/<change-id>/design/prototype-audit.md` 生成。
 
 - 原型链接/导出版本：docs/design/prototype.pen（18 屏）+ docs/design/exports/ 18 张快照；评审版本 2026-11-05

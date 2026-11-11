@@ -9,27 +9,34 @@ Most scripts resolve the project root from their own location; file arguments to
 | `test-api-io-mapping.sh` | Temporary positive/negative fixtures verify API→IO checker behavior, including explicit no-API scope | Basic checker regressions are caught | Real project API/IO design is correct |
 | `check-acceptance.py <id>` | Acceptance result, evidence, reviewer and AC rows | Evidence sheet has no pending fields and includes accepted AC rows | Business acceptance is actually justified |
 | `check-package.py` | Skill/Prompt pairing, frontmatter and syntax checks | Package structure is consistent | Content/logic is correct |
+| `check-output-consumption.py` | Forward: each file output has a registered consumer; reverse: each input reference to an earlier output is registered | Output/consumer map is bidirectionally closed | Downstream semantics are correct |
 | `check-requirements.py [--strict]` | Declared workflow/story/AC/business-rule IDs and duplicates | Required IDs exist and declarations are unique | Semantic completeness is proven |
 | `check-roadmap.py [--strict]` | Roadmap table IDs and duplicates | Proposal plan structurally consistent | Priority/business value are correct |
 | `check-required-files.sh [--strict]` | Baseline file presence and placeholder warnings | Required baseline files exist; strict rejects placeholders | Requirements/architecture are sound |
 | `new-change-assets.sh <id>` | Add supplemental design/evidence templates to an existing Change without overwriting files | Custom asset skeletons exist | OpenSpec artifacts are created/valid |
 | `check-design-assets.sh <id> [--strict] [--lint-api]` | `design.md` five sections, traceability, conditional OpenAPI/API→IO/catalog, and Figma audit for UI changes | Unified design assets exist and API→IO/Figma references are consistent | Design quality and runtime behavior are correct |
 | `check-change.sh <id> [--no-openspec]` | Change structure/tasks/specs and OpenSpec validation | Change structure validates | AC/business completeness is proven |
-| `check-inventory.py --change <id> [--strict]` or `--change <id> --no-ui --reason "..." --strict` | Page/block/event CSV columns, IDs and reference closure within that Change's design inventory | Inventory links are structurally sound | UI/interaction behavior is correct |
+| `check-inventory.py --change <id> [--strict]` or `--change <id> --no-ui --reason "..." --strict` | Legacy page/block/event CSV checker for historical Changes; no longer part of stage 06 | Legacy inventory links are structurally sound | UI/interaction behavior is correct |
+| ~~`check-stage06a.py --change <id>`~~ | Removed with the Figma-only stage 06 rewrite; moved to `_trash/2026-11-11/scripts/legacy/` for history | N/A | N/A |
+| ~~`build-figma-source.py --change <id>`~~ | Removed with the Figma-only stage 06 rewrite; moved to `_trash/2026-11-11/scripts/legacy/` for history | N/A | N/A |
 | `check-design-sections.py --change <id>` | `design.md` five unified sections and their required subsections (frontend/backend/API/test detail) | Detailed design is not just a heading shell | Field semantics are correct |
 | `check-api-traceability.py --change <id> [--strict]` | Every OpenAPI operationId links to PAGE/EVT/AC in traceability.csv | API-to-UI/AC trace is closed | API behavior is correct |
-| `check-test-cases.py --change <id> [--strict]` | TEST ID uniqueness, required fields, AC/page/operationId/IO coverage, and TEST IDs linked in traceability.csv | Test-case matrix is structurally complete | Test assertions actually pass |
-| `check-figma-audit.py --change <id> [--strict]` / `--no-ui --reason "..." --strict` | UI Changes must have `design/figma-audit.md` with real Figma link/node and actual Figma MCP tool records | Figma design was actually read and mapped | Figma visual quality is correct |
+| `check-test-cases.py --change <id> [--strict]` | TEST ID uniqueness, required fields, AC/page/operationId/IO coverage (PAGE from figma-audit.md; BLOCK optional), and TEST IDs linked in traceability.csv | Test-case matrix is structurally complete | Test assertions actually pass |
+| `check-figma-audit.py --change <id> [--strict]` / `--no-ui --reason "..." --strict` | UI Changes must have `design/figma-audit.md` with real Figma link/node, actual Figma MCP tool records, PAGE -> node mapping and `- UI 评审状态：APPROVED` | Figma design was actually generated/read, mapped and reviewed | Figma visual quality is correct |
 | `check-traceability.py --file <csv> [--strict]` | Traceability CSV columns, duplicate links and states | Trace edges are structurally sound | All semantic coverage exists |
 | `validate-openapi.sh <file>` | Redocly OpenAPI lint | Linter accepts the contract | Business semantics are correct |
 | `test-all.sh <dir>...` | Run detected test entrypoints | All requested detected test commands passed | Lint/build/E2E ran unless included in command |
 | `verify-before-completion.sh <id> ...` | Run strict OpenSpec, diff and optional API/tests checks | Configured checks ran successfully | Human acceptance/release approval complete |
+| `check-code-review.py --change <id> [--strict]` | Stage 08 `design/evidence/code-review.md` must have real header fields, an approved conclusion, findings/status, and no unresolved TODO/PENDING markers | Code review evidence is structurally complete and closed | Review findings are technically correct |
 
 The scripts are intentionally fail-closed when they cannot run a required check. Adapt for Windows PowerShell if the repository does not use Bash/WSL/macOS/Linux.
 
 | `workflow.py status` | 展示工作流状态 | 状态 JSON 可读取且阶段 ID 合法 | 业务产物真实完成 |
 | `workflow.py check-entry --step <id>` | 阶段进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff | 阶段满足进入条件 | 当前阶段产物质量正确 |
-| `workflow.py transition --step <id> --evidence <json>` | 校验输出/门禁/审批，生成下游 handoff 并原子推进状态 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
+| `workflow.py transition --step <id> --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进状态 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
+| `workflow.py reopen --step <id> --reason <text>` | 返工回退：移除目标阶段及其下游依赖闭包，清理相关审批/阻断，current_step 回到目标阶段 | 回退完成并记录 reopen_history | 不校验返工后产物质量 |
+| `workflow.py next-change --change-id <id>` | 当前 Change 验收后归档 05–10，切换 active_change_id 并从 05 开始下一个 Change | 上一个 Change 已完成验收且无阻断 | 不支持并发 Change 调度 |
+| `workflow.py sync-baseline-index` | 从 baseline-manifest.json 同步 workflow-state.json 的基线版本/状态索引 | 状态索引与机器权威 Manifest 一致 | 不冻结或修改基线本身 |
 | `workflow.py handoff-verify --manifest <json>` | 校验交接包文件 SHA-256 | 交接文件未变化 | 文件语义正确 |
 | `check-independent-verification.py` | 验证独立验证报告和结构化证据 | AC/测试/revision/只读/发现项满足 PASS 规则 | 不能证明 Verifier Agent 身份真实独立 |
 | `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；15 必须保留独立验证 checker 证据 |

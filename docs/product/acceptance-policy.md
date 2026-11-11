@@ -1,6 +1,6 @@
 # 验收政策
 
-> 状态：BASELINE v1.1（2026-11-09 阶段 02 重跑校对：移除 UC 引用，阻断判定改为 BR 口径）
+> 状态：BASELINE v1.1（2026-11-11 流程澄清：阶段 06 改为 Figma-only，`design/figma-audit.md` 与 Figma 评审稿作为设计证据）
 > 来源基线：需求 v0.5（APPROVED 2026-11-05）、原型评审记录（2026-11-05）、阶段 02 节点级重跑（2026-11-09）
 > 关联需求/AC：全局验收政策，适用全部 FLOW/NODE/DO/BR 与提案级 US/AC
 > 生成日期：2026-11-05
@@ -9,7 +9,7 @@
 
 - 每条 AC 使用 Given / When / Then 或等价的可验证条件，并包含错误/边界分支。
 - AC 必须引用稳定的 US/FLOW/BR ID；不得只写自然语言描述。
-- 新增或修改 AC 必须回到 Change 的 `specs/<capability>/spec.md` 与 `design/user-stories.md` 登记；`prototype.md` 只作为设计证据，不作为 AC 登记处。
+- 新增或修改 AC 必须回到 Change 的 `specs/<capability>/spec.md` 与 `design/user-stories.md` 登记；`design/figma-audit.md` 与 Figma 评审稿只作为设计证据，不作为 AC 登记处。
 
 ## 2. 测试映射
 

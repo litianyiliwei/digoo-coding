@@ -15,9 +15,10 @@ NAMING = {
     "rule": "Figma 图层名必须与清单 ID 一致，供 08 figma-audit 的 figma_node_id 映射",
 }
 CONSTRAINT_TEXT = [
+    "必需输入：page-inventory.csv、block-inventory.csv、design-spec.json、示例风格图、项目设计规范（docs/architecture/frontend-conventions.md 第 9 节 + design tokens）。",
     "必须遵循：页面集合、区块顺序与边界、元素所属区块、状态覆盖、权限与导航行为、交互结果。",
     "允许优化：间距节奏、排版层级、组件质量、图标语义化、空态/错误态/无权限态设计、可访问性、一致性与动效。",
-    "不得作为输入：原型截图、原型临时占位画法与试错图标、原型的彩色值（颜色由设计 token 绑定）。",
+    "interaction-map.csv 用于事件、状态与权限核对，不替代上述设计输入；不得作为输入：原型截图、原型临时占位画法与试错图标、原型的彩色值（颜色由设计 token 绑定）。",
 ]
 
 args = sys.argv[1:]

@@ -30,9 +30,9 @@
 ## 4. 哪些输出必须模板化
 
 L1 强制模板包含（仅在矩阵中的适用条件成立时强制；不适用必须留下有原因的 N/A 记录）：
-- 需求：业务流程（节点表）、业务数据对象目录、RD 矩阵、提案级用户故事/验收标准、业务规则和待确认问题。
+- 需求：业务流程（节点表）、业务数据对象目录、RD 矩阵、提案级用户故事/验收标准、业务规则和未决问题。
 - OpenSpec：proposal、delta specs、design、tasks。
-- 设计：页面清单、交互事件清单、Figma 审计（涉及 UI 时必填；必须登记 Figma MCP 实际读取的 node/component/variable）、OpenAPI、统一详细设计（design.md 五节）、测试用例矩阵（test-cases.csv）、API→IO 映射、IO 目录、需求追踪矩阵。
+- 设计：Figma 设计与评审产物（`design/figma-audit.md`；涉及 UI 时必填，必须登记 Figma MCP 实际生成/读取的 node/component/variable、PAGE 清单与映射、MCP 读取记录与 UI 评审，并把读取结果落盘为下游界面输入）、OpenAPI、统一详细设计（design.md 五节）、测试用例矩阵（test-cases.csv）、API→IO 映射、IO 目录、需求追踪矩阵。
 - 验证：自动化检查结果、代码审查记录、人工验收矩阵、归档清单。
 
 L2 推荐模板包含：系统上下文、技术选型/ADR、部署与模块边界、数据流、逻辑 ERD、领域边界、API 约定、前端规范、测试策略、提案路线图和基线审计报告。

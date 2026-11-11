@@ -21,14 +21,11 @@ phase,output_name,template_level,template_path,required_traceability,validator_o
 提案,OpenSpec delta spec,L1,OpenSpec 内置 schema: specs/<capability>/spec.md,Requirement + Scenario,openspec validate + 人工评审,外部可观察行为,当 Change 改变外部可观察行为时必须生成；纯文档/工具/重构变更按 OpenSpec 约定评估是否 skip_specs
 提案,OpenSpec design,L1,OpenSpec 内置 schema: design.md,上下文/决策/风险/问题,人工技术评审,引用辅助详细设计,当 Change 存在重要技术决策/数据/集成/安全/性能影响时生成；若无设计决策按 active schema 的规则处理
 提案,OpenSpec tasks,L1,OpenSpec 内置 schema: tasks.md,- [ ] 可验证任务,openspec validate / task check,小步可验证,所有需要实现或验证的 Change 必须生成可勾选任务；纯说明性变更按实际工作拆分
-页面设计,页面清单,L1,templates/change-assets/design/page-inventory.csv,PAGE ID/需求/状态/路由,check-inventory.py,每 Change 一份,当本 Change 涉及页面或 UI 状态；无 UI 时在 Change 设计中说明 N/A 原因
-页面设计,功能区块清单,L1,templates/change-assets/design/block-inventory.csv,BLOCK ID/所属 PAGE/区块类型/职责/顺序/需求,check-inventory.py,每 Change 一份,每个页面至少一个区块；区块按业务功能划分而非视觉图层
-页面设计,交互事件清单,L1,templates/change-assets/design/interaction-map.csv,EVT/PAGE/BLOCK/ELEM/operationId,check-inventory.py,每 Change 一份,每个按钮/元素必须唯一归属一个区块；无交互时说明 N/A 原因
-UI 设计,Figma 审计,L2,templates/change-assets/design/figma-audit.md,PAGE→BLOCK→ELEMENT 到 node/component/variable 映射及区块覆盖,check-figma-audit.py + 人工设计评审,必须登记 Figma MCP 实际读取的 node/component/variable；不得用截图或臆造替代,涉及 UI 时必填；无 UI 时说明 N/A 原因
+UI 设计,Figma 审计,L2,templates/change-assets/design/figma-audit.md,设计来源与选择（Figma MCP AI 自动设计/人工 Figma 设计）、设计输入（需求与 AC/产品流程/Figma MCP/设计规范第 9 节）、PAGE 清单与 PAGE → Figma node/component/variable 映射、页面覆盖与 UI 评审,Figma MCP 实际读取 + check-figma-audit.py --strict + 人工 UI 评审（- UI 评审状态：APPROVED）,必须登记 Figma MCP 实际生成/读取的 node/component/variable；PAGE ID 由 06 冻结；Figma 评审稿是视觉/组件/变量权威；落盘快照供下游界面输入；Figma MCP 不可用或读不到真实设计时阻断；无 UI 时 N/A + 理由
 API 设计,OpenAPI 契约,L1,templates/change-assets/api/openapi.yaml,operationId/请求/响应/错误,validate-openapi.sh,唯一 API 契约来源,当本 Change 新增/修改 API；无 API 时 x-api-scope: none
 后端设计,API→IO 映射表,L1,templates/change-assets/design/api-io-mapping.csv,每 operationId 1+ IO ID,check-api-io-mapping.py,强制门禁,当 OpenAPI 有 operationId；每个 operationId 至少一个 IO ID
 后端设计,IO 操作目录,L1,templates/change-assets/design/io-catalog.csv,每个 IO 的契约/超时/重试/错误/测试,check-api-io-mapping.py,数据库与非数据库 IO,当 OpenAPI 有 operationId；每个 IO ID 都要被接口映射引用
-追踪设计,需求追踪矩阵,L1,templates/change-assets/traceability.csv,source → target → evidence,check-traceability.py,06 初始化；07 合并页面/API/测试映射；唯一追踪聚合文件,每个行为变更 Change 均需要；不适用的追踪边要有理由
+追踪设计,需求追踪矩阵,L1,templates/change-assets/traceability.csv,source → target → evidence,check-traceability.py,07 初始化 PAGE→AC 并合并 API 与测试映射；唯一追踪聚合文件,每个行为变更 Change 均需要；不适用的追踪边要有理由
 开发验证,代码审查记录,L1,templates/change-assets/evidence/code-review.md,问题/严重级/结论/证据,人工审查,Superpowers review,每个代码变更均需要；纯文档变更可记录 N/A 原因
 验收,验收记录,L1,templates/change-assets/evidence/acceptance.md,AC/证据/结果/签字,check-acceptance.py,产品责任人批准,每个可交付功能 Change 均需要
 交付复核,完成前检查,L1,scripts/verify-before-completion.sh,测试/构建/差异/未跟踪文件,实际命令退出码,不得伪报完成,每次合并/归档前
@@ -44,6 +41,5 @@ API 设计,OpenAPI 契约,L1,templates/change-assets/api/openapi.yaml,operationI
 项目基线治理,机器可读基线 Manifest,L1,templates/project-baseline/baseline-manifest.json,域/版本/状态/审批/文件 SHA-256,python3 scripts/baseline-governance.py audit --require-frozen,机器权威登记；禁止仅靠 Markdown 宣称冻结,每次基线冻结/修订必须更新
 项目基线治理,约束注册表,L1,templates/project-baseline/constraint-registry.json,Constraint ID/等级/适用范围/来源/执行器/审批,python3 scripts/baseline-governance.py audit --require-frozen,所有 ACTIVE 约束必须有稳定 ID/来源/责任人/审批,项目基线冻结与每次修订必须更新
 提案级需求分析/基线影响,Change 基线绑定 JSON,L1,templates/change-assets/design/baseline-binding.json,Change → 基线快照 → 全部 ACTIVE 约束 → 设计/实现证据/例外审批,baseline-governance.py check-change（requirement/design/implementation/acceptance）,机器权威约束追踪；不得删除约束项或把 PENDING 当通过,每个功能 Change 强制生成
-原型生成,原型与评审记录,L2,templates/change-assets/design/prototype.md,PAGE → AC/US/FLOW/BR + 评审结论,check-prototype-build.py --change + 人工评审,原型构建/MCP 调用/页面清单/评审合并记录,涉及 UI 的 Change 生成；无 UI 用 --no-ui --reason
 功能详细设计,统一详细设计五节,L1,OpenSpec 内置 schema: design.md,设计决策/接口/前端/后端/测试（含旧 frontend/backend/test-design 等价字段）,check-design-assets.sh + check-design-sections.py,与 OpenSpec design.md 同一文件；无 API/前端/后端写 N/A + 理由；子节由 detailed-design Skill 规定,每个 Change 生成；接口/前后端/测试不再拆独立文件
-测试设计,测试用例矩阵,L1,templates/change-assets/design/test-cases.csv,TEST ID → AC/PAGE/BLOCK/API/IO + 失败注入/替身环境/人工原因,check-test-cases.py,每条 AC/页面/区块至少一个用例；operationId/IO 覆盖；TEST ID 写入 traceability.csv,每个行为变更 Change 生成；无 UI/API 字段用 N/A + 理由
+测试设计,测试用例矩阵,L1,templates/change-assets/design/test-cases.csv,TEST ID → AC/PAGE/API/IO（BLOCK 可选）+ 失败注入/替身环境/人工原因,check-test-cases.py,每条 AC/页面/operationId/IO 至少一个用例；BLOCK 不强制；TEST ID 写入 traceability.csv,每个行为变更 Change 生成；无 UI/API 字段用 N/A + 理由

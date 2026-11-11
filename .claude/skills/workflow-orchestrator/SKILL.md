@@ -15,8 +15,8 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 4. 若存在待审批项、阻断项、上一步必需产物缺失、校验失败或关键问题待用户确认，停止自动推进，明确提出需要用户决策的事项。
 5. 只推进一个阶段；不得一次性执行多个阶段，不得跳过审批门禁。
 6. 按下一阶段 Prompt 和 Skill 执行。Prompt 路径在 `prompts/`，Skill 路径在 `.claude/skills/<skill-id>/SKILL.md`。
-7. 调用工具必须真实执行：OpenSpec CLI 用终端命令；Superpowers 按当前 Agent 的技能加载机制读取/调用技能；Figma/pen.dev 只能使用实际可用的 MCP 或已提供导出物。
-8. 完成后运行该阶段的检查脚本。只有产物实际存在、质量门禁通过且无需审批时，才把阶段加入 `completed_steps` 并更新 `current_step`。不得伪造测试结果。
+7. 调用工具必须真实执行：OpenSpec CLI 用终端命令；Superpowers 按当前 Agent 的技能加载机制读取/调用技能；Figma MCP 只能使用实际可用的 MCP 或已提供导出物。
+8. 完成后运行该阶段的检查脚本。只有产物实际存在、质量门禁通过且无需审批时，才通过 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>` 推进状态；禁止直接编辑 `completed_steps`/`current_step`。不得伪造测试结果。
 9. 如果当前阶段需要客户/产品/架构/设计人工批准，记录到 `pending_approvals`，等待用户明确批准后再继续。
 10. 输出：当前状态、检查证据、执行的工具/技能、下一步、阻断项。若只是分析尚未写入文件，不要标记完成。
 

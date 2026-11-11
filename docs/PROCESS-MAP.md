@@ -7,9 +7,9 @@
 | 03 项目总体架构设计 | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `scripts/check-required-files.sh --strict` + 技术选型访谈记录 + 阶段结束审计 `baseline-governance.py freeze` / `audit --require-frozen` |
 | 04 提案拆分、依赖排序与路线图 | `proposal-planning` | `prompts/04-proposal-planning.md` | `baseline-governance.py audit --require-frozen` + `scripts/check-roadmap.py --strict` |
 | 05 提案级需求分析 | `feature-requirements` | `prompts/05-feature-requirements.md` | `scripts/check-requirements.py --change <change-id> --strict`（UC 可选）+ `baseline-governance.py check-change --phase requirement` + `scripts/check-baseline-impact.py <change-id>` |
-| 06 原型、页面与交互清单 | `ui-prototype-inventory` | `prompts/06-ui-prototype-inventory.md` | `scripts/check-prototype-build.py --change <change-id> --strict` + `scripts/check-inventory.py --change <change-id> --strict` + 涉及 UI 时 `scripts/check-figma-audit.py --change <change-id> --strict`；需要几何/交接时 `check-design-spec.py` + `build-figma-handoff.py --check` |
-| 07 详细设计、接口与测试设计 | `detailed-design` | `prompts/07-detailed-design.md` | 涉及 UI 时必须通过 Figma MCP 读取真实 Figma 文件/节点/组件/变量，并对照 `figma-audit.md`；`scripts/check-change.sh <change-id>` + `scripts/check-design-assets.sh <change-id> --strict --lint-api` + `scripts/check-design-sections.py --change <change-id>` + `scripts/check-test-cases.py --change <change-id> --strict` + `scripts/check-traceability.py --strict` + 有 API 时 `scripts/check-api-traceability.py --change <change-id>` + `baseline-governance.py check-change --phase design` |
-| 08 实现、TDD、验证与代码审查 | `implementation-orchestrator` | `prompts/08-implementation-orchestrator.md` | `baseline-governance.py check-change --phase implementation` + `scripts/test-all.sh` + `verify-before-completion.sh` |
+| 06 Figma 设计与评审（Figma-only） | `figma-design-review` | `prompts/06-figma-design-review.md` | `scripts/check-figma-audit.py --change <change-id> --strict`（Figma MCP 实际生成/读取落盘 + PAGE 覆盖与映射 + UI 评审 APPROVED） |
+| 07 详细设计、接口与测试设计 | `detailed-design` | `prompts/07-detailed-design.md` | 涉及 UI 时必须通过 Figma MCP 读取真实 Figma 文件/节点/组件/变量，并读取 `figma-audit.md`；`scripts/check-change.sh <change-id>` + `scripts/check-design-assets.sh <change-id> --strict --lint-api` + `scripts/check-design-sections.py --change <change-id>` + `scripts/check-test-cases.py --change <change-id> --strict` + `scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict` + 有 API 时 `scripts/check-api-traceability.py --change <change-id>` + `baseline-governance.py check-change --phase design` |
+| 08 实现、TDD、验证与代码审查 | `implementation-orchestrator` | `prompts/08-implementation-orchestrator.md` | `baseline-governance.py check-change --phase implementation` + `scripts/test-all.sh` + `verify-before-completion.sh` + `scripts/check-code-review.py --change <change-id> --strict` |
 | 09 独立验证与验收证据 | `independent-verifier` | `prompts/09-independent-verification.md` | `scripts/check-independent-verification.py --report <report> --evidence <json>`；PASS 后才进入阶段 10 |
 | 10 人工验收、归档与基线回写 | `acceptance-audit` | `prompts/10-acceptance-audit.md` | `baseline-governance.py check-change --phase acceptance` + `scripts/check-acceptance.py <change-id>` + `verify-before-completion.sh` |
 
@@ -41,11 +41,14 @@
 
 每个阶段的正式输入、正式输出、下游消费关系、审批点与质量门禁，以 `docs/STEP-ARTIFACT-CONTRACTS.md` 和机器可读的 `docs/STEP-ARTIFACT-CONTRACTS.json` 为准。每个 Skill/Prompt 均内嵌对应契约引用。阶段结束必须展示 `templates/workflow/step-handoff-report.md`；未批准产物不得作为下一阶段正式输入。
 
+涉及 UI 时，阶段 06 的唯一 UI 产物是 `design/figma-audit.md`（Figma 文件/节点/组件/变量、PAGE 清单与映射、MCP 读取记录、UI 评审 APPROVED）；视觉规范为 Figma 变量/样式（Figma MCP 读取）与 `docs/architecture/frontend-conventions.md` 第 9 节；后续界面输入统一来自 Figma MCP，无法实时访问时以 `design/figma-audit.md` 落盘快照为稳定输入。Figma 评审稿是视觉/组件/变量最终权威，PAGE ID 由 06 冻结。不再使用 pen.dev、prototype.pen、PAGE-*.html、prototype.md、manifest.json、design-tokens.json、page-inventory/block-inventory/interaction-map/design-spec/figma-handoff。
+
 ## P0 Runtime Governance
 
 - 阶段 DAG 以 `docs/WORKFLOW-STAGES.json` 为准；状态转换只能通过 `scripts/workflow.py transition`。
-- 每次成功转换生成 SHA-256 handoff manifest；下游入口自动核验上游交接文件未漂移。
+- 每次成功转换生成 SHA-256 handoff manifest；下游入口自动核验上游交接文件未漂移；被后续阶段声明为输出的产物标记为 `mutable_by_design`，只核验存在性。
 - 阶段 08 实施后必须经过阶段 09 独立只读验证，PASS 后才进入阶段 10。
+- 返工使用 `workflow.py reopen --step <id> --reason <原因>`；当前 Change 验收后使用 `workflow.py next-change --change-id <id>` 开始下一个 Change。
 - 详细命令、Evidence JSON 和限制见 `docs/P0-RUNTIME-GOVERNANCE.md`。
 
 ## Baseline Governance Engine 门禁

@@ -40,7 +40,7 @@ description: 以只读、独立视角验证一个 OpenSpec Change 的实现是�
 
 ## 输入/输出/交接契约（强制）
 
-执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="independent-verifier"` 的契约。输入必须来自已批准 Change（含 `design/user-stories.md` 的提案级 US/AC、`design/test-cases.csv` 的 TEST 覆盖，以及涉及 UI 时的 `design/figma-audit.md`、`design/design-spec.json` 与 Figma 实际设计 与 `docs/product/acceptance-policy.md`）和阶段 08 的真实实现证据；输出必须落盘为 Markdown 报告与 JSON 证据；下游阶段 10 只消费 Verdict=PASS 且校验脚本退出码为 0 的报告。缺少输入、AC 证据或测试运行记录时阻断。
+执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="independent-verifier"` 的契约。输入必须来自已批准 Change（含 `design/user-stories.md` 的提案级 US/AC、`design/test-cases.csv` 的 TEST 覆盖，以及涉及 UI 时的 `design/figma-audit.md`（Figma MCP 读取落盘快照，可用时重新读取真实 Figma）与 Figma 评审稿，以及 `docs/product/acceptance-policy.md`、`docs/product/open-questions.md`（只读））和阶段 08 的真实实现证据；输出必须落盘为 Markdown 报告与 JSON 证据；下游阶段 10 只消费 Verdict=PASS 且校验脚本退出码为 0 的报告。缺少输入、AC 证据或测试运行记录时阻断。
 
 
 ## 独立基线约束验证（强制）

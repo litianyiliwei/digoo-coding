@@ -28,7 +28,7 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="implementation-orchestrator"` 的记录。
 
-- 输入核验：已批准 tasks.md/design.md；设计五节、OpenAPI、IO 契约；design.md（含测试设计节）、design/test-cases.csv 与 traceability.csv；项目级工程规范/测试策略；涉及 UI 时 Figma 设计（`design/figma-audit.md`、`design/design-spec.json`，按 Figma 实际设计实现）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 输入核验：已批准 tasks.md/design.md；设计五节、OpenAPI、IO 契约；design.md（含测试设计节）、design/test-cases.csv 与 traceability.csv；项目级工程规范/测试策略；docs/product/open-questions.md（只读）；涉及 UI 时 `design/figma-audit.md`（Figma MCP 读取落盘快照，可用时重新读取真实 Figma）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
 - 必须输出：实际源代码/迁移/配置；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md；实现/验证证据。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：代码差异、测试报告、审查结论、未解决问题。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
@@ -39,6 +39,10 @@
 
 Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `09-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
 
+
+## 代码审查内容门禁（必须执行）
+
+阶段 08 转出前运行 `python scripts/check-code-review.py --change <change-id> --strict`，退出码必须为 0。`design/evidence/code-review.md` 必须填写真实 Change ID、审查人/工具、审查日期或 commit、`Review conclusion`（PASS/APPROVED/NO_BLOCKING_FINDINGS）、发现项及其关闭状态，并说明规格、安全、数据一致性与失败路径的审查结论；TODO/PENDING 或未关闭发现项阻断阶段 08。
 
 ## 机器基线实现门禁（必须执行）
 

@@ -125,4 +125,118 @@ class WorkflowRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Human approval required'):
             w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
 
+    def _write_evidence(self, name, payload):
+        ep=self.root/name; ep.write_text(json.dumps(payload),encoding='utf-8'); return ep
+
+    def _transition(self, step, evidence):
+        args=type('Args',(),{'step':step,'evidence':str(evidence),'change_id':None})()
+        return w.cmd_transition(args)
+
+    def test_own_pending_approval_does_not_deadlock_transition(self):
+        state=w.load_state()
+        state['pending_approvals']=[{'step_id':'01-project-bootstrap','artifact':'out.md','reason':'awaiting approval'}]
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-10'}}
+        ep=self._write_evidence('approval-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        state=w.load_state()
+        self.assertEqual('02-requirements-analysis',state['current_step'])
+        self.assertEqual([],state['pending_approvals'])
+
+    def test_own_blocked_item_can_be_resolved_with_evidence(self):
+        state=w.load_state()
+        state['blocked_items']=[{'step_id':'01-project-bootstrap','reason':'awaiting external input'}]
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'},
+                  'resolved_blockers':[{'step_id':'01-project-bootstrap','resolution':'external input received','evidence':'check.log'}]}
+        ep=self._write_evidence('resolved-blocker-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        state=w.load_state()
+        self.assertEqual([],state['blocked_items'])
+
+    def test_own_blocked_item_requires_resolved_evidence(self):
+        state=w.load_state()
+        state['blocked_items']=[{'step_id':'01-project-bootstrap','reason':'awaiting external input'}]
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        ep=self._write_evidence('blocked-evidence.json',evidence)
+        self.assertEqual(3,self._transition('01-project-bootstrap',ep))
+
+    def test_own_pending_approval_requires_approved_evidence(self):
+        state=w.load_state()
+        state['pending_approvals']=[{'step_id':'01-project-bootstrap','artifact':'out.md'}]
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        ep=self._write_evidence('unapproved-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'requires approved evidence'):
+            self._transition('01-project-bootstrap',ep)
+
+    def test_reopen_removes_stage_and_all_dependents(self):
+        state={'project_name':'test','active_change_id':'','completed_steps':['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline'],
+               'current_step':'04-proposal-planning','pending_approvals':[{'step_id':'03-project-architecture-baseline'}],
+               'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        args=type('Args',(),{'step':'02-requirements-analysis','reason':'requirement rework','note':''})()
+        self.assertEqual(0,w.cmd_reopen(args))
+        state=w.load_state()
+        self.assertEqual(['01-project-bootstrap'],state['completed_steps'])
+        self.assertEqual('02-requirements-analysis',state['current_step'])
+        self.assertEqual([],state['pending_approvals'])
+        removed=state['reopen_history'][0]['removed_steps']
+        self.assertIn('03-project-architecture-baseline',removed)
+        self.assertIn('04-proposal-planning',removed)
+
+    def test_next_change_archives_change_phase_and_reopens_stage_05(self):
+        change_steps=[s['id'] for s in w.STAGES if s['scope']=='change']
+        state={'project_name':'test','active_change_id':'change-a','completed_steps':[s['id'] for s in w.STAGES],
+               'current_step':'ALL_STEPS_COMPLETE','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],'transition_history':[
+                   {'step_id':'10-acceptance-audit','change_id':'change-a','completed_at':'2026-11-10T00:00:00+00:00','evidence_path':'workflow/evidence/10.json'}]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        args=type('Args',(),{'change_id':'change-b','note':''})()
+        self.assertEqual(0,w.cmd_next_change(args))
+        state=w.load_state()
+        self.assertEqual('change-b',state['active_change_id'])
+        self.assertEqual('05-feature-requirements',state['current_step'])
+        self.assertFalse(any(x in state['completed_steps'] for x in change_steps))
+        self.assertIn('04-proposal-planning',state['completed_steps'])
+        self.assertEqual('change-a',state['completed_changes'][0]['change_id'])
+
+    def test_declared_downstream_output_is_mutable_in_handoff(self):
+        contract={'steps':[{'step':'01','outputs':['docs/out.md']},{'step':'05','outputs':['docs/out.md']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'docs/out.md').write_text('v1',encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        ep=self._write_evidence('mutable-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        manifest=self.root/'workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json'
+        self.assertTrue(w.verify_manifest(manifest)[0])
+        (self.root/'docs/out.md').write_text('v2 from downstream stage',encoding='utf-8')
+        ok,errors=w.verify_manifest(manifest)
+        self.assertTrue(ok,errors)
+
+    def test_transition_requires_all_declared_outputs_or_explicit_na_waiver(self):
+        contract={'steps':[{'step':'01','outputs':['docs/a.md','docs/b.md']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'docs/a.md').write_text('a',encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/a.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        ep=self._write_evidence('missing-output-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'omits declared stage outputs'):
+            self._transition('01-project-bootstrap',ep)
+        evidence['outputs'].append({'path':'docs/b.md','status':'n/a','required':False,'waiver_reason':'not applicable'})
+        ep=self._write_evidence('waived-output-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+
 if __name__=='__main__': unittest.main(verbosity=2)

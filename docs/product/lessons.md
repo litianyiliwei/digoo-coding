@@ -12,3 +12,4 @@
 |---|---|---|---|---|---|---|---|
 | LESSON-001 | 阶段 02 交接阶段 05 | 基线只有流程叙述，无 NODE 节点表、DO 目录与 RD 矩阵，提案级需求没有可引用的锚点 | 先写叙述、后补机器产物 | 阶段 02 先产出最小 NODE/DO/RD 集，再写叙述；`check-requirements.py` 未通过不得交接 | 02/05 | N/A（流程优化） | 2026-11-09 |
 | LESSON-002 | 基线索引维护 | `requirements-analysis.md` 把历史 UC/US 列为 APPROVED 产物，与实际职责不符 | 手写索引且未随重构更新 | 索引由 `scripts/gen-baseline-index.py` 生成，禁止手改 | 02 | N/A（流程优化） | 2026-11-09 |
+| LESSON-003 | 06a pen.dev 原型清理 | 按 `PAGE-` 前缀批量删除历史页面时误删 PAGE-002~006 的子节点，页面变空；页面/区块/交互清单仍保留内容 | 删除条件未限定 document 顶层；清单未从 pen.dev 重新读取 | 删除只匹配顶层页面框；保存后逐页 `Get` 核验 children 非空；清单必须从 pen.dev 读取后再生成 | 06a | platform-access | 2026-11-10 |

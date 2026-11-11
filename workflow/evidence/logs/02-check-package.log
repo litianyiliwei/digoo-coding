@@ -1,2 +1,0 @@
-Skills: 17; prompts: 12
-Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, output consumption, template matrix, Bash/Python syntax, API→IO regression tests.

@@ -20,7 +20,7 @@
 
 ## 强制交付物交接
 
-- 输入：阶段 08 的代码差异、测试报告、审查结论、批准规格、AC、基线快照、设计和测试契约、`design/test-cases.csv`；涉及 UI 时 `design/figma-audit.md`、`design/design-spec.json` 与 Figma 设计。
+- 输入：阶段 08 的代码差异、测试报告、审查结论、批准规格、AC、基线快照、设计和测试契约、`design/test-cases.csv`；涉及 UI 时 `design/figma-audit.md`（Figma MCP 读取落盘快照，可用时重新读取真实 Figma）与 Figma 评审稿；`docs/product/acceptance-policy.md`；`docs/product/open-questions.md`（只读；未决问题不得在验证中擅自关闭）。
 - 输出：独立验证 Markdown 报告和 JSON 证据，必须位于当前 Change 的 `design/evidence/`。
 - 下游输入：阶段 10 只读取 PASS 的验证报告、AC 证据、测试退出码、发现项和 revision。
 - 交接：生成 `templates/workflow/step-handoff-report.md`；调用 `scripts/workflow.py transition` 生成 SHA-256 manifest 并推进状态。

@@ -19,7 +19,7 @@
 | 教训/反模式 | `docs/product/lessons.md` | BASELINE v1.0 | 验收后回写的可复用失败模式 |
 | ID 约定 | `docs/product/id-conventions.md` | BASELINE v1.0 | 项目级/Change 级 ID 与并行分配规则 |
 | 验收政策 | `docs/product/acceptance-policy.md` | BASELINE v1.1 | AC 格式、测试映射、阻断项与证据要求 |
-| 基线状态 | `docs/architecture/baseline-status.md` | DRAFT / FROZEN / UNDER_AMENDMENT | 各基线域版本、冻结状态与审批 |
+| 基线状态 | `docs/architecture/baseline-status.md` | FROZEN | 各基线域版本、冻结状态与审批 |
 
 ## 当前缺口
 

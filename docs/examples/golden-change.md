@@ -84,7 +84,7 @@
 
 ## 6. 原型与页面清单（06 阶段）
 
-`design/prototype.md` 合并原型构建、MCP 调用、页面清单、页面-需求映射与评审结论；三份 UI 清单写入 `design/page-inventory.csv`、`block-inventory.csv`、`interaction-map.csv`。无 UI 时用 `--no-ui --reason "<原因>" --strict` 明确排除。
+阶段 06（Figma-only）的唯一 UI 产物是 `design/figma-audit.md`：通过 Figma MCP 生成并回读真实 Figma 设计，用户在真实 Figma 稿上完成 UI 评审，并把 MCP 读取结果与 PAGE 映射落盘，作为后续界面的稳定输入。不再使用 pen.dev、prototype.pen 或 PAGE HTML。无 UI 时用 `--no-ui --reason "<原因>" --strict` 明确排除。
 
 ## 7. 详细设计（design.md 五节）
 

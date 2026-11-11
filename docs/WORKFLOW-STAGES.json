@@ -55,10 +55,10 @@
       "human_approval_required": true
     },
     {
-      "id": "06-ui-prototype-inventory",
-      "title": "原型、页面与交互清单",
-      "skill": "ui-prototype-inventory",
-      "prompt": "prompts/06-ui-prototype-inventory.md",
+      "id": "06-figma-design-review",
+      "title": "Figma 设计与评审（Figma-only）",
+      "skill": "figma-design-review",
+      "prompt": "prompts/06-figma-design-review.md",
       "dependencies": [
         "05-feature-requirements"
       ],
@@ -71,7 +71,7 @@
       "skill": "detailed-design",
       "prompt": "prompts/07-detailed-design.md",
       "dependencies": [
-        "06-ui-prototype-inventory"
+        "06-figma-design-review"
       ],
       "scope": "change",
       "human_approval_required": true

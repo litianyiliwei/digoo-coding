@@ -33,7 +33,7 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 ## 与 OpenSpec / Superpowers 的边界
 - 若 OpenSpec 已初始化，运行 `openspec list --specs` 并读取相关已批准规格；本阶段不创建 Change。
 - 本阶段适用 Superpowers `brainstorming`，其作用是交互式澄清需求和比较方案；它不替代业务规格。只有实际发现并加载了技能才报告“已调用”。
-- pen.dev / Figma MCP 的输入必须基于实际可访问的链接、导出物和 MCP 返回结果。
+- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查

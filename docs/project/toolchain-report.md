@@ -36,7 +36,7 @@
 |---|---|---|---|---|
 | 仓库无业务源代码、构建配置与 CI | 无法运行业务测试；`test-all.sh`、`validate-openapi.sh` 依赖待适配 | 待阶段 03（架构）与阶段 08（实现）确定技术栈后补充 | 架构/技术负责人 | PENDING |
 | `master` 分支无任何提交，全部文件未跟踪 | 工具包与基线文件尚无版本保护 | 由用户决定首次提交内容与时机（本阶段按 Prompt 约定不自动提交） | 用户 | PENDING |
-| 业务技术栈未知（README 仅声明面向 pen.dev + Figma MCP + OpenSpec + Superpowers 工作流） | 代码/API 标识符约定无法写入 AGENTS.md | AGENTS.md 中已标记 PENDING，待架构阶段回写 | 技术负责人 | PENDING |
+| 业务技术栈未知（README 声明面向 Figma MCP + OpenSpec + Superpowers 工作流） | 代码/API 标识符约定无法写入 AGENTS.md | AGENTS.md 中已标记 PENDING，待架构阶段回写 | 技术负责人 | PENDING |
 | `docs/architecture/baseline-status.md` 为未填写模板（TODO 值） | 属阶段 01 预期输出，本次已按最小变更更新 | 已更新（见下），基线仍未冻结，属正常 | 用户确认 | OK |
 | Agent（Claude 桌面应用）无法交互执行终端对话框斜杠命令 | 不影响本阶段；后续阶段脚本均可用 Bash 工具真实执行 | 如遇限制改用 Bash 工具执行等价命令 | N/A | OK |
 

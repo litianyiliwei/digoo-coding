@@ -29,7 +29,7 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 ## 与 OpenSpec / Superpowers 的边界
 - OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
 - Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- pen.dev / Figma MCP 的输入必须基于实际可访问的链接、导出物和 MCP 返回结果。
+- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
@@ -56,7 +56,7 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="acceptance-audit"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；openspec/changes/<change-id>/design/user-stories.md（提案级 US/AC）、design/test-cases.csv（TEST 覆盖），以及涉及 UI 时的 design/figma-audit.md、design/design-spec.json 与 Figma 设计；docs/product/acceptance-policy.md；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；openspec/changes/<change-id>/design/user-stories.md（提案级 US/AC）、design/test-cases.csv（TEST 覆盖），以及涉及 UI 时的 design/figma-audit.md（Figma MCP 读取落盘快照）与 Figma 评审稿；docs/product/acceptance-policy.md、docs/product/open-questions.md（只读）；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；部署/演示或验收环境证据。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/design/evidence/acceptance.md；验收报告与批准记录；条件适用的项目基线文档/版本登记/在途 Change 复核；OpenSpec archive 结果及更新后的主规格（仅批准后）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已验收并归档的能力规格、验收证据、后续 Change 依赖。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。

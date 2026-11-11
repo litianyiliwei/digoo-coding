@@ -30,7 +30,7 @@
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
 - **Superpowers：** 使用 `brainstorming` 比较架构备选项、澄清领域边界与一致性取舍；先确认技能真实安装/可发现，不可用时说明并执行等价步骤。
 - **OpenSpec：** 若 CLI 可用，运行 `openspec list --specs`、`openspec list --changes` 核对基线与现有规格关系；本阶段不创建功能 Change。命令须真实执行并报告退出码/结果。
-- **pen.dev / Figma MCP：** 仅作为可访问的参考输入；不把不可读取内容当作已审查。
+- **Figma MCP：** 仅作为可访问的参考输入；不把不可读取内容当作已审查。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当产物写入指定路径、脚本与冻结审计通过且所需审批完成后，才将阶段记为完成。
 - **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件。
 

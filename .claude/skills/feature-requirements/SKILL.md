@@ -32,7 +32,7 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 ## 与 OpenSpec / Superpowers 的边界
 - OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
 - Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- pen.dev / Figma MCP 的输入必须基于实际可访问的链接、导出物和 MCP 返回结果。
+- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
@@ -58,7 +58,7 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-requirements"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；docs/product/BASELINE-BRIEF.md、change-sizing.md、role-permission-matrix.csv、decisions.md、assumptions.md、lessons.md、id-conventions.md（常驻基线）；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输入：** 已批准路线图/当前 Change 范围；项目需求业务梳理（workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy）与冻结基线；docs/product/BASELINE-BRIEF.md、change-sizing.md、role-permission-matrix.csv、decisions.md、assumptions.md、lessons.md、id-conventions.md（常驻基线）；docs/product/acceptance-policy.md（项目级验收口径；AC 与验收政策对齐）；关联 FLOW/NODE/DO/BR ID；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
 - **本阶段输出：** openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md（US/AC）；openspec/changes/<change-id>/design/baseline-impact.md（每个 Change 强制）；openspec/changes/<change-id>/design/baseline-binding.json。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
 - **下游交接：** 已批准的提案级 US/UC/AC、场景与业务规则、范围边界、需求追踪 ID、基线快照与约束绑定。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。

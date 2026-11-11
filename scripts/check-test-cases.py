@@ -25,7 +25,7 @@ change_dir = ROOT / 'openspec/changes' / change
 base = change_dir / 'design'
 TEST = base / 'test-cases.csv'
 US = base / 'user-stories.md'
-PAGE = base / 'page-inventory.csv'
+AUDIT = base / 'figma-audit.md'
 OPENAPI = change_dir / 'api' / 'openapi.yaml'
 IO = base / 'io-catalog.csv'
 TRACE = change_dir / 'traceability.csv'
@@ -93,12 +93,11 @@ for row in rows:
 for ac in sorted(acs - covered_acs):
     errors.append(f'AC coverage: {ac} has no test case (add a test row, or a manual row with status n/a + reason)')
 
-# Page coverage: every PAGE in page-inventory.csv must appear in at least one test case.
-if PAGE.is_file():
-    with PAGE.open(newline='', encoding='utf-8-sig') as f:
-        pages = { (r.get('page_id') or '').strip() for r in csv.DictReader(f) if (r.get('page_id') or '').strip() }
-else:
-    pages = set()
+# Page coverage: every PAGE frozen in 06 figma-audit.md must appear in at
+# least one test case.
+pages = set()
+if AUDIT.is_file():
+    pages = set(re.findall(r'PAGE-\d{3}', AUDIT.read_text(encoding='utf-8')))
 covered_pages = set()
 for row in rows:
     covered_pages.update(split_ids(row.get('page_ids')))

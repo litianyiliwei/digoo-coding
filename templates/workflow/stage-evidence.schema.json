@@ -7,8 +7,9 @@
     "step_id": {"type": "string", "minLength": 1},
     "change_id": {"type": ["string", "null"]},
     "baseline_version": {"type": "string"},
-    "outputs": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["path", "status"], "properties": {"path": {"type": "string"}, "status": {"enum": ["created", "updated", "verified", "draft", "missing", "blocked"]}, "required": {"type": "boolean"}, "role": {"type": "string"}}}},
+    "outputs": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["path", "status"], "properties": {"path": {"type": "string"}, "status": {"enum": ["created", "updated", "verified", "draft", "missing", "blocked", "n/a"]}, "required": {"type": "boolean"}, "role": {"type": "string"}, "waiver_reason": {"type": "string", "minLength": 1}}}},
     "checks": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "kind", "status"], "properties": {"name": {"type": "string"}, "kind": {"enum": ["automated", "manual"]}, "status": {"enum": ["passed", "failed", "not-run", "blocked"]}, "command": {"type": "string"}, "exit_code": {"type": "integer"}, "reviewer": {"type": "string"}, "log": {"type": "string"}}}},
+    "resolved_blockers": {"type": "array", "items": {"type": "object", "required": ["step_id", "resolution", "evidence"], "properties": {"step_id": {"type": "string"}, "resolution": {"type": "string", "minLength": 1}, "evidence": {"type": "string", "minLength": 1}}}},
     "approval": {"type": "object", "required": ["status"], "properties": {"required": {"type": "boolean"}, "status": {"enum": ["approved", "pending", "not-required"]}, "approver": {"type": "string"}, "approved_at": {"type": "string"}}}
   }
 }

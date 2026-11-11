@@ -33,7 +33,7 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="feature-requirements"` 的记录。
 
-- 输入核验：已批准路线图/当前 Change 范围；项目需求业务梳理与冻结基线；常驻基线简报、角色权限矩阵、切片规则与 DoD、决策/假设/教训；关联 FLOW/NODE/DO/BR/ROLE/CAP；现有 OpenSpec specs；docs/product/open-questions.md（只读）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 输入核验：已批准路线图/当前 Change 范围；项目需求业务梳理与冻结基线；常驻基线简报、角色权限矩阵、切片规则与 DoD、决策/假设/教训；关联 FLOW/NODE/DO/BR/ROLE/CAP；现有 OpenSpec specs；docs/product/open-questions.md（只读）；docs/product/acceptance-policy.md（项目级验收口径；AC 与验收政策对齐）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
 - 必须先执行 `bash scripts/new-change-assets.sh <change-id>` 创建辅助模板（若已存在则保留），再输出：openspec/changes/<change-id>/proposal.md；openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）；openspec/changes/<change-id>/tasks.md（初步任务）；openspec/changes/<change-id>/design.md（有设计决策时）；openspec/changes/<change-id>/design/user-stories.md（US/AC）。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：已批准的提案级 US/AC、场景与业务规则、范围边界、需求追踪 ID、基线绑定。在报告中明确这些文件如何被下游（阶段 06 原型、页面与交互清单）消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。

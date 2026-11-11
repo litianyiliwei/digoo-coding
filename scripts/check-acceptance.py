@@ -8,7 +8,7 @@ if len(sys.argv)!=2:
 change_id=sys.argv[1]
 if not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*',change_id):
     print('Invalid change-id; use lowercase kebab-case.',file=sys.stderr); sys.exit(2)
-path=ROOT/'openspec/changes'/change_id/'evidence/acceptance.md'
+path=ROOT/'openspec/changes'/change_id/'design/evidence/acceptance.md'
 if not path.is_file():
     print(f'MISSING: {path.relative_to(ROOT)}',file=sys.stderr); sys.exit(1)
 text=path.read_text(encoding='utf-8')

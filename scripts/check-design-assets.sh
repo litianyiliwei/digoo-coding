@@ -64,9 +64,15 @@ if (( STRICT )); then api_trace_args+=(--strict); fi
 "$PYTHON" "$ROOT/scripts/check-api-traceability.py" "${api_trace_args[@]}"
 
 # UI-bearing Changes must have consumed the real Figma design (not screenshots/guesses).
-figma_args=(--change "$CHANGE_ID")
-if (( STRICT )); then figma_args+=(--strict); fi
-"$PYTHON" "$ROOT/scripts/check-figma-audit.py" "${figma_args[@]}"
+# No-UI Changes either carry a figma-audit.md with 设计来源状态：N/A + 理由, or closed
+# stage 06 explicitly with --no-ui; in the latter case there is no file to re-check here.
+if [[ -f "$DIR/design/figma-audit.md" ]]; then
+  figma_args=(--change "$CHANGE_ID")
+  if (( STRICT )); then figma_args+=(--strict); fi
+  "$PYTHON" "$ROOT/scripts/check-figma-audit.py" "${figma_args[@]}"
+else
+  echo "Figma audit: design/figma-audit.md absent; stage 06 must have declared no UI."
+fi
 
 if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
   io_args=("$OPENAPI" "$API_MAP" "$IO_CATALOG")
