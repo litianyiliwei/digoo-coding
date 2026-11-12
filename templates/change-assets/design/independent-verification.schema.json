@@ -120,6 +120,72 @@
     "builder_identity": {
       "type": "string",
       "minLength": 1
+    },
+    "layout_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "page_id",
+          "figma_node",
+          "asserted_elements",
+          "max_delta_px",
+          "tolerance_px",
+          "missing_elements",
+          "result",
+          "evidence"
+        ],
+        "properties": {
+          "page_id": {
+            "type": "string",
+            "pattern": "^PAGE-\\d{3}$"
+          },
+          "figma_node": {
+            "type": "string",
+            "minLength": 1
+          },
+          "asserted_elements": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_delta_px": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tolerance_px": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "missing_elements": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN",
+              "PENDING",
+              "SKIPPED"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          },
+          "differences": {
+            "type": "string"
+          },
+          "deviation_approved": {
+            "type": "boolean"
+          },
+          "approved_by": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

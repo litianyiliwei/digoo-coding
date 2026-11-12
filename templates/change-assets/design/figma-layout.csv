@@ -1,0 +1,8 @@
+page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes
+PAGE-001,PENDING,PAGE-001-E01,3:3,0,0,600,900,.brand-panel,Y,N,2,,,品牌区容器；坐标相对 PAGE 画板
+PAGE-001,PENDING,PAGE-001-E02,3:4,22,382,176,53,.brand-panel h1,Y,Y,4,智慧农业,44px,700,品牌标题
+PAGE-001,PENDING,PAGE-001-E03,3:8,810,265,420,370,.form-card,Y,N,2,,,表单卡
+PAGE-001,PENDING,PAGE-001-E04,3:9,829,284,96,29,.form-card h2,Y,Y,4,登录平台,24px,700,表单标题
+PAGE-001,PENDING,PAGE-001-E05,3:12,829,397,382,40,[data-figma-node="3:12"],Y,N,2,,,账号输入容器
+PAGE-001,PENDING,PAGE-001-E06,3:17,829,545,66,39,[data-figma-node="3:17"],Y,Y,2,登录,14px,500,登录按钮
+PAGE-001,PENDING,PAGE-001-E07,3:19,829,602,382,14,.login-hint,Y,Y,4,消费者扫码查询无需登录；监管账号为只读。,12px,400,底部说明；含逗号/分号的文本必须用 CSV 引号

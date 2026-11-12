@@ -32,6 +32,15 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 - 阶段要求人工批准时，证据中有 `approval.status=approved`、approver、approved_at；
 - 上游交接包存在且哈希未变化。
 
+### UI 一致性门禁
+
+涉及 UI 的 Change 还必须满足以下条件才允许推进：
+- 06：`design/figma-audit.md` 是唯一 UI 契约（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、MCP 读取记录、UI 评审 APPROVED）；同时产出 `design/figma-code/`（06 按总体技术选型转码的 `.vue`/`.tsx` 目标框架设计代码）与 `design/figma-layout.csv`（断言映射）；`check-figma-audit.py --strict --require-framework` 退出码 0；不使用截图。
+- 08：直接移植目标框架设计代码、只补业务逻辑；`design/evidence/code-review.md` 含 `## UI fidelity`，逐 PAGE 有 Figma node、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论与审批人；数值直接取自 JSON，仅差异/`UI-DERIVED` PAGE 需人工说明；`check-figma-layout.py` 与 `check-design-tokens.py` 退出码 0；`check-code-review.py --strict` 退出码 0。
+- 09：`independent-verification.json` 含 `layout_checks`，逐 PAGE 覆盖断言元素数/最大偏差/容差/缺失元素/判定/证据并独立重跑 `check-figma-layout.py`；`check-independent-verification.py` 退出码 0；有 `differences` 但未 `deviation_approved` 不得 PASS。
+- 10：`acceptance.md` 含 `## UI acceptance`，逐 PAGE 由设计负责人签收；无差异 PAGE 按机器证据批量签收，差异/`UI-DERIVED` PAGE 并排核对；`check-acceptance.py` 退出码 0。
+- 07/08 默认离线消费 06 导出包；仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。缺失上述任一 UI 证据时，不得 transition 或归档。
+
 状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python3 scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
 
 ### 审批解除与死锁边界

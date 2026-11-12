@@ -23,6 +23,7 @@
 - 上游需求/故事/AC：
 - 本阶段产物 ID：
 - 下游消费关系：
+- UI 一致性（涉及 UI）：`figma-code/` / `figma-layout.csv` 断言覆盖、`figma-layout-check.json` 最大偏差与差异结论（路径与结论；不使用截图）
 - 未覆盖/不适用项及理由：
 
 ## 4. 自检与工具执行证据
@@ -54,6 +55,7 @@
 
 - 下一阶段：
 - 下一阶段必须读取：
+- UI 证据（涉及 UI）：`design/figma-audit.md`、`design/figma-code/`、`design/figma-layout.csv`、`design/evidence/figma-layout-check.json`、`code-review.md` 的数值 UI fidelity / `layout_checks` / `UI acceptance`（不使用截图）
 - 输入完整性：PASS / FAIL
 - 是否允许推进：YES / NO
 - 需要用户确认的问题：

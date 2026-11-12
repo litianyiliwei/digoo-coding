@@ -24,7 +24,7 @@
 
 ## 2. 总体结论
 
-当前 01–10 主链路已闭合：01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10。每个阶段的文件型输入均可追溯到上游阶段或明确的“包内静态/外部材料”；57 个文件型输出全部有登记消费者（其中 1 个为纯证据），反向校验未发现“已读取但未登记”的引用（0 条）。状态机已在真实流程中验证：阶段 03 冻结后成功推进到 04，`check-entry 04` 返回 `ENTRY_READY`。
+当前 01–10 主链路已闭合：01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10。每个阶段的文件型输入均可追溯到上游阶段或明确的“包内静态/外部材料”；59 个文件型输出全部有登记消费者（其中 1 个为纯证据），反向校验未发现“已读取但未登记”的引用（0 条）。状态机已在真实流程中验证：阶段 03 冻结后成功推进到 04，`check-entry 04` 返回 `ENTRY_READY`。
 
 本轮复核确认的边界与设计选择：
 
@@ -49,8 +49,8 @@
 | 09 独立验证 | 08 代码/revision/code-review/测试证据；05 proposal/spec/design/tasks/US；06 figma-audit；07 API/IO/test-cases/traceability；03/05 基线；Figma | independent-verification-report.md/json → 10 | 输入闭合；仅 10 消费；要求与 Builder 不同执行上下文。 |
 | 10 验收归档 | 09 report/json；08 代码/测试/code-review；05 spec/US/traceability/design；06 figma-audit；07 test-cases；部署证据；05 baseline-impact/binding；03 baseline-status；02 acceptance-policy/BASELINE-BRIEF/change-sizing/lessons/decisions/assumptions/id-conventions | acceptance.md（纯证据）；lessons/decisions/assumptions → 后续 03/04/05/10；验收报告/批准记录；需要基线修订时提交修订请求并走 amendment 流程 | 输入闭合；10 的读后写已补；acceptance 标记 `evidence_only`；归档规格成为后续 Change 输入。 |
 
-> 复核证据（2026-11-11）：`check-output-consumption.py` 通过，57 个文件输出 / 1 个纯证据 / 0 条未登记反向引用；`check-step-contracts.py` 11 条契约对应 10 个 DAG 阶段；`stage-io-report.py --check` 为最新。2026-11-11 阶段 06 规则收敛后重新生成。
-> 计数说明：早期版本曾记录 59 个文件输出；阶段 06 改为 Figma-only 并移除旧 06a 产物后，实际登记为 57 个。后续以脚本输出为准。
+> 复核证据（2026-11-11）：`check-output-consumption.py` 通过，59 个文件输出 / 1 个纯证据 / 0 条未登记反向引用；`check-step-contracts.py` 11 条契约对应 10 个 DAG 阶段；`stage-io-report.py --check` 为最新。2026-11-11 阶段 06 规则收敛后重新生成。
+> 计数说明：阶段 06 收敛后实际为 57 个；本轮补齐 07 对 `baseline-impact.md` 与 `baseline-binding.json` 的更新输出声明后为 59 个。后续以脚本输出为准。
 
 ### 3.1 旧 17 阶段逐阶段表（历史，勿用于当前流程）
 
@@ -180,7 +180,7 @@
 | F-15 | 09 的三个输出合并为一个 `docs/product/proposal-roadmap.md`（范围/依赖/价值/基线适用域/潜在修订都作为该文件的字段） |
 | F-16 | 13c 的“测试用例/组件状态映射”固定为 `frontend-design.md` 的章节，不再作为无路径内容输出 |
 
-消费映射现为 57 个文件输出；无 evidence-only 输出（所有文件输出都有明确消费者或属于运行时/未来阶段）。
+消费映射现为 59 个文件输出（含 07 重新声明的 2 个基线产物）；无 evidence-only 输出（所有文件输出都有明确消费者或属于运行时/未来阶段）。
 
 ## 10. 2026-11-10 当前 01–10 拓扑修复记录
 
@@ -198,7 +198,7 @@
 | R-08 | 06 的 `prototype.md`/`design-spec.json`/`figma-handoff.*` 实际被 08/09/10 读取但未登记 | 补齐 5 条 `consumed_by`；`check-output-consumption.py` 增加反向校验 |
 | R-09 | 旧拓扑 handoff 残留在 project 目录 | 移入 `workflow/handoffs/legacy/` |
 | R-10 | workflow-orchestrator 仍要求手工改 `completed_steps`/`current_step` | 改为必须通过 `transition` |
-| R-11 | Figma 设计输入没有统一定义 | 在阶段 06/07 Prompt/Skill、Figma 审计与交接模板、契约和逐阶段表统一为：page-inventory.csv、block-inventory.csv、design-spec.json、示例风格图、项目设计规范；`interaction-map.csv` 仅用于事件/状态/权限核对，原型截图不得作为设计输入；`check-figma-audit.py --strict` 强制审计表包含五项输入 |
+| R-11 | Figma 设计输入没有统一定义 | 在阶段 06/07 Prompt/Skill、Figma 审计与交接模板、契约和逐阶段表统一为：`figma-audit.md` + `figma-code/`（设计代码（get_design_context 落盘））+ `figma-layout.csv`（运行态断言映射）+ 真实图片/SVG 资产 + 项目设计规范；不使用参考截图，`check-figma-audit.py --strict` 强制节点完整性与断言子集 |
 
 并行阶段 03 工作已同步修正约束来源章节：当前 22 条约束的 `file`/`section` 全部可定位，`audit --require-frozen` 不再报告来源缺失。
 
@@ -229,3 +229,13 @@
 | R-19 | 06a 的 `prototype.pen` 与 `PAGE-*.html` 形成“两次设计、两套工具链”，且 HTML 只是被 Figma 生成消费的中间物 | 阶段 06 收敛为 `06-figma-design-review`：唯一产物 `design/figma-audit.md`（Figma MCP 生成/读取快照 + PAGE 清单与映射 + UI 评审 APPROVED）；删除 `check-stage06a.py` 与 `build-figma-source.py` 门禁（归档到 `scripts/legacy/`）；07–10 只消费 figma-audit 与实时 Figma |
 | R-20 | `figma-audit.md` 原先只校验 HTML 存在的 PAGE，无法独立定义页面集合 | `check-figma-audit.py` 改为从 `## 页面覆盖` 解析 PAGE ID，要求每个 PAGE 在节点映射中闭合；`check-test-cases.py` 也从 figma-audit 读取 PAGE |
 | R-21 | `frontend-conventions.md` §11/§13 与 `acceptance-policy.md` 仍引用 06a HTML | 通过 `BCR-2026-11-11-FIGMA-ONLY` 修订 frontend/product 基线并重新冻结；旧版本 v1.0.1 → v1.0.2 |
+
+## 13. 2026-11-12 UI 一致性流程收敛
+
+依据用户指令（合并 Figma 落盘文件、按“导出一次、下游离线消费”改造流程；版本控制与 MCP 中断由用户保证，限流需流程规避）：
+
+- 06 唯一 UI 契约收敛为 `design/figma-audit.md`（token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、资产清单、MCP 读取记录、UI 评审 APPROVED）与 `design/figma-code/`（设计代码（get_design_context 落盘））、`design/figma-layout.csv`（运行态断言映射）；不再拆分每页/每状态子目录或生成分散 token/contract JSON；**不使用截图，不保存参考图**。
+- 06 一次性完整导出（`get_variable_defs` 全程一次、`get_metadata` 每 PAGE 一次、`get_design_context` 按需）；07/08 默认离线消费，仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。
+- 07 必须建 token → CSS 变量/Element Plus 主题/字体映射、填满 `figma-layout.csv` 的 route/dom_selector 并定义响应式规则；08 必须落地全局 token 层与字体，运行 `check-figma-layout.py`（Figma 节点几何 vs 1440×900 运行态 DOM）与 `check-design-tokens.py`，在 `code-review.md` 的 `## UI fidelity` 写逐 PAGE 数值表与 `figma-layout-check.json`；09 在 `layout_checks` 独立核验；10 直接对照运行系统与 Figma 文件在 `## UI acceptance` 逐 PAGE 人工签收；**全流程不使用截图**。
+- 机器门禁：`check-figma-audit.py --strict`（06，节点/断言映射完整性）、`check-design-sections.py`（07，route/dom_selector 与响应式规则）、`check-figma-layout.py` + `check-design-tokens.py` + `check-code-review.py --strict`（08）、`check-independent-verification.py`（09 `layout_checks`）、`check-acceptance.py`（10 UI acceptance 运行入口/签收）；缺失任一 UI 数值证据阻断推进/归档；截图不作为门禁证据。
+- 契约与模板已同步：`docs/STEP-ARTIFACT-CONTRACTS.json/.md`、`docs/STAGE-IO-OVERVIEW.md`、`docs/OUTPUT-TEMPLATE-MATRIX.csv`、`templates/change-assets/design/figma-audit.md`、`templates/change-assets/evidence/code-review.md`、`templates/change-assets/evidence/acceptance.md`、`templates/change-assets/design/independent-verification-report.md` 及其 schema。

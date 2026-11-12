@@ -37,6 +37,15 @@
 - 基线约束：
 - OpenSpec tasks：
 
+## UI 一致性验证（涉及 UI 时必须）
+
+> 逐 PAGE 使用独立重跑的运行态几何断言 `evidence/figma-layout-check.json`；不使用截图。
+> `layout_checks` 必须与本文表格一致；任 PAGE 缺失证据、超差或有未批准差异时 Verdict 不得 PASS。
+
+| PAGE | Figma node | 断言元素数 | 最大偏差 | 缺失/差异 | 判定 |
+|---|---|---|---|---|---|
+| PAGE-001 | `3:2` | 8 | 0.0px / tol 2px | 无 | PASS/FAIL/NOT_RUN |
+
 ## 5. 发现项
 
 | ID | 严重程度 | 描述 | 复现步骤/证据 | 责任阶段 |

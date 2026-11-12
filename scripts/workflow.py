@@ -53,7 +53,10 @@ def output_paths_for_step(step_id,cid=None):
         paths.append(path)
     return paths
 
+MULTI_WRITER_ARTIFACTS={'baseline-binding.json'}
+
 def has_later_declared_output(path,sid,cid=None):
+    if Path(str(path)).name in MULTI_WRITER_ARTIFACTS:return True
     current=contract_step_num(sid)
     if current is None:return False
     for row in contract_doc().get('steps',[]):
@@ -74,7 +77,13 @@ def missing_declared_outputs(evidence,sid,cid=None):
     if not declared:return []
     ready={norm_path(o.get('path','')) for o in evidence.get('outputs',[]) if o.get('status') in ('created','updated','verified')}
     waived={norm_path(o.get('path','')) for o in evidence.get('outputs',[]) if o.get('status')=='n/a' and o.get('waiver_reason')}
-    return [p for p in declared if norm_path(p) not in ready and norm_path(p) not in waived]
+    def satisfied(path):
+        p=norm_path(path)
+        if p.endswith('/'):
+            # Directory outputs are satisfied by any handed-off file under that directory.
+            return p in waived or any(r.startswith(p) for r in ready)
+        return p in ready or p in waived
+    return [p for p in declared if not satisfied(p)]
 
 def atomic_json(path:Path,data):
     path.parent.mkdir(parents=True,exist_ok=True)

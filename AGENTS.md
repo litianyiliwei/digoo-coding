@@ -20,10 +20,12 @@
 - 项目级基线放 `docs/product/`、`docs/architecture/`、`docs/adr/`；单个功能内容放 `openspec/changes/<change-id>/`。
 - 每份 Markdown 正式产物开头注明：Change ID（若适用）、状态、来源基线、关联需求/AC ID、生成日期或版本。
 - UI 相关 Change 的界面阶段（06）为 Figma-only：
-  - 以已批准的提案需求/AC、产品流程与 `docs/architecture/frontend-conventions.md` 第 9 节为输入，通过 Figma MCP AI 生成真实 Figma 设计；用户必须在真实 Figma 评审稿上完成 UI 评审。
-  - 设计完成后必须通过 Figma MCP 实际读取真实文件/节点/组件/变量，并把读取结果落盘到 `design/figma-audit.md`（唯一 UI 产物）；UI 评审状态必须为 `APPROVED`。Figma MCP 不可用或读不到真实设计时阶段阻断；不得用截图或臆造替代。
-  - PAGE ID 与页面集合在 06 冻结；07–10 的界面输入统一来自 Figma MCP，无法实时访问时以 `figma-audit.md` 落盘快照为稳定输入；不得新增或重命名 PAGE。
-  - 不再使用 pen.dev、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json` 或 `design/design-tokens.json`。
+  - 以已批准的提案需求/AC、产品流程、`docs/architecture/frontend-conventions.md` 第 9 节与 `docs/architecture/technology-decisions.md`（总体技术选型）为输入，通过 Figma MCP AI 生成真实 Figma 设计；用户必须在真实 Figma 评审稿上完成 UI 评审。
+  - **框架对齐转码（强制）**：06 必须在调用 `get_design_context` 前加载官方 `figma-design-to-code` Skill，并先按总体技术选型确定目标框架；返回的参考实现必须转码为目标框架设计代码：技术选型为 Vue 时输出 Vue SFC（`.vue`，使用该端组件库（Web 为 Element Plus，移动端为 uni-app）与项目 token），为 React 时输出 React（`.tsx`/`.jsx`，使用项目组件库与 token）。`figma-code/README.md` 必须记录目标框架、扩展名、组件/样式/token 替换与偏差；禁止把 React/Tailwind 原始参考实现直接当作交付代码，08 只在此基础上补业务逻辑，不重写样式/布局/文案。
+  - 设计完成后必须通过 Figma MCP 实际读取真实文件/节点/组件/变量，并把 token **实际值**（颜色 hex、字号/行高、间距/圆角/阴影）、文字样式、每 PAGE 区块规格、状态覆盖与决策、设计代码（含目标框架与转码说明）、断言范围、MCP 读取记录、UI 评审 APPROVED 落盘到唯一单文件 `design/figma-audit.md`；同时导出 `design/figma-code/`（目标框架设计代码）与 `design/figma-layout.csv`（运行态断言映射）。**截图不是契约、资产或门禁证据**：`get_design_context` 返回的渲染只能即时用作视觉对照，不得保存、登记或入库；真实图片/SVG 资产放 `design/figma-assets/`，由 README 登记文件/来源 node/sha256/尺寸，无资产写“无”。Figma MCP 不可用或读不到真实设计时阶段阻断；不得用截图或臆造替代。
+  - 06 一次性完整导出；07/08 默认离线消费 `figma-audit.md`、`figma-code/` 与 `figma-layout.csv`，仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。07 必须在 design.md 建 token → CSS 变量/Element Plus 主题/字体映射，填满 `figma-layout.csv` 的 `route`/`dom_selector` 并定义 `### 响应式与视口规则`；08 必须直接以目标框架设计代码为页面骨架（只补业务逻辑/路由/API/状态），落地全局 token 层与字体，运行 `check-figma-layout.py`（Figma 节点几何 vs 1440×900 运行态 DOM，元素缺失/超差即 FAIL）与 `check-design-tokens.py`，生成 `design/evidence/figma-layout-check.json`。**UI 验证以机器证据为主**：`code-review.md` 的 `## UI fidelity` 逐 PAGE 数值直接从 JSON 抄录，只有存在差异/`UI-DERIVED` 的 PAGE 才需要人工说明与审批人；09 在 `independent-verification.json` 的 `layout_checks` 独立重跑并核验（缺失、超差或未批准差异不得 PASS），人工抽查仅限差异/`UI-DERIVED` PAGE；10 在 `acceptance.md` 的 `## UI acceptance` 逐 PAGE 签收，无差异且机器 PASS 的 PAGE 可按机器证据批量签收，仅差异/`UI-DERIVED` PAGE 需并排核对。**全流程不保存截图；截图不是 UI 证据。** 缺失这些 UI 数值证据不得推进对应阶段或归档。
+  - PAGE ID 与页面集合在 06 冻结；不得新增或重命名 PAGE。Figma 未定义的弹窗/抽屉/状态必须新增 Figma 画板，或以 `UI-DERIVED` 记录视觉规格、审批人与理由。
+  - 不再使用 pen.dev、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json`、`design/design-tokens.json` 或分散的 token/contract JSON。
 - 测试用例矩阵放 `design/test-cases.csv`，TEST ID 必须回链 AC/PAGE/BLOCK/API/IO，并写入唯一 `traceability.csv`；不得只把测试写在 design.md 叙述里。
 
 ## OpenSpec 约定

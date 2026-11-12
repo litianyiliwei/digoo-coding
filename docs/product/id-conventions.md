@@ -1,10 +1,10 @@
 # ID 命名与分配约定
 
 - Change ID：N/A（项目级）
-- 状态：BASELINE v1.0（2026-11-09 基线优化；待产品负责人批准）
+- 状态：DRAFT
 - 来源基线：docs/TEMPLATE-POLICY.md、各阶段模板
 - 关联需求/AC：全部稳定 ID
-- 生成日期/版本：2026-11-09
+- 生成日期/版本：PENDING
 
 ## 1. 两层 ID
 

@@ -12,6 +12,8 @@
 | 故障处理 | `systematic-debugging` | 复现、定位根因、验证修复，不做随机修改 |
 | 代码审查 | `requesting-code-review`、`receiving-code-review` | 根据规格/计划检查并核实审查反馈 |
 | 完成前验证 | `verification-before-completion` | 用真实命令和结果证明功能已修复/实现 |
+| 07 详细设计 | `brainstorming`、`writing-plans` | 用 `brainstorming` 比较数据模型、接口形态、状态流转与测试策略的取舍；用 `writing-plans` 把已批准 spec/AC 拆成设计任务与测试计划；必须记录方法证据 |
+| 09 独立验证 | `verification-before-completion`、`systematic-debugging`（只读） | 用 `verification-before-completion` 要求真实命令/退出码/测试结果；用 `systematic-debugging` 复现失败、定位根因但不修复代码；不得用 code review 技能替代独立验证 |
 | 分支结束 | `finishing-a-development-branch` | 在所有验证通过后讨论合并/PR/清理，不能自动发布 |
 
 技能名称和触发规则可能随 Superpowers 版本及 Agent 适配有所变化。实施前先检查当前安装内容；若缺少技能，应明确报告并执行等价的显式流程，不要声称调用了不存在的技能。
@@ -20,6 +22,7 @@
 ## 必须执行而非只提及
 
 - 每个阶段 Prompt 必须先加载对应的项目 Skill，并检查适用的 Superpowers 技能是否实际可用。
+- 详细设计必须实际使用 `brainstorming` 与 `writing-plans`，并记录方法证据；独立验证必须使用 `verification-before-completion`，独立运行 OpenSpec `status`/`validate`，不能用 code review 技能替代独立验证。
 - 需求业务梳理阶段明确使用 `brainstorming`；它通常发生在正式 OpenSpec Change 之前，因此先读取已有 specs，不要提前创建 Change。
 - OpenSpec 相关阶段必须运行真实 CLI：用 `openspec list/status/instructions/validate` 读取状态和规则；只有用户批准且门禁通过后才 archive。
 - 若 Agent 没有仓库/终端/Skill 访问能力，必须请求用户提供文件或说明无法执行，不能模拟工具结果。

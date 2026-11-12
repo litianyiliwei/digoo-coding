@@ -1,10 +1,10 @@
 # Change 切片规则与完成定义
 
 - Change ID：N/A（项目级）
-- 状态：BASELINE v1.0（2026-11-09 基线优化）
-- 来源基线：需求 v0.5、docs/product/proposal-roadmap.md
-- 关联需求/AC：N/A（规则层，被全部 Change 引用）
-- 生成日期/版本：2026-11-09
+- 状态：DRAFT
+- 来源基线：docs/product/requirements-analysis.md、proposal-roadmap.md
+- 关联需求/AC：N/A
+- 生成日期/版本：PENDING
 
 ## 1. 什么是一个 Change
 
@@ -50,4 +50,4 @@
 
 - 阶段 04 拆分路线图时读取第 1–3 节并标注每个候选 Change 的预算。
 - 阶段 05 开始前读取第 4 节，作为提案级需求的准入检查。
-- 阶段 10 验收时逐项核对 DoD。
+- 阶段 16 验收时逐项核对 DoD。

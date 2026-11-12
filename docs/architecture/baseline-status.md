@@ -1,40 +1,30 @@
 # 项目基线状态与版本登记
 
 - 项目名称：智慧农业项目
-- 总体基线版本：`v1.0.2`
-- 总体状态：FROZEN
-- 最近生效日期：2026-11-11
-- 产品负责人：用户（welly，代行业务负责人）
-- 架构负责人：用户（welly，代行架构负责人）
-- 技术负责人：用户（welly，代行技术负责人）
-- 基线仓库版本/Commit：工作区（未提交变更除外）
+- 总体基线版本：`v0.1.0`
+- 总体状态：DRAFT
+- 最近生效日期：N/A（尚未冻结）
+- 产品负责人：PENDING（待业务/产品负责人指定；阻塞条件：阶段 02 需求基线评审）
+- 架构负责人：PENDING（待架构负责人指定；阻塞条件：阶段 03 架构基线评审）
+- 技术负责人：PENDING（待技术负责人指定；阻塞条件：阶段 03 技术选型评审）
+- 基线仓库版本/Commit：PENDING（基线冻结时按阶段 03 证据登记）
 
-> **机器权威来源：** `docs/architecture/baseline-manifest.json`。本 Markdown 仅供人审阅；版本、冻结状态、审批和哈希以 JSON Manifest 为准。
-> **约束权威来源：** `docs/architecture/constraint-registry.json`。所有适用的 MUST / SHOULD / MAY / PROHIBITED 规则必须有稳定 Constraint ID。
-> 禁止只修改本文件来宣称冻结或升级；必须同时通过 `scripts/baseline-governance.py audit`。
+> 机器权威来源：`docs/architecture/baseline-manifest.json`（阶段 03 生成；当前尚不存在）。
+> 约束权威来源：`docs/architecture/constraint-registry.json`（阶段 03 生成；当前尚不存在）。
+> 本文件为阶段 01（project-bootstrap）初始化产物；2026-11-12 清理全部流程输出后按 `templates/project-baseline/baseline-status.md` 重建，仅登记 DRAFT 状态，未冻结任何域。
 
 ## 1. 各基线域版本
 
-| 基线域 | 权威文件 | 版本 | 状态 | 审批人 | 生效日期 | 最近关联 ADR |
+| 基线域 | 权威文件 | 版本 | 状态 | 审批人 | 生效日期 | 最近关联 Change / ADR |
 |---|---|---|---|---|---|---|
-| 产品 | `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md` | v1.0.2 | FROZEN | 用户（welly，代行） | 2026-11-11 | N/A |
-| 架构 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`technology-decisions.md`、`docs/adr/README.md` | v1.0.0 | FROZEN | 用户（welly，代行） | 2026-11-10 | ADR-001~014 |
-| 数据与领域 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | v1.0.0 | FROZEN | 用户（welly，代行） | 2026-11-10 | ADR-003/010 |
-| 公共 API | `docs/architecture/api-conventions.md` | v1.0.0 | FROZEN | 用户（welly，代行） | 2026-11-10 | ADR-006 |
-| 前端工程 | `docs/architecture/frontend-conventions.md` | v1.0.2 | FROZEN | 用户（welly，代行） | 2026-11-11 | ADR-002 |
-| 测试与质量 | `docs/architecture/test-strategy.md` | v1.0.0 | FROZEN | 用户（welly，代行） | 2026-11-10 | ADR-007 |
+| 产品 | `docs/product/*` | v0.1.0 | DRAFT | PENDING（待产品负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
+| 架构 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`technology-decisions.md`、`docs/adr/*` | v0.1.0 | DRAFT | PENDING（待架构负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
+| 数据与领域 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | v0.1.0 | DRAFT | PENDING（待架构负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
+| 公共 API | `docs/architecture/api-conventions.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
+| 前端工程 | `docs/architecture/frontend-conventions.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
+| 测试与质量 | `docs/architecture/test-strategy.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
 
-> 当前 22 条约束均为 ACTIVE；机器权威以 `constraint-registry.json` 与 `baseline-manifest.json` 为准。
-
-## 1.1 服务清单
-
-| 服务 | 领域 | 一期状态 | 说明 |
-|---|---|---|---|
-| `platform-service` | DOM-001、DOM-009 | 启用 | 身份、RBAC、审计、通知、系统配置 |
-| `mes-service` | DOM-002~005、DOM-007、DOM-008 | 启用 | 农业 MES 主服务：计划、任务、作业、库存、批次、溯源、监管 |
-| `iot-service` | DOM-006 | 启用 | 设备、遥测、预警、控制、适配层 |
-| `gis-service` | DOM-010 | 启用 | 地块几何、图层、GeoJSON、PostGIS |
-| `ecommerce-service` | DOM-011 | 远期预留，默认不部署 | 商品、订单、支付、售后；启用前需产品基线修订 |
+> 上述域文件尚未生成（由阶段 02/03 产出）；当前仅登记域与预期版本，不代表基线已建立。
 
 ## 2. 生效规则
 
@@ -50,21 +40,19 @@
 - MINOR：新增兼容的共享规则、实体/公共约定或质量要求。
 - MAJOR：改变系统边界、数据所有权、公共契约或可能导致既有功能不兼容的约束。
 
+项目可采用其他策略，但必须在此明确并保持一致。
+
 ## 4. 当前待处理的基线修订
 
 | 修订 ID | 影响域 | 提出来源 Change | 变更摘要 | 状态 | 负责人/审批人 | 生效版本 |
 |---|---|---|---|---|---|---|
-| N/A | N/A | N/A | 初次冻结，无修订 | N/A | 产品/架构/技术负责人 | v1.0.0 |
-| BCR-2026-11-11-FRONTEND-06 | 前端工程、产品 | 流程修复（阶段 06 收敛） | 修正冻结后漂移；明确设计令牌以 Figma MCP 读取结果为准，不再维护 design-tokens.json；acceptance-policy 同步 06 产物定义 | CLOSED | 用户（welly，代行架构/技术负责人） | v1.0.1 |
-| BCR-2026-11-11-FIGMA-ONLY | 前端工程、产品 | 流程调整（阶段 06 改为 Figma-only） | 移除 06a/pen.dev/PAGE HTML 引用；06 唯一 UI 产物改为 figma-audit.md；验收设计证据同步 | CLOSED | 用户（welly，代行架构/技术负责人） | v1.0.2 |
+| N/A | N/A | N/A | 暂无基线修订（基线尚未建立，阻塞于阶段 02/03） | N/A | PENDING（待负责人指定） | N/A |
 
 ## 5. 冻结批准记录
 
 | 基线版本 | 审批范围 | 审批人 | 日期 | 证据/会议记录 |
 |---|---|---|---|---|
-| v1.0.0 | 产品、架构、数据与领域、公共 API、前端工程、测试与质量 | 用户（welly，代行业务/架构/技术负责人） | 2026-11-10 | `workflow/evidence/03-architecture-baseline-approval.md` |
-| v1.0.1 | 前端工程、产品（阶段 06 规则收敛与冻结漂移修正） | 用户（welly，代行架构/技术负责人） | 2026-11-11 | `workflow/evidence/baseline-amendment-2026-11-11-frontend.md` |
-| v1.0.2 | 前端工程、产品（阶段 06 改为 Figma-only） | 用户（welly，代行架构/技术负责人） | 2026-11-11 | `workflow/evidence/baseline-amendment-2026-11-11-figma-only.md` |
+| N/A | N/A（尚无冻结基线） | PENDING（待业务/架构/技术负责人） | N/A | N/A |
 
 ## 6. 机器登记操作
 

@@ -1,585 +1,74 @@
 {
   "project_name": "智慧农业项目",
-  "active_change_id": "platform-access",
+  "active_change_id": "",
   "completed_steps": [
-    "01-project-bootstrap",
-    "02-requirements-analysis",
-    "03-project-architecture-baseline",
-    "04-proposal-planning",
-    "05-feature-requirements"
+    "01-project-bootstrap"
   ],
-  "current_step": "06-figma-design-review",
+  "current_step": "02-requirements-analysis",
   "pending_approvals": [],
-  "blocked_items": [
-    {
-      "step_id": "06-figma-design-review",
-      "sub_step": "06",
-      "reason": "Figma 设计已通过 Figma MCP 生成并回读（fileKey DyOnrbYYYxRN0sVuMcgIMd，6 个 PAGE、11 个颜色变量、14 个文字样式）；等待用户完成 UI 评审并把 figma-audit.md 的 UI 评审状态改为 APPROVED",
-      "owner": "用户（welly，设计负责人）",
-      "since": "2026-11-10"
-    }
-  ],
+  "blocked_items": [],
   "last_completed_outputs": [
-    "openspec/changes/platform-access/proposal.md",
-    "openspec/changes/platform-access/specs/identity-access/spec.md",
-    "openspec/changes/platform-access/specs/audit-trail/spec.md",
-    "openspec/changes/platform-access/specs/platform-operations/spec.md",
-    "openspec/changes/platform-access/design.md",
-    "openspec/changes/platform-access/tasks.md",
-    "openspec/changes/platform-access/design/user-stories.md",
-    "openspec/changes/platform-access/design/baseline-impact.md",
-    "openspec/changes/platform-access/design/baseline-binding.json"
+    "AGENTS.md",
+    "docs/architecture/baseline-status.md",
+    "docs/project/toolchain-report.md"
   ],
-  "last_updated": "2026-11-11T08:28:44+00:00",
-  "notes": "阶段 06 改为 Figma-only：唯一 UI 产物为 design/figma-audit.md；pen.dev、prototype.pen、PAGE-*.html 移出流程并归档；07–10 只消费 figma-audit 与实时 Figma；frontend/product 基线走 BCR-2026-11-11-FIGMA-ONLY 修订。",
+  "last_updated": "2026-11-12",
+  "notes": "2026-11-12 清理全部流程输出，回到初始化状态：仅保留阶段 01（project-bootstrap）产物，全部业务基线与 Change 产物已移出工作区（_trash/2026-11-12/），等待阶段 02（requirements-analysis）。",
   "state_schema_version": "1.0",
-  "transition_history": [
-    {
-      "step_id": "02-requirements-analysis",
-      "completed_at": "2026-11-05T06:09:42+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/02-requirements-analysis.json",
-      "outputs": [
-        "docs/product/requirements-analysis.md",
-        "docs/product/workflows.md",
-        "docs/product/use-cases.md",
-        "docs/product/user-stories.md",
-        "docs/product/business-rules.md",
-        "docs/product/open-questions.md"
-      ],
-      "checks": [
-        {
-          "name": "package-self-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "openspec-specs-readonly",
-          "status": "passed",
-          "exit_code": 0
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行业务负责人）",
-        "approved_at": "2026-11-05"
-      }
-    },
-    {
-      "step_id": "02b-prototype-generation",
-      "completed_at": "2026-11-05T06:19:32+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/02b-prototype-generation.json",
-      "outputs": [
-        "docs/design/prototype-build.md",
-        "docs/design/prototype.pen",
-        "docs/design/exports/PAGE-015-login.png",
-        "docs/design/exports/PAGE-016-workbench.png",
-        "docs/design/exports/PAGE-017-tasks.png",
-        "docs/design/exports/PAGE-018-task-detail.png",
-        "docs/design/exports/PAGE-019-monitoring.png",
-        "docs/design/exports/PAGE-020-alerts.png",
-        "docs/design/exports/PAGE-021-trace.png"
-      ],
-      "checks": [
-        {
-          "name": "prototype-build-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "pen-dev-render-verification",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": false,
-        "status": "not-required",
-        "approver": "",
-        "approved_at": ""
-      }
-    },
-    {
-      "step_id": "03-prototype-audit",
-      "completed_at": "2026-11-05T07:39:32+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/03-prototype-audit.json",
-      "outputs": [
-        "docs/design/prototype-audit.md",
-        "docs/product/open-questions.md",
-        "docs/product/requirements-analysis.md"
-      ],
-      "checks": [
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "prototype-build-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "prototype-review-approved-by-user",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行产品负责人）",
-        "approved_at": "2026-11-05"
-      }
-    },
-    {
-      "step_id": "04-product-baseline",
-      "completed_at": "2026-11-05T08:44:59+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/04-product-baseline.json",
-      "outputs": [
-        "docs/product/requirements-analysis.md",
-        "docs/product/workflows.md",
-        "docs/product/use-cases.md",
-        "docs/product/user-stories.md",
-        "docs/product/business-rules.md",
-        "docs/product/glossary.md",
-        "docs/product/acceptance-policy.md"
-      ],
-      "checks": [
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "required-baseline-files",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "product-baseline-review-approved-by-owner",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行产品负责人）",
-        "approved_at": "2026-11-05"
-      }
-    },
-    {
-      "step_id": "02-requirements-analysis",
-      "completed_at": "2026-11-09T09:31:16+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/02-requirements-analysis.json",
-      "outputs": [
-        "docs/product/requirements-analysis.md",
-        "docs/product/workflows.md",
-        "docs/product/data-objects.csv",
-        "docs/product/rd-matrix.csv",
-        "docs/product/business-rules.md",
-        "docs/product/glossary.md",
-        "docs/product/acceptance-policy.md",
-        "docs/product/open-questions.md",
-        "docs/product/BASELINE-BRIEF.md",
-        "docs/product/role-permission-matrix.csv",
-        "docs/product/change-sizing.md",
-        "docs/product/decisions.md",
-        "docs/product/assumptions.md",
-        "docs/product/lessons.md",
-        "docs/product/id-conventions.md",
-        "docs/product/BASELINE-INDEX.md"
-      ],
-      "checks": [
-        {
-          "name": "package-self-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-index-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "openspec-specs-readonly",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "product-owner-approval",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行业务负责人）",
-        "approved_at": "2026-11-09"
-      }
-    },
-    {
-      "step_id": "03-project-architecture-baseline",
-      "completed_at": "2026-11-10T02:43:43+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/03-project-architecture-baseline.json",
-      "outputs": [
-        "docs/architecture/system-context.md",
-        "docs/architecture/domain-boundaries.md",
-        "docs/architecture/containers-and-deployment.md",
-        "docs/architecture/data-flows.md",
-        "docs/architecture/logical-erd.md",
-        "docs/architecture/technology-decisions.md",
-        "docs/architecture/api-conventions.md",
-        "docs/architecture/frontend-conventions.md",
-        "docs/architecture/test-strategy.md",
-        "docs/adr/README.md",
-        "docs/architecture/baseline-status.md",
-        "docs/architecture/baseline-manifest.json",
-        "docs/architecture/constraint-registry.json",
-        "docs/project/baseline-audit-report.md"
-      ],
-      "checks": [
-        {
-          "name": "required-baseline-files-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-frozen-audit",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "package-self-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-index-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "openspec-specs-and-changes",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "product-architecture-tech-approval",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行业务/架构/技术负责人）",
-        "approved_at": "2026-11-10"
-      }
-    },
-    {
-      "step_id": "04-proposal-planning",
-      "completed_at": "2026-11-10T02:53:06+00:00",
-      "change_id": null,
-      "evidence_path": "workflow/evidence/04-proposal-planning.json",
-      "outputs": [
-        "docs/product/proposal-roadmap.md"
-      ],
-      "checks": [
-        {
-          "name": "roadmap-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-frozen-audit",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "package-self-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "requirements-structure-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-index-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "product-tech-roadmap-approval",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行业务/技术负责人）",
-        "approved_at": "2026-11-10"
-      }
-    },
-    {
-      "step_id": "05-feature-requirements",
-      "completed_at": "2026-11-10T03:04:10+00:00",
-      "change_id": "platform-access",
-      "evidence_path": "workflow/evidence/05-feature-requirements.json",
-      "outputs": [
-        "openspec/changes/platform-access/proposal.md",
-        "openspec/changes/platform-access/specs/identity-access/spec.md",
-        "openspec/changes/platform-access/specs/audit-trail/spec.md",
-        "openspec/changes/platform-access/specs/platform-operations/spec.md",
-        "openspec/changes/platform-access/design.md",
-        "openspec/changes/platform-access/tasks.md",
-        "openspec/changes/platform-access/design/user-stories.md",
-        "openspec/changes/platform-access/design/baseline-impact.md",
-        "openspec/changes/platform-access/design/baseline-binding.json"
-      ],
-      "checks": [
-        {
-          "name": "openspec-validate-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "requirements-change-strict",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "change-structural-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-impact-structure",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "baseline-binding-requirement",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "package-self-check",
-          "status": "passed",
-          "exit_code": 0
-        },
-        {
-          "name": "product-tech-proposal-approval",
-          "status": "passed",
-          "exit_code": null
-        }
-      ],
-      "approval": {
-        "required": true,
-        "status": "approved",
-        "approver": "用户（welly，代行业务/技术负责人）",
-        "approved_at": "2026-11-10"
-      }
-    }
-  ],
-  "last_transition": {
-    "step_id": "05-feature-requirements",
-    "completed_at": "2026-11-10T03:04:10+00:00",
-    "change_id": "platform-access",
-    "evidence_path": "workflow/evidence/05-feature-requirements.json",
-    "outputs": [
-      "openspec/changes/platform-access/proposal.md",
-      "openspec/changes/platform-access/specs/identity-access/spec.md",
-      "openspec/changes/platform-access/specs/audit-trail/spec.md",
-      "openspec/changes/platform-access/specs/platform-operations/spec.md",
-      "openspec/changes/platform-access/design.md",
-      "openspec/changes/platform-access/tasks.md",
-      "openspec/changes/platform-access/design/user-stories.md",
-      "openspec/changes/platform-access/design/baseline-impact.md",
-      "openspec/changes/platform-access/design/baseline-binding.json"
-    ],
-    "checks": [
-      {
-        "name": "openspec-validate-strict",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "requirements-change-strict",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "change-structural-check",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "baseline-impact-structure",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "baseline-binding-requirement",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "package-self-check",
-        "status": "passed",
-        "exit_code": 0
-      },
-      {
-        "name": "product-tech-proposal-approval",
-        "status": "passed",
-        "exit_code": null
-      }
-    ],
-    "approval": {
-      "required": true,
-      "status": "approved",
-      "approver": "用户（welly，代行业务/技术负责人）",
-      "approved_at": "2026-11-10"
-    }
-  },
-  "legacy_completed_steps": [
-    "02-requirements-analysis",
-    "02b-prototype-generation",
-    "03-prototype-audit",
-    "04-product-baseline"
-  ],
-  "topology_migrations": [
-    {
-      "at": "2026-11-06T02:13:21+00:00",
-      "reason": "2026-11-06 流程重构：原型移至提案级，合并架构/数据/契约，取消独立产品/数据/基线审计阶段；02 需求业务梳理需按新契约重跑",
-      "legacy_steps": [
-        "02-requirements-analysis",
-        "02b-prototype-generation",
-        "03-prototype-audit",
-        "04-product-baseline"
-      ],
-      "reset_steps": [
-        "02-requirements-analysis"
-      ],
-      "completed_steps": [
-        "01-project-bootstrap"
-      ],
-      "current_step": "02-requirements-analysis"
-    },
-    {
-      "at": "2026-11-09T03:47:46+00:00",
-      "reason": "2026-11-09 vibe 流程重构：17→10 阶段；合并 06+07+08 为原型/页面清单，合并 09–13 为详细设计；use-cases 并入 specs/user-stories；前端/后端/测试设计并入 design.md 五节",
-      "legacy_steps": [
-        "06-prototype-generation",
-        "07-page-interaction-inventory",
-        "08-figma-ui-audit",
-        "09-feature-design",
-        "10-api-contract-design",
-        "11-frontend-detail-design",
-        "12-backend-detail-design",
-        "13-test-design",
-        "14-implementation-orchestrator",
-        "15-independent-verification",
-        "16-acceptance-audit"
-      ],
-      "reset_steps": [],
-      "completed_steps": [
-        "01-project-bootstrap"
-      ],
-      "current_step": "02-requirements-analysis"
-    },
-    {
-      "at": "2026-11-11T07:47:16+00:00",
-      "reason": "2026-11-11 阶段 06 改为 Figma-only：移除 pen.dev/06a、PAGE HTML 与 build-figma-source/check-stage06a 门禁；阶段 ID 06-ui-prototype-inventory → 06-figma-design-review",
-      "legacy_steps": [],
-      "reset_steps": [],
-      "completed_steps": [
-        "01-project-bootstrap",
-        "02-requirements-analysis",
-        "03-project-architecture-baseline",
-        "04-proposal-planning",
-        "05-feature-requirements"
-      ],
-      "current_step": "06-figma-design-review"
-    }
-  ],
+  "transition_history": [],
+  "topology_migrations": [],
+  "completed_substeps": [],
+  "current_substep": "",
+  "reopen_history": [],
   "baseline": {
     "manifest": "docs/architecture/baseline-manifest.json",
     "constraint_registry": "docs/architecture/constraint-registry.json",
     "status": "docs/architecture/baseline-status.md",
-    "overall_version": "1.0.2",
-    "status_value": "FROZEN",
+    "overall_version": "0.1.0",
+    "status_value": "DRAFT",
     "domains": {
       "product": {
-        "version": "1.0.2",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行业务负责人）",
-        "approver": "用户（welly，代行架构/技术负责人）",
-        "approved_at": "2026-11-11"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       },
       "architecture": {
-        "version": "1.0.0",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行架构负责人）",
-        "approver": "用户（welly，代行业务/架构/技术负责人）",
-        "approved_at": "2026-11-10"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       },
       "data_domain": {
-        "version": "1.0.0",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行架构负责人）",
-        "approver": "用户（welly，代行业务/架构/技术负责人）",
-        "approved_at": "2026-11-10"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       },
       "api": {
-        "version": "1.0.0",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行技术负责人）",
-        "approver": "用户（welly，代行业务/架构/技术负责人）",
-        "approved_at": "2026-11-10"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       },
       "frontend": {
-        "version": "1.0.2",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行技术负责人）",
-        "approver": "用户（welly，代行架构/技术负责人）",
-        "approved_at": "2026-11-11"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       },
       "test_quality": {
-        "version": "1.0.0",
-        "status": "FROZEN",
-        "owner": "用户（welly，代行技术负责人）",
-        "approver": "用户（welly，代行业务/架构/技术负责人）",
-        "approved_at": "2026-11-10"
+        "version": "0.1.0",
+        "status": "DRAFT",
+        "owner": "",
+        "approver": "",
+        "approved_at": ""
       }
     }
-  },
-  "completed_substeps": [],
-  "current_substep": "06"
+  }
 }

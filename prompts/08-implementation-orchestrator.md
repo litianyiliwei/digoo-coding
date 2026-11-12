@@ -6,6 +6,13 @@
 先读取 `openspec instructions apply --change <change-id>`、设计文档与 tasks。检查 Superpowers 当前可用技能。按复杂度使用 `brainstorming`、`using-git-worktrees`、`writing-plans`、`subagent-driven-development`/`executing-plans`；实施遵循 `test-driven-development`，调试使用 `systematic-debugging`，审查使用 `requesting-code-review` / `receiving-code-review`，完成前使用 `verification-before-completion`。
 
 一次完成一个可验证小任务：先写测试并观察预期失败，再实现最小代码、复测、重构、更新 tasks。不得擅改规格/OpenAPI；规格冲突先暂停并更新 Change。最终报告真实执行命令、退出码、测试/构建结果和未执行项，未执行不能写通过。
+
+涉及 UI 时（前端任务前/后必须执行）：
+- 读取 `design/figma-audit.md` 的目标框架/转码说明、token **实际值**、文字样式、每 PAGE 区块规格、状态决策，以及 `design/figma-code/`（06 已按总体技术选型转码的目标框架设计代码）与 `design/figma-layout.csv`（断言映射）；默认离线消费导出包，仅在文件版本变化或页面有歧义时按页批量重读 Figma（串行，避免限流）。
+- **直接以 `figma-code/` 为页面骨架**：将 `.vue`（React 栈为 `.tsx`/`.jsx`）设计代码移植到应用目录，只补路由、API、状态、权限与业务逻辑；不得重写样式/布局/文案。确需视觉改动时登记 `UI-DEVIATION`（原因、影响、审批人）并同步更新断言；先建立全局 token 层：CSS 变量 / 目标组件库主题 / 字体栈（含 Noto Sans SC），禁止在页面散落硬编码颜色/字号；实现必须满足 `figma-layout.csv` 的 `dom_selector`（优先使用稳定的 `data-test` / `data-figma-node`）。
+- 运行 `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`，生成 `design/evidence/figma-layout-check.json`；运行 `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`；两者退出码必须为 0。
+- 在 `design/evidence/code-review.md` 的 `## UI fidelity` 逐 PAGE 从 `figma-layout-check.json` 抄录 Figma node、断言元素数/最大偏差、布局证据、结论与审批人；**只有存在差异或 `UI-DERIVED` 的 PAGE 需要人工说明与审批，无差异 PAGE 不做逐页视觉复核**。缺少断言证据、元素缺失、几何超差或有未批准差异不得转出阶段 08。**不使用截图。**
+- 运行 `python scripts/check-code-review.py --change <change-id> --strict`，UI Change 会校验 `## UI fidelity` 与 `figma-layout-check.json`。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 基线交互要求：实施前复核 `design/baseline-impact.md` 和当前基线版本。若实现中发现冲突/缺口，暂停受影响任务、提交基线修订请求/ADR；不得直接编辑冻结基线。基线获批更新后，刷新 Change 的基线快照、设计和测试；实施前运行 `python3 scripts/check-baseline-impact.py <change-id> --strict`。
 ```
@@ -28,9 +35,9 @@
 
 执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="implementation-orchestrator"` 的记录。
 
-- 输入核验：已批准 tasks.md/design.md；设计五节、OpenAPI、IO 契约；design.md（含测试设计节）、design/test-cases.csv 与 traceability.csv；项目级工程规范/测试策略；docs/product/open-questions.md（只读）；涉及 UI 时 `design/figma-audit.md`（Figma MCP 读取落盘快照，可用时重新读取真实 Figma）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：实际源代码/迁移/配置；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md；实现/验证证据。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：代码差异、测试报告、审查结论、未解决问题。在报告中明确这些文件如何被下游消费。
+- 输入核验：已批准 tasks.md/design.md；设计五节、OpenAPI、IO 契约；design.md（含测试设计节）、design/test-cases.csv 与 traceability.csv；项目级工程规范/测试策略；docs/product/open-questions.md（只读）；涉及 UI 时 `design/figma-audit.md`（目标框架/转码说明、token 实际值/PAGE 规格/状态决策）、`design/figma-code/`（目标框架设计代码）与 `design/figma-layout.csv`（断言映射）及项目 token 文件；`docs/architecture/technology-decisions.md`（目标框架一致性）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
+- 必须输出：实际源代码/迁移/配置；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 `## UI fidelity` 数值表，数值直接取自 `figma-layout-check.json`；仅差异/`UI-DERIVED` PAGE 需人工说明与审批）与 `design/evidence/figma-layout-check.json`；实现/验证证据。按模板写入仓库，不要只在聊天中展示。
+- 下一步输入：代码差异、测试报告、审查结论、未解决问题、`figma-layout-check.json` 与 token 检查结果。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
@@ -42,7 +49,7 @@ Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@ind
 
 ## 代码审查内容门禁（必须执行）
 
-阶段 08 转出前运行 `python scripts/check-code-review.py --change <change-id> --strict`，退出码必须为 0。`design/evidence/code-review.md` 必须填写真实 Change ID、审查人/工具、审查日期或 commit、`Review conclusion`（PASS/APPROVED/NO_BLOCKING_FINDINGS）、发现项及其关闭状态，并说明规格、安全、数据一致性与失败路径的审查结论；TODO/PENDING 或未关闭发现项阻断阶段 08。
+阶段 08 转出前运行 `python scripts/check-code-review.py --change <change-id> --strict`，退出码必须为 0。`design/evidence/code-review.md` 必须填写真实 Change ID、审查人/工具、审查日期或 commit、`Review conclusion`（PASS/APPROVED/NO_BLOCKING_FINDINGS）、发现项及其关闭状态，并说明规格、安全、数据一致性与失败路径的审查结论；涉及 UI 时还必须包含 `## UI fidelity` 章节，逐 PAGE 列出 Figma node、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论、审批人与审查方式（机器证据/人工复核），且 `figma-layout-check.json` 的 `result` 必须为 PASS、无缺失元素、`max_delta_px` 不超过 `tolerance_px`。TODO/PENDING、未关闭发现项、缺失断言证据或有未批准差异阻断阶段 08。**截图不是证据，不得写入或引用 `ui-screens/`。**
 
 ## 机器基线实现门禁（必须执行）
 

@@ -63,7 +63,10 @@ api_trace_args=(--change "$CHANGE_ID")
 if (( STRICT )); then api_trace_args+=(--strict); fi
 "$PYTHON" "$ROOT/scripts/check-api-traceability.py" "${api_trace_args[@]}"
 
-# UI-bearing Changes must have consumed the real Figma design (not screenshots/guesses).
+# UI-bearing Changes must consume the merged Figma design contract and assets.
+# Contract: design/figma-audit.md (token actual values + per-PAGE specs) +
+# design/figma-code/ (all visible node geometry) + design/figma-layout.csv
+# (runtime assertion mapping). Reference screenshots are not part of the contract.
 # No-UI Changes either carry a figma-audit.md with 设计来源状态：N/A + 理由, or closed
 # stage 06 explicitly with --no-ui; in the latter case there is no file to re-check here.
 if [[ -f "$DIR/design/figma-audit.md" ]]; then
@@ -71,7 +74,7 @@ if [[ -f "$DIR/design/figma-audit.md" ]]; then
   if (( STRICT )); then figma_args+=(--strict); fi
   "$PYTHON" "$ROOT/scripts/check-figma-audit.py" "${figma_args[@]}"
 else
-  echo "Figma audit: design/figma-audit.md absent; stage 06 must have declared no UI."
+  echo "Figma design contract: design/figma-audit.md absent; stage 06 must have declared no UI."
 fi
 
 if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
