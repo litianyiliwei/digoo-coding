@@ -3,7 +3,7 @@
 ```text
 执行 `@implementation-orchestrator`，Change：<change-id>。
 
-先读取 `openspec instructions apply --change <change-id>`、设计文档与 tasks。检查 Superpowers 当前可用技能。按复杂度使用 `brainstorming`、`using-git-worktrees`、`writing-plans`、`subagent-driven-development`/`executing-plans`；实施遵循 `test-driven-development`，调试使用 `systematic-debugging`，审查使用 `requesting-code-review` / `receiving-code-review`，完成前使用 `verification-before-completion`。
+先读取 `openspec instructions apply --change <change-id>`、设计文档与 tasks。检查 Superpowers 当前可用技能。按复杂度使用 `brainstorming`、`using-git-worktrees`、`writing-plans`、`subagent-driven-development`/`executing-plans`；实施遵循 `test-driven-development`，调试使用 `systematic-debugging`，审查使用 `requesting-code-review` / `receiving-code-review`，完成前使用 `verification-before-completion`。有 `design/interface-catalog.csv` 时，逐行实现接口契约并为每个 interface_id 执行至少一个 TEST；原生/设备/第三方边界写清真机、模拟器、替身或人工验证证据，无法执行写 BLOCKED + 原因，不得伪报通过。阶段 evidence 必须写 `methods`：`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径，并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。
 
 一次完成一个可验证小任务：先写测试并观察预期失败，再实现最小代码、复测、重构、更新 tasks。不得擅改规格/OpenAPI；规格冲突先暂停并更新 Change。最终报告真实执行命令、退出码、测试/构建结果和未执行项，未执行不能写通过。
 
@@ -26,7 +26,7 @@
 ## 执行工具协议（必须遵守）
 
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 必须检查并按宿主机制加载可用的 `using-superpowers`、`writing-plans`、`test-driven-development`、必要时 `systematic-debugging`、`requesting-code-review`/`receiving-code-review`、`verification-before-completion`。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时说明并执行等价步骤，禁止声称调用了未安装技能。
+- **Superpowers：** 必须检查并按宿主机制加载可用的 `using-superpowers`、`writing-plans`、`test-driven-development`、必要时 `systematic-debugging`、`requesting-code-review`/`receiving-code-review`、`verification-before-completion`。阶段 evidence 必须写 `methods`（`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径），并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时用 `mode=equivalent` 并写 `reason`，禁止声称调用了未安装技能。
 - **OpenSpec：** 先运行 `openspec instructions apply --change <id> --json` 和 `openspec status --change <id>`；按批准 tasks 实施，完成后 `openspec validate <id> --strict`。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行，不得假装验证通过。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
 - **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。

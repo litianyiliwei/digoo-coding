@@ -38,7 +38,7 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 
 ## 实际工具调用要求
 
-- **Superpowers：** 使用 `verification-before-completion` 验证真实测试证据，必要时使用 `requesting-code-review`/`receiving-code-review`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
+- **Superpowers：** 使用 `verification-before-completion` 验证真实测试证据，必要时使用 `requesting-code-review`/`receiving-code-review`。阶段 evidence 必须写 `methods`（至少 1 个决策和真实证据路径）并运行 `python scripts/check-method-evidence.py --step 10-acceptance-audit --evidence <evidence.json>`。有 `design/interface-catalog.csv` 时，逐行核对 interface_id 的 owner、测试与真机/模拟器/替身/人工证据；缺失不得归档。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 运行 `openspec status --change <id>` 和 `openspec validate <id> --strict`；只有人工批准且所有门禁通过后才运行 `openspec archive <id>`，不使用 `-y` 绕过确认。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。

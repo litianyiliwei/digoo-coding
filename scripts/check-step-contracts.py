@@ -30,6 +30,45 @@ for s in stages:
     row=contract_by_skill.get(s['skill'])
     if row and row.get('prompt')!=s['prompt']:
         errors.append(f"Prompt path mismatch for {s['skill']}: contract={row.get('prompt')} dag={s['prompt']}")
+# Validate the method policy covers 02-10 and that its required skills are
+# actually mentioned in the matching Skill and Prompt (not just in the contract).
+dag_ids={s['id'] for s in stages}
+policy=data.get('method_policy') or {}
+policy_steps={str(k).split('-')[0] for k in policy}
+required_steps={'02','03','04','05','06','07','08','09','10'}
+missing_policy=required_steps-policy_steps
+if missing_policy:
+    errors.append('method_policy missing stages: '+', '.join(sorted(missing_policy)))
+for key, rule in policy.items():
+    if key not in dag_ids:
+        errors.append(f'method_policy references unknown stage id: {key}')
+        continue
+    row=next((r for r in data['steps'] if str(r.get('step'))==str(key).split('-')[0]), None)
+    if not row:
+        errors.append(f'method_policy stage has no contract row: {key}')
+        continue
+    sid=row.get('skill')
+    skill_file=SKILLS_DIR/sid/'SKILL.md'
+    prompt_file=ROOT/row.get('prompt','')
+    skill_text=skill_file.read_text(encoding='utf-8') if skill_file.is_file() else ''
+    prompt_text=prompt_file.read_text(encoding='utf-8') if prompt_file.is_file() else ''
+    for requirement in rule.get('required',[]):
+        name=str(requirement.get('skill') or '').strip()
+        if not name:
+            errors.append(f'method_policy {key}: empty required skill')
+            continue
+        if skill_file.is_file() and name not in skill_text:
+            errors.append(f'method_policy {key}: skill {name} not mentioned in {skill_file.relative_to(ROOT)}')
+        if prompt_file.is_file() and name not in prompt_text:
+            errors.append(f'method_policy {key}: skill {name} not mentioned in {row.get("prompt")}')
+        for topic in requirement.get('required_topics', []):
+            topic=str(topic).strip()
+            if not topic:
+                continue
+            if skill_file.is_file() and topic not in skill_text:
+                errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {skill_file.relative_to(ROOT)}')
+            if prompt_file.is_file() and topic not in prompt_text:
+                errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {row.get("prompt")}')
 if not (ROOT/'templates/workflow/step-handoff-report.md').is_file(): errors.append('missing handoff report template')
 if errors:
     print('Step contract check failed:')

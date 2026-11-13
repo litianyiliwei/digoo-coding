@@ -7,7 +7,12 @@
 项目目标/用户/角色：<goals-and-roles>
 既有 product 文档：<existing-product-docs>
 
-输出项目级需求业务梳理：docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md。
+输出项目级需求业务梳理：docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md、reference-research.md（参考产品与互联网调研）。
+
+参考产品与联网调研（前置）：
+- 先询问用户是否有参考产品/竞品/同类系统；请其提供名称、链接、截图、试用账号或文档，并记录回答。
+- 无论是否有参考产品，都必须使用 WebSearch/WebFetch（或宿主等价联网工具）完成互联网调研，至少 3 个研究问题、3 条不同来源（真实 URL + 访问日期）、2 条对比；输出 `docs/product/reference-research.md`，并运行 `python scripts/check-reference-research.py --strict`。
+- 无联网能力时标记 BLOCKED，写入 `open-questions.md`，不得通过阶段 02。
 
 要求：
 1. 业务流程必须完整、不得遗漏：覆盖全部业务域的主流程、替代流程、异常流程和后置条件；每个流程拆到可执行节点，节点 ID 用 NODE-<流程号>-<序号>。
@@ -15,6 +20,9 @@
 3. 建立业务数据对象目录（DO-xxx）并输出 RD 矩阵（rd-matrix.csv）：逐行登记需求/规则 → 流程节点 → 角色 → 数据对象 → 访问类型；每个节点至少一条 RD 记录（或 N/A + 理由）。
 4. 本阶段不输出用户故事、用例或 AC：US/AC 留到阶段 05 提案级需求分析，由每个 Change 生成；用例场景写入提案级 spec 的 Scenario，不单独产出 `use-cases` 文件。
 5. 完成后运行 `python scripts/check-requirements.py --strict`，失败不得推进；按阶段结束审计核对流程节点与 RD 矩阵覆盖。
+6. 与 `brainstorming` 一起完成业务异常与边界清单：至少询问天气/季节、设备离线、人工接管、审计/溯源、监管上报、多角色、历史数据迁移、数据所有权与保留；未确认项写入 `open-questions.md`，不得擅自决策。
+7. 参考产品与互联网调研：必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成研究问题、参考产品、来源记录、对比、结论与影响映射，写入 `docs/product/reference-research.md`；至少 3 个研究问题、3 条不同来源、2 条对比，并记录访问日期与审批。无联网能力时标记 BLOCKED 并写入 `open-questions.md`，不得用记忆替代或通过阶段 02。
+8. 方法证据：阶段 evidence 必须写 `methods`：`brainstorming` 至少 3 个业务澄清问题、1 个备选方案、1 个决策；`internet-research` 至少 3 个研究问题、2 个对比、1 个决策。结果落点写 `docs/product/requirements-analysis.md`、`docs/product/open-questions.md` 或 `docs/product/reference-research.md`；运行 `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 ```
 
@@ -27,7 +35,7 @@
 ## 执行工具协议（必须遵守）
 
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 使用 `using-superpowers` 与 `brainstorming`（若实际可用）；先澄清目标、用户、痛点、范围和成功标准。先检查技能是否真实安装/可发现，不可用时说明并执行等价步骤，禁止声称调用了未安装技能。
+- **Superpowers：** 使用 `using-superpowers` 与 `brainstorming` 的 stage-scoped 模式；先澄清目标、用户、痛点、范围和成功标准，并逐项询问业务异常/边界（天气/季节、设备离线、人工接管、审计/溯源、监管上报、多角色、历史数据迁移）。必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成参考产品与市场调研，结果写入 `docs/product/reference-research.md`。结论写入 `requirements-analysis.md` 或 `open-questions.md`，不另写独立设计文档。阶段 evidence 必须写 `methods`（brainstorming 3/1/1，internet-research 3/2/1）并运行 `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`。先检查技能是否真实安装/可发现，不可用时用 `mode=equivalent` 并写 `reason`（联网调研不可用不属于 equivalent，必须 BLOCKED）。
 - **OpenSpec：** 仅运行 `openspec list --specs` 并阅读相关规格；本阶段不得创建 Change。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
 - **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。

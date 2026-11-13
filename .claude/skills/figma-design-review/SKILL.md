@@ -73,7 +73,7 @@ description: Figma 设计与评审（Figma-only）。通过 Figma MCP 生成真�
 ## 与 OpenSpec / Superpowers 的边界
 
 - OpenSpec 保存 proposal、delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 校验。
-- 需要澄清交互时可用 Superpowers `brainstorming`；只有确认真实安装且可调用时才声称使用。
+- 需要澄清交互或多端状态时可用 Superpowers `brainstorming` 的 stage-scoped 模式，结论写入 `figma-audit.md` 的状态覆盖/差异章节，不另写独立设计文档；只有确认真实安装且可调用时才声称使用。状态覆盖至少包括 default、loading、empty、error、permission denied/降级、offline/weak network、push/deep link（适用时）与 Android/iOS/HarmonyOS 差异。
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查

@@ -7,9 +7,10 @@
 必须记录被测 Git commit/revision；如果没有 commit，记录工作区 diff 指纹，并在验证期间确认其未变化。逐条验证 AC，重新执行所有适用测试/构建/契约检查，记录命令、退出码和证据。Builder 报告仅作线索，不能代替独立执行。
 
 方法与工具（强制）：
-- 使用 Superpowers `verification-before-completion`：PASS 必须由真实命令、退出码和测试结果支撑；不得用 Builder 报告或“已看过”代替独立执行。
+- 使用 Superpowers `verification-before-completion`：PASS 必须由真实命令、退出码和测试结果支撑；不得用 Builder 报告或“已看过”代替独立执行。阶段 evidence 必须写 `methods`，至少 1 个决策和真实证据路径，并运行 `python scripts/check-method-evidence.py --step 09-independent-verification --evidence <evidence.json>`。
 - 需要复现失败/定位原因时使用 `systematic-debugging`，只读排查，不修复代码、不修改测试。
 - 不得使用 `requesting-code-review`/`receiving-code-review` 替代独立验证；Verifier 是审查者，不是被审查的 Builder。
+- 有 `design/interface-catalog.csv` 时，逐行核对 interface_id 的契约、测试与 traceability；缺失测试、未执行或未批准差异判 FAIL/BLOCKED；原生/设备/第三方边界没有真机/模拟器/替身/人工证据时不得 PASS。
 - 必须独立运行 `openspec status --change <id>` 与 `openspec validate <id> --strict`，记录退出码；OpenSpec 校验失败即 FAIL/BLOCKED。
 
 生成：
@@ -32,7 +33,7 @@
 - 下游输入：阶段 10 只读取 PASS 的验证报告、AC 证据、测试退出码、发现项、`layout_checks` 和 revision。
 - 交接：生成 `templates/workflow/step-handoff-report.md`；调用 `scripts/workflow.py transition` 生成 SHA-256 manifest 并推进状态。
 - 状态：只有 `check-independent-verification.py` 退出码为 0，且阶段 evidence 的 gate check 记录该命令真实退出码 0，才允许完成阶段；涉及 UI 时 `layout_checks` 必须全部 PASS，且 `test_runs` 包含独立重跑的 `check-figma-layout.py` 退出码 0。
-- 方法证据：阶段 evidence 的 checks 必须记录 `superpowers-verification-methods`（verification-before-completion / systematic-debugging 的实际使用与证据）和 `openspec-validate-independent`（status/validate 的命令、退出码与日志）。
+- 方法证据：阶段 evidence 的 checks 必须记录 `superpowers-verification-methods`（verification-before-completion / systematic-debugging 的实际使用与证据）和 `openspec-validate-independent`（status/validate 的命令、退出码与日志）。阶段 evidence 同时必须写 `methods`：`verification-before-completion` 至少 1 个决策和真实证据路径；运行 `python scripts/check-method-evidence.py --step 09-independent-verification --evidence <evidence.json>`。
 
 - **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 09-independent-verification --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 09-independent-verification”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 09-independent-verification --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。

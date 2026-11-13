@@ -1,5 +1,6 @@
 # 阶段输出流转审计
 
+> 2026-11-13 更新：新增阶段 02 `reference-research.md` 与阶段 07 `design/interface-catalog.csv`；文件型输出计数以 `scripts/check-output-consumption.py` 实际输出为准。
 > 2026-11-11 二次更新：阶段 06 已改为 Figma-only。`pen.dev`、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json`、`design-tokens.json` 全部移出流程；06 的唯一 UI 产物是 `figma-audit.md`（Figma MCP 生成/读取快照 + PAGE 清单与映射 + UI 评审 APPROVED）。历史产物归档到各 Change 的 `design/legacy/`。当前契约以 `docs/STEP-ARTIFACT-CONTRACTS.json` 与 `docs/STAGE-IO-OVERVIEW.md` 为准。
 > 2026-11-11 清理：旧顶层 `scripts/legacy`、`prompts/legacy`、`.claude/skills/legacy`、`templates/change-assets/legacy`、`workflow/evidence/legacy`、`workflow/handoffs/legacy`、旧原型快照与临时构建脚本已移至 `_trash/2026-11-11/`；本文历史段落中的旧路径保留为当时记录。
 

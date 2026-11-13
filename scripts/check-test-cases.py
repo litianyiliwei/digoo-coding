@@ -139,6 +139,23 @@ for row in rows:
 for ioid in sorted(io_ids - covered_ios):
     errors.append(f'IO coverage: {ioid} has no test case/io_ids entry')
 
+# Interface coverage: every cross-boundary interface must have at least one test.
+INTERFACE = base / 'interface-catalog.csv'
+interface_ids = set()
+covered_interfaces = set()
+if INTERFACE.is_file():
+    if 'interface_ids' not in headers:
+        errors.append('test-cases.csv missing interface_ids column while interface-catalog.csv exists')
+    with INTERFACE.open(newline='', encoding='utf-8-sig') as f:
+        interface_ids = { (r.get('interface_id') or '').strip() for r in csv.DictReader(f) if (r.get('interface_id') or '').strip() }
+    for row in rows:
+        covered_interfaces.update(split_ids(row.get('interface_ids')))
+    for iid in sorted(interface_ids - covered_interfaces):
+        errors.append(f'Interface coverage: {iid} has no test case/interface_ids entry')
+    for iid in sorted(covered_interfaces - interface_ids):
+        errors.append(f'Interface coverage: test case references unknown interface {iid}')
+
+
 # Traceability: TEST IDs must appear in the single aggregate traceability.csv.
 if TRACE.is_file():
     trace_ids = set()
@@ -158,4 +175,4 @@ for w in warnings: print('WARN:', w)
 if errors or (strict and warnings):
     print(f'Test-case matrix check failed: {len(errors)} error(s), {len(warnings)} warning(s).')
     sys.exit(1)
-print(f'Test-case matrix passed: {len(rows)} case(s), AC coverage {len(covered_acs)}/{len(acs)}, pages {len(covered_pages)}/{len(pages)}, blocks {len(covered_blocks)}/{len(blocks)}, APIs {len(covered_apis)}/{len(operation_ids)}, IO {len(covered_ios)}/{len(io_ids)}.')
+print(f'Test-case matrix passed: {len(rows)} case(s), AC coverage {len(covered_acs)}/{len(acs)}, pages {len(covered_pages)}/{len(pages)}, blocks {len(covered_blocks)}/{len(blocks)}, APIs {len(covered_apis)}/{len(operation_ids)}, IO {len(covered_ios)}/{len(io_ids)}, interfaces {len(covered_interfaces)}/{len(interface_ids)}.')

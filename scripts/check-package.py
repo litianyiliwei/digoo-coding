@@ -65,6 +65,19 @@ if shutil.which("bash"):
     if contract_test.is_file():
         r=subprocess.run(["bash", str(contract_test)],capture_output=True,text=True)
         if r.returncode: errors.append(f"API→IO checker regression test failed: {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
+# Run standalone Python regression tests for the newer process checkers.
+for test_name in ("test-reference-research.py", "test-interface-catalog.py"):
+    test_path = ROOT / "scripts" / test_name
+    if test_path.is_file():
+        r=subprocess.run([sys.executable, str(test_path)],capture_output=True,text=True)
+        if r.returncode: errors.append(f"Regression test failed ({test_name}): {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
+# Run Python regression tests that do not need a live business project.
+for test_name in ("test-workflow-runtime.py", "test-architecture-baseline.py"):
+    test_path = ROOT / "scripts" / test_name
+    if test_path.is_file():
+        r = subprocess.run([sys.executable, str(test_path)], capture_output=True, text=True)
+        if r.returncode:
+            errors.append(f"{test_name} failed: {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
 # Python syntax-check scripts without generating __pycache__ files.
 for p in sorted((ROOT/"scripts").glob("*.py")):
     r=subprocess.run([sys.executable,"-m","py_compile",str(p)],capture_output=True,text=True)

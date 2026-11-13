@@ -41,6 +41,12 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 - 10：`acceptance.md` 含 `## UI acceptance`，逐 PAGE 由设计负责人签收；无差异 PAGE 按机器证据批量签收，差异/`UI-DERIVED` PAGE 并排核对；`check-acceptance.py` 退出码 0。
 - 07/08 默认离线消费 06 导出包；仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。缺失上述任一 UI 证据时，不得 transition 或归档。
 
+### 接口边界门禁
+
+- 07 存在 HTTP API、App↔Native（uni-app/Flutter/React Native/原生桥接）、设备、第三方、异步或文件边界时，必须生成 `design/interface-catalog.csv`，并在 `design.md` 的 `### 接口边界清单` 引用它；无跨边界接口时写 `N/A + 理由` 并在 evidence 把该输出标记 `n/a` + `waiver_reason`。
+- `python scripts/check-interface-catalog.py --change <change-id> --strict` 校验必填字段、HTTP_API 与 OpenAPI operationId 双向一致、每个接口至少一个 TEST 与 traceability 行；总体选型为 uni-app/Flutter/React Native/原生 App 时加 `--require-native`。
+- 08/09/10 逐行消费该目录：08 为每个 interface_id 执行测试/真机/替身并记录证据；09 独立核对契约、测试与追踪，缺失或未执行判 FAIL/BLOCKED；10 逐行签收 owner 与证据后方可归档。
+
 状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python3 scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
 
 ### 阶段评审停等（强制）
@@ -98,6 +104,18 @@ python3 scripts/workflow.py next-change --change-id change-b
 - `transition` 会读取 `STEP-ARTIFACT-CONTRACTS.json` 中该阶段声明的文件型 outputs，要求 evidence 为每个输出列一条记录。
 - 条件不适用的输出必须写 `status: "n/a"` 与 `waiver_reason`，不能静默省略；缺失会在状态推进前失败。
 - 内容型输出（如“实际源代码/迁移/配置”）没有固定路径，仍由该阶段门禁脚本核验。
+
+### 方法证据门禁
+
+- 02–10 的 evidence 必须包含 `methods`；策略以 `docs/STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy` 为准，缺失时使用 `scripts/method_evidence.py` 的内置默认策略。
+- 每条 method 记录 skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence。`brainstorming` 在 03/07 至少记录 4 个问题与 2 个备选，在 02/05 至少 3 个问题与 1 个备选；`writing-plans`、`test-driven-development`、`verification-before-completion` 至少记录 1 个决策和真实证据路径。
+- 03 的 `brainstorming` 问题/决策必须覆盖“新系统/现有系统/代码地址/第三方接口”；若二开，必须实际读取代码地址并在 `technology-decisions.md` 写“现有系统二开约束”，转换为 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
+- 03 结束前运行 `python scripts/check-architecture-baseline.py --strict`；缺少“现有系统二开约束”“第三方接口依赖清单”、代码访问记录、第三方数据流或 `LEGACY-*`/`EXT-*` 约束时不得冻结基线。
+- 07 的 `brainstorming` 问题/决策必须覆盖“现有功能/新功能/代码地址/第三方接口”；修改现有功能时 `design.md` 的 `### 现有代码变更影响` 必须登记文件/类/函数/接口/表/测试、修改策略、兼容性、迁移/回滚、风险；第三方接口必须进入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行并有 test/fakes 证据。
+- `mode=equivalent` 只在技能确实不可用时使用，必须写 `reason`，并在 `docs/project/toolchain-report.md` 记录缺失；不能把“可用”当作“已使用”。
+- 02 的 `internet-research` 必须至少记录 3 个研究问题、2 个对比/备选、1 个决策，结果写入 `docs/product/reference-research.md`；`python scripts/check-reference-research.py --strict` 还会校验至少 3 条真实来源 URL、访问日期、参考产品状态与影响映射。无联网能力时标记 BLOCKED，不能用 `equivalent` 绕过。
+- 单独校验：`python scripts/check-method-evidence.py --step <step-id> --evidence <path>`；`workflow.py transition` 会自动调用同一逻辑。
+- 交接报告第 4 节必须展示关键问题、备选、决策、未决项、产物落点与证据路径。
 
 ### Evidence JSON 示例
 

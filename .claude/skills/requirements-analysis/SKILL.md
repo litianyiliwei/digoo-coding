@@ -12,8 +12,8 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 访谈、业务材料、旧系统资料、项目目标、用户与角色、约束、既有 docs/product/*、既有 OpenSpec specs（只读）。
 
 ## 执行流程
-1. 在宿主 Agent 支持且已安装时，先读取/调用 Superpowers `using-superpowers`，再读取/调用 `brainstorming`；遵循宿主环境的真实 Skill 调用方式，不假设 `@`、slash command 或 MCP 语法一定适用。若缺少技能，明确说明并按本 Skill 的澄清步骤执行，不得声称已调用。
-2. 采用分阶段需求发现：先澄清目标/用户/痛点/成功标准，再逐步展开业务流程、业务规则、数据对象与边界；关键未知项先提问，未确认前标为 PENDING。
+1. 在宿主 Agent 支持且已安装时，先读取/调用 Superpowers `using-superpowers`，再读取/调用 `brainstorming`；必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成参考产品与市场调研。遵循宿主环境的真实 Skill 调用方式，不假设 `@`、slash command 或 MCP 语法一定适用。若缺少技能，明确说明并按本 Skill 的澄清步骤执行，不得声称已调用；无联网能力时标记 BLOCKED，不得用记忆替代。
+2. 采用分阶段需求发现：先澄清目标/用户/痛点/成功标准，再逐步展开业务流程、业务规则、数据对象与边界；同时逐项询问业务异常/边界（天气/季节、设备离线、人工接管、审计/溯源、监管上报、多角色、历史数据迁移、数据所有权与保留）；关键未知项先提问，未确认前标为 PENDING，并写入 `open-questions.md`。
 3. **业务流程必须完整、不得遗漏**：覆盖全部业务域（种植、畜牧、水产及监管/溯源等支撑域）的触发条件、前置条件、主流程、替代流程、异常流程、后置条件。每个流程拆到可执行节点，节点编号稳定为 `NODE-<流程号>-<序号>`（如 `NODE-004-01`）。
 4. **每个节点必须登记**：执行角色、输入数据对象、输出/写入数据对象、前置条件、处理动作、异常/分支、下一节点、关联业务规则。纯人工节点与系统节点都要登记；不得用概括性步骤代替节点表。
 5. 建立业务数据对象目录：`DO-xxx` 稳定 ID、名称、定义、关键属性、业务所有者、来源/消费节点。数据对象是业务概念，不是数据库表。
@@ -25,7 +25,7 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 11. 不在需求阶段提前决定数据库表、类、框架或 API 细节。
 
 ## 输出
-`docs/product/requirements-analysis.md`、`workflows.md`（含节点表）、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`、`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`lessons.md`、`id-conventions.md`、`BASELINE-INDEX.md`（由脚本生成）。
+`docs/product/requirements-analysis.md`、`workflows.md`（含节点表）、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`、`reference-research.md`、`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`lessons.md`、`id-conventions.md`、`BASELINE-INDEX.md`（由脚本生成）。
 
 ## 质量与安全边界
 每条需求有来源和状态；每个流程的每个节点都有角色与数据对象；RD 矩阵引用闭合且覆盖全部节点；未确认项有负责人与阻塞条件。
@@ -37,11 +37,11 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
-`scripts/check-requirements.py --strict`
+`scripts/check-requirements.py --strict`；`python scripts/check-reference-research.py --strict`
 
 ## 实际工具调用要求
 
-- **Superpowers：** `using-superpowers` 与 `brainstorming`（若实际可用）；先澄清目标、用户、痛点、范围和成功标准，信息不足先提问。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
+- **Superpowers：** `using-superpowers` 与 `brainstorming` 的 stage-scoped 模式；先澄清目标、用户、痛点、范围和成功标准，并逐项询问业务异常/边界。必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成参考产品与市场调研，结果写入 `docs/product/reference-research.md`；无联网能力时标记 BLOCKED，不得用记忆替代。结论写入 `requirements-analysis.md` 或 `open-questions.md`，不另写独立设计文档；阶段 evidence 必须写 `methods`（brainstorming 3/1/1，internet-research 3/2/1）并运行 `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时用 `mode=equivalent` 并写 `reason`（联网调研不可用不属于 equivalent，必须 BLOCKED）。
 - **OpenSpec：** 仅运行 `openspec list --specs` 并阅读相关规格；本阶段不得创建 Change。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
@@ -50,8 +50,8 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 
 执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="requirements-analysis"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
 
-- **本阶段输入：** 访谈/业务材料/旧系统资料；项目目标、用户、角色、约束；既有 docs/product/*（若存在）；既有 OpenSpec specs（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** docs/product/requirements-analysis.md；docs/product/workflows.md；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（脚本生成）。按模板生成并落盘。
+- **本阶段输入：** 访谈/业务材料/旧系统资料；项目目标、用户、角色、约束；既有 docs/product/*（若存在）；既有 OpenSpec specs（只读）；用户提供的参考产品（名称/链接/截图/账号；无则 NONE + 理由）；互联网调研工具（WebSearch/WebFetch 或宿主等价能力）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
+- **本阶段输出：** docs/product/requirements-analysis.md；docs/product/workflows.md；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/reference-research.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（脚本生成）。按模板生成并落盘。
 - **下游交接：** 业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
@@ -61,7 +61,7 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 - 逐流程核对节点表：每个 FLOW 的主流程、替代流程、异常流程都有节点；每个节点都有角色、输入/输出数据对象、前置条件、动作、分支、下一节点。
 - 逐节点核对 RD 矩阵：每个 NODE 至少有一条 RD 记录（或 N/A + 理由）；每个 DO 至少被一个节点使用；引用不得悬空。
 - 核对业务规则、术语、验收政策与流程/节点一致；冲突转入 open-questions，不擅自选择。
-- 运行 `python scripts/check-requirements.py --strict`，失败不得推进。
+- 运行 `python scripts/check-requirements.py --strict` 与 `python scripts/check-reference-research.py --strict`，失败不得推进。
 
 ## 阶段边界与评审停等（强制）
 

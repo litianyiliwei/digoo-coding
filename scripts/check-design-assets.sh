@@ -16,6 +16,7 @@ TEST_CASES="$DIR/design/test-cases.csv"
 OPENAPI="$DIR/api/openapi.yaml"
 API_MAP="$DIR/design/api-io-mapping.csv"
 IO_CATALOG="$DIR/design/io-catalog.csv"
+INTERFACE_CATALOG="$DIR/design/interface-catalog.csv"
 
 required=("$DESIGN" "$TRACE" "$TEST_CASES")
 missing=0
@@ -59,6 +60,17 @@ section_args=(--change "$CHANGE_ID")
 if (( STRICT )); then section_args+=(--strict); fi
 "$PYTHON" "$ROOT/scripts/check-design-sections.py" "${section_args[@]}"
 
+# The cross-boundary interface catalog is conditional: required when design.md
+# points at it, or when the file exists. A pure N/A Change may omit it.
+if [[ -f "$INTERFACE_CATALOG" ]]; then
+  interface_args=(--change "$CHANGE_ID")
+  if (( STRICT )); then interface_args+=(--strict); fi
+  "$PYTHON" "$ROOT/scripts/check-interface-catalog.py" "${interface_args[@]}"
+elif grep -qF 'interface-catalog.csv' "$DESIGN"; then
+  echo "ERROR MISSING: ${INTERFACE_CATALOG#$ROOT/} (design.md references it)" >&2
+  exit 1
+fi
+
 api_trace_args=(--change "$CHANGE_ID")
 if (( STRICT )); then api_trace_args+=(--strict); fi
 "$PYTHON" "$ROOT/scripts/check-api-traceability.py" "${api_trace_args[@]}"
@@ -85,4 +97,4 @@ if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
 else
   echo "API scope: none (x-api-scope: none); API→IO checks skipped."
 fi
-echo "Unified design (design.md sections), test-case matrix, traceability and API→IO mapping passed."
+echo "Unified design (design.md sections), test-case matrix, traceability, interface catalog and API→IO mapping passed."

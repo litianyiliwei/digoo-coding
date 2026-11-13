@@ -65,3 +65,13 @@
 
 - 业务/产品负责人：PENDING
 - 审批状态：DRAFT
+
+## 9. 参考产品与互联网调研
+
+- 调研记录：`docs/product/reference-research.md`
+- 参考产品状态：PRESENT / NONE（NONE 时在调研记录写理由）
+- 可借鉴结论：PENDING
+- 不借鉴结论及理由：PENDING
+- 影响映射（FLOW/NODE/DO/BR/NFR）：PENDING
+
+> 阶段 02 必须实际使用 WebSearch/WebFetch（或宿主等价联网工具）完成调研并记录真实 URL 与访问日期；无联网能力时标记 BLOCKED，不得用记忆替代。

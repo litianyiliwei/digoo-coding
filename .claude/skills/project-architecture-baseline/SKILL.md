@@ -12,7 +12,7 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 已批准的 `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`（只读）；`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`id-conventions.md`、`BASELINE-INDEX.md`（常驻基线，先读简报）；现有仓库结构/技术约束；非功能需求；用户/技术负责人明确的技术选型偏好（本阶段必须显式询问，不得默认或自行拍板）。
 
 ## 执行流程
-1. **强制技术选型访谈（前置门禁）：** 在产出任何技术决策前，必须向用户逐项询问希望采用的选型及其约束，至少覆盖：后端语言/框架、前端框架/UI 组件库、数据库与存储、缓存/消息/任务调度、部署与运行环境（云/自托管/容器/信创）、认证与权限、构建/测试/CI 工具、既有系统集成、许可与成本、团队熟悉度与运维能力。先给出候选方案与权衡，再请用户确认；用户表示“无偏好”时也必须记录，并把推荐方案列为待确认候选。
+1. **强制技术选型与平台边界访谈（前置门禁）：** 在产出任何技术决策前，必须向用户逐项询问希望采用的选型及其约束，至少覆盖：后端语言/框架、前端框架/UI 组件库、数据库与存储、缓存/消息/任务调度、部署与运行环境（云/自托管/容器/信创）、认证与权限、构建/测试/CI 工具、既有系统集成、许可与成本、团队熟悉度与运维能力。还必须完成平台与集成边界访谈：客户端形态（Web/H5、微信小程序、Android、iOS、HarmonyOS、PDA/手持机、平板、桌面）；跨端方案（原生双端、Flutter、React Native、uni-app、Taro、混合）；若选 uni-app，逐项记录目标平台、原生插件清单、JS Bridge 接口（名称/参数/返回/错误/回调/超时）、平台差异矩阵、权限拒绝/降级、离线缓存/同步冲突、推送/深链、热更新/商店合规、插件许可/版本；设备/物联网协议（BLE/Modbus/LoRa/MQTT/HTTP）；第三方平台（GIS、天气、支付、短信、实名、政府溯源、物流）；接口边界（UI↔API、App↔Native、App↔Device、Backend↔Third-party、Backend↔IoT、异步事件、文件/对象存储）。每条边界记录协议、鉴权、契约、错误语义、超时/重试/幂等、版本兼容、测试/真机、责任人。先给出候选方案与权衡，再请用户确认；用户表示“无偏好”时也必须记录，并把推荐方案列为待确认候选。结果写入 `technology-decisions.md` 的“平台与集成边界访谈记录”，并在 `api-conventions.md` 增加“跨边界接口与集成约定”、`frontend-conventions.md` 增加“多端与原生能力”、`data-flows.md` 增加客户端/原生/设备数据流。还必须完成系统来源与现有代码/第三方接口访谈：明确新系统、基于现有系统二开，还是混合；若基于现有系统二开，要求代码地址（仓库 URL/本地路径/分支/commit），实际探索代码结构与技术栈、模块边界、API/数据模型、构建/测试/发布命令、既有规范与技术债，写入 `technology-decisions.md` 的“现有系统二开约束”，并转换为 `constraint-registry.json` 的 `LEGACY-*` 约束（含来源章节、等级、范围、执行方式、责任人）；代码不可访问时 BLOCKED，不得凭记忆假设。无论是否二开，都必须列出依赖的第三方接口：提供方、用途、协议、鉴权、SLA/配额、沙箱/测试账号、审批、数据共享/隐私、错误/超时、责任人，写入“第三方接口依赖清单”、`data-flows.md` 的 EXTERNAL 数据流和 `api-conventions.md` 的“第三方接口与集成约定”；无第三方接口写 NONE + 理由。
 2. 绘制系统上下文、模块/容器、部署和主要信任边界；技术决策写 ADR，记录用户确认结果、确认人和日期。
 3. **数据流转（强制）：** 按 `DF-xxx` 登记跨系统/跨模块/关键业务的同步请求、异步消息、数据读写、外部调用、事务边界、失败与补偿；每条数据流引用相关 FLOW/NODE/DO 与 RD 矩阵条目。
 4. **数据与领域基线（并入本阶段）：** 识别核心概念、领域边界、实体/值对象、生命周期和数据所有权；绘制逻辑 ERD，标注关系、基数、跨领域引用；定义命名、ID、审计字段、时间、删除、并发版本与保留规范；明确事务边界、唯一性/完整性规则、并发控制和一致性策略。逻辑 ERD 不是物理 DDL。
@@ -22,7 +22,7 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 8. **阶段结束审计与冻结（强制）：** 运行 `scripts/check-required-files.sh --strict`；核对 Manifest 与 Constraint Registry；由负责人执行 `baseline-governance.py freeze`，再执行 `audit --require-frozen`；审计报告写入 `docs/project/baseline-audit-report.md`。存在阻断项时不得建议冻结。
 
 ## 输出
-`docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`（数据流转）、`logical-erd.md`、`technology-decisions.md`、`api-conventions.md`、`frontend-conventions.md`、`test-strategy.md`、`docs/adr/README.md`、`baseline-status.md`、`baseline-manifest.json`、`constraint-registry.json`、`docs/project/baseline-audit-report.md`。
+`docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`（数据流转 + 客户端/原生/设备数据流 + 第三方 EXTERNAL 数据流）、`logical-erd.md`、`technology-decisions.md`（含技术选型访谈记录、平台/集成边界访谈记录、现有系统二开约束、第三方接口依赖清单）、`api-conventions.md`（含跨边界接口与集成约定、第三方接口与集成约定）、`frontend-conventions.md`（含多端与原生能力）、`test-strategy.md`（含原生桥接/设备/第三方测试策略）、`docs/adr/README.md`、`baseline-status.md`、`baseline-manifest.json`、`constraint-registry.json`（含 LEGACY-*/EXT-* 约束）、`docs/project/baseline-audit-report.md`。
 
 ## 质量与安全边界
 图和文字对同一边界的描述一致；选择有理由；关键非功能需求能被后续验证；数据流转引用闭合；未显式询问用户技术偏好或用户尚未确认的选型，不得标记为已批准；未决项必须写明负责人和阻塞条件，阶段不得完成。审批状态有负责人/证据；存在阻断项时不得冻结。
@@ -34,11 +34,11 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 - 不在本阶段自动提交、发布、归档或覆盖用户文件。
 
 ## 推荐检查
-`scripts/check-required-files.sh --strict`；`scripts/baseline-governance.py audit --require-frozen`
+`scripts/check-required-files.sh --strict`；`python scripts/check-architecture-baseline.py --strict`（现有系统二开约束/第三方接口依赖清单/LEGACY-*/EXT-*）；`scripts/baseline-governance.py audit --require-frozen`
 
 ## 实际工具调用要求
 
-- **Superpowers：** `brainstorming` 用于比较架构备选项、澄清领域边界和一致性取舍，并记录权衡，不直接把假设写成决策。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。
+- **Superpowers：** `brainstorming` 的 stage-scoped 模式用于比较架构、平台与集成边界备选，澄清领域边界和一致性取舍，并记录问题/备选/决策；问题/决策必须覆盖“新系统/现有系统/代码地址/第三方接口”四个主题；结论写入 `technology-decisions.md` 等阶段既有产物，不另写独立设计文档。必须按当前宿主 Agent 的真实机制检查、读取或调用技能；不可用时用 `mode=equivalent` 并写 `reason`。阶段 evidence 必须写 `methods` 并运行 `python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence.json>`。
 - **OpenSpec：** 检查既有 specs、架构文档和 ADR；若 CLI 可用，执行 `openspec list --specs` 和 `openspec list --changes`，核对基线与现有规格的关系。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。

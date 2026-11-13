@@ -10,7 +10,7 @@
 阶段 03 审计报告：<baseline-audit-report>
 优先级/约束：<priorities>
 
-按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、风险、数据迁移、兼容和排序理由；按 `docs/product/change-sizing.md` 标注每项的规模预算，超过预算必须拆分或记录理由与验收人；提案级 UC/US/AC 在阶段 05 细化。先读取 open-questions、decisions/assumptions、lessons 与阶段 03 审计报告，把未决问题、基线缺口和已知反模式带入候选 Change 的风险/依赖，不要擅自关闭。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
+按独立可验收业务能力划分 OpenSpec Change。为每项给出 change-id、价值、范围/非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、风险、数据迁移、兼容和排序理由；按 `docs/product/change-sizing.md` 标注每项的规模预算，超过预算必须拆分或记录理由与验收人；提案级 UC/US/AC 在阶段 05 细化。先读取 open-questions、decisions/assumptions、lessons 与阶段 03 审计报告，把未决问题、基线缺口和已知反模式带入候选 Change 的风险/依赖，不要擅自关闭。拆分时必须检查平台/原生/设备/第三方前置依赖：跨端方案、原生插件与 JS Bridge、设备/网关、地图/天气/支付/实名/溯源等第三方审批、数据迁移与离线同步；这些依赖不得藏在备注里。输出 Mermaid 依赖图；优先纵向切片，不按前后端技术层横向切分。
 正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
 基线交互要求：为每个候选 Change 标注适用的产品/架构/数据/公共 API/前端/测试基线版本、需复用约束和潜在基线修订。功能局部变化留在 Change；跨功能公共约束变化列为基线变更候选，不得默认为已批准。
 ```
@@ -24,7 +24,7 @@
 ## 执行工具协议（必须遵守）
 
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 使用 Superpowers `brainstorming` 对提案边界和备选拆分进行澄清；在审批前只产出路线图，不批量创建 Change。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时说明并执行等价步骤，禁止声称调用了未安装技能。
+- **Superpowers：** 使用 `brainstorming` 的 stage-scoped 模式对提案边界、备选拆分与平台/原生依赖进行澄清；结论写入 `proposal-roadmap.md`，不另写独立设计文档。阶段 evidence 必须写 `methods`，至少记录 2 个问题、2 个备选、1 个决策，并运行 `python scripts/check-method-evidence.py --step 04-proposal-planning --evidence <evidence.json>`。先检查技能是否真实安装/可发现；不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 先运行 `openspec list --specs`、`openspec list --changes`；提案获批后才可逐个运行 `openspec new change <change-id>`。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行，不得假装验证通过。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
 - **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。

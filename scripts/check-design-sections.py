@@ -38,8 +38,8 @@ for line in lines:
         sections[current].append(line)
 
 REQUIRED = {
-    "设计决策": ["### 范围与非目标", "### 关键决策与权衡", "### 设计任务分解与接口范围", "### 设计缺口与准入结论"],
-    "接口设计": ["### 接口清单", "### 契约与错误语义", "### 接口追踪"],
+    "设计决策": ["### 范围与非目标", "### 关键决策与权衡", "### 现有代码变更影响", "### 设计任务分解与接口范围", "### 设计缺口与准入结论"],
+    "接口设计": ["### 接口清单", "### 接口边界清单", "### 契约与错误语义", "### 接口追踪"],
     "前端详细设计": [
         "### 路由与组件树", "### 设计令牌与实现映射", "### PAGE→BLOCK→Figma 规格",
         "### PAGE→BLOCK→组件映射", "### 组件职责与状态", "### 事件处理",
@@ -77,6 +77,27 @@ for section, required in REQUIRED.items():
     for sub in required:
         if sub not in body:
             errors.append(f"## {section} missing required subsection: {sub}")
+
+# Cross-boundary interfaces must point at the machine-readable catalog unless N/A.
+interface_body = "\n".join(sections.get("接口设计", []))
+if not interface_body.strip().upper().startswith("N/A") and "### 接口边界清单" in interface_body:
+    boundary = interface_body.split("### 接口边界清单", 1)[1].split("### ", 1)[0]
+    if not boundary.strip().upper().startswith("N/A") and "interface-catalog.csv" not in boundary:
+        errors.append("## 接口设计 ### 接口边界清单 must reference interface-catalog.csv unless N/A")
+
+# Existing-code impact must be concrete when the Change modifies existing code.
+decision_body = "\n".join(sections.get("设计决策", []))
+if not decision_body.strip().upper().startswith("N/A") and "### 现有代码变更影响" in decision_body:
+    existing_code = decision_body.split("### 现有代码变更影响", 1)[1].split("### ", 1)[0].strip()
+    if not existing_code:
+        errors.append("### 现有代码变更影响 is empty; write impact analysis or N/A + reason")
+    elif not existing_code.upper().startswith("N/A"):
+        if not any(k in existing_code for k in ("代码地址", "仓库", "分支", "commit")):
+            errors.append("### 现有代码变更影响 must record code address/repository/branch/commit when modifying existing code")
+        if not any(k in existing_code for k in ("文件", "类", "函数", "接口", "表", "测试")):
+            errors.append("### 现有代码变更影响 must list affected files/classes/functions/interfaces/tables/tests")
+        if not any(k in existing_code for k in ("修改策略", "兼容", "回滚", "迁移")):
+            errors.append("### 现有代码变更影响 must state change strategy/compatibility/migration/rollback")
 
 # UI Changes must carry actual tokens, not only variable names.
 audit = ROOT / "openspec/changes" / change / "design/figma-audit.md"

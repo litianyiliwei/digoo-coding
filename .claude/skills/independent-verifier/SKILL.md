@@ -16,9 +16,10 @@ description: 以只读、独立视角验证一个 OpenSpec Change 的实现是�
 
 ## 方法与工具（强制）
 
-- 使用 Superpowers `verification-before-completion`：PASS 必须由真实命令、退出码和测试结果支撑；不得用 Builder 报告或“已看过”代替独立执行。
+- 使用 Superpowers `verification-before-completion`：PASS 必须由真实命令、退出码和测试结果支撑；不得用 Builder 报告或“已看过”代替独立执行。阶段 evidence 必须写 `methods`，至少 1 个决策和真实证据路径，并运行 `python scripts/check-method-evidence.py --step 09-independent-verification --evidence <evidence.json>`。
 - 需要复现失败/定位原因时使用 `systematic-debugging`，只读排查，不修复代码、不修改测试。
 - 不得使用 `requesting-code-review`/`receiving-code-review` 替代独立验证；Verifier 是审查者，不是被审查的 Builder。
+- 有 `design/interface-catalog.csv` 时，逐行核对 interface_id 的契约、测试与 traceability；缺失测试、未执行或未批准差异判 FAIL/BLOCKED；原生/设备/第三方边界没有真机/模拟器/替身/人工证据时不得 PASS。
 - 必须独立运行 `openspec status --change <id>` 与 `openspec validate <id> --strict`，记录命令、退出码和结果；OpenSpec 校验失败即 FAIL/BLOCKED。
 - 阶段 evidence 的 checks 记录 `superpowers-verification-methods`（技能实际使用与证据）和 `openspec-validate-independent`（status/validate 的退出码与日志）。
 

@@ -1,0 +1,1 @@
+interface_id,interface_type,source,target,protocol,operation,input_contract,output_contract,auth,error_semantics,timeout_ms,retry_policy,idempotency,versioning,test_ids,owner,notes

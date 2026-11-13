@@ -97,6 +97,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
         (self.root/'docs/architecture/baseline-manifest.json').write_text('{}',encoding='utf-8')
         (self.root/'docs/architecture/constraint-registry.json').write_text('{}',encoding='utf-8')
+        self._write_method_artifact()
         calls=[]
         original_check,original_gate=w.check_entry,w.run_baseline_gate
         w.check_entry=lambda *a,**k: []
@@ -105,6 +106,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
             evidence={'step_id':'03-project-architecture-baseline','outputs':[
                 {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
                 {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
+                'methods':[self._method_entry()],
                 'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
                 'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
             ep=self.root/'baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -157,6 +159,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
         (self.root/'docs/architecture/baseline-manifest.json').write_text('{}',encoding='utf-8')
         (self.root/'docs/architecture/constraint-registry.json').write_text('{}',encoding='utf-8')
+        self._write_method_artifact()
         calls=[]
         original_check,original_gate=w.check_entry,w.run_baseline_gate
         w.check_entry=lambda *a,**k: []
@@ -165,6 +168,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
             evidence={'step_id':'03-project-architecture-baseline','outputs':[
                 {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
                 {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
+                'methods':[self._method_entry()],
                 'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
                 'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
             ep=self.root/'unapproved-baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -188,8 +192,10 @@ class WorkflowRuntimeTests(unittest.TestCase):
             w.cmd_handoff_create(args)
 
     def test_feature_transition_rejects_missing_human_approval(self):
+        self._write_method_artifact()
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
+                  'methods':[self._method_entry()],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self.root/'feature-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -309,5 +315,91 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence['outputs'].append({'path':'docs/b.md','status':'n/a','required':False,'waiver_reason':'not applicable'})
         ep=self._write_evidence('waived-output-evidence.json',evidence)
         self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+
+    def _method_entry(self, **overrides):
+        entry={'skill':'brainstorming','mode':'stage-scoped','summary':'test methods',
+               'questions':['新系统还是基于现有系统二开？','现有系统代码地址（仓库/分支/commit）？','依赖哪些第三方接口？','平台/跨端方案？'],
+               'alternatives':['a1','a2'],
+               'decisions':['d1'],'open_questions':[],
+               'artifact_section':'docs/architecture/technology-decisions.md#1. 技术选型访谈记录',
+               'evidence':'docs/architecture/technology-decisions.md'}
+        entry.update(overrides)
+        return entry
+
+    def _write_method_artifact(self):
+        (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
+        artifact=self.root/'docs/architecture/technology-decisions.md'
+        artifact.write_text('# 技术选型决策\n\n## 1. 技术选型访谈记录\n\n- 客户端形态：Web/H5、Android、iOS\n- 跨端方案：uni-app / Flutter / 原生双端\n',encoding='utf-8')
+        return artifact
+
+    def test_method_evidence_required_for_stage_03(self):
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('methods' in e for e in errors),errors)
+
+    def test_method_evidence_passes_with_questions_and_alternatives(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry()]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertEqual([],errors)
+
+    def test_equivalent_method_requires_reason(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry(mode='equivalent')]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('reason' in e for e in errors),errors)
+
+    def test_method_evidence_requires_artifact_heading(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry(artifact_section='docs/architecture/technology-decisions.md#不存在的章节')]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('heading' in e for e in errors),errors)
+
+    def test_method_evidence_requires_minimum_alternatives(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry(alternatives=['only-one'])]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('alternatives' in e for e in errors),errors)
+
+    def test_stage_02_requires_internet_research(self):
+        self._write_method_artifact()
+        (self.root/'docs/product').mkdir(parents=True,exist_ok=True)
+        research=self.root/'docs/product/reference-research.md'
+        research.write_text('# 参考产品与互联网调研\n\n## 3. 研究记录\n\n| 1 | WebSearch | https://example.com | 2026-11-13 |\n',encoding='utf-8')
+        evidence={'step_id':'02-requirements-analysis','methods':[self._method_entry()]}
+        errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
+        self.assertTrue(any('internet-research' in e for e in errors),errors)
+        evidence['methods'].append({'skill':'internet-research','mode':'stage-scoped','summary':'market research',
+            'questions':['q1','q2','q3'],'alternatives':['a1','a2'],'decisions':['d1'],'open_questions':[],
+            'artifact_section':'docs/product/reference-research.md#3. 研究记录',
+            'evidence':'docs/product/reference-research.md'})
+        errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
+        self.assertEqual([],errors)
+
+    def test_method_evidence_supports_multiple_required_skills(self):
+        (self.root/'docs/product').mkdir(parents=True,exist_ok=True)
+        artifact=self.root/'docs/product/reference-research.md'
+        artifact.write_text('# 参考产品与互联网调研\n\n## 1. 研究范围与问题\n\n| RQ-001 | 研究问题 | 为什么重要 |\n|---|---|---|\n',encoding='utf-8')
+        section='docs/product/reference-research.md#1. 研究范围与问题'
+        entry=self._method_entry(skill='brainstorming',artifact_section=section,evidence='docs/product/reference-research.md')
+        research=self._method_entry(skill='internet-research',questions=['q1','q2','q3'],alternatives=['a1','a2'],
+                                    decisions=['d1'],artifact_section=section,evidence='docs/product/reference-research.md')
+        evidence={'step_id':'02-requirements-analysis','methods':[entry,research]}
+        errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
+        self.assertEqual([],errors)
+
+    def test_method_evidence_requires_declared_topics(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry(questions=['客户端形态？','跨端方案？','设备协议？','离线同步？'])]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('required topic' in e for e in errors),errors)
 
 if __name__=='__main__': unittest.main(verbosity=2)

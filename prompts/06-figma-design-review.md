@@ -25,7 +25,7 @@ Figma MCP：<figma-file-link-or-file-key>（必须实际可访问）
 1. 先要求用户选择设计来源（默认 Figma MCP AI 自动设计；人工 Figma 设计仅在用户明确选择时），并在 figma-audit.md 的“设计来源与选择”记录；设计来源状态必须为 APPROVED。
 2. **确定目标框架**：读取 `docs/architecture/technology-decisions.md` 与 `frontend-conventions.md` 第 1 节，在 figma-audit.md 的 `## 设计代码` 写入 `- 目标框架：<Vue 3 + TypeScript + Element Plus / React + ...>`、`- 设计代码扩展名：<.vue / .tsx / .jsx>` 与选型依据；选型 PENDING/冲突/读不到时阻断，不得自行选择。
 3. **一次性完整导出并框架对齐转码**：先加载官方 `figma-design-to-code` Skill（调用 `get_design_context` 时在 `skillNames` 登记，资源方式加载时前缀 `resource:`）；使用 Figma MCP 从已批准需求生成/确认真实 Figma 设计后，按 PAGE 逐页读取；`get_variable_defs` 至少覆盖全文件 token 实际值，`get_metadata` 每 PAGE 读取精确 `x/y/w/h`（用于断言表），`get_design_context` 每 PAGE 生成参考实现后立即转码为目标框架并落盘为 `figma-code/PAGE-001.vue … PAGE-00N.vue`（React 栈为 `.tsx`/`.jsx`）；保留真实文案/字号/间距/圆角/层级与 `data-node-id`，替换为目标组件库与项目 token，只做静态高保真页面，不接业务 API。返回的渲染仅即时对照，不保存。有图片/SVG 资产时立即下载到 `figma-assets/`。不得逐节点轮询，不得并行多个 Agent 读取同一文件。
-4. 在 figma-audit.md 建立 PAGE → node 映射、每 PAGE 区块级实际规格、状态覆盖与差异/待确认；建立 `figma-layout.csv` 断言子集，断言范围必须在 `## 断言范围` 说明；设计代码中的文字/结构以目标框架代码为准。状态没有 Figma 画板时必须写明 07 设计决策、审批人和依据，不能声称已还原。
+4. 在 figma-audit.md 建立 PAGE → node 映射、每 PAGE 区块级实际规格、状态覆盖与差异/待确认；状态覆盖至少包括 default、loading、empty、error、permission denied/降级、offline/weak network、push/deep link（适用时），并记录 Android/iOS/HarmonyOS 等多端差异；建立 `figma-layout.csv` 断言子集，断言范围必须在 `## 断言范围` 说明；设计代码中的文字/结构以目标框架代码为准。状态没有 Figma 画板时必须写明 07 设计决策、审批人和依据，不能声称已还原。
 5. 用户必须在真实 Figma 评审稿上完成 UI 评审，并在 `## UI 评审` 写入 `- UI 评审状态：APPROVED`、`- 评审人：...`、`- 评审证据：workflow/evidence/06-figma-ui-review.md`（文件必须真实存在）。
 6. MCP 不可用或读不到真实设计时阻断，不得用截图、手写 HTML 或臆造替代。PAGE ID 由 06 冻结，07–10 不得新增或重命名 PAGE。
 7. 完成后运行 `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`，退出码必须为 0。缺少目标框架、节点 CSV、断言映射、token 实际值、可见 TEXT 覆盖或 UI 评审时失败。
@@ -43,7 +43,7 @@ Figma MCP：<figma-file-link-or-file-key>（必须实际可访问）
 ## 执行工具协议（必须遵守）
 
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`；无法加载时明确报告并按本 Prompt 执行。
-- **Superpowers：** 需要澄清交互时可用 `brainstorming`；先确认真实安装与可调用方式，不可用时说明并执行等价步骤。
+- **Superpowers：** 交互/多端状态需要澄清时使用 `brainstorming` 的 stage-scoped 模式；结论写入 `figma-audit.md` 的状态覆盖/差异章节，不另写独立设计文档。阶段 evidence 可选写 `methods`（至少 2 个问题、1 个备选、1 个决策）；若写则运行 `python scripts/check-method-evidence.py --step 06-figma-design-review --evidence <evidence.json>`。先确认真实安装与可调用方式，不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 运行 `openspec status --change <id>` 并读取已批准 specs；本阶段不归档 Change。命令须真实执行并报告退出码/结果。
 - **Figma MCP：** 使用 `use_figma`、`get_metadata`、`get_variable_defs`、`get_design_context` 等实际可用工具生成/读取 Figma 文件、节点、组件和变量；首次调用 `get_design_context` 前必须加载官方 `figma-design-to-code` Skill；本阶段**一次性完整导出并转码**（token 实际值、每 PAGE 区块规格、目标框架设计代码 `figma-code/PAGE-00N.vue`（React 栈为 `.tsx`）、`figma-layout.csv` 断言表、真实图片/SVG 资产），资产立即下载到 `figma-assets/`；串行调用、按页批量，不逐节点轮询或并行多个 Agent，避免限流。返回的渲染仅即时对照，不保存；MCP 不可用或读不到真实设计时阻断，不得伪造或用截图替代。本阶段不使用 pen.dev。
 - **状态与门禁：** 仅在产物写入指定路径且脚本检查通过后更新 `workflow-state.json`；遇到待审批、缺输入或验证失败必须暂停。

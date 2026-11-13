@@ -15,7 +15,7 @@ Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/�
 1. 先运行 `openspec status --change <id>`、`openspec list --specs` 并读取相关规格全文；遵循当前 OpenSpec CLI/Schema 指引。
 2. 从项目业务流程、RD 矩阵与 Change 范围推导**提案级用户故事与 AC**（`design/user-stories.md`，US/AC ID）；不得复制项目级历史故事清单，只保留与本 Change 相关的条目并保持稳定 ID。specs 是规范行为的唯一来源，场景写在 spec 的 Scenario 中；user-stories 只写 US、AC 与追踪 ID，不复制完整规格。
 3. 每个用户场景必须写清触发、角色、前置条件、主流程、替代/异常流程、后置条件，并引用项目 FLOW/NODE/DO/BR ID；场景正文写入 `specs/<capability>/spec.md` 的 Scenario，不单独产出 `design/use-cases.md`，也不使用 UC ID 做追踪。
-4. 每个 US 写可验证的 Given/When/Then；每个关键故事至少一个 AC，覆盖权限、空值、边界、异常、重复提交和并发（适用时）。
+4. 每个 US 写可验证的 Given/When/Then；每个关键故事至少一个 AC，覆盖权限、空值、边界、异常、重复提交和并发（适用时）。涉及多端/原生/设备的 Change，场景还必须覆盖平台权限（拒绝/降级）、离线/弱网、推送/深链、多端差异、失败重试、幂等/并发；不适用写 N/A + 理由。
 5. 完善 `proposal.md` 的 Why、What Changes、Capabilities、Impact；capability 路径使用 kebab-case 并复用既有路径。
 6. 把外部可观察行为写入 `specs/<capability>/spec.md`，使用规范的 ADDED/MODIFIED/REMOVED/RENAMED Requirements 和 Scenario。
 7. 把实现方法放进 `design.md`，任务只放进带复选框的 `tasks.md`。
@@ -41,7 +41,7 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 
 ## 实际工具调用要求
 
-- **Superpowers：** `brainstorming` 检查需求边界；不得开始编码。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
+- **Superpowers：** `brainstorming` 的 stage-scoped 模式检查方案、需求边界与多端场景完整性；结论写入 `design/user-stories.md`、spec 的 Scenario 或 `design.md`，不另写独立设计文档；不得开始编码。阶段 evidence 必须写 `methods`（至少 3 个问题、1 个备选、1 个决策）并运行 `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能；不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 真实执行 `openspec status --change <id>`、`openspec instructions <artifact> --change <id> --json`、`openspec validate <id> --strict`。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。

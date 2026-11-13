@@ -2,6 +2,24 @@
   "step_id": "01-project-bootstrap",
   "change_id": null,
   "baseline_version": "",
+  "methods": [
+    {
+      "skill": "superpowers:brainstorming",
+      "mode": "stage-scoped",
+      "summary": "比较平台/跨端/集成边界方案并把结论写入技术选型访谈记录",
+      "questions": [
+        "新系统还是基于现有系统二开？现有系统代码地址（仓库/分支/commit）是什么？",
+        "依赖哪些第三方接口，提供方/协议/鉴权/SLA/沙箱是什么？",
+        "客户端形态：Web/H5、微信小程序、Android、iOS、HarmonyOS、PDA？",
+        "跨端方案与原生插件/JS Bridge、设备协议分别是什么？"
+      ],
+      "alternatives": ["uni-app", "Flutter", "原生双端"],
+      "decisions": ["选择 uni-app，原生能力通过插件 + JS Bridge 提供"],
+      "open_questions": ["iOS 定位权限被拒绝时的降级方式待确认"],
+      "artifact_section": "docs/architecture/technology-decisions.md#1. 技术选型访谈记录",
+      "evidence": "docs/architecture/technology-decisions.md"
+    }
+  ],
   "outputs": [
     {
       "path": "AGENTS.md",

@@ -21,6 +21,8 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 7. 失败时使用 `systematic-debugging`，优先定位根因，不进行无证据的随机修改。
 8. 阶段性使用 `requesting-code-review`；收到评论后按 `receiving-code-review` 核实并处理。
 9. 结束前使用 `verification-before-completion`，运行真实测试/构建/契约检查，并报告命令、退出码和未执行项。
+10. 有 `design/interface-catalog.csv` 时，逐行实现接口契约并为每个 interface_id 执行至少一个 TEST；原生/设备/第三方边界写清真机、模拟器、替身或人工验证证据，无法执行写 BLOCKED + 原因，不得伪报通过。
+11. 阶段 evidence 必须写 `methods`：`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径；运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。
 10. 不要声称使用了未安装的 Superpowers 技能；不要擅改 specs/OpenAPI。如规格确需变化，暂停并更新 Change。
 
 ## 输出
@@ -40,7 +42,7 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 
 ## 实际工具调用要求
 
-- **Superpowers：** 检查并按宿主机制加载 `using-superpowers`、`writing-plans`、`test-driven-development`；故障时 `systematic-debugging`；审查用 `requesting-code-review`/`receiving-code-review`；完成前 `verification-before-completion`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
+- **Superpowers：** 检查并按宿主机制加载 `using-superpowers`、`writing-plans`、`test-driven-development`；故障时 `systematic-debugging`；审查用 `requesting-code-review`/`receiving-code-review`；完成前 `verification-before-completion`。阶段 evidence 必须写 `methods`（`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径）并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 先执行 `openspec instructions apply --change <id> --json` 和 `openspec status --change <id>`；完成后 `openspec validate <id> --strict`，不擅改规格。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。

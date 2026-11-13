@@ -25,7 +25,7 @@ Figma/原型审计：<design-evidence>
 ## 执行工具协议（必须遵守）
 
 - **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 按验收/归档阶段使用 `verification-before-completion`；若需代码审查，使用 `requesting-code-review`/`receiving-code-review`。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时说明并执行等价步骤，禁止声称调用了未安装技能。
+- **Superpowers：** 按验收/归档阶段使用 `verification-before-completion`；若需代码审查，使用 `requesting-code-review`/`receiving-code-review`。阶段 evidence 必须写 `methods`（至少 1 个决策和真实证据路径），并运行 `python scripts/check-method-evidence.py --step 10-acceptance-audit --evidence <evidence.json>`。有 `design/interface-catalog.csv` 时，逐行核对 interface_id 的 owner、测试与真机/模拟器/替身/人工证据；缺失不得归档。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时用 `mode=equivalent` 并写 `reason`，禁止声称调用了未安装技能。
 - **OpenSpec：** 验收前运行 `openspec status --change <id>`、`openspec validate <id> --strict`；只有所有门禁通过并获明确批准后才执行 `openspec archive <id>`，不得加 `-y` 绕过确认。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行，不得假装验证通过。
 - **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
 - **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。

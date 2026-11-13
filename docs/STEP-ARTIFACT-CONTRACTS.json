@@ -9,8 +9,67 @@
     "阶段状态只能通过 scripts/workflow.py transition 原子推进；不得由 Skill 直接编辑 completed_steps/current_step。",
     "阶段完成不等于批准：必须 request-review 冻结当前阶段并结束回合；用户明确批准（approve）后才能 transition。",
     "阶段交接必须生成 SHA-256 manifest，下游入口核验文件哈希。",
-    "实现阶段之后必须由独立只读 Verifier 生成机器可检查证据，PASS 才可进入人工验收。"
+    "实现阶段之后必须由独立只读 Verifier 生成机器可检查证据，PASS 才可进入人工验收。",
+    "现有系统二开与修改现有代码必须实际读取代码地址并记录探索结论；第三方接口必须记录提供方、契约、沙箱与测试替身，不得凭记忆假设。"
   ],
+  "method_policy": {
+    "02-requirements-analysis": {
+      "required": [
+        {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true},
+        {"skill": "internet-research", "min_questions": 3, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true}
+      ]
+    },
+    "03-project-architecture-baseline": {
+      "required": [
+        {
+          "skill": "brainstorming",
+          "min_questions": 4,
+          "min_alternatives": 2,
+          "min_decisions": 1,
+          "requires_artifact": true,
+          "required_topics": ["新系统", "现有系统", "代码地址", "第三方接口"]
+        }
+      ]
+    },
+    "04-proposal-planning": {
+      "required": [
+        {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true}
+      ]
+    },
+    "05-feature-requirements": {
+      "required": [
+        {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true}
+      ]
+    },
+    "06-figma-design-review": {
+      "optional": true,
+      "required": [
+        {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true}
+      ]
+    },
+    "07-detailed-design": {
+      "required": [
+        {"skill": "brainstorming", "min_questions": 4, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true, "required_topics": ["现有功能", "新功能", "代码地址", "第三方接口"]},
+        {"skill": "writing-plans", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": true}
+      ]
+    },
+    "08-implementation-orchestrator": {
+      "required": [
+        {"skill": "test-driven-development", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false},
+        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+      ]
+    },
+    "09-independent-verification": {
+      "required": [
+        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+      ]
+    },
+    "10-acceptance-audit": {
+      "required": [
+        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+      ]
+    }
+  },
   "steps": [
     {
       "step": "00",
@@ -71,7 +130,9 @@
         "访谈/业务材料/旧系统资料",
         "项目目标、用户、角色、约束",
         "既有 docs/product/*（若存在）",
-        "既有 OpenSpec specs（只读）"
+        "既有 OpenSpec specs（只读）",
+        "用户提供的参考产品（名称/链接/截图/账号；无则 NONE + 理由）",
+        "互联网调研工具与真实来源（WebSearch/WebFetch 或宿主等价能力；记录查询、URL、访问日期）"
       ],
       "outputs": [
         "docs/product/requirements-analysis.md",
@@ -89,14 +150,15 @@
         "docs/product/assumptions.md（ASM 假设登记）",
         "docs/product/lessons.md（教训/反模式；验收后由阶段 10 追加）",
         "docs/product/id-conventions.md（项目级/Change 级 ID 与并行分配规则）",
-        "docs/product/BASELINE-INDEX.md（由 scripts/gen-baseline-index.py 生成的常驻基线索引）"
+        "docs/product/BASELINE-INDEX.md（由 scripts/gen-baseline-index.py 生成的常驻基线索引）",
+        "docs/product/reference-research.md（参考产品与互联网调研：研究问题/参考产品/来源记录/对比/结论/影响映射）"
       ],
       "next_inputs": [
         "业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题",
         "常驻基线简报、角色权限矩阵、Change 切片规则、决策/假设登记、ID 约定与基线索引"
       ],
       "approval": "业务/产品负责人确认业务流程完整性、节点数据对象与角色、RD 矩阵覆盖",
-      "gate": "scripts/check-requirements.py --strict（FLOW/NODE/DO/RD/BR 结构、引用闭合与节点覆盖）；scripts/gen-baseline-index.py --check（常驻基线索引未过期）"
+      "gate": "scripts/check-requirements.py --strict（FLOW/NODE/DO/RD/BR 结构、引用闭合与节点覆盖）；scripts/gen-baseline-index.py --check（常驻基线索引未过期）；python scripts/check-reference-research.py --strict（参考产品与互联网调研：≥3 个研究问题、≥3 条来源、≥2 条对比、影响映射与审批）"
     },
     {
       "step": "03",
@@ -107,7 +169,10 @@
       "inputs": [
         "已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md",
         "docs/product/BASELINE-BRIEF.md、role-permission-matrix.csv、change-sizing.md、decisions.md、assumptions.md、id-conventions.md、BASELINE-INDEX.md（常驻基线；先读简报，细节按需加载）",
+        "docs/product/reference-research.md（参考产品与互联网调研结论；用于技术选型、边界与第三方判断）",
         "现有仓库结构/技术约束",
+        "现有系统代码库地址与可访问性（若基于现有系统二开；含仓库/本地路径/分支/commit）",
+        "用户确认的第三方接口清单（提供方/用途/协议/鉴权/SLA/沙箱/审批；无则 NONE + 理由）",
         "非功能需求",
         "用户/技术负责人明确的技术选型偏好（本阶段必须显式询问并记录，不得默认或自行假设）",
         "docs/product/open-questions.md（只读；未决问题不得由架构阶段擅自关闭）",
@@ -134,7 +199,7 @@
         "冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录"
       ],
       "approval": "产品/架构/技术负责人共同确认系统边界、数据流转与公共契约，并批准基线冻结",
-      "gate": "scripts/check-required-files.sh --strict；跨文档一致性审计（系统边界/数据流转/ERD/公共契约/术语）；scripts/baseline-governance.py audit --require-frozen（阶段结束冻结审计）"
+      "gate": "scripts/check-required-files.sh --strict；跨文档一致性审计（系统边界/数据流转/ERD/公共契约/术语）；python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence>（必须覆盖新系统/现有系统/代码地址/第三方接口）；python scripts/check-architecture-baseline.py --strict（现有系统二开约束/第三方接口依赖清单/LEGACY-*/EXT-*）；docs/architecture/technology-decisions.md 必须含“现有系统二开约束”与“第三方接口依赖清单”；scripts/baseline-governance.py audit --require-frozen（阶段结束冻结审计）"
     },
     {
       "step": "04",
@@ -146,6 +211,7 @@
         "已批准并冻结的项目总体架构与基线：docs/architecture/baseline-manifest.json、constraint-registry.json、baseline-status.md、docs/project/baseline-audit-report.md",
         "docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md（需求业务梳理全量输入）",
         "docs/product/BASELINE-BRIEF.md、role-permission-matrix.csv、change-sizing.md、decisions.md、assumptions.md、lessons.md、id-conventions.md（基线常驻层与经验回写）",
+        "docs/product/reference-research.md（参考产品与互联网调研结论；用于 Change 拆分与依赖判断）",
         "已知技术债与依赖",
         "docs/architecture/baseline-status.md",
         "相关架构/数据/API/前端/测试基线版本与审批信息",
@@ -181,6 +247,7 @@
       "inputs": [
         "docs/product/proposal-roadmap.md（当前 Change 所在行与依赖）、当前 Change 范围",
         "docs/product/BASELINE-BRIEF.md（先读，≤1 页）、change-sizing.md（切片预算与 DoD）、role-permission-matrix.csv、decisions.md、assumptions.md、lessons.md、id-conventions.md",
+        "docs/product/reference-research.md（参考产品与互联网调研结论；用于提案范围与场景完整性）",
         "docs/architecture/baseline-status.md 与相关架构/数据/公共契约/测试基线",
         "docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md（关联 FLOW/BR/AC 与 RD 矩阵；AC 与验收政策对齐）",
         "openspec/specs/**（只读）",
@@ -224,6 +291,7 @@
         "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md（已批准的提案级需求与 AC）",
         "docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、role-permission-matrix.csv、id-conventions.md（业务流程/数据对象/RD 矩阵/角色权限/ID 约定）；docs/architecture/frontend-conventions.md（UI/前端规范，视觉权威取第 9 节）；docs/architecture/technology-decisions.md（总体技术选型，确定目标前端框架/组件库）",
         "docs/product/open-questions.md（只读，生成时不擅自决策）",
+        "docs/product/reference-research.md（参考产品与互联网调研结论；用于页面与状态参考）",
         "docs/architecture/baseline-status.md（当前版本）",
         "openspec/changes/<change-id>/design/baseline-impact.md（已批准的基线快照）",
         "openspec/changes/<change-id>/design/baseline-binding.json（阶段 05 已审批的约束绑定；本阶段只读继承）",
@@ -252,6 +320,8 @@
       "inputs": [
         "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md（提案需求、AC 与初始设计决策）",
         "openspec/changes/<change-id>/tasks.md（任务范围）",
+        "现有功能代码地址与可访问性（若修改现有功能代码；含仓库/路径/分支/commit）",
+        "03 基线中的第三方接口清单与沙箱/契约/测试替身要求",
         "openspec/changes/<change-id>/design/figma-audit.md（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、状态决策；默认离线消费，仅在版本变化/歧义时按页重读）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射；07 填满 route/dom_selector）",
         "Figma 评审稿（视觉/组件/变量权威）与 docs/architecture/frontend-conventions.md 第 9 节（视觉规范）；不维护 design-tokens.json，token 实际值见 figma-audit.md",
         "docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、acceptance-policy.md、role-permission-matrix.csv、id-conventions.md、open-questions.md（关联 FLOW/NODE/DO/BR、验收口径、权限与 ID 约定；open-questions 只读）",
@@ -269,13 +339,14 @@
         "openspec/changes/<change-id>/api/openapi.yaml（条件适用：有 API 时）",
         "openspec/changes/<change-id>/design/api-io-mapping.csv（条件适用：有 API 时）",
         "openspec/changes/<change-id>/design/io-catalog.csv（条件适用：有 API 时）",
+        "openspec/changes/<change-id>/design/interface-catalog.csv（跨边界接口目录：HTTP/原生桥接/设备/第三方/异步/文件；条件适用：有跨边界接口时）",
         "openspec/changes/<change-id>/traceability.csv（合并 API 与测试映射；唯一追踪聚合文件）"
       ],
       "next_inputs": [
         "统一设计决策、接口契约、前后端实现约束、测试用例矩阵、figma-layout.csv 断言映射与唯一追踪矩阵"
       ],
       "approval": "技术负责人确认设计范围、接口与测试方案",
-      "gate": "scripts/check-change.sh <change-id>；scripts/check-design-assets.sh <change-id> --strict --lint-api（涉及 UI 时同时校验 figma-audit）；scripts/check-design-sections.py --change <change-id>（含 figma-layout.csv route/dom_selector 填满与响应式规则）；scripts/check-test-cases.py --change <change-id> --strict；scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict；有 API 时 scripts/check-api-traceability.py --change <change-id>；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "gate": "scripts/check-change.sh <change-id>；scripts/check-design-assets.sh <change-id> --strict --lint-api（涉及 UI 时同时校验 figma-audit）；scripts/check-design-sections.py --change <change-id>（含 ### 现有代码变更影响、figma-layout.csv route/dom_selector 填满与响应式规则）；scripts/check-test-cases.py --change <change-id> --strict；scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict；有 API 时 scripts/check-api-traceability.py --change <change-id>；有跨边界接口时 scripts/check-interface-catalog.py --change <change-id> --strict；python scripts/check-method-evidence.py --step 07-detailed-design --evidence <evidence>（必须覆盖现有功能/新功能/代码地址/第三方接口）；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
       "baseline_interaction": {
         "read": [
           "当前 Change 的 design/baseline-impact.md",
@@ -297,7 +368,7 @@
       "inputs": [
         "openspec/changes/<change-id>/tasks.md、design.md（已批准）",
         "openspec/changes/<change-id>/specs/<capability>/spec.md、design/user-stories.md（AC）",
-        "openspec/changes/<change-id>/api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv（适用时）",
+        "openspec/changes/<change-id>/api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv、design/interface-catalog.csv（适用时）",
         "openspec/changes/<change-id>/design/test-cases.csv（按 TEST ID 实现与执行测试）",
         "openspec/changes/<change-id>/design/figma-audit.md（涉及 UI 时读取目标框架/转码说明、token 实际值/PAGE 规格/状态决策；06 冻结 PAGE 清单）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射）",
         "openspec/changes/<change-id>/traceability.csv",
@@ -339,7 +410,7 @@
       "inputs": [
         "已实现代码及 revision/diff 指纹",
         "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、tasks.md、design/user-stories.md（已批准需求、设计与 AC）",
-        "openspec/changes/<change-id>/api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv（适用时）",
+        "openspec/changes/<change-id>/api/openapi.yaml、design/api-io-mapping.csv、design/io-catalog.csv、design/interface-catalog.csv（适用时）",
         "openspec/changes/<change-id>/design/figma-audit.md（涉及 UI 时对照目标框架/转码说明、token 实际值/PAGE 规格/状态决策）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射）",
         "docs/product/acceptance-policy.md（项目级验收口径）",
         "openspec/changes/<change-id>/design/test-cases.csv（测试用例与执行结果核对）",
@@ -379,6 +450,7 @@
         "openspec/changes/<change-id>/design/evidence/code-review.md",
         "openspec/changes/<change-id>/design/figma-audit.md（涉及 UI 时验收目标框架/转码说明、token 实际值/PAGE 规格/状态与 Figma 评审稿一致性）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）、design/figma-layout.csv（断言映射）与 design/evidence/figma-layout-check.json（必须 PASS）",
         "openspec/changes/<change-id>/design/test-cases.csv（验收测试覆盖证据）",
+        "openspec/changes/<change-id>/design/interface-catalog.csv（跨边界接口验收证据）",
         "运行中的验收环境入口（URL/路由；人工 UI 验收无差异 PAGE 按机器证据签收，差异/UI-DERIVED PAGE 并排核对，不使用截图）",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md（当前版本）",
@@ -498,6 +570,17 @@
         "03",
         "04",
         "05"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "02",
+      "artifact": "docs/product/reference-research.md",
+      "consumed_by": [
+        "03",
+        "04",
+        "05",
+        "06"
       ],
       "evidence_only": false
     },
@@ -961,6 +1044,16 @@
       "consumed_by": [
         "08",
         "09"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
+      "artifact": "openspec/changes/<change-id>/design/interface-catalog.csv",
+      "consumed_by": [
+        "08",
+        "09",
+        "10"
       ],
       "evidence_only": false
     },

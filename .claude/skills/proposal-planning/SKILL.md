@@ -13,7 +13,7 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 
 ## 执行流程
 1. 按用户可感知且可独立验收的业务能力切分 Change，不按前端/后端/数据库横向切分。
-2. 每项明确价值、目标、非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、数据迁移、风险与发布策略；提案级 UC/US/AC 在阶段 05 细化，不在本阶段伪造。
+2. 每项明确价值、目标、非目标、关联 FLOW/NODE/DO/BR、预期验收方向、依赖、数据迁移、风险与发布策略；依赖必须显式检查平台/原生/设备/第三方前置条件（跨端方案、原生插件与 JS Bridge、设备/网关、地图/天气/支付/实名/溯源等第三方审批、离线同步），不得藏在备注里。提案级 UC/US/AC 在阶段 05 细化，不在本阶段伪造。
 3. 读取 open-questions 与阶段 03 基线审计报告，把未决问题、审计缺口和待批项带入候选 Change 的风险/依赖/阻塞条件，不擅自关闭。
 4. 优先选纵向切片，尽早贯穿 UI/API/domain/persistence/test。
 5. 识别基础设施型 Change 的独立理由和前置依赖。
@@ -38,7 +38,7 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 
 ## 实际工具调用要求
 
-- **Superpowers：** `brainstorming`，先比较切分方案、依赖和风险，审批后再创建 Change。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
+- **Superpowers：** `brainstorming` 的 stage-scoped 模式，先比较切分方案、平台/原生依赖和风险，结论写入 `proposal-roadmap.md`，审批后再创建 Change。阶段 evidence 必须写 `methods`（至少 2 个问题、2 个备选、1 个决策）并运行 `python scripts/check-method-evidence.py --step 04-proposal-planning --evidence <evidence.json>`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能；不可用时用 `mode=equivalent` 并写 `reason`。
 - **OpenSpec：** 先运行 `openspec list --specs`、`openspec list --changes`；提案获批后才可运行 `openspec new change <id>`。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
 - **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
 - **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。

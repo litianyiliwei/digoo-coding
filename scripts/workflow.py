@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse, hashlib, json, os, re, sys, time, subprocess
 from datetime import datetime, timezone
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from method_evidence import validate_methods
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'workflow-state.json'
@@ -282,6 +284,9 @@ def parse_evidence(path,step_id,change_id):
             else:
                 if not pp.is_file(): failed.append(c.get('name','unnamed check')+f': proof file missing: {proof}')
     if failed: raise ValueError('Gate checks failed: '+'; '.join(failed))
+    method_errors=validate_methods(e,step_id,ROOT)
+    if method_errors:
+        raise ValueError('Method evidence failed: '+'; '.join(method_errors))
     if step_id=='09-independent-verification':
         paths={a['path'] for a in artifacts}
         required_suffixes=('independent-verification-report.md','independent-verification.json')
@@ -588,6 +593,29 @@ def cmd_sync_baseline_index(args):
     print('BASELINE_INDEX_SYNCED='+str(s['baseline']['overall_version']))
     return 0
 
+def cmd_check_methods(args):
+    p=(ROOT/args.evidence).resolve() if not Path(args.evidence).is_absolute() else Path(args.evidence).resolve()
+    try:
+        p.relative_to(ROOT.resolve())
+    except ValueError:
+        print('METHOD_EVIDENCE_FAILED: evidence file must be inside project root')
+        return 1
+    try:
+        e=json.loads(p.read_text(encoding='utf-8'))
+    except Exception as exc:
+        print(f'METHOD_EVIDENCE_FAILED: cannot read evidence: {exc}')
+        return 1
+    if e.get('step_id')!=args.step:
+        print(f'METHOD_EVIDENCE_FAILED: evidence.step_id must be {args.step}')
+        return 1
+    errors=validate_methods(e,args.step,ROOT)
+    if errors:
+        print('METHOD_EVIDENCE_FAILED')
+        for error in errors: print(' - '+error)
+        return 1
+    print(f'METHOD_EVIDENCE_PASSED={args.step}')
+    return 0
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__); sub=ap.add_subparsers(dest='cmd',required=True)
     sub.add_parser('status')
@@ -597,13 +625,14 @@ def main():
     p=sub.add_parser('transition'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
     p=sub.add_parser('request-review'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--summary',default=''); p.add_argument('--target',action='append',default=[])
     p=sub.add_parser('approve'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--approver',required=True); p.add_argument('--approved-at',required=True); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
+    p=sub.add_parser('check-methods'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
     p=sub.add_parser('next-change'); p.add_argument('--change-id',required=True); p.add_argument('--note')
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())
