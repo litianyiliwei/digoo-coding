@@ -60,3 +60,11 @@ description: 详细设计、接口与测试设计。合并设计总控、OpenAPI
 - 执行前读取当前 Change 的 `design/baseline-impact.md` 与 `baseline-binding.json`；逐条约束须有 COMPLIANT 或 EXCEPTION_APPROVED 结论及设计证据。
 - 基线版本变化必须记录 `NO_IMPACT` 或 `REBASE_REQUIRED`；发现冲突必须提出基线修订，受影响设计在审批前不得冻结。
 - 通过前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 07-detailed-design [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 07-detailed-design --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 07-detailed-design”后，才可运行 `python scripts/workflow.py approve --step 07-detailed-design --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

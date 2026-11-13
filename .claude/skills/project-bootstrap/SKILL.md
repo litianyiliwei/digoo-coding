@@ -49,3 +49,11 @@ description: 项目初始化与工具链检查。初始化仓库上下文与工�
 - **下游交接：** 仓库约定与工具链报告；workflow-state.json。明确指出下一阶段消费哪些文件/字段。
 - **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
 - **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 01-project-bootstrap [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 01-project-bootstrap --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 01-project-bootstrap”后，才可运行 `python scripts/workflow.py approve --step 01-project-bootstrap --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

@@ -35,7 +35,9 @@ The scripts are intentionally fail-closed when they cannot run a required check.
 
 | `workflow.py status` | 展示工作流状态 | 状态 JSON 可读取且阶段 ID 合法 | 业务产物真实完成 |
 | `workflow.py check-entry --step <id>` | 阶段进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff | 阶段满足进入条件 | 当前阶段产物质量正确 |
-| `workflow.py transition --step <id> --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进状态 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
+| `workflow.py request-review --step <id> --summary <text>` | 阶段完成后登记待评审：写入 pending_approvals 且 current_step 不前进；next-step/check-entry 随即阻断 | 送审状态已记录 | 产物质量正确 |
+| `workflow.py approve --step <id> --approver <name> --approved-at <date> --evidence <file>` | 记录用户明确批准，写入 approvals_history 并清除该阶段待评审 | 用户审批已登记 | 审批身份由脚本认证 |
+| `workflow.py transition --step <id> --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进状态；人工审批阶段必须有 approvals_history 记录 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
 | `workflow.py reopen --step <id> --reason <text>` | 返工回退：移除目标阶段及其下游依赖闭包，清理相关审批/阻断，current_step 回到目标阶段 | 回退完成并记录 reopen_history | 不校验返工后产物质量 |
 | `workflow.py next-change --change-id <id>` | 当前 Change 验收后归档 05–10，切换 active_change_id 并从 05 开始下一个 Change | 上一个 Change 已完成验收且无阻断 | 不支持并发 Change 调度 |
 | `workflow.py sync-baseline-index` | 从 baseline-manifest.json 同步 workflow-state.json 的基线版本/状态索引 | 状态索引与机器权威 Manifest 一致 | 不冻结或修改基线本身 |

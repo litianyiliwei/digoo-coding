@@ -48,3 +48,10 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 - 阶段完成后生成符合 `workflow/evidence/<step-id>.json` 结构的证据，调用 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`。禁止直接编辑 `completed_steps/current_step`。
 - transition 会生成 SHA-256 handoff；下一阶段必须核验全部上游 manifest。文件哈希变化时退回上游重审，不得静默刷新。
 - 阶段 08 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 10。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。
+
+## 阶段边界与评审停等（强制）
+
+- 状态中存在 `pending_approvals` 时，只能报告 BLOCKED、待评审阶段与送审产物，禁止建议或执行任何下一阶段。
+- 用户只说“下一步”时，先核验真实产物与 `approvals_history`；上一阶段没有用户审批记录时不得 `transition`，只能报告待评审。
+- 任一阶段开始前必须运行 `check-entry`；阶段完成后必须 `request-review` 并立即结束回合，禁止在同一会话连续推进两个阶段。
+- 只有用户明确回复“评审通过 <step-id>”后，才可 `approve` 再 `transition`；不得自行填写 approver/approved_at。

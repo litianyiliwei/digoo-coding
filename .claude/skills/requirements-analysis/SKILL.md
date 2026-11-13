@@ -62,3 +62,11 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 - 逐节点核对 RD 矩阵：每个 NODE 至少有一条 RD 记录（或 N/A + 理由）；每个 DO 至少被一个节点使用；引用不得悬空。
 - 核对业务规则、术语、验收政策与流程/节点一致；冲突转入 open-questions，不擅自选择。
 - 运行 `python scripts/check-requirements.py --strict`，失败不得推进。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 02-requirements-analysis [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 02-requirements-analysis --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 02-requirements-analysis”后，才可运行 `python scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

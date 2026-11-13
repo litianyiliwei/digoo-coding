@@ -56,3 +56,11 @@ description: 以只读、独立视角验证一个 OpenSpec Change 的实现是�
 - Verifier 必须独立读取当前 Manifest、Constraint Registry 和 Change `baseline-binding.json`，核验每条适用约束是否与实际代码/配置/数据库迁移/接口一致。
 - 不得信任 Builder 自填的 PASS；Verifier 应重新执行对应的自动检查或记录独立人工核验依据，并在报告中列出约束 ID 与结果。
 - 阶段 09 转出前，执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`；报告未覆盖约束的检查结论时应判 BLOCKED。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 09-independent-verification [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 09-independent-verification --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 09-independent-verification”后，才可运行 `python scripts/workflow.py approve --step 09-independent-verification --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

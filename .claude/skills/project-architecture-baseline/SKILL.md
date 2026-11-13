@@ -66,3 +66,11 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 - 阶段 03 转换的 Evidence 必须包含 Manifest 与 Constraint Registry 两个输出；`workflow.py transition` 会再次进行冻结门禁。
 - 审计报告必须区分“基线正文已更新”“Change 局部记录”“待批准修订”，并检查 OpenSpec 主规格与项目设计基线是否一致。
 - 冻结后不得直接改文件；必须先 `open-amendment`。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 03-project-architecture-baseline [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 03-project-architecture-baseline --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 03-project-architecture-baseline”后，才可运行 `python scripts/workflow.py approve --step 03-project-architecture-baseline --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

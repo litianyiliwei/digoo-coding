@@ -43,12 +43,34 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 
 状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python3 scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
 
+### 阶段评审停等（强制）
+
+阶段完成不等于可进入下一阶段。每个阶段产物与检查完成后，必须先把流程冻结为待评审：
+
+```bash
+python3 scripts/workflow.py request-review --step 02-requirements-analysis --summary "需求业务梳理送审"
+```
+
+- `request-review` 写入 `pending_approvals` 且 **不推进** `current_step`；此后 `next-step.py` 与 `check-entry --step <下一阶段>` 均会阻断。
+- Agent 必须按 `templates/workflow/step-handoff-report.md` 展示交接报告并**立即结束回合**，不得在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 <step-id>”后，才可记录审批：
+
+```bash
+python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at 2026-11-13 --evidence workflow/evidence/02-approval.md
+```
+
+- `approve` 校验审批证据文件真实存在，把审批记录写入 `approvals_history` 并清除该阶段 `pending_approvals`；随后才能执行 `transition`。
+- `transition` 对所有 `human_approval_required=true` 的阶段（02–10）要求存在对应的 `approvals_history` 记录；只写 evidence 中的审批或用 `handoff-create --approved` 都不能绕过。
+- `reopen` 会清除被回退阶段的审批记录，重跑后必须重新评审。
+- Claude Code 下 `.claude/settings.json` 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑 `workflow-state.json`；待评审期间同样拒绝。其他 Agent 应以 `pending_approvals` 与 `current_step` 为准自行停止。
+
 ### 审批解除与死锁边界
 
-- 当前阶段的 `pending_approvals` 不会阻塞该阶段自己的 `transition`。审批完成后，在 evidence 中写 `approval.status=approved`、`approver`、`approved_at`，再运行 `transition`，状态机会原子清除该阶段的待审批项。
+- 当前阶段的 `pending_approvals` 不会阻塞该阶段自己的 `transition`。审批完成后，先运行 `approve` 写入 `approvals_history`，再在 evidence 中写 `approval.status=approved`、`approver`、`approved_at`，然后运行 `transition`；状态机会原子清除该阶段的待审批项。
 - 当前阶段的 `blocked_items` 可通过 evidence 的 `resolved_blockers` 解除：每项写 `step_id`、`resolution` 和已存在的仓库内证据路径；状态机会在成功转换后原子清除该阶段的阻断项。其他阶段的阻断项仍需先处理。
 - 其他阶段、其他 Change 的待审批项仍会阻止后续阶段进入。
 - 若当前阶段有待审批项但 evidence 未给出 `status=approved`，`transition` 会拒绝，状态不会推进；不存在“先推进再补审批”的路径。
+- `human_approval_required=true` 的阶段没有 `approvals_history` 记录时，`transition` 直接拒绝，必须先 `request-review` 并取得用户明确批准。
 - `check-entry` 仍会报告当前阶段的待审批项；它用于阻止在审批前重新执行该阶段，而不是阻止提交已批准证据。
 
 ### 返工回退

@@ -51,6 +51,7 @@ UI 基线：openspec/changes/<change-id>/design/figma-audit.md（目标框架/�
 - 必须输出：openspec/changes/<change-id>/design.md（统一设计五节，含 `### 响应式与视口规则` 与 `### 页面几何与保真断言`）；`design/figma-layout.csv`（每行 `route`/`dom_selector` 已填）；`design/test-cases.csv`（TEST 矩阵）；条件适用时 `api/openapi.yaml`、`design/api-io-mapping.csv`、`design/io-catalog.csv`；`traceability.csv`（合并页面/API/测试映射）；`design/baseline-impact.md`（07 更新设计复核结论）；`design/baseline-binding.json`（07 写入设计证据）。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：统一设计决策、接口契约、前后端实现约束、测试用例矩阵、`figma-layout.csv` 断言映射与唯一追踪矩阵；08 阶段据此实现并运行几何断言。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 07-detailed-design --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 07-detailed-design”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 07-detailed-design --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
 ## 阶段结束审计（必须执行）

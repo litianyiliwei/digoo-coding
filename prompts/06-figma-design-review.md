@@ -57,6 +57,7 @@ Figma MCP：<figma-file-link-or-file-key>（必须实际可访问）
 - 必须输出：`openspec/changes/<change-id>/design/figma-audit.md`（唯一 UI 契约：Figma 文件/版本 + 目标框架/转码说明 + token 实际值 + 文字样式 + PAGE 与 node + 每 PAGE 区块规格 + 设计代码 + 断言范围 + 状态覆盖/决策 + UI 评审 APPROVED；无 UI 时 N/A + 理由）、`design/figma-code/README.md` 与目标框架设计代码 `PAGE-001.vue … PAGE-00N.vue`（React 栈为 `.tsx`/`.jsx`）、`design/figma-layout.csv`（精简断言表，`route`/`dom_selector` 可由 07 填满）；有真实图片/SVG 时附 `design/figma-assets/README.md`。不再输出参考截图、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json`、`design-tokens.json`、分散的 token/contract JSON 或 06 初始化的 `traceability.csv`。
 - 下一步输入：`design/figma-audit.md`、`design/figma-code/` 与 `design/figma-layout.csv` 是 07/08/09/10 的唯一界面输入；07/08 默认离线消费，仅在 Figma 文件版本变化或页面有歧义时重新读取 Figma；不得要求每个阶段全量实时读取。PAGE ID 与页面集合在 06 冻结；`traceability.csv` 由 07 初始化 PAGE → AC 并合并 API/测试映射。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 06-figma-design-review”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 06-figma-design-review --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 - 若 `workflow-state.json` 中本阶段存在 `blocked_items`，`transition` 证据必须增加 `resolved_blockers`（含 `step_id`、`resolution` 与现有证据路径），否则 `transition` 仍会被阻断。
 

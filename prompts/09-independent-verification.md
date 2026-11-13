@@ -34,6 +34,8 @@
 - 状态：只有 `check-independent-verification.py` 退出码为 0，且阶段 evidence 的 gate check 记录该命令真实退出码 0，才允许完成阶段；涉及 UI 时 `layout_checks` 必须全部 PASS，且 `test_runs` 包含独立重跑的 `check-figma-layout.py` 退出码 0。
 - 方法证据：阶段 evidence 的 checks 必须记录 `superpowers-verification-methods`（verification-before-completion / systematic-debugging 的实际使用与证据）和 `openspec-validate-independent`（status/validate 的命令、退出码与日志）。
 
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 09-independent-verification --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 09-independent-verification”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 09-independent-verification --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
+- 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
 ## 独立基线约束验证（必须执行）
 

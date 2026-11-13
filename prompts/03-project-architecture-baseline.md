@@ -42,6 +42,7 @@
 - 必须输出：docs/architecture/system-context.md；domain-boundaries.md；containers-and-deployment.md；data-flows.md；logical-erd.md；technology-decisions.md；api-conventions.md；frontend-conventions.md；test-strategy.md；docs/adr/README.md；baseline-status.md；baseline-manifest.json；constraint-registry.json；docs/project/baseline-audit-report.md。按模板写入仓库。
 - 下一步输入：冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录。在报告中明确阶段 04/05 如何消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 03-project-architecture-baseline --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 03-project-architecture-baseline”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 03-project-architecture-baseline --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
 ## 阶段结束审计与冻结（必须执行）

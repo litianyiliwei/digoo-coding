@@ -198,6 +198,7 @@
 | R-08 | 06 的 `prototype.md`/`design-spec.json`/`figma-handoff.*` 实际被 08/09/10 读取但未登记 | 补齐 5 条 `consumed_by`；`check-output-consumption.py` 增加反向校验 |
 | R-09 | 旧拓扑 handoff 残留在 project 目录 | 移入 `workflow/handoffs/legacy/` |
 | R-10 | workflow-orchestrator 仍要求手工改 `completed_steps`/`current_step` | 改为必须通过 `transition` |
+| R-11 | 阶段完成后没有“待评审”状态，Agent 可直接继续下一阶段 | 新增 `workflow.py request-review`（冻结 `current_step`、写 `pending_approvals`）与 `approve`（写 `approvals_history`）；`transition` 对 02–10 强制要求审批记录；08/09 也设为人工审批；PreToolUse hook 在待评审期间拒绝跨阶段写入 |
 | R-11 | Figma 设计输入没有统一定义 | 在阶段 06/07 Prompt/Skill、Figma 审计与交接模板、契约和逐阶段表统一为：`figma-audit.md` + `figma-code/`（设计代码（get_design_context 落盘））+ `figma-layout.csv`（运行态断言映射）+ 真实图片/SVG 资产 + 项目设计规范；不使用参考截图，`check-figma-audit.py --strict` 强制节点完整性与断言子集 |
 
 并行阶段 03 工作已同步修正约束来源章节：当前 22 条约束的 `file`/`section` 全部可定位，`audit --require-frozen` 不再报告来源缺失。

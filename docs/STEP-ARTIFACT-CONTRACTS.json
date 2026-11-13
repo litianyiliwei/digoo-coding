@@ -7,6 +7,7 @@
     "每一步结束必须展示文件路径、内容摘要、自检结果、待审批项与下一步输入。",
     "缺失/冲突/过期输入必须阻断或显式标记，不得编造。",
     "阶段状态只能通过 scripts/workflow.py transition 原子推进；不得由 Skill 直接编辑 completed_steps/current_step。",
+    "阶段完成不等于批准：必须 request-review 冻结当前阶段并结束回合；用户明确批准（approve）后才能 transition。",
     "阶段交接必须生成 SHA-256 manifest，下游入口核验文件哈希。",
     "实现阶段之后必须由独立只读 Verifier 生成机器可检查证据，PASS 才可进入人工验收。"
   ],

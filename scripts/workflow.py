@@ -24,7 +24,7 @@ def relpath(p:Path):
 def load_state():
     if not STATE.exists(): raise ValueError(f'Missing {STATE.relative_to(ROOT)}')
     data=json.loads(STATE.read_text(encoding='utf-8'))
-    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[]}.items(): data.setdefault(k,v)
+    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[]}.items(): data.setdefault(k,v)
     if data.get('current_step') not in BY_ID and data.get('current_step')!='ALL_STEPS_COMPLETE': raise ValueError(f"Unknown current_step: {data.get('current_step')}")
     unknown=set(data['completed_steps'])-set(BY_ID)
     if unknown: raise ValueError('Unknown completed steps: '+', '.join(sorted(unknown)))
@@ -32,6 +32,16 @@ def load_state():
 
 def norm_path(value):
     return str(value).replace(chr(92),'/').strip().rstrip('。.）)')
+
+def item_step(item):
+    return item.get('step_id') if isinstance(item,dict) else item
+
+def approval_record(state,step_id,change_id=None):
+    for item in (state.get('approvals_history') or []):
+        if item_step(item)!=step_id: continue
+        if change_id is not None and (item.get('change_id') or '')!=change_id: continue
+        return item
+    return None
 
 def contract_doc():
     try:return json.loads((ROOT/CONTRACT_FILE).read_text(encoding='utf-8'))
@@ -288,8 +298,66 @@ def parse_evidence(path,step_id,change_id):
         raise ValueError('Approved evidence requires approver and approved_at')
     return e,artifacts
 
+def cmd_request_review(args):
+    """Record that the current stage is finished and awaiting user review.
+
+    Writing stage artifacts is not permission to start the next stage. This
+    command freezes the workflow at the current step by adding a pending
+    approval entry; next-step/check-entry then refuse to advance until the
+    user explicitly approves.
+    """
+    s=load_state(); sid=args.step; stage=BY_ID[sid]
+    if s.get('current_step')!=sid:
+        raise ValueError(f"current_step is {s.get('current_step')}, not {sid}")
+    completed=set(s.get('completed_steps') or [])
+    missing=[d for d in stage['dependencies'] if d not in completed]
+    if missing: raise ValueError('Uncompleted dependencies: '+', '.join(missing))
+    cid=args.change_id or s.get('active_change_id') or None
+    if stage['scope']=='change' and not cid:
+        raise ValueError('Change-scoped stage requires active_change_id / --change-id')
+    targets=args.target or output_paths_for_step(sid,cid)
+    entry={'step_id':sid,'change_id':cid,'requested_at':now(),
+           'summary':args.summary or '','targets':targets}
+    s['pending_approvals']=[x for x in (s.get('pending_approvals') or []) if item_step(x)!=sid]+[entry]
+    s['last_updated']=now()
+    atomic_json(STATE,s)
+    print(f'REVIEW_REQUESTED={sid}')
+    print('CURRENT_STEP='+s['current_step'])
+    if targets: print('REVIEW_TARGETS='+'; '.join(targets))
+    print('STATUS=AWAITING_USER_REVIEW')
+    print('NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.')
+    print(f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批证据路径>')
+    return 0
+
+def cmd_approve(args):
+    """Record an explicit user approval for the current stage (clears its pending review)."""
+    s=load_state(); sid=args.step
+    if s.get('current_step')!=sid:
+        raise ValueError(f"current_step is {s.get('current_step')}, not {sid}")
+    pending=[x for x in (s.get('pending_approvals') or []) if item_step(x)==sid]
+    if not pending:
+        raise ValueError(f'No pending review request for {sid}; run request-review first and wait for the user')
+    if not args.approver.strip() or not args.approved_at.strip():
+        raise ValueError('approve requires the real approver and approval date from the user')
+    ev=(ROOT/args.evidence).resolve()
+    try: ev.relative_to(ROOT.resolve())
+    except ValueError: raise ValueError('Approval evidence must be inside project root')
+    if not ev.is_file(): raise ValueError('Approval evidence file missing: '+args.evidence)
+    rec={'step_id':sid,'change_id':args.change_id or s.get('active_change_id') or '',
+         'approver':args.approver,'approved_at':args.approved_at,
+         'evidence':relpath(ev),'recorded_at':now()}
+    s['approvals_history']=[x for x in (s.get('approvals_history') or []) if item_step(x)!=sid]+[rec]
+    s['pending_approvals']=[x for x in s['pending_approvals'] if item_step(x)!=sid]
+    s['last_updated']=now()
+    atomic_json(STATE,s)
+    print(f'APPROVED={sid}')
+    print('APPROVER='+args.approver)
+    print('APPROVED_AT='+args.approved_at)
+    print(f'NEXT=python scripts/workflow.py transition --step {sid} --evidence <stage evidence>')
+    return 0
+
 def cmd_status(args):
-    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'completed_changes':s.get('completed_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
+    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'completed_changes':s.get('completed_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'approvals_history':s.get('approvals_history',[]),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
 
 def cmd_check_entry(args):
     s=load_state(); errs=check_entry(args.step,s,args.change_id)
@@ -306,6 +374,14 @@ def cmd_handoff_verify(args):
 def cmd_transition(args):
     s=load_state(); sid=args.step; stage=BY_ID[sid]
     e,artifacts=parse_evidence(args.evidence,sid,args.change_id)
+    if stage.get('human_approval_required'):
+        cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
+        rec=approval_record(s,sid,cid if stage['scope']=='change' else None)
+        if not rec:
+            raise ValueError(f'Human approval required: run request-review, wait for the user, then run workflow.py approve --step {sid} before transition')
+        approval=e.get('approval',{}) if isinstance(e.get('approval'),dict) else {}
+        if approval.get('approver') and rec.get('approver') and approval['approver']!=rec['approver']:
+            raise ValueError('Evidence approver does not match the recorded user approval')
     own_blocked=[x for x in (s.get('blocked_items') or [])
                  if (x.get('step_id') if isinstance(x,dict) else x)==sid]
     resolved=[r for r in (e.get('resolved_blockers') or []) if r.get('step_id')==sid]
@@ -379,6 +455,12 @@ def cmd_handoff_create(args):
     # Explicit utility for re-creating a handoff after a predecessor has been re-approved.
     if args.from_step not in BY_ID or args.to_step not in BY_ID: raise ValueError('Unknown from/to step')
     if args.to_step not in [x['id'] for x in STAGES if args.from_step in x['dependencies']]: raise ValueError('to-step is not a direct successor')
+    state=load_state()
+    if BY_ID[args.from_step].get('human_approval_required'):
+        cid=args.change_id or state.get('active_change_id') or None
+        rec=approval_record(state,args.from_step,cid if BY_ID[args.from_step]['scope']=='change' else None)
+        if not rec:
+            raise ValueError(f'{args.from_step} requires a recorded user approval; run request-review/approve first (--approved alone is not accepted)')
     cid=args.change_id
     evidence_data=None; checks=[]; approval={'status':'approved' if args.approved else 'not-recorded'}; baseline_version=args.baseline_version or ''
     if args.evidence:
@@ -442,6 +524,7 @@ def cmd_reopen(args):
     s['completed_steps']=[x for x in s['completed_steps'] if x not in removed]
     s['pending_approvals']=[x for x in s.get('pending_approvals',[]) if item_step(x) not in removed]
     s['blocked_items']=[x for x in s.get('blocked_items',[]) if item_step(x) not in removed]
+    s['approvals_history']=[x for x in s.get('approvals_history',[]) if item_step(x) not in removed]
     s['current_step']=sid
     s['last_updated']=now()
     s.setdefault('reopen_history',[]).append({
@@ -512,13 +595,15 @@ def main():
     p=sub.add_parser('handoff-verify'); p.add_argument('--manifest',required=True)
     p=sub.add_parser('handoff-create'); p.add_argument('--from-step',required=True,choices=ORDER); p.add_argument('--to-step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--baseline-version'); p.add_argument('--approved',action='store_true'); p.add_argument('--evidence'); p.add_argument('--file',action='append',default=[])
     p=sub.add_parser('transition'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
+    p=sub.add_parser('request-review'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--summary',default=''); p.add_argument('--target',action='append',default=[])
+    p=sub.add_parser('approve'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--approver',required=True); p.add_argument('--approved-at',required=True); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
     p=sub.add_parser('next-change'); p.add_argument('--change-id',required=True); p.add_argument('--note')
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())

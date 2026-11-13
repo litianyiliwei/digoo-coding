@@ -3,7 +3,7 @@
   "from_step": "01-project-bootstrap",
   "to_step": "02-requirements-analysis",
   "change_id": null,
-  "created_at": "2026-11-12T08:42:14+00:00",
+  "created_at": "2026-11-13T06:07:49+00:00",
   "baseline_version": "",
   "approval": {
     "status": "not-recorded"
@@ -12,8 +12,8 @@
   "artifacts": [
     {
       "path": "AGENTS.md",
-      "sha256": "583d78cf13dbb5a6e9a6415c33db5231375ca7ed645e897fa97db8513f18cd27",
-      "size_bytes": 7291,
+      "sha256": "971252e1d35c3be103f99ec47f40fe8be43a6a3e49408938a63de48a1fc5adde",
+      "size_bytes": 9396,
       "role": "output"
     },
     {

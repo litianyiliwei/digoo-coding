@@ -75,6 +75,17 @@ for p in (ROOT/"scripts").glob("__pycache__/*"):
     except OSError: pass
 try: (ROOT/"scripts/__pycache__").rmdir()
 except OSError: pass
+# Claude Code hook scripts must stay importable/compilable.
+hooks_dir=ROOT/".claude"/"hooks"
+if hooks_dir.is_dir():
+    for p in sorted(hooks_dir.glob("*.py")):
+        r=subprocess.run([sys.executable,"-m","py_compile",str(p)],capture_output=True,text=True)
+        if r.returncode: errors.append(f"Python syntax error in {p.relative_to(ROOT)}: {r.stderr.strip()}")
+    for p in (hooks_dir/"__pycache__").glob("*"):
+        try: p.unlink()
+        except OSError: pass
+    try: (hooks_dir/"__pycache__").rmdir()
+    except OSError: pass
 print(f"Skills: {len(skill_paths)}; prompts: {len(prompt_paths)}")
 # Expected counts derive from the contract registry: one Skill per contract step,
 # plus the contract prompts and the standalone workflow-prompts.md overview.

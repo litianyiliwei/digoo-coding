@@ -4,7 +4,7 @@
 > Change ID：N/A（项目级流程总览）
 > 来源基线：`docs/STEP-ARTIFACT-CONTRACTS.json`（输入/输出/审批/门禁）、`docs/WORKFLOW-STAGES.json`（依赖 DAG）
 > 关联需求/AC：N/A（流程文档）
-> 生成版本：`src-sha256:c094fb5ec205`
+> 生成版本：`src-sha256:0a4637dbb99c`
 
 > 本文件只汇总阶段交接面。字段级产物模板见 `docs/OUTPUT-TEMPLATE-MATRIX.csv`；流程入口见 `prompts/00-next-step.md`。
 > 修改阶段交接必须先改两份 JSON 源文件，再执行 `python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md` 重新生成；`scripts/check-package.py` 会检查本文件是否过期。

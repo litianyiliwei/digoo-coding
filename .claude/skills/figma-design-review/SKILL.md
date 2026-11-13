@@ -102,3 +102,11 @@ description: Figma 设计与评审（Figma-only）。通过 Figma MCP 生成真�
 - 执行前读取 `docs/architecture/baseline-manifest.json`、`docs/architecture/constraint-registry.json` 与当前 Change 的 `design/baseline-binding.json`。
 - 页面、元素、事件不得绕过已批准产品/前端/权限约束；冲突时记录约束 ID 并提交例外/BCR，不得自行修改 binding。
 - 通过前执行 `python scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 06-figma-design-review [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 06-figma-design-review”后，才可运行 `python scripts/workflow.py approve --step 06-figma-design-review --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

@@ -71,3 +71,11 @@ OpenSpec proposal、delta specs、design、tasks、`design/user-stories.md`、`d
 - Change 辅助资产创建后，必须存在 `design/baseline-binding.json`；若使用 `new-change-assets.sh` 会自动从冻结注册表生成，亦可运行 `python3 scripts/baseline-governance.py init-binding --change-id <id>`。
 - 不得删除/合并/改写机器生成的约束 ID；对每个 ACTIVE 约束填写 APPLICABLE 或 NOT_APPLICABLE 和具体理由。
 - 阶段 05 人工审批绑定后运行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement`；此门禁和 Markdown `baseline-impact.md` 同时通过才可交接。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 05-feature-requirements [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 05-feature-requirements --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 05-feature-requirements”后，才可运行 `python scripts/workflow.py approve --step 05-feature-requirements --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

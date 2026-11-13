@@ -17,3 +17,7 @@ Prompt 文件位于 `prompts/`，与 `.claude/skills/<skill-id>/SKILL.md` 一一
 | 10 人工验收、归档与基线回写 | `prompts/10-acceptance-audit.md` | `acceptance-audit` |
 
 输入、输出、审批点与门禁以 `docs/STEP-ARTIFACT-CONTRACTS.json` 为准；阶段总览见 `docs/STAGE-IO-OVERVIEW.md`。
+
+## 阶段边界与评审停等（全局）
+
+所有阶段 Prompt 共用同一条硬规则：产物写完只代表可送审。必须运行 `python scripts/workflow.py request-review --step <step-id>`，按交接模板展示报告并立即结束回合；用户明确回复“评审通过 <step-id>”后，才能 `approve` 再 `transition`。`pending_approvals` 非空时禁止执行任何下一阶段；`workflow-state.json` 只能由 `scripts/workflow.py` 写入。

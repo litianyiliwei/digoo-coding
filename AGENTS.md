@@ -13,6 +13,19 @@
 - 每阶段开始前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中对应 Skill 的契约记录。
 - 阶段结束使用 `templates/workflow/step-handoff-report.md` 展示交接报告；产物必须落盘到契约指定路径，不得只在聊天中输出。
 
+## 阶段边界与评审停等（强制）
+
+- **阶段完成 ≠ 可进入下一阶段。** 产物写完、检查通过只代表“可送审”，不代表已批准。未获用户明确批准前，禁止读取或执行下一阶段 Prompt/Skill、禁止创建下一阶段产物、禁止调用下一阶段工具。
+- **开始任何阶段前** 必须运行 `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；退出码非 0 时立即停止并报告阻断原因，不得绕过。
+- **每个阶段结束流程（顺序不可变）：**
+  1. 生成 `workflow/evidence/<step-id>.json` 并运行该阶段全部检查脚本；
+  2. 运行 `python3 scripts/workflow.py request-review --step <step-id> --summary "<送审摘要>"`，把流程冻结为“待评审”（`current_step` 不前进）；
+  3. 按 `templates/workflow/step-handoff-report.md` 展示交接报告（产物路径、摘要、检查结果/退出码、待确认项、下一阶段输入）后**立即结束回合**，不得继续。
+- **只有用户明确回复“评审通过 <step-id>”后**，才可运行 `python3 scripts/workflow.py approve --step <step-id> --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再运行 `transition`。不得自行填写 approver/approved_at，不得把“产物完成”“检查通过”或 Agent 自己的判断当作批准。
+- **08（实现）与 09（独立验证）同样必须等待用户评审**；09 由独立 Verifier 在独立上下文完成，Builder 不得在同一会话代跑验证并自动进入 10。
+- `pending_approvals` 非空时不得推进任何阶段；`workflow-state.json` 只能由 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 下由 `.claude/settings.json` 的 PreToolUse hook 拒绝写入当前阶段之后的阶段产物（共享产物除外）以及直接编辑 `workflow-state.json`；待评审期间同样拒绝。被拒绝时必须停止并说明，不得绕过（更换写入路径、禁用 hook 或改用其他工具规避均属违规）。
+
 ## 模板与产物规则
 
 - 正式产物遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不得删除模板字段；未知项写 `PENDING` 并说明原因与责任人/阻塞条件；不适用项写 `N/A` 并写理由。

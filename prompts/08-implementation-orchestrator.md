@@ -39,6 +39,7 @@
 - 必须输出：实际源代码/迁移/配置；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 `## UI fidelity` 数值表，数值直接取自 `figma-layout-check.json`；仅差异/`UI-DERIVED` PAGE 需人工说明与审批）与 `design/evidence/figma-layout-check.json`；实现/验证证据。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：代码差异、测试报告、审查结论、未解决问题、`figma-layout-check.json` 与 token 检查结果。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 08-implementation-orchestrator”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
 

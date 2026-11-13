@@ -67,3 +67,11 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 - 路线图拆分前运行 `python3 scripts/baseline-governance.py audit --require-frozen`，读取 Manifest 与 Constraint Registry。
 - 为每个候选 Change 记录可能适用的 Constraint ID、潜在例外和基线修订候选；不得把 DRAFT 约束当成现行规则，也不得跳过 ACTIVE 约束。
 - 不得修改冻结基线；基线修订只能走 BCR/ADR 和 `open-amendment`。
+
+## 阶段边界与评审停等（强制）
+
+- 开始前运行 `python scripts/workflow.py check-entry --step 04-proposal-planning [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
+- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 04-proposal-planning --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
+- 只有用户明确回复“评审通过 04-proposal-planning”后，才可运行 `python scripts/workflow.py approve --step 04-proposal-planning --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
+- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
+- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。

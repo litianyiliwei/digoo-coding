@@ -28,6 +28,7 @@ OpenSpec 要求：若仓库已初始化 OpenSpec，执行 `openspec list --chang
 - 下一步输入：所选阶段的 Input Contract 中全部文件。在报告中明确这些文件如何被下游消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
 - 仅在门禁通过且审批完成后，通过 `workflow.py transition` 更新 `workflow-state.json`；不得自动跨越审批点，不得直接编辑状态文件。
+- **待评审时止步（强制）：** `pending_approvals` 非空时，只能报告 BLOCKED、待评审阶段与送审产物，禁止建议或执行任何下一阶段；必须等待用户明确回复“评审通过 <step-id>”后，先 `approve` 再 `transition`。
 
 
 ## P0 Runtime Guard (强制)

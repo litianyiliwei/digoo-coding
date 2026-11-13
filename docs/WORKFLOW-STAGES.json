@@ -85,7 +85,7 @@
         "07-detailed-design"
       ],
       "scope": "change",
-      "human_approval_required": false
+      "human_approval_required": true
     },
     {
       "id": "09-independent-verification",
@@ -96,7 +96,7 @@
         "08-implementation-orchestrator"
       ],
       "scope": "change",
-      "human_approval_required": false
+      "human_approval_required": true
     },
     {
       "id": "10-acceptance-audit",

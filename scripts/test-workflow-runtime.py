@@ -90,7 +90,9 @@ class WorkflowRuntimeTests(unittest.TestCase):
 
     def test_baseline_freeze_transition_requires_manifest_and_registry_outputs(self):
         state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis'],
-               'current_step':'03-project-architecture-baseline','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+               'current_step':'03-project-architecture-baseline','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],'approvals_history':[
+                   {'step_id':'03-project-architecture-baseline','approver':'Owner','approved_at':'2026-11-03','evidence':'check.log'}]}
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
         (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
         (self.root/'docs/architecture/baseline-manifest.json').write_text('{}',encoding='utf-8')
@@ -116,6 +118,75 @@ class WorkflowRuntimeTests(unittest.TestCase):
     def test_human_approval_required_for_feature_stage(self):
         stage=w.BY_ID['05-feature-requirements']
         self.assertTrue(stage['human_approval_required'])
+
+    def test_builder_and_verifier_stages_require_review(self):
+        self.assertTrue(w.BY_ID['08-implementation-orchestrator']['human_approval_required'])
+        self.assertTrue(w.BY_ID['09-independent-verification']['human_approval_required'])
+
+    def test_request_review_freezes_current_step(self):
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready for review','target':[]})()
+        self.assertEqual(0,w.cmd_request_review(args))
+        state=w.load_state()
+        self.assertEqual('01-project-bootstrap',state['current_step'])
+        self.assertEqual(['01-project-bootstrap'],[w.item_step(x) for x in state['pending_approvals']])
+        errors=w.check_entry('02-requirements-analysis',state,verify_handoffs=False)
+        self.assertTrue(any('Pending approvals' in e for e in errors),errors)
+
+    def test_approve_clears_pending_and_records_user_approval(self):
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready','target':[]})()
+        self.assertEqual(0,w.cmd_request_review(args))
+        approve_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,
+                                     'approver':'用户','approved_at':'2026-11-13','evidence':'check.log'})()
+        self.assertEqual(0,w.cmd_approve(approve_args))
+        state=w.load_state()
+        self.assertEqual([],state['pending_approvals'])
+        self.assertEqual('01-project-bootstrap',state['current_step'])
+        self.assertEqual('用户',state['approvals_history'][0]['approver'])
+
+    def test_approve_requires_pending_review_request(self):
+        approve_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,
+                                     'approver':'用户','approved_at':'2026-11-13','evidence':'check.log'})()
+        with self.assertRaisesRegex(ValueError,'No pending review request'):
+            w.cmd_approve(approve_args)
+
+    def test_human_stage_transition_requires_recorded_approval(self):
+        state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis'],
+               'current_step':'03-project-architecture-baseline','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
+        (self.root/'docs/architecture/baseline-manifest.json').write_text('{}',encoding='utf-8')
+        (self.root/'docs/architecture/constraint-registry.json').write_text('{}',encoding='utf-8')
+        calls=[]
+        original_check,original_gate=w.check_entry,w.run_baseline_gate
+        w.check_entry=lambda *a,**k: []
+        w.run_baseline_gate=lambda args,label: calls.append(args) or ''
+        try:
+            evidence={'step_id':'03-project-architecture-baseline','outputs':[
+                {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
+                {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
+                'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
+                'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
+            ep=self.root/'unapproved-baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
+            args=type('Args',(),{'step':'03-project-architecture-baseline','evidence':str(ep),'change_id':None})()
+            with self.assertRaisesRegex(ValueError,'run request-review'):
+                w.cmd_transition(args)
+        finally:
+            w.check_entry,w.run_baseline_gate=original_check,original_gate
+
+    def test_change_scoped_approval_is_not_reused_across_changes(self):
+        state={'approvals_history':[{'step_id':'05-feature-requirements','change_id':'change-a',
+                                     'approver':'用户','approved_at':'2026-11-13','evidence':'check.log'}]}
+        self.assertIsNone(w.approval_record(state,'05-feature-requirements','change-b'))
+        self.assertIsNotNone(w.approval_record(state,'05-feature-requirements','change-a'))
+
+    def test_handoff_create_rejects_approval_bypass_for_human_stage(self):
+        args=type('Args',(),{'from_step':'05-feature-requirements','to_step':'06-figma-design-review',
+                             'change_id':None,'evidence':None,'approved':True,'file':['out.md'],
+                             'baseline_version':''})()
+        with self.assertRaisesRegex(ValueError,'recorded user approval'):
+            w.cmd_handoff_create(args)
+
     def test_feature_transition_rejects_missing_human_approval(self):
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],

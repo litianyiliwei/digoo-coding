@@ -40,6 +40,7 @@
 - 必须输出：docs/product/requirements-analysis.md；docs/product/workflows.md（含节点表）；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（运行 scripts/gen-baseline-index.py --write 生成）。按模板写入仓库，不要只在聊天中展示。
 - 下一步输入：业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题；常驻基线简报、角色权限矩阵、Change 切片规则、决策/假设登记、ID 约定与基线索引。在报告中明确这些文件如何被下游（阶段 03 项目总体架构设计）消费。
 - 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
+- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 02-requirements-analysis --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 02-requirements-analysis”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
 - 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
 
 ## 阶段结束审计（必须执行）
