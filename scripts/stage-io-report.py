@@ -98,16 +98,21 @@ lines = [
     "## 总览",
     "",
     "> 总览把输入/输出合并展示；逐阶段明细再拆分为“内容/材料”和“文档/文件”。",
+    "> 总览“精简输入”列是每阶段默认读取组；完整契约审计集与按需输入见逐阶段明细。",
     "",
-    "| 阶段 | 名称 | 范围 | Skill | 依赖（DAG） | 输入 | 输出 |",
-    "|---|---|---|---|---|---|---|",
+    "| 阶段 | 名称 | 范围 | Skill | 依赖（DAG） | 精简输入（默认读取） | 输出 | 按需输入（触发后） |",
+    "|---|---|---|---|---|---|---|---|",
 ]
 for r in contracts:
+    profile = (contract_doc.get("input_policy") or {}).get("stage_profiles", {}).get(r["step"])
+    lean = profile.get("lean", []) if profile else r.get("inputs", [])
+    on_demand = profile.get("on_demand", []) if profile else []
+    on_demand_cell = f"{len(on_demand)} 项（见明细）" if on_demand else "N/A"
     lines.append(
-        "| {step} | {title} | {scope} | `{skill}` | {deps} | {inputs} | {outputs} |".format(
+        "| {step} | {title} | {scope} | `{skill}` | {deps} | {inputs} | {outputs} | {on_demand} |".format(
             step=r["step"], title=cell(r["title"]), scope=cell(r.get("scope", "PENDING")),
             skill=r["skill"], deps=deps_for(r["step"]),
-            inputs=join(r.get("inputs", [])), outputs=join(r.get("outputs", [])),
+            inputs=join(lean), outputs=join(r.get("outputs", [])), on_demand=on_demand_cell,
         )
     )
 
@@ -115,6 +120,7 @@ lines += ["", "## 逐阶段明细", ""]
 for r in contracts:
     in_contents, in_docs = split_content_docs(r.get("inputs", []))
     out_contents, out_docs = split_content_docs(r.get("outputs", []))
+    profile = (contract_doc.get("input_policy") or {}).get("stage_profiles", {}).get(r["step"])
     lines += [
         f"### {r['step']} {r['title']}",
         "",
@@ -123,11 +129,26 @@ for r in contracts:
         f"- Prompt：`{r.get('prompt', 'PENDING')}`",
         f"- 依赖（DAG）：{deps_for(r['step'])}",
         "",
-        "**输入（内容/材料）**",
+    ]
+    if profile:
+        lines += [
+            "**精简输入（默认读取，预算内）**",
+            "",
+            bullets(profile.get("lean", [])),
+            "",
+            f"> 预算：{len(profile.get('lean', []))}/{profile.get('max_files', 'N/A')} 条；超出时先拆分 Change 或缩小范围。",
+            "",
+            "**按需输入（触发后读取，不计入默认预算）**",
+            "",
+            bullets(profile.get("on_demand", [])),
+            "",
+        ]
+    lines += [
+        "**完整契约输入（内容/材料，审计集）**",
         "",
         bullets(in_contents),
         "",
-        "**输入（文档/文件）**",
+        "**完整契约输入（文档/文件，审计集）**",
         "",
         bullets(in_docs),
         "",

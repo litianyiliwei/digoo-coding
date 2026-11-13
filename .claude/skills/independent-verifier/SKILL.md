@@ -10,6 +10,7 @@ description: 以只读、独立视角验证一个 OpenSpec Change 的实现是�
 
 ## 独立性与权限
 - 以独立 Agent/新上下文执行，不能把 Builder 的自我总结作为通过证据。
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 - 对源代码、配置、迁移、OpenAPI、规格和测试文件只读；允许执行测试/构建命令，允许写入本阶段报告文件。
 - 不得修改实现代码、测试代码、OpenSpec proposal/specs/design/tasks、项目基线或审批记录。
 - 记录 Builder 与 Verifier 的 Agent/会话标识，并确保是不同 Agent 或独立会话；记录被验证的 Git revision/commit，或明确记录工作区 diff 指纹；验证期间源代码发生变化则本轮证据失效。

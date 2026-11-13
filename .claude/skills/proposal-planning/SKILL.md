@@ -9,6 +9,8 @@ description: 提案拆分、依赖排序与路线图。按独立可验收的业�
 当流程进入“提案拆分、依赖排序与路线图”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 已审并冻结的项目总体架构基线、业务流程/节点/RD 矩阵、业务规则、验收政策、open-questions、`BASELINE-BRIEF.md`/`change-sizing.md`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md`（常驻基线）、阶段 03 基线审计报告、风险、依赖和产品优先级。
 
 ## 执行流程

@@ -117,6 +117,13 @@ python3 scripts/workflow.py next-change --change-id change-b
 - 单独校验：`python scripts/check-method-evidence.py --step <step-id> --evidence <path>`；`workflow.py transition` 会自动调用同一逻辑。
 - 交接报告第 4 节必须展示关键问题、备选、决策、未决项、产物落点与证据路径。
 
+### 输入/输出上下文预算
+
+- 契约 `inputs` 是完整审计/溯源集；默认读取以 `input_policy.stage_profiles.lean` 为准（每阶段 ≤8 个读取组、约 ≤16000 字符）。`agent-context.py` 默认打印精简/按需清单，`--full` 才打印完整审计输入。
+- 读序：`BASELINE-BRIEF` → 当前 Change 产物 → 按命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE 定向读取 → 完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因。
+- 输出采用引用式输出，不复制输入全文；摘要/证据文件的行数上限见 `output_policy.summary_budgets`。阶段结束可运行 `python scripts/check-output-context.py --stage <id> [--change <change-id>]`；超预算先检查是否复制了上游，必要时拆分 Change 或链接上游文件。
+- 完整规则见 `docs/INPUT-OUTPUT-POLICY.md`。
+
 ### Evidence JSON 示例
 
 可从 `templates/workflow/stage-evidence.example.json` 复制，结构参考 `templates/workflow/stage-evidence.schema.json`。每个阶段需要将示例中的文件路径、命令、退出码和审批信息替换为本次真实证据。

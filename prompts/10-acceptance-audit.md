@@ -16,6 +16,8 @@ Figma/原型审计：<design-evidence>
 基线交互要求：仅将已批准、已实现、已验证且具有跨功能复用价值的决策回写项目基线。功能专属 API、页面、表迁移、IO 和测试保留在归档 Change。更新基线版本和审批记录，并列出需重新核对的在途 Change。OpenSpec 主规格归档与项目设计基线回写是两项独立判断。
 ```
 
+上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+
 ## 运行前要填的变量
 
 - 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。

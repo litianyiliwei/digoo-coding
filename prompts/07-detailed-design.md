@@ -29,6 +29,8 @@ UI 基线：openspec/changes/<change-id>/design/figma-audit.md（目标框架/�
 基线交互要求：重新核验 `design/baseline-impact.md` 与当前 `baseline-status.md`；任何基线版本变化都要写明 `NO_IMPACT` 或 `REBASE_REQUIRED`。违反基线的方案必须先走 ADR/基线修订审批，批准后才能冻结详细设计。完成复核后运行 `python3 scripts/check-baseline-impact.py <change-id> --strict` 与 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。
 ```
 
+上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+
 ## 运行前要填的变量
 
 - 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。

@@ -34,6 +34,8 @@ Figma MCP：<figma-file-link-or-file-key>（必须实际可访问）
 基线交互要求：先读 BASELINE-BRIEF.md，再按页面/前端影响读取相关基线；页面、元素、事件不得绕过已批准约束。发现冲突时记录约束 ID 并提交例外/BCR，不得自行修改 baseline-binding.json。完成后执行 python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement。
 ```
 
+上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+
 ## 运行前要填的变量
 
 - 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。

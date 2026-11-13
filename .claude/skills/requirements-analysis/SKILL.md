@@ -9,6 +9,8 @@ description: 需求业务梳理。输出完整业务流程（节点级角色与�
 当流程进入“需求业务梳理”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 访谈、业务材料、旧系统资料、项目目标、用户与角色、约束、既有 docs/product/*、既有 OpenSpec specs（只读）。
 
 ## 执行流程

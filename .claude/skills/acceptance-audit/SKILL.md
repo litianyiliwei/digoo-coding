@@ -9,6 +9,8 @@ description: 人工验收、归档与基线回写。对照 AC 和证据验收；
 当流程进入“人工验收、归档与基线回写”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 阶段 09 的独立验证 PASS 报告与 JSON 证据（必须）；实现分支、AC、`design/user-stories.md`、`docs/product/acceptance-policy.md`、测试/构建报告、Figma/原型审计、OpenAPI、`design/baseline-impact.md`、当前 `baseline-status.md` 与已批准基线修订证据。
 
 ## 执行流程

@@ -9,6 +9,8 @@ description: 实现、TDD、验证与代码审查。使用已安装的 Superpowe
 当流程进入“实现、TDD、验证与代码审查”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 审批通过的 OpenSpec artifacts、详细设计、tasks、仓库规范、可用 Superpowers。
 
 ## 执行流程

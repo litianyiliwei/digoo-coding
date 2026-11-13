@@ -15,6 +15,8 @@
 基线交互要求：为每个候选 Change 标注适用的产品/架构/数据/公共 API/前端/测试基线版本、需复用约束和潜在基线修订。功能局部变化留在 Change；跨功能公共约束变化列为基线变更候选，不得默认为已批准。
 ```
 
+上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+
 ## 运行前要填的变量
 
 - 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。

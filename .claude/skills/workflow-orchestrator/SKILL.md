@@ -8,6 +8,8 @@ description: 当用户说“下一步/继续/接着做”时，根据仓库中�
 ## 触发条件
 用户说“下一步”“继续”“接着做”“继续研发流程”或要求恢复上次流程时使用。
 
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
+
 ## 必须遵守
 1. 先读取 `workflow-state.json`、`docs/PROCESS-MAP.md`、`docs/OUTPUT-TEMPLATE-MATRIX.csv`，再检查当前阶段对应的真实文件。状态文件只是线索，不可代替文件校验。
 2. 检查当前 Agent 能发现哪些 Skill。若存在 Superpowers 的 `using-superpowers`，先按宿主 Agent 支持的方式加载它；然后按任务加载相关 Superpowers Skill。不要臆造调用语法或声称执行了未安装的 Skill。

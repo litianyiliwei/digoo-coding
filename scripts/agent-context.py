@@ -53,7 +53,7 @@ RESIDENT = {
     ],
 }
 
-PATH_RE = re.compile(r'(?:docs|openspec|scripts|prompts|templates|\.claude)/[^\s，、；（）<>]+')
+PATH_RE = re.compile(r'(?:docs|openspec|scripts|prompts|templates|workflow|\.claude)/[A-Za-z0-9_\-./<>*#]+')
 
 
 def load_stage(stage):
@@ -65,7 +65,9 @@ def load_stage(stage):
 
 
 def check_path(raw, change_id):
-    token = raw.rstrip('。，、；:：)')
+    token = raw.split('#', 1)[0].rstrip('。，、；:：)')
+    if token.startswith('design/') or token.startswith('specs/'):
+        return token, None
     if '<change-id>' in token:
         if not change_id:
             return token, None
@@ -80,57 +82,102 @@ def main():
     args = sys.argv[1:]
     stage = None
     change_id = None
+    root_arg = None
     while args:
         arg = args.pop(0)
         if arg == '--stage' and args:
             stage = args.pop(0)
         elif arg == '--change' and args:
             change_id = args.pop(0)
+        elif arg == '--root' and args:
+            root_arg = args.pop(0)
+        elif arg == '--full':
+            pass
         else:
             print(f'Unknown argument: {arg}', file=sys.stderr)
             sys.exit(2)
     if not stage:
-        print('Usage: agent-context.py --stage <02|05> [--change <change-id>]', file=sys.stderr)
+        print('Usage: agent-context.py --stage <02|05> [--change <change-id>] [--full] [--root <dir>]', file=sys.stderr)
         sys.exit(2)
-    row = load_stage(stage)
+    global ROOT, CONTRACTS
+    if root_arg:
+        ROOT = Path(root_arg).resolve()
+        CONTRACTS = ROOT / 'docs/STEP-ARTIFACT-CONTRACTS.json'
+    row = load_stage(stage.split('-')[0])
     if not row:
         print(f'Unknown stage: {stage}', file=sys.stderr)
         sys.exit(2)
 
+    contract = json.loads(CONTRACTS.read_text(encoding='utf-8'))
+    profile = (contract.get('input_policy') or {}).get('stage_profiles', {}).get(row['step'])
+    full = '--full' in sys.argv
     missing = []
+
     print(f'# Agent Context Bundle: {row["step"]} {row["title"]}')
     print(f'- Skill: `{row["skill"]}`')
     print(f'- Scope: {row.get("scope", "—")}')
     print('')
-    print('## 0. 常驻读取（先读）')
-    for path in RESIDENT.get(row['step'].lstrip('0'), []):
-        token, exists = check_path(path, change_id)
-        print(f'- `{token}` [{"OK" if exists else "MISSING"}]')
-        if exists is False:
-            missing.append(token)
 
-    print('')
-    print('## 1. 契约输入')
-    for item in row.get('inputs', []):
-        print(f'- {item}')
-        for raw in PATH_RE.findall(item):
-            token, exists = check_path(raw, change_id)
+    if profile:
+        lean = profile.get('lean') or []
+        max_files = profile.get('max_files', 8)
+        print('## 0. 精简输入（默认读取，预算内）')
+        for item in lean:
+            print(f'- {item}')
+            for raw in PATH_RE.findall(str(item)):
+                token, exists = check_path(raw, change_id)
+                if exists is False:
+                    missing.append(token)
+                    print(f'  - `{token}` [MISSING]')
+                elif exists is True:
+                    print(f'  - `{token}` [OK]')
+        print(f'- 预算：lean 读取组 {len(lean)}/{max_files}；超出时先拆分 Change 或缩小范围。')
+        if len(lean) > max_files:
+            print(f'CONTEXT_BUDGET_EXCEEDED: lean {len(lean)} > max_files {max_files}')
+            sys.exit(1)
+        print('')
+        print('## 1. 按需输入（仅触发后读取，不计入默认预算）')
+        for item in profile.get('on_demand') or []:
+            print(f'- {item}')
+        print('')
+        if full:
+            print('## 2. 完整契约输入（审计用）')
+            for item in row.get('inputs', []):
+                print(f'- {item}')
+            print('')
+        else:
+            print('## 2. 完整契约输入（审计用，默认不读；需要时加 --full）')
+            print(f'- 共 {len(row.get("inputs", []))} 条；默认按上面的精简/按需清单读取。')
+            print('')
+    else:
+        print('## 0. 常驻读取（先读）')
+        for path in RESIDENT.get(row['step'].lstrip('0'), []):
+            token, exists = check_path(path, change_id)
+            print(f'- `{token}` [{"OK" if exists else "MISSING"}]')
             if exists is False:
                 missing.append(token)
-                print(f'  - `{token}` [MISSING]')
-            elif exists is True:
-                print(f'  - `{token}` [OK]')
+        print('')
+        print('## 1. 契约输入')
+        for item in row.get('inputs', []):
+            print(f'- {item}')
+            for raw in PATH_RE.findall(item):
+                token, exists = check_path(raw, change_id)
+                if exists is False:
+                    missing.append(token)
+                    print(f'  - `{token}` [MISSING]')
+                elif exists is True:
+                    print(f'  - `{token}` [OK]')
+        print('')
 
-    print('')
-    print('## 2. 契约输出')
+    print('## 3. 契约输出')
     for item in row.get('outputs', []):
         print(f'- {item.replace("<change-id>", change_id or "<change-id>")}')
 
     print('')
-    print('## 3. 门禁')
+    print('## 4. 门禁')
     print(row.get('gate', '—'))
     print('')
-    print('## 4. 审批与下一步输入')
+    print('## 5. 审批与下一步输入')
     print(f'- 审批：{row.get("approval", "—")}')
     for item in row.get('next_inputs', []):
         print(f'- {item}')

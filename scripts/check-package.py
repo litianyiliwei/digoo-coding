@@ -72,7 +72,7 @@ for test_name in ("test-reference-research.py", "test-interface-catalog.py"):
         r=subprocess.run([sys.executable, str(test_path)],capture_output=True,text=True)
         if r.returncode: errors.append(f"Regression test failed ({test_name}): {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
 # Run Python regression tests that do not need a live business project.
-for test_name in ("test-workflow-runtime.py", "test-architecture-baseline.py"):
+for test_name in ("test-workflow-runtime.py", "test-architecture-baseline.py", "test-output-context.py", "test-agent-context.py"):
     test_path = ROOT / "scripts" / test_name
     if test_path.is_file():
         r = subprocess.run([sys.executable, str(test_path)], capture_output=True, text=True)

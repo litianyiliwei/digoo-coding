@@ -22,6 +22,13 @@
 - 07 存在 HTTP API、原生桥接、设备、第三方、异步或文件边界时，必须生成 `design/interface-catalog.csv` 并运行 `check-interface-catalog.py --change <change-id> --strict`；仅 HTTP API 的 Change 也要在目录中登记 `HTTP_API` 行。
 - OpenSpec/Superpowers 的逐阶段允许/禁止范围见 `docs/SUPERPOWERS-MAPPING.md` 的“OpenSpec 参与矩阵”与“阶段内方法模式”。
 
+## 上下文预算
+
+- 契约 `inputs` 是完整审计/溯源集；默认读取以 `input_policy.stage_profiles.lean` 为准（每阶段 ≤8 个读取组、约 ≤16000 字符）。
+- 读序：`BASELINE-BRIEF` → 当前 Change 产物 → 按命中 ID 定向读行/章节 → 完整基线/架构/ADR/完整 specs 仅在必要时按需读并记录原因。
+- 运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简包；`--full` 仅用于交接审计。
+- 输出采用引用式输出，不复制输入全文；摘要行数上限见 `output_policy.summary_budgets`。完整规则见 `docs/INPUT-OUTPUT-POLICY.md`。
+
 ## 检查策略说明
 
 > 说明：项目级与提案级都不产出 `use-cases` 文件。项目级用 FLOW/NODE 表达业务流程；提案级用例场景统一写在 delta spec 的 Scenario，US/AC 保留在 `design/user-stories.md`。

@@ -22,6 +22,8 @@ description: Figma 设计与评审（Figma-only）。通过 Figma MCP 生成真�
 
 ## 输入
 
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
+
 已批准的提案级需求与 AC（proposal/specs/design/user-stories）；项目业务流程、数据对象、RD 矩阵、业务规则（workflows/data-objects/rd-matrix/business-rules）；`docs/product/open-questions.md`（只读，生成时不擅自决策）；`docs/architecture/technology-decisions.md`（总体技术选型，确定目标前端框架/组件库）与 `docs/architecture/frontend-conventions.md` 第 1、9 节（工程与视觉规范）；`docs/architecture/baseline-status.md`；当前 Change 的 `design/baseline-impact.md` 与 `design/baseline-binding.json`；Figma MCP 的实际可访问能力（涉及 UI 时必须）。
 
 ## 执行流程

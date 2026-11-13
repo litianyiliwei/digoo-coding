@@ -9,6 +9,8 @@ description: 项目总体架构设计。合并架构、数据/领域与公共契
 当流程进入“项目总体架构设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 已批准的 `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`（只读）；`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`id-conventions.md`、`BASELINE-INDEX.md`（常驻基线，先读简报）；现有仓库结构/技术约束；非功能需求；用户/技术负责人明确的技术选型偏好（本阶段必须显式询问，不得默认或自行拍板）。
 
 ## 执行流程

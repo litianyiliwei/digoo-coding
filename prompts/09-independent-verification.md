@@ -6,6 +6,8 @@
 
 必须记录被测 Git commit/revision；如果没有 commit，记录工作区 diff 指纹，并在验证期间确认其未变化。逐条验证 AC，重新执行所有适用测试/构建/契约检查，记录命令、退出码和证据。Builder 报告仅作线索，不能代替独立执行。
 
+上下文：先运行 `python scripts/agent-context.py --stage 09 --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage 09 --strict` 检查摘要输出预算。
+
 方法与工具（强制）：
 - 使用 Superpowers `verification-before-completion`：PASS 必须由真实命令、退出码和测试结果支撑；不得用 Builder 报告或“已看过”代替独立执行。阶段 evidence 必须写 `methods`，至少 1 个决策和真实证据路径，并运行 `python scripts/check-method-evidence.py --step 09-independent-verification --evidence <evidence.json>`。
 - 需要复现失败/定位原因时使用 `systematic-debugging`，只读排查，不修复代码、不修改测试。

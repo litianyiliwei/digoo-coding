@@ -9,6 +9,8 @@ description: 提案级需求分析。按 Change 生成用户故事与 AC，并�
 当流程进入“提案级需求分析”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 Change ID、已批准路线图、项目需求业务梳理（FLOW/NODE/DO/RD/BR/验收政策）、`BASELINE-BRIEF.md`/`change-sizing.md`/`role-permission-matrix.csv`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md`（常驻基线）、open-questions（只读）、冻结基线、相关 openspec/specs。
 
 ## 执行流程

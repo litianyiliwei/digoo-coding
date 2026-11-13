@@ -9,6 +9,8 @@ description: 详细设计、接口与测试设计。合并设计总控、OpenAPI
 当流程进入阶段 07「详细设计、接口与测试设计」时加载本 Skill。一次处理一个 Change；不要提前实现。
 
 ## 输入
+
+读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
 已批准的 proposal/specs/user-stories、初始 `design.md`；本阶段初始化 `traceability.csv`；涉及 UI 时必须读取 `design/figma-audit.md`（目标框架/转码说明、token 实际值、文字样式、PAGE 规格、状态决策）、`design/figma-code/`（06 已按总体技术选型转码的目标框架设计代码）与 `design/figma-layout.csv`（断言映射）并核对文件版本；同时读取 `docs/architecture/technology-decisions.md`，确认目标框架与 06 转码一致；Figma 评审稿是视觉与结构权威；视觉规范取自已冻结的 `docs/architecture/frontend-conventions.md` 第 9 节；项目业务流程/数据对象/RD/业务规则/验收政策；按设计域按需读取的项目架构基线；当前 Change 的 `design/baseline-impact.md` 与 `design/baseline-binding.json`。默认离线消费导出包，仅在版本变化或页面有歧义时按页批量重读 Figma。**不使用参考截图或实现截图。**
 
 ## 方法与工具（强制）

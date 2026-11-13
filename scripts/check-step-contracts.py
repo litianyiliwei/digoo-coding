@@ -69,6 +69,41 @@ for key, rule in policy.items():
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {skill_file.relative_to(ROOT)}')
             if prompt_file.is_file() and topic not in prompt_text:
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {row.get("prompt")}')
+# Validate lean-context policies: every change stage has a lean default read
+# set within its declared file budget, plus an on-demand overflow list.
+input_policy=data.get('input_policy') or {}
+output_policy=data.get('output_policy') or {}
+if not input_policy.get('stage_profiles'):
+    errors.append('input_policy.stage_profiles is missing')
+if not output_policy.get('summary_budgets'):
+    errors.append('output_policy.summary_budgets is missing')
+profiles=input_policy.get('stage_profiles') or {}
+for step in ('03','04','05','06','07','08','09','10'):
+    profile=profiles.get(step)
+    if not profile:
+        errors.append(f'input_policy missing stage profile: {step}')
+        continue
+    lean=profile.get('lean') or []
+    on_demand=profile.get('on_demand') or []
+    max_files=profile.get('max_files')
+    if not lean:
+        errors.append(f'input_policy {step}: lean must be non-empty')
+    if not on_demand:
+        errors.append(f'input_policy {step}: on_demand must be non-empty')
+    if not isinstance(max_files,int) or max_files<1:
+        errors.append(f'input_policy {step}: max_files must be a positive integer')
+    elif len(lean)>max_files:
+        errors.append(f'input_policy {step}: lean has {len(lean)} entries, exceeding max_files={max_files}')
+    for name,items in (('lean',lean),('on_demand',on_demand)):
+        for item in items:
+            if not str(item).strip():
+                errors.append(f'input_policy {step}: empty {name} entry')
+if not output_policy.get('principle'):
+    errors.append('output_policy.principle is missing')
+if not output_policy.get('rules'):
+    errors.append('output_policy.rules is missing')
+if not output_policy.get('stage_focus'):
+    errors.append('output_policy.stage_focus is missing')
 if not (ROOT/'templates/workflow/step-handoff-report.md').is_file(): errors.append('missing handoff report template')
 if errors:
     print('Step contract check failed:')

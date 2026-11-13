@@ -17,6 +17,8 @@
 基线交互要求：实施前复核 `design/baseline-impact.md` 和当前基线版本。若实现中发现冲突/缺口，暂停受影响任务、提交基线修订请求/ADR；不得直接编辑冻结基线。基线获批更新后，刷新 Change 的基线快照、设计和测试；实施前运行 `python3 scripts/check-baseline-impact.py <change-id> --strict`。
 ```
 
+上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+
 ## 运行前要填的变量
 
 - 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。

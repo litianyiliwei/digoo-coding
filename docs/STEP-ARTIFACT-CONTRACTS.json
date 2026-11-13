@@ -70,6 +70,165 @@
       ]
     }
   },
+  "input_policy": {
+    "principle": "先读小入口，再按 ID 定向读取；完整产品/架构基线、ADR 与完整 specs 只在必要时按需读取，禁止默认全量塞入上下文。",
+    "read_order": [
+      "0. 常驻：docs/product/BASELINE-BRIEF.md（≤1 页）",
+      "1. 当前 Change 产物：proposal/specs/user-stories/tasks/design/baseline-impact/baseline-binding",
+      "2. 定向：只读本 Change 命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE 行或章节",
+      "3. 按需：完整产品/架构基线、ADRs、reference-research、完整 specs；必须记录触发原因"
+    ],
+    "budget": {
+      "max_lean_files": 8,
+      "max_lean_chars": 16000,
+      "note": "超过预算时先拆分 Change、缩小范围，或在交接报告中记录理由与已读文件；不得把整包基线塞入上下文。"
+    },
+    "rules": [
+      "先读 BASELINE-BRIEF 与当前 Change 产物，再按 ID 定向读取；完整产品/架构文件不是默认输入。",
+      "架构文件是阶段 03 的输出；05–10 只在设计域命中时读对应章节，不默认全量读取。",
+      "ADRs 仅在决策冲突/例外时读取；完整 specs 仅在现有 spec 不足时读取。",
+      "交接报告第 1 节必须列出实际读取的文件/章节；未读的按需文件不得声称已审查。"
+    ],
+    "stage_profiles": {
+      "03": {
+        "lean": [
+          "docs/product/BASELINE-BRIEF.md（先读，≤1 页）",
+          "docs/product/reference-research.md（技术选型/第三方判断）",
+          "docs/product/open-questions.md（仅相关条目）",
+          "docs/project/toolchain-report.md（工具链/测试命令）",
+          "docs/architecture/baseline-status.md（初始基线）",
+          "现有系统代码库地址/第三方接口清单（用户提供）",
+          "命中的 FLOW/NODE/DO/RD/BR 行（按 ID 定向读取）"
+        ],
+        "on_demand": ["docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/glossary.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/product/change-sizing.md", "docs/product/decisions.md", "docs/product/assumptions.md", "docs/product/id-conventions.md", "docs/adr/*"],
+        "max_files": 8
+      },
+      "04": {
+        "lean": [
+          "docs/product/BASELINE-BRIEF.md",
+          "docs/product/change-sizing.md",
+          "docs/architecture/baseline-manifest.json",
+          "docs/architecture/constraint-registry.json",
+          "docs/architecture/baseline-status.md",
+          "docs/project/baseline-audit-report.md",
+          "docs/product/open-questions.md（仅相关条目）",
+          "命中的 FLOW/NODE/DO/BR 行"
+        ],
+        "on_demand": ["docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/adr/*"],
+        "max_files": 8
+      },
+      "05": {
+        "lean": [
+          "docs/product/BASELINE-BRIEF.md",
+          "docs/product/change-sizing.md、id-conventions.md",
+          "docs/product/proposal-roadmap.md（当前行）",
+          "docs/architecture/baseline-status.md、baseline-manifest.json、constraint-registry.json",
+          "命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP 行",
+          "openspec/specs/**（仅相关 capability）",
+          "docs/product/open-questions.md（仅相关条目）",
+          "docs/product/reference-research.md（仅范围/场景需要时）"
+        ],
+        "on_demand": ["docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/glossary.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/adr/*"],
+        "max_files": 8
+      },
+      "06": {
+        "lean": [
+          "当前 Change 的 proposal/specs/design/user-stories",
+          "当前 Change 的 design/baseline-impact.md、baseline-binding.json",
+          "docs/architecture/frontend-conventions.md 第 9 节、technology-decisions.md",
+          "docs/architecture/baseline-status.md",
+          "docs/product/BASELINE-BRIEF.md、id-conventions.md",
+          "命中的 FLOW/NODE/DO/RD/BR/ROLE/PAGE 行",
+          "docs/product/open-questions.md（仅页面相关）",
+          "Figma MCP 可访问性"
+        ],
+        "on_demand": ["docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/role-permission-matrix.csv", "docs/product/reference-research.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/api-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
+        "max_files": 8
+      },
+      "07": {
+        "lean": [
+          "openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design/user-stories.md、tasks.md、design.md",
+          "openspec/changes/<change-id>/design/baseline-impact.md、baseline-binding.json",
+          "现有功能代码地址/第三方接口清单（用户提供）",
+          "涉及 UI 时：openspec/changes/<change-id>/design/figma-audit.md、figma-code/、figma-layout.csv、Figma 评审稿",
+          "docs/architecture/technology-decisions.md、docs/architecture/api-conventions.md、docs/architecture/frontend-conventions.md#9、docs/architecture/test-strategy.md（按设计域）",
+          "docs/architecture/baseline-status.md",
+          "docs/product/BASELINE-BRIEF.md、docs/product/id-conventions.md",
+          "命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE 行（按 ID 定向读取）"
+        ],
+        "on_demand": ["docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/product/open-questions.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/containers-and-deployment.md", "docs/architecture/data-flows.md", "docs/architecture/logical-erd.md", "docs/adr/*", "docs/product/reference-research.md"],
+        "max_files": 8
+      },
+      "08": {
+        "lean": [
+          "当前 Change 的 tasks.md、design.md、specs、user-stories、test-cases.csv、traceability.csv",
+          "适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv",
+          "涉及 UI 的 figma-audit.md、figma-code/、figma-layout.csv",
+          "当前 Change 的 design/baseline-impact.md、baseline-binding.json、baseline-status.md",
+          "设计域命中的架构章节：system-context/domain-boundaries/logical-erd/data-flows/technology-decisions/api-conventions/frontend-conventions/test-strategy",
+          "docs/product/BASELINE-BRIEF.md",
+          "docs/product/open-questions.md（仅相关条目）",
+          "现有功能代码地址（若修改现有功能）"
+        ],
+        "on_demand": ["docs/product/acceptance-policy.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/logical-erd.md", "docs/architecture/data-flows.md", "docs/architecture/technology-decisions.md", "docs/architecture/api-conventions.md", "docs/architecture/frontend-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
+        "max_files": 8
+      },
+      "09": {
+        "lean": [
+          "已实现代码及 revision/diff 指纹",
+          "当前 Change 的 proposal/specs/design/user-stories/tasks",
+          "适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv",
+          "涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json",
+          "test-cases.csv、traceability.csv、code-review.md、Builder 测试证据",
+          "docs/product/BASELINE-BRIEF.md",
+          "docs/product/acceptance-policy.md",
+          "当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md"
+        ],
+        "on_demand": ["docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/logical-erd.md", "docs/architecture/data-flows.md", "docs/architecture/technology-decisions.md", "docs/architecture/api-conventions.md", "docs/architecture/frontend-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*", "docs/product/open-questions.md"],
+        "max_files": 8
+      },
+      "10": {
+        "lean": [
+          "independent-verification-report.md 与 independent-verification.json",
+          "当前 Change 的 specs、user-stories、traceability.csv、design.md、code-review.md",
+          "涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json",
+          "test-cases.csv、interface-catalog.csv",
+          "当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md",
+          "docs/product/acceptance-policy.md、BASELINE-BRIEF.md、change-sizing.md",
+          "docs/product/decisions.md、assumptions.md、id-conventions.md",
+          "运行中的验收环境入口"
+        ],
+        "on_demand": ["design/figma-code/", "docs/adr/*", "docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/business-rules.md", "docs/product/lessons.md"],
+        "max_files": 8
+      }
+    }
+  },
+  "output_policy": {
+    "principle": "引用式输出：不复制输入全文；基线/规格/上游产物用 ID/路径/章节引用；每个输出只承载本阶段新增决策、契约或证据。",
+    "rules": [
+      "摘要文件（BASELINE-BRIEF、requirements-analysis、baseline-audit-report、acceptance.md）只写结论/差异/证据，不重复明细表。",
+      "design.md 只写本 Change 的决策/契约/实现约束/测试映射；基线内容引用 ID，不复制整份基线。",
+      "证据文件（code-review、independent-verification、acceptance）引用 JSON/日志/报告路径，不复述全部测试输出。",
+      "表格只保留决策项/契约项/证据项；模板固定字段不重复展开。"
+    ],
+    "summary_budgets": {
+      "docs/product/BASELINE-BRIEF.md": {"max_lines": 60},
+      "docs/product/requirements-analysis.md": {"max_lines": 150},
+      "docs/product/reference-research.md": {"max_lines": 120},
+      "docs/project/baseline-audit-report.md": {"max_lines": 150},
+      "openspec/changes/<change-id>/design.md": {"max_lines": 400, "stage_max_lines": {"05": 80}},
+      "openspec/changes/<change-id>/design/evidence/code-review.md": {"max_lines": 150},
+      "openspec/changes/<change-id>/design/evidence/independent-verification-report.md": {"max_lines": 150},
+      "openspec/changes/<change-id>/design/evidence/acceptance.md": {"max_lines": 120}
+    },
+    "stage_focus": {
+      "02": "requirements-analysis 只写目标/角色/流程结论与差异；明细放 workflows/data-objects/rd-matrix/business-rules。",
+      "03": "architecture 文件各写各的域；technology-decisions 只写决策/访谈；不要复制完整产品基线。",
+      "05": "design.md 只写提案级初始决策（≤1 页）；接口/前端/后端/测试细节留到 07。",
+      "07": "design.md 引用 figma-audit/interface-catalog/test-cases/traceability；不复制 Figma 全量规格或基线全文。",
+      "10": "acceptance.md 引用 independent-verification 报告/JSON 与 test-cases；只写签收结论与差异。"
+    }
+  },
   "steps": [
     {
       "step": "00",
@@ -258,7 +417,7 @@
         "openspec/changes/<change-id>/proposal.md",
         "openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）",
         "openspec/changes/<change-id>/tasks.md（初步任务）",
-        "openspec/changes/<change-id>/design.md（初始设计决策；07 阶段继续更新）",
+        "openspec/changes/<change-id>/design.md（初始设计决策；≤1 页；接口/前端/后端/测试细节留到 07）",
         "openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；AC 是测试与验证的唯一锚点）",
         "openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md；07 更新设计复核结论）",
         "openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，逐条绑定 ACTIVE Constraint ID；07 写入设计证据）"

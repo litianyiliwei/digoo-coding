@@ -9,6 +9,8 @@
 
 OpenSpec 要求：若仓库已初始化 OpenSpec，执行 `openspec list --changes` 和 `openspec list --specs`；如有活动 Change，执行 `openspec status --change <change-id>`。创建/更新 artifact 前读取 `openspec instructions <artifact> --change <change-id> --json`。只有在提案规划/提案级需求分析阶段才创建或修改 Change；不要在需求业务梳理阶段提前创建 Change。需要时执行 `openspec validate <change-id> --strict`，不得未经人工批准自动归档。
 
+上下文预算：选择阶段后先运行 `python scripts/agent-context.py --stage <id> --change <change-id>`，按“精简输入”读取；完整 `inputs` 只用于交接审计，默认不读。输出按 `docs/INPUT-OUTPUT-POLICY.md` 的引用式规则，不复制输入全文。
+
 阶段 02 额外要求：先与用户确认是否有参考产品（名称/链接/截图/账号），无论有无都必须使用 WebSearch/WebFetch（或宿主等价联网工具）完成互联网调研，产出 `docs/product/reference-research.md` 并运行 `python scripts/check-reference-research.py --strict`；无联网能力时标记 BLOCKED，不得用记忆替代。
 
 选择唯一的下一阶段；功能级阶段还必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 与 `docs/architecture/baseline-status.md`，核对当前 Change 的 `design/baseline-impact.md`。阶段 05 必须建立该清单，阶段 06–07 复核，阶段 08 不直接修改冻结基线，阶段 10 仅回写已批准的公共决策。读取 `prompts/<next-prompt>` 和 `.claude/skills/<skill-id>/SKILL.md`，核验前置产物，按模板执行并运行阶段检查脚本。若有待审批、缺失输入或检查失败，暂停并提出具体问题。完成后生成 `workflow/evidence/<step-id>.json` 证据，并执行 `python scripts/workflow.py transition --step <step-id> --evidence workflow/evidence/<step-id>.json` 完成状态更新；禁止直接编辑 `workflow-state.json` 的 `completed_steps`/`current_step`，状态只能由 transition 写入。
