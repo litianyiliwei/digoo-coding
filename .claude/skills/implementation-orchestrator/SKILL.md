@@ -1,88 +1,88 @@
 ---
 name: implementation-orchestrator
-description: 实现、TDD、验证与代码审查。使用已安装的 Superpowers 工作流实施小任务并以真实测试结果验收。
+description: Implementation, TDD, verification, and code review. Implements small tasks using the installed Superpowers workflow and accepts them based on real test results.
 ---
 
-# 实现、TDD、验证与代码审查
+# Implementation, TDD, Verification, and Code Review
 
-## 何时使用
-当流程进入“实现、TDD、验证与代码审查”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
+## When to Use
+Load this Skill when the workflow enters "implementation, TDD, verification, and code review". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
 
-## 输入
+## Input
 
-读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
-审批通过的 OpenSpec artifacts、详细设计、tasks、仓库规范、可用 Superpowers。
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Approved OpenSpec artifacts, detailed design, tasks, repository conventions, and available Superpowers.
 
-## 执行流程
-1. 先读取 `openspec instructions apply --change <id>` 和项目开发说明；核对 Superpowers 实际安装的技能。
-2. 根据复杂度按需执行 Superpowers 的 `brainstorming`、`using-git-worktrees`、`writing-plans`、`subagent-driven-development` 或 `executing-plans`。
-3. 涉及 UI 时先读取 `figma-audit.md` 的目标框架/转码说明、token 实际值、PAGE 规格、状态决策，以及 `figma-code/`（06 已按总体技术选型转码的目标框架设计代码）与 `figma-layout.csv`（断言映射）；默认离线消费，仅在版本变化或页面歧义时按页批量重读 Figma。**实现直接以 `figma-code/` 为页面骨架**：将 `.vue`（或 React 栈 `.tsx`/`.jsx`）设计代码移植到应用目录，只补路由、API 调用、状态、权限与业务逻辑，不得重写样式、布局或文案；确需改动时按 `UI-DEVIATION` 记录原因、影响、审批人并同步更新断言。先建立全局 CSS 变量/目标组件库主题/字体栈，页面样式必须引用 token，禁止散落硬编码颜色/字号；实现必须满足 `figma-layout.csv` 中的 `dom_selector`（选择器优先使用稳定的 `data-test` / `data-figma-node` 属性）。**不使用截图作为 UI 证据。**
-4. 对行为变化使用 `test-driven-development` 的 RED-GREEN-REFACTOR：先写失败测试并观察失败，再做最小实现。
-5. 按小任务实现并更新 OpenSpec tasks 复选框；每个任务运行相关测试。
-6. 每个 PAGE 运行 `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`，产物 `design/evidence/figma-layout-check.json`；运行 `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`。**UI 验证以机器证据为主**：在 `code-review.md` 的 `## UI fidelity` 逐 PAGE 直接从 JSON 抄录 Figma node、断言元素数/最大偏差、布局证据、结论与审批人；只有存在差异或 `UI-DERIVED` 的 PAGE 需要补充人工说明与审批，无差异 PAGE 不做逐页视觉复核。运行 `check-code-review.py --strict`。任一元素缺失、几何超差、文本/字体不符或 token 不一致即 FAIL。
-7. 失败时使用 `systematic-debugging`，优先定位根因，不进行无证据的随机修改。
-8. 阶段性使用 `requesting-code-review`；收到评论后按 `receiving-code-review` 核实并处理。
-9. 结束前使用 `verification-before-completion`，运行真实测试/构建/契约检查，并报告命令、退出码和未执行项。
-10. 有 `design/interface-catalog.csv` 时，逐行实现接口契约并为每个 interface_id 执行至少一个 TEST；原生/设备/第三方边界写清真机、模拟器、替身或人工验证证据，无法执行写 BLOCKED + 原因，不得伪报通过。
-11. 阶段 evidence 必须写 `methods`：`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径；运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。
-10. 不要声称使用了未安装的 Superpowers 技能；不要擅改 specs/OpenAPI。如规格确需变化，暂停并更新 Change。
+## Execution Flow
+1. First read `openspec instructions apply --change <id>` and the project development notes; verify the actually installed Superpowers skills.
+2. Execute Superpowers' `brainstorming`, `using-git-worktrees`, `writing-plans`, `subagent-driven-development`, or `executing-plans` as needed based on complexity.
+3. When UI is involved, first read the target framework/transcoding notes, actual token values, PAGE specifications, and state decisions in `figma-audit.md`, plus `figma-code/` (target-framework design code transcoded in 06 according to the overall technology selection) and `figma-layout.csv` (assertion mapping); consume offline by default, and reread Figma page by page in batches only when the version changes or pages are ambiguous. **Implementation uses `figma-code/` directly as the page skeleton**: port the `.vue` (or `.tsx`/`.jsx` for the React stack) design code into the application directory, and only add routing, API calls, state, permissions, and business logic; do not rewrite styles, layout, or copy; when changes are truly needed, record the reason, impact, and approver per `UI-DEVIATION` and update assertions in sync. First establish global CSS variables/target component library theme/font stack; page styles must reference tokens, and hard-coded colors/font sizes must not be scattered; implementation must satisfy the `dom_selector` in `figma-layout.csv` (selectors should preferentially use stable `data-test` / `data-figma-node` attributes). **Do not use screenshots as UI evidence.**
+4. For behavior changes, use `test-driven-development`'s RED-GREEN-REFACTOR: write the failing test first and observe the failure, then implement minimally.
+5. Implement in small tasks and update OpenSpec task checkboxes; run the relevant tests for each task.
+6. Run `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900` for each PAGE, producing `design/evidence/figma-layout-check.json`; run `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`. **UI verification is primarily based on machine evidence**: in `## UI fidelity` of `code-review.md`, copy directly from the JSON per PAGE the Figma node, asserted element count/max deviation, layout evidence, conclusion, and approver; only PAGEs with differences or `UI-DERIVED` need supplementary manual explanation and approval, and PAGEs without differences are not visually rechecked page by page. Run `check-code-review.py --strict`. Any missing element, geometry out of tolerance, text/font mismatch, or token inconsistency is FAIL.
+7. On failure, use `systematic-debugging`, prioritize finding the root cause, and do not make random changes without evidence.
+8. Use `requesting-code-review` periodically; after receiving comments, verify and address them according to `receiving-code-review`.
+9. Before finishing, use `verification-before-completion`, run real tests/builds/contract checks, and report commands, exit codes, and unexecuted items.
+10. When `design/interface-catalog.csv` exists, implement the interface contracts row by row and run at least one TEST for each interface_id; for native/device/third-party boundaries, state real-device, simulator, double, or manual verification evidence; if unable to execute, write BLOCKED + reason, and do not falsely report success.
+11. Stage evidence must write `methods`: `test-driven-development` and `verification-before-completion` each with at least 1 decision and a real evidence path; run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`.
+10. Do not claim to have used Superpowers skills that are not installed; do not change specs/OpenAPI without authorization. If specs truly need to change, pause and update the Change.
 
-## 输出
-代码变更、测试、更新后的 tasks、代码审查报告和验证证据。
+## Output
+Code changes, tests, updated tasks, code review report, and verification evidence.
 
-## 质量与安全边界
-不以代码生成代替测试；不把未运行的检查报告为通过；禁止未审批的契约/需求变更。UI Change 以 06 目标框架设计代码为还原基线：08 只补业务逻辑，不得重写样式/布局/文案；视觉偏差必须有 `UI-DEVIATION` 审批，否则阻断。
+## Quality and Safety Boundaries
+Do not replace tests with code generation; do not report unexecuted checks as passing; unauthorized contract/requirement changes are prohibited. UI Changes use the 06 target-framework design code as the reproduction baseline: 08 only adds business logic and must not rewrite styles/layout/copy; visual deviations must have `UI-DEVIATION` approval, otherwise blocked.
 
-## 与 OpenSpec / Superpowers 的边界
-- OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
-- Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
-- 不在本阶段自动提交、发布、归档或覆盖用户文件。
+## Boundaries with OpenSpec / Superpowers
+- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
+- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
+- Figma MCP input must be based on actually accessible links, nodes, and MCP responses.
+- Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
-## 推荐检查
+## Recommended Checks
 `scripts/test-all.sh <project-dir>; scripts/verify-before-completion.sh; python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900; python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>; python scripts/check-code-review.py --change <change-id> --strict`
 
-## 实际工具调用要求
+## Actual Tool Invocation Requirements
 
-- **Superpowers：** 检查并按宿主机制加载 `using-superpowers`、`writing-plans`、`test-driven-development`；故障时 `systematic-debugging`；审查用 `requesting-code-review`/`receiving-code-review`；完成前 `verification-before-completion`。阶段 evidence 必须写 `methods`（`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径）并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时用 `mode=equivalent` 并写 `reason`。
-- **OpenSpec：** 先执行 `openspec instructions apply --change <id> --json` 和 `openspec status --change <id>`；完成后 `openspec validate <id> --strict`，不擅改规格。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
-- **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
-- **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
+- **Superpowers:** Check and load `using-superpowers`, `writing-plans`, and `test-driven-development` per the host mechanism; `systematic-debugging` on failures; `requesting-code-review`/`receiving-code-review` for review; `verification-before-completion` before completion. Stage evidence must write `methods` (`test-driven-development` and `verification-before-completion` each with at least 1 decision and a real evidence path) and run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, use `mode=equivalent` and write `reason`.
+- **OpenSpec:** First execute `openspec instructions apply --change <id> --json` and `openspec status --change <id>`; after completion, `openspec validate <id> --strict`, without unauthorized spec changes. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
+- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
+- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
 
-## 实施期间的基线纪律（强制）
+## Baseline Discipline During Implementation (Mandatory)
 
-- 开发前再次核验 `design/baseline-impact.md`、`docs/architecture/baseline-status.md` 和批准的基线版本；代码、迁移、配置必须遵循已批准约束。
-- 实施中发现基线不适用、冲突或缺失时，先在当前 Change 记录证据并暂停受影响任务；不得直接编辑冻结基线或以代码绕过规则。
-- 创建/更新基线变更请求和 ADR，待对应负责人批准后更新基线版本；然后刷新当前 Change 的 baseline snapshot、详细设计、任务和验证。独立且不受影响的任务可经负责人确认后继续。
-- 功能局部行为/端点/表迁移/IO/实现细节继续留在 Change，不得因开发完成就自动提升到全局基线。
-- 详细规则见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+- Before development, re-verify `design/baseline-impact.md`, `docs/architecture/baseline-status.md`, and the approved baseline version; code, migrations, and configuration must follow approved constraints.
+- If a baseline is found to be inapplicable, conflicting, or missing during implementation, first record evidence in the current Change and pause affected tasks; do not directly edit the frozen baseline or bypass rules in code.
+- Create/update the baseline change request and ADR, and update the baseline version after approval by the corresponding owner; then refresh the current Change's baseline snapshot, detailed design, tasks, and verification. Independent, unaffected tasks may continue after owner confirmation.
+- Feature-local behavior/endpoints/table migrations/IO/implementation details remain in the Change, and must not be automatically promoted to the global baseline just because development is complete.
+- For detailed rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
 
-## 输入/输出/交接契约（强制）
+## Input/Output/Handoff Contract (Mandatory)
 
-执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="implementation-orchestrator"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
+Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="implementation-orchestrator"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **本阶段输入：** 已批准的 design/baseline-impact.md 与当前 baseline-status.md；已批准 tasks.md/design.md；design.md（含前端/后端/测试设计节）、design/test-cases.csv、OpenAPI、IO 契约与 traceability.csv；涉及 UI 时 `design/figma-audit.md`（目标框架/转码说明、token 实际值、PAGE 规格、状态决策）、`design/figma-code/`（目标框架设计代码）与 `design/figma-layout.csv`（断言映射）及项目 token 文件；`docs/architecture/technology-decisions.md`（目标框架一致性）；项目级工程规范/测试策略；docs/product/open-questions.md（只读）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** 实际源代码/迁移/配置；条件适用的基线变更请求/ADR 草案（未经批准不更新冻结基线）；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 `## UI fidelity` 数值表，数值直接取自 `figma-layout-check.json`；仅差异/`UI-DERIVED` PAGE 需人工说明与审批）；`design/evidence/figma-layout-check.json`；实现/验证证据。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
-- **下游交接：** 代码差异、测试报告、审查结论、未解决问题、`figma-layout-check.json` 与 token 检查结果。明确指出下一阶段消费哪些文件/字段。
-- **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
-
-
-## 独立验证交接（新增强制要求）
-
-Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `09-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
+- **Inputs for this stage:** Approved design/baseline-impact.md and current baseline-status.md; approved tasks.md/design.md; design.md (including frontend/backend/test design sections), design/test-cases.csv, OpenAPI, IO contracts, and traceability.csv; when UI is involved, `design/figma-audit.md` (target framework/transcoding notes, actual token values, PAGE specifications, state decisions), `design/figma-code/` (target-framework design code), `design/figma-layout.csv` (assertion mapping), and the project token file; `docs/architecture/technology-decisions.md` (target framework consistency); project-level engineering conventions/test strategy; docs/product/open-questions.md (read-only). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Outputs for this stage:** Actual source code/migrations/configuration; baseline change requests/ADR drafts when applicable (do not update the frozen baseline without approval); automated test code and run results; openspec/changes/<change-id>/design/evidence/code-review.md (including the `## UI fidelity` numeric table when UI is involved, with values taken directly from `figma-layout-check.json`; only PAGEs with differences/`UI-DERIVED` need manual explanation and approval); `design/evidence/figma-layout-check.json`; implementation/verification evidence. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
+- **Downstream handoff:** Code diff, test report, review conclusion, unresolved issues, `figma-layout-check.json`, and token check results. Explicitly state which files/fields the next stage consumes.
+- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
+- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
 
 
-## 实现阶段的机器基线门禁（强制）
+## Independent Verification Handoff (New Mandatory Requirement)
 
-- 编码前必须通过 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。
-- 实现完成后，为每条 APPLICABLE 约束记录 `implementation_verification.status=PASS`、验证方法和仓库内真实证据路径；纯设计约束需显式记录 NOT_APPLICABLE 与理由。
-- 阶段 08 转出前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`。缺证据、NOT_RUN、PENDING 均阻断。
+After the Builder completes, do not proceed directly to manual acceptance. You must hand off to the independent Skill `@independent-verifier` (stage `09-independent-verification`), using an independent Agent/context to read-only verify code, specs, ACs, and IO contracts and rerun tests. The Builder must not generate a PASS conclusion itself to replace the Verifier.
 
-## 阶段边界与评审停等（强制）
 
-- 开始前运行 `python scripts/workflow.py check-entry --step 08-implementation-orchestrator [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
-- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
-- 只有用户明确回复“评审通过 08-implementation-orchestrator”后，才可运行 `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
-- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
-- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。
+## Machine Baseline Gates for the Implementation Stage (Mandatory)
+
+- Before coding, `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design` must pass.
+- After implementation is complete, record `implementation_verification.status=PASS`, the verification method, and the real in-repository evidence path for each APPLICABLE constraint; purely design constraints need an explicit NOT_APPLICABLE and reason.
+- Before stage 08 transition-out, run `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`. Missing evidence, NOT_RUN, and PENDING all block.
+
+## Stage Boundaries and Review Stop (Mandatory)
+
+- Before starting, run `python scripts/workflow.py check-entry --step 08-implementation-orchestrator [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
+- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
+- Only after the user explicitly replies "Review passed 08-implementation-orchestrator" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
+- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

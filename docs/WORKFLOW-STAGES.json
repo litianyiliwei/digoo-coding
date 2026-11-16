@@ -3,7 +3,7 @@
   "stages": [
     {
       "id": "01-project-bootstrap",
-      "title": "项目初始化与工具链检查",
+      "title": "Project initialization and toolchain check",
       "skill": "project-bootstrap",
       "prompt": "prompts/01-project-bootstrap.md",
       "dependencies": [],
@@ -12,7 +12,7 @@
     },
     {
       "id": "02-requirements-analysis",
-      "title": "需求业务梳理",
+      "title": "Requirements business analysis",
       "skill": "requirements-analysis",
       "prompt": "prompts/02-requirements-analysis.md",
       "dependencies": [
@@ -23,7 +23,7 @@
     },
     {
       "id": "03-project-architecture-baseline",
-      "title": "项目总体架构设计",
+      "title": "Project overall architecture design",
       "skill": "project-architecture-baseline",
       "prompt": "prompts/03-project-architecture-baseline.md",
       "dependencies": [
@@ -34,7 +34,7 @@
     },
     {
       "id": "04-proposal-planning",
-      "title": "提案拆分、依赖排序与路线图",
+      "title": "Proposal breakdown, dependency ordering, and roadmap",
       "skill": "proposal-planning",
       "prompt": "prompts/04-proposal-planning.md",
       "dependencies": [
@@ -45,7 +45,7 @@
     },
     {
       "id": "05-feature-requirements",
-      "title": "提案级需求分析",
+      "title": "Proposal-level requirements analysis",
       "skill": "feature-requirements",
       "prompt": "prompts/05-feature-requirements.md",
       "dependencies": [
@@ -56,7 +56,7 @@
     },
     {
       "id": "06-figma-design-review",
-      "title": "Figma 设计与评审（Figma-only）",
+      "title": "Figma design and review (Figma-only)",
       "skill": "figma-design-review",
       "prompt": "prompts/06-figma-design-review.md",
       "dependencies": [
@@ -67,7 +67,7 @@
     },
     {
       "id": "07-detailed-design",
-      "title": "详细设计、接口与测试设计",
+      "title": "Detailed design, interface and test design",
       "skill": "detailed-design",
       "prompt": "prompts/07-detailed-design.md",
       "dependencies": [
@@ -78,7 +78,7 @@
     },
     {
       "id": "08-implementation-orchestrator",
-      "title": "实现、TDD、验证与代码审查",
+      "title": "Implementation, TDD, verification, and code review",
       "skill": "implementation-orchestrator",
       "prompt": "prompts/08-implementation-orchestrator.md",
       "dependencies": [
@@ -89,7 +89,7 @@
     },
     {
       "id": "09-independent-verification",
-      "title": "独立验证与验收证据",
+      "title": "Independent verification and acceptance evidence",
       "skill": "independent-verifier",
       "prompt": "prompts/09-independent-verification.md",
       "dependencies": [
@@ -100,7 +100,7 @@
     },
     {
       "id": "10-acceptance-audit",
-      "title": "人工验收、归档与基线回写",
+      "title": "Human acceptance, archive, and baseline write-back",
       "skill": "acceptance-audit",
       "prompt": "prompts/10-acceptance-audit.md",
       "dependencies": [

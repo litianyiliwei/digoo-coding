@@ -1,77 +1,77 @@
-# 需求业务梳理
+# Requirements Business Analysis
 
-- Change ID：N/A（项目级）
-- 状态：DRAFT
-- 来源基线：PENDING（访谈/业务材料/旧系统资料）
-- 关联需求/AC：FLOW/NODE/DO/RD/BR ID
-- 生成日期/版本：PENDING
+- Change ID: N/A (project-level)
+- Status: DRAFT
+- Source baseline: PENDING (interviews/business materials/legacy system materials)
+- Related requirements/AC: FLOW/NODE/DO/RD/BR ID
+- Generated date/version: PENDING
 
-## 1. 项目目标、范围与角色
+## 1. Project Goals, Scope, and Roles
 
-- 项目/产品目标：PENDING
-- 明确不做（非目标）：PENDING
-- 业务范围（种植/畜牧/水产/监管等）：PENDING
-- 角色与权限概览：PENDING
+- Project/product goal: PENDING
+- Explicitly out of scope (non-goals): PENDING
+- Business scope (core business domains / supporting domains, etc.): PENDING
+- Roles and permissions overview: PENDING
 
-## 2. 业务域与流程索引
+## 2. Business Domains and Process Index
 
-| FLOW ID | 流程名称 | 业务域 | 主责角色 | 节点数 | 关联 DO/RD | 状态 |
+| FLOW ID | Process name | Business domain | Primary role | Node count | Related DO/RD | Status |
 |---|---|---|---|---|---|---|
 | FLOW-001 | PENDING | PENDING | PENDING | PENDING | PENDING | DRAFT |
 
-详细流程与节点表见 `docs/product/workflows.md`。
+See `docs/product/workflows.md` for detailed processes and node tables.
 
-## 3. 业务数据对象概览
+## 3. Business Data Object Overview
 
-| DO ID | 数据对象 | 业务定义 | 所有者角色 | 来源节点 | 消费节点 |
+| DO ID | Data object | Business definition | Owner role | Source node | Consuming node |
 |---|---|---|---|---|---|
 | DO-001 | PENDING | PENDING | PENDING | PENDING | PENDING |
 
-完整目录见 `docs/product/data-objects.csv`。
+See `docs/product/data-objects.csv` for the complete catalog.
 
-## 4. RD 矩阵摘要
+## 4. RD Matrix Summary
 
-| 需求/规则 | 覆盖 FLOW | 覆盖节点 | 关键 DO | 验收方向 | 状态 |
+| Requirement/Rule | Covered FLOW | Covered nodes | Key DO | Acceptance direction | Status |
 |---|---|---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING |
 
-完整矩阵见 `docs/product/rd-matrix.csv`；每个节点至少一条 RD 记录。
+See `docs/product/rd-matrix.csv` for the full matrix; every node has at least one RD record.
 
-## 5. 业务规则、术语与验收政策
+## 5. Business Rules, Terms, and Acceptance Policy
 
-- 业务规则：`docs/product/business-rules.md`
-- 术语表：`docs/product/glossary.md`
-- 验收政策：`docs/product/acceptance-policy.md`
+- Business rules: `docs/product/business-rules.md`
+- Glossary: `docs/product/glossary.md`
+- Acceptance policy: `docs/product/acceptance-policy.md`
 
-## 6. 非功能需求
+## 6. Non-functional Requirements
 
-| NFR ID | 类别 | 要求 | 约束来源 | 验证方向 | 状态 |
+| NFR ID | Category | Requirement | Constraint source | Verification direction | Status |
 |---|---|---|---|---|---|
-| NFR-001 | 性能/安全/可用性/审计/隐私 | PENDING | PENDING | PENDING | PENDING |
+| NFR-001 | Performance/Security/Availability/Audit/Privacy | PENDING | PENDING | PENDING | PENDING |
 
-## 7. 假设、冲突与待确认
+## 7. Assumptions, Conflicts, and Pending Confirmations
 
-| ID | 类型（假设/冲突/待确认） | 内容 | 影响 | 负责人 | 阻塞条件 |
+| ID | Type (assumption/conflict/pending confirmation) | Content | Impact | Owner | Blocking condition |
 |---|---|---|---|---|---|
 | RA-001 | PENDING | PENDING | PENDING | PENDING | PENDING |
 
-未决问题统一登记到 `docs/product/open-questions.md`。
+Open questions are all registered in `docs/product/open-questions.md`.
 
-## 8. 来源与审批
+## 8. Sources and Approval
 
-| 来源 | 内容摘要 | 日期 | 可信度/限制 |
+| Source | Content summary | Date | Credibility/limitations |
 |---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING |
 
-- 业务/产品负责人：PENDING
-- 审批状态：DRAFT
+- Business/product owner: PENDING
+- Approval status: DRAFT
 
-## 9. 参考产品与互联网调研
+## 9. Reference Products and Internet Research
 
-- 调研记录：`docs/product/reference-research.md`
-- 参考产品状态：PRESENT / NONE（NONE 时在调研记录写理由）
-- 可借鉴结论：PENDING
-- 不借鉴结论及理由：PENDING
-- 影响映射（FLOW/NODE/DO/BR/NFR）：PENDING
+- Research records: `docs/product/reference-research.md`
+- Reference product status: PRESENT / NONE (when NONE, write the reason in the research records)
+- Reusable conclusions: PENDING
+- Conclusions not adopted and reasons: PENDING
+- Impact mapping (FLOW/NODE/DO/BR/NFR): PENDING
 
-> 阶段 02 必须实际使用 WebSearch/WebFetch（或宿主等价联网工具）完成调研并记录真实 URL 与访问日期；无联网能力时标记 BLOCKED，不得用记忆替代。
+> Step 02 must actually use WebSearch/WebFetch (or an equivalent host network tool) to complete the research and record real URLs and access dates; when no network capability exists, mark BLOCKED and do not substitute memory.

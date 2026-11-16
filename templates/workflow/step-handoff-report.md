@@ -1,71 +1,71 @@
-# 阶段交接报告
+# Stage Handoff Report
 
-- 阶段 ID：
-- Skill：
-- Change ID（项目级填 N/A）：
-- 执行时间：
-- 状态：DRAFT / BLOCKED / READY_FOR_REVIEW / APPROVED
+- Stage ID:
+- Skill:
+- Change ID (fill N/A for project-level):
+- Execution time:
+- Status: DRAFT / BLOCKED / READY_FOR_REVIEW / APPROVED
 
-## 1. 实际读取的输入
+## 1. Inputs Actually Read
 
-| 文件/资源 | 存在 | 版本/更新时间 | 审批状态 | 与本阶段相关性 |
+| File/resource | Exists | Version/last updated | Approval status | Relevance to this stage |
 |---|---|---|---|---|
 | | | | | |
 
-## 2. 本阶段输出
+## 2. Outputs of This Stage
 
-| 输出文件 | 已创建/修改/未生成 | 核心内容摘要 | 下游用途 |
+| Output file | Created/modified/not generated | Core content summary | Downstream use |
 |---|---|---|---|
 | | | | |
 
-## 3. 追踪关系与覆盖情况
+## 3. Traceability and Coverage
 
-- 上游需求/故事/AC：
-- 本阶段产物 ID：
-- 下游消费关系：
-- UI 一致性（涉及 UI）：`figma-code/` / `figma-layout.csv` 断言覆盖、`figma-layout-check.json` 最大偏差与差异结论（路径与结论；不使用截图）
-- 未覆盖/不适用项及理由：
+- Upstream requirements/stories/ACs:
+- Artifact IDs of this stage:
+- Downstream consumption relationships:
+- UI consistency (when UI is involved): assertion coverage of `figma-code/` / `figma-layout.csv`, max deviation and difference conclusions of `figma-layout-check.json` (paths and conclusions; no screenshots)
+- Uncovered/not-applicable items and reasons:
 
-## 4. 方法证据
+## 4. Method Evidence
 
-> 详细问题/备选/决策见阶段 evidence 的 `methods` 块；此处至少列出关键项。02–10 必须通过 `python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>`。
+> For detailed issues/alternatives/decisions, see the `methods` block in the stage evidence; at least list the key items here. 02–10 must pass `python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>`.
 
-| 技能/模式 | 澄清问题（关键项） | 备选方案 | 决策 | 未决问题 | 产物落点 | 证据路径 |
+| Skill/mode | Clarifying questions (key items) | Alternatives | Decision | Open questions | Artifact location | Evidence path |
 |---|---|---|---|---|---|---|
 | | | | | | | |
 
-## 5. 自检与工具执行证据
+## 5. Self-Check and Tool Execution Evidence
 
-| 命令/工具 | 实际执行 | 退出码/结果 | 证据/日志位置 |
+| Command/tool | Actually executed | Exit code/result | Evidence/log location |
 |---|---|---|---|
 | | | | |
 
-## 6. 待确认、风险与阻断
+## 6. Pending Confirmation, Risks, and Blockers
 
-- 待审批：
-- 阻断项：
-- 假设/冲突：
-- 未执行项（含原因）：
+- Pending approval:
+- Blockers:
+- Assumptions/conflicts:
+- Not-executed items (with reasons):
 
 
-## 7. 基线适用性与变更交接
+## 7. Baseline Applicability and Change Handoff
 
-- 当前基线版本/状态：
-- 本阶段读取的基线域/文件/章节：
-- 本 Change 的基线分类：CHANGE_ONLY / BASELINE_CHANGE_REQUIRED / BASELINE_UPDATE_AFTER_ACCEPTANCE / N/A
-- 当前结论：COMPATIBLE / BLOCKED_PENDING_BASELINE_CHANGE / APPROVED_BASELINE_AMENDMENT
-- 复核结论：NO_IMPACT / REBASE_REQUIRED / N/A
-- BCR / ADR 路径与审批状态：
-- 需要更新的基线文件及版本（无则写 N/A）：
-- 受影响的在途 Change：
+- Current baseline version/status:
+- Baseline domains/files/sections read in this stage:
+- Baseline classification of this Change: CHANGE_ONLY / BASELINE_CHANGE_REQUIRED / BASELINE_UPDATE_AFTER_ACCEPTANCE / N/A
+- Current conclusion: COMPATIBLE / BLOCKED_PENDING_BASELINE_CHANGE / APPROVED_BASELINE_AMENDMENT
+- Review conclusion: NO_IMPACT / REBASE_REQUIRED / N/A
+- BCR / ADR paths and approval status:
+- Baseline files and versions to update (write N/A if none):
+- Affected in-flight Changes:
 
-## 8. 下一阶段交接
+## 8. Next-Stage Handoff
 
-- 下一阶段：
-- 下一阶段必须读取：
-- UI 证据（涉及 UI）：`design/figma-audit.md`、`design/figma-code/`、`design/figma-layout.csv`、`design/evidence/figma-layout-check.json`、`code-review.md` 的数值 UI fidelity / `layout_checks` / `UI acceptance`（不使用截图）
-- 输入完整性：PASS / FAIL
-- 是否允许推进：YES / NO
-- 需要用户确认的问题：
+- Next stage:
+- Required reading for the next stage:
+- UI evidence (when UI is involved): numeric UI fidelity / `layout_checks` / `UI acceptance` of `design/figma-audit.md`, `design/figma-code/`, `design/figma-layout.csv`, `design/evidence/figma-layout-check.json`, `code-review.md` (no screenshots)
+- Input completeness: PASS / FAIL
+- Allowed to proceed: YES / NO
+- Questions requiring user confirmation:
 
-> 只有真实产物存在、门禁通过且所需审批完成，才能将本阶段记入 `workflow-state.json.completed_steps`。
+> Only when real artifacts exist, gates pass, and the required approvals are complete may this stage be recorded in `workflow-state.json.completed_steps`.

@@ -1,49 +1,49 @@
-# 项目基线状态与版本登记
+# Project Baseline Status and Version Register
 
-- 项目名称：
-- 总体基线版本：`v0.1.0`
-- 总体状态：DRAFT / FROZEN / UNDER_AMENDMENT
-- 最近生效日期：
-- 产品负责人：
-- 架构负责人：
-- 技术负责人：
-- 基线仓库版本/Commit：
+- Project name:
+- Overall baseline version: `v0.1.0`
+- Overall status: DRAFT / FROZEN / UNDER_AMENDMENT
+- Most recent effective date:
+- Product owner:
+- Architecture owner:
+- Technical owner:
+- Baseline repository version/Commit:
 
-## 1. 各基线域版本
+## 1. Versions by Baseline Domain
 
-| 基线域 | 权威文件 | 版本 | 状态 | 审批人 | 生效日期 | 最近关联 Change / ADR |
+| Baseline domain | Authoritative files | Version | Status | Approver | Effective date | Most recent related Change / ADR |
 |---|---|---|---|---|---|---|
-| 产品 | `docs/product/*` | v0.1.0 | DRAFT / FROZEN | | | |
-| 架构 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`technology-decisions.md`、`docs/adr/*` | v0.1.0 | DRAFT / FROZEN | | | |
-| 数据与领域 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | v0.1.0 | DRAFT / FROZEN | | | |
-| 公共 API | `docs/architecture/api-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
-| 前端工程 | `docs/architecture/frontend-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
-| 测试与质量 | `docs/architecture/test-strategy.md` | v0.1.0 | DRAFT / FROZEN | | | |
+| Product | `docs/product/*` | v0.1.0 | DRAFT / FROZEN | | | |
+| Architecture | `docs/architecture/system-context.md`, `domain-boundaries.md`, `containers-and-deployment.md`, `data-flows.md`, `technology-decisions.md`, `docs/adr/*` | v0.1.0 | DRAFT / FROZEN | | | |
+| Data and Domain | `docs/architecture/logical-erd.md`, `domain-boundaries.md`, `data-flows.md` | v0.1.0 | DRAFT / FROZEN | | | |
+| Public API | `docs/architecture/api-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
+| Frontend Engineering | `docs/architecture/frontend-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
+| Test and Quality | `docs/architecture/test-strategy.md` | v0.1.0 | DRAFT / FROZEN | | | |
 
-## 2. 生效规则
+## 2. Effective Rules
 
-- 状态为 `FROZEN` 的域是功能开发必须遵循的规范；功能 Change 必须记录实际引用的域版本。
-- `DRAFT` 域可以作为参考，但不能冒充已批准约束；影响该域的功能设计必须标记风险并取得负责人批准。
-- `UNDER_AMENDMENT` 表示存在基线修订；在审批生效前仍以旧版本为准，待修订规则不能提前作为强制要求。
-- 任何正式变更都必须记录修订版本、变更理由、审批人、生效日期、关联 ADR/Change 和受影响的在途 Change。
+- Domains with status `FROZEN` are the norms feature development must follow; feature Changes must record the actual domain versions they reference.
+- `DRAFT` domains may serve as references but must not masquerade as approved constraints; feature designs that affect such a domain must flag the risk and obtain the owner's approval.
+- `UNDER_AMENDMENT` indicates an in-progress baseline revision; the old version remains authoritative until the approval takes effect, and the revision rules must not be used as mandatory requirements in advance.
+- Every formal change must record the revision version, change reason, approver, effective date, related ADR/Change, and affected in-flight Changes.
 
-## 3. 版本策略
+## 3. Versioning Policy
 
-默认使用语义版本：
-- PATCH：不改变规范语义的澄清、错字、引用修正。
-- MINOR：新增兼容的共享规则、实体/公共约定或质量要求。
-- MAJOR：改变系统边界、数据所有权、公共契约或可能导致既有功能不兼容的约束。
+Semantic versioning is used by default:
+- PATCH: clarifications, typos, and reference fixes that do not change normative semantics.
+- MINOR: newly added backward-compatible shared rules, entities/public conventions, or quality requirements.
+- MAJOR: changes to system boundaries, data ownership, public contracts, or constraints that may make existing features incompatible.
 
-项目可采用其他策略，但必须在此明确并保持一致。
+Projects may adopt another policy, but it must be stated explicitly here and applied consistently.
 
-## 4. 当前待处理的基线修订
+## 4. Currently Pending Baseline Revisions
 
-| 修订 ID | 影响域 | 提出来源 Change | 变更摘要 | 状态 | 负责人/审批人 | 生效版本 |
+| Revision ID | Impacted domain | Originating Change | Change summary | Status | Owner/Approver | Effective version |
 |---|---|---|---|---|---|---|
 | | | | | PENDING / APPROVED / REJECTED / IMPLEMENTED | | |
 
-## 5. 冻结批准记录
+## 5. Freeze Approval Records
 
-| 基线版本 | 审批范围 | 审批人 | 日期 | 证据/会议记录 |
+| Baseline version | Approval scope | Approver | Date | Evidence/Meeting minutes |
 |---|---|---|---|---|
 | | | | | |

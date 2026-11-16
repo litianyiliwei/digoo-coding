@@ -1,53 +1,53 @@
-# Change 切片规则与完成定义
+# Change Slicing Rules and Definition of Done
 
-- Change ID：N/A（项目级）
-- 状态：DRAFT
-- 来源基线：docs/product/requirements-analysis.md、proposal-roadmap.md
-- 关联需求/AC：N/A
-- 生成日期/版本：PENDING
+- Change ID: N/A (project-level)
+- Status: DRAFT
+- Source baseline: docs/product/requirements-analysis.md, proposal-roadmap.md
+- Related requirements/AC: N/A
+- Generated date/version: PENDING
 
-## 1. 什么是一个 Change
+## 1. What Is a Change
 
-一个 Change 是一个可独立验收的业务能力（capability），能沿“入口 → 行为 → 结果”形成可演示的纵向切片；不是一层架构、一批页面、一次重构或一组技术任务。
+A Change is one independently acceptable business capability that forms a demonstrable vertical slice along "entry → behavior → result"; it is not an architecture layer, a batch of pages, a refactor, or a set of technical tasks.
 
-## 2. 切片预算
+## 2. Slicing Budget
 
-| 维度 | 建议上限 | 超过时 |
+| Dimension | Suggested limit | When exceeded |
 |---|---|---|
-| 可观察业务能力 | 1 个 | 拆分 |
-| 关键 AC | 12 条 | 拆分或分期 |
-| 涉及角色 | 3 个 | 检查是否跨权限域，必要时拆分 |
-| 跨域依赖 | 2 个 | 先做依赖 Change 或缩小范围 |
-| 新增公共契约 | 0 个 | 先走基线变更/ADR |
+| Observable business capability | 1 | Split |
+| Key AC | 12 | Split or phase |
+| Roles involved | 3 | Check whether it crosses permission domains; split if necessary |
+| Cross-domain dependencies | 2 | Build the dependency Change first or narrow the scope |
+| New public contracts | 0 | Go through a baseline change/ADR first |
 
-预算不是硬性数字，超过时必须记录理由与验收人。
+The budget is not a hard number; when exceeded, the reason and approver must be recorded.
 
-## 3. 必须拆分的信号
+## 3. Signals That Require Splitting
 
-- 同时改变两个以上角色的核心流程。
-- 同时引入新的公共规则、公共数据模型和公共 API。
-- 无法用一个演示脚本从头到尾展示。
-- AC 之间没有共同业务目标，只是技术层相邻。
-- 需要“先做一半、以后再补”才能验收。
+- Simultaneously changing the core flows of two or more roles.
+- Simultaneously introducing new public rules, public data models, and public APIs.
+- Cannot be demonstrated end to end with a single demo script.
+- The AC share no common business goal and are merely adjacent at the technical layer.
+- Acceptance requires "doing half now and filling in the rest later".
 
-## 4. Definition of Done（DoD）
+## 4. Definition of Done (DoD)
 
-- [ ] proposal 的 Why/What/Non-goals 已批准。
-- [ ] delta specs 覆盖全部外部可观察行为，每个 Requirement 至少一个 Scenario。
-- [ ] 每条 AC 有验证方式与证据路径；阻断 AC 全部通过。
-- [ ] 基线影响清单与约束绑定完成，适用约束为 COMPLIANT 或 EXCEPTION_APPROVED。
-- [ ] 测试、构建、代码审查与独立验证证据真实存在；未执行项已列明。
-- [ ] 人工验收通过并记录批准人；归档/基线回写按规则完成。
-- [ ] `lessons.md` 已追加本次可复用的教训（无则写 N/A + 理由）。
+- [ ] The proposal's Why/What/Non-goals are approved.
+- [ ] Delta specs cover all externally observable behavior, with at least one Scenario per Requirement.
+- [ ] Every AC has a verification method and evidence path; all blocking AC pass.
+- [ ] The baseline impact list and constraint binding are complete; applicable constraints are COMPLIANT or EXCEPTION_APPROVED.
+- [ ] Test, build, code review, and independent verification evidence genuinely exists; unexecuted items are listed.
+- [ ] Human acceptance passes and the approver is recorded; archiving/baseline write-back is completed per the rules.
+- [ ] `lessons.md` has been appended with reusable lessons from this Change (write N/A + reason if none).
 
-## 5. 与基线的边界
+## 5. Boundary with the Baseline
 
-- 当前功能独有的行为、页面、API、表迁移、IO 和测试留在 Change。
-- 跨功能共享的规则、公共契约、核心模型、质量门禁变化必须提升为基线变更，先审批后设计。
-- 详细判定见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+- Behavior, pages, APIs, table migrations, IO, and tests unique to the current feature stay in the Change.
+- Rules, public contracts, core models, and quality gate changes shared across features must be elevated to baseline changes and approved before design.
+- See `docs/BASELINE-FEATURE-INTERACTION.md` for detailed determination.
 
-## 6. 使用方式
+## 6. Usage
 
-- 阶段 04 拆分路线图时读取第 1–3 节并标注每个候选 Change 的预算。
-- 阶段 05 开始前读取第 4 节，作为提案级需求的准入检查。
-- 阶段 16 验收时逐项核对 DoD。
+- During Step 04 roadmap splitting, read sections 1-3 and annotate the budget for each candidate Change.
+- Before Step 05 begins, read section 4 as the admission check for proposal-level requirements.
+- During Step 16 acceptance, verify the DoD item by item.

@@ -8,7 +8,7 @@ This repository is an AI R&D workflow toolkit built for **OpenSpec + Superpowers
 
 | Item | Value |
 |---|---|
-| Workflow state | Stage `01-project-bootstrap` completed; next stage is `02-requirements-analysis` (requirements analysis) |
+| Workflow state | Stage `01-project-bootstrap` not completed; current stage is `01-project-bootstrap` (project bootstrap & toolchain check) |
 | Active change | None |
 | Pending approvals / blockers | None |
 | Project baseline | `v0.1.0` DRAFT; none of the six baseline domains is frozen |
@@ -55,7 +55,7 @@ If `python3` is unavailable on Windows, use `python` instead; the `.sh` scripts 
 ```bash
 python scripts/next-step.py            # Read-only: print the next stage
 python scripts/workflow.py status      # Workflow state summary
-python scripts/workflow.py check-entry --step 02-requirements-analysis
+python scripts/workflow.py check-entry --step 01-project-bootstrap
 python scripts/check-package.py        # Toolkit self-check
 bash scripts/check-required-files.sh   # Baseline file presence (non-strict)
 ```
@@ -73,6 +73,8 @@ Before entering a stage, run `check-entry --step <id>` (a non-zero exit code mea
 7. **Agent boundaries**: no automatic dependency installation, commits, CI changes, archiving, or releases, and no approving unresolved rules on behalf of business, design, or architecture owners.
 
 ## Further Reading
+
+> Process documents are maintained bilingually, with a language switcher at the top of each document. English is the main language and uses the canonical filenames; Chinese translations use the same path with `-zh.md`. `scripts/README.md` is the English version and links to its Chinese counterpart.
 
 - [AGENTS.md](AGENTS.md) — repository conventions and process entry points
 - [docs/PROCESS-MAP.md](docs/PROCESS-MAP.md) — overview of stages and artifacts

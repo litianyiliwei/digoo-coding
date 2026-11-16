@@ -1,27 +1,27 @@
-# ID 命名与分配约定
+# ID Naming and Allocation Conventions
 
-- Change ID：N/A（项目级）
-- 状态：DRAFT
-- 来源基线：docs/TEMPLATE-POLICY.md、各阶段模板
-- 关联需求/AC：全部稳定 ID
-- 生成日期/版本：PENDING
+- Change ID: N/A (project-level)
+- Status: DRAFT
+- Source baseline: docs/TEMPLATE-POLICY.md, stage templates
+- Related requirements/AC: All stable IDs
+- Generated date/version: PENDING
 
-## 1. 两层 ID
+## 1. Two ID Layers
 
-| 层级 | 前缀 | 示例 | 分配者 | 作用域 |
+| Layer | Prefix | Example | Allocator | Scope |
 |---|---|---|---|---|
-| 项目级 | FLOW/NODE/DO/RD/BR/TERM/Q/DEC/ASM/CAP/LESSON/ROLE | FLOW-001、NODE-001-01、DO-001 | 阶段 02/03 基线负责人 | 全项目 |
-| Change 级 | US/AC/TEST/PAGE/BLOCK/ELEM/EVT/IO/TASK | US-001、AC-001 | 当前 Change | 该 Change 内唯一 |
+| Project-level | FLOW/NODE/DO/RD/BR/TERM/Q/DEC/ASM/CAP/LESSON/ROLE | FLOW-001, NODE-001-01, DO-001 | Step 02/03 baseline owner | Whole project |
+| Change-level | US/AC/TEST/PAGE/BLOCK/ELEM/EVT/IO/TASK | US-001, AC-001 | Current Change | Unique within that Change |
 
-## 2. 并行分配规则
+## 2. Parallel Allocation Rules
 
-- 项目级 ID 只在基线阶段分配；功能 Change 不得新建或复用项目级 ID。
-- Change 级 ID 在该 Change 内唯一；跨 Change 引用必须带 Change 前缀，例如 `report-export:US-001`。
-- 不得把 Change 级 ID 登记到 `docs/product/` 基线文档；需要提升时先走基线变更并分配项目级 ID。
-- 禁止复用已退役 ID；退役时在来源文档标记 `RETIRED` 并保留原行。
+- Project-level IDs are allocated only during baseline stages; feature Changes must not create or reuse project-level IDs.
+- Change-level IDs are unique within that Change; cross-Change references must carry the Change prefix, for example `report-export:US-001`.
+- Change-level IDs must not be registered in `docs/product/` baseline documents; when elevation is needed, go through a baseline change first and allocate a project-level ID.
+- Reusing retired IDs is prohibited; on retirement, mark `RETIRED` in the source document and keep the original row.
 
-## 3. 引用闭合
+## 3. Reference Closure
 
-- 每个引用必须指向真实存在的 ID；未知 ID 由 `check-requirements.py` 判为错误。
-- 改名/重排不改变 ID；措辞修订保留原 ID 并记录版本。
-- 新增 ID 前先搜索现有文档，避免语义重复。
+- Every reference must point to an ID that actually exists; unknown IDs are judged as errors by `check-requirements.py`.
+- Renaming/reordering does not change IDs; wording revisions keep the original ID and record the version.
+- Search existing documents before adding a new ID to avoid semantic duplication.

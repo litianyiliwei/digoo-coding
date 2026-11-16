@@ -1,211 +1,213 @@
-# 项目基线与功能 Change 的双向治理规则
+# Bidirectional Governance Rules Between the Project Baseline and Feature Changes
 
-> 本文件定义项目级基线与功能级 OpenSpec Change 的权责边界，是所有功能开发阶段的强制规则。流程图、Skill、Prompt 与阶段契约不得与本文件冲突。
+> Language: English | [简体中文](BASELINE-FEATURE-INTERACTION-zh.md)
 
-## 1. 核心原则
+> This document defines the responsibility boundary between the project-level baseline and feature-level OpenSpec Changes and is a mandatory rule for all feature development stages. Flow diagrams, Skills, Prompts, and stage contracts must not conflict with this document.
 
-1. **基线先约束功能，功能再反馈基线。** 每个功能 Change 在需求细化前必须读取当前有效基线，并形成基线适用性/影响记录。
-2. **基线是共享规则，不是功能设计的副本。** 功能 Change 通过文件路径、版本、章节和稳定 ID 引用基线，不复制整份基线。
-3. **功能 Change 是单一功能行为的权威变更载体。** 当前功能的行为、页面、端点、局部数据迁移、IO、测试与实现细节留在该 Change。
-4. **不因“新增实现”就自动修改基线。** 只有跨功能复用、公共规则改变、系统级约束变化或项目公共模型演进，才提升为基线变更。
-5. **基线变更必须显式评审、批准、版本化。** 不得在功能开发中静默改写已冻结基线；未批准的候选决策不能成为其他 Change 的约束。
-6. **基线更新不能追溯性地静默改变在途 Change。** 基线版本变化后，在途 Change 必须重新核对适用性并记录是否需要 rebase / 重新评审。
+## 1. Core Principles
 
-## 2. 项目基线包含哪些权威内容
+1. **The baseline constrains features first; features then feed back into the baseline.** Before requirements refinement, every feature Change must read the currently effective baseline and produce a baseline applicability/impact record.
+2. **The baseline is shared rules, not a copy of feature design.** Feature Changes reference the baseline through file paths, versions, sections, and stable IDs, and do not copy the entire baseline.
+3. **A feature Change is the authoritative change vehicle for the behavior of a single feature.** The current feature's behavior, pages, endpoints, local data migrations, IO, tests, and implementation details remain in that Change.
+4. **Do not automatically modify the baseline just because "new implementation" is added.** Only cross-feature reuse, changes to shared rules, changes to system-level constraints, or evolution of project shared models are elevated to baseline changes.
+5. **Baseline changes must be explicitly reviewed, approved, and versioned.** A frozen baseline must not be silently rewritten during feature development; unapproved candidate decisions cannot become constraints for other Changes.
+6. **Baseline updates must not retroactively and silently change in-flight Changes.** After the baseline version changes, in-flight Changes must re-check applicability and record whether rebase / re-review is required.
 
-| 基线域 | 权威文件 | 对功能的约束类型 |
+## 2. What Authoritative Content the Project Baseline Contains
+
+| Baseline domain | Authoritative files | Constraint type for features |
 |---|---|---|
-| 产品基线 | `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md` | 全局业务目标、共享流程与节点、角色/数据对象、RD 矩阵、业务规则、术语、验收口径 |
-| 架构基线 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`technology-decisions.md`、`docs/adr/` | 系统/模块边界、职责与依赖方向、技术选型、部署拓扑、跨模块集成方式 |
-| 数据与领域基线 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | 核心实体及关系、数据所有权、领域不变量、共享事务/一致性原则 |
-| 公共 API 基线 | `docs/architecture/api-conventions.md` | 认证授权、错误模型、版本、分页、幂等、兼容与公共响应约定 |
-| 前端工程基线 | `docs/architecture/frontend-conventions.md` | 路由、组件/设计系统、状态管理、请求层、错误和可访问性规范 |
-| 测试与质量基线 | `docs/architecture/test-strategy.md` | 测试分层、必须执行的质量门禁、测试环境和发布验证要求 |
-| 基线治理元数据 | `docs/architecture/baseline-status.md` | 各基线域版本、生效状态、审批人、生效日期、在途修订和豁免 |
+| Product baseline | `docs/product/requirements-analysis.md`, `workflows.md`, `data-objects.csv`, `rd-matrix.csv`, `business-rules.md`, `glossary.md`, `acceptance-policy.md` | Global business goals, shared flows and nodes, roles/data objects, RD matrix, business rules, terminology, acceptance criteria |
+| Architecture baseline | `docs/architecture/system-context.md`, `domain-boundaries.md`, `containers-and-deployment.md`, `data-flows.md`, `technology-decisions.md`, `docs/adr/` | System/module boundaries, responsibilities and dependency direction, technology selection, deployment topology, cross-module integration methods |
+| Data and domain baseline | `docs/architecture/logical-erd.md`, `domain-boundaries.md`, `data-flows.md` | Core entities and relationships, data ownership, domain invariants, shared transaction/consistency principles |
+| Public API baseline | `docs/architecture/api-conventions.md` | Authentication and authorization, error model, versioning, pagination, idempotency, compatibility, and public response conventions |
+| Frontend engineering baseline | `docs/architecture/frontend-conventions.md` | Routing, components/design system, state management, request layer, error and accessibility specifications |
+| Test and quality baseline | `docs/architecture/test-strategy.md` | Test layering, mandatory quality gates, test environments, and release verification requirements |
+| Baseline governance metadata | `docs/architecture/baseline-status.md` | Versions, effective status, approvers, effective dates, in-flight amendments, and waivers for each baseline domain |
 
-OpenSpec `openspec/specs/**` 与上述设计/治理基线互补：OpenSpec 主规格描述系统已经承诺的、可观察的能力行为；项目基线文档描述跨功能复用的业务、架构、数据和工程约束。功能开始时两者都要检查，不能相互替代。
+OpenSpec `openspec/specs/**` and the design/governance baselines above are complementary: the OpenSpec main specs describe committed, externally observable capability behavior of the system; the project baseline documents describe business, architecture, data, and engineering constraints reused across features. Both must be checked at the start of a feature, and neither can replace the other.
 
-## 3. 功能开发前必须读取什么
+## 3. What Must Be Read Before Feature Development
 
-### 3.1 固定读取（每个 Change 都做）
+### 3.1 Fixed Reads (for Every Change)
 
-- `docs/architecture/baseline-status.md`：核验是否 FROZEN、版本、生效日期、审批人与待处理修订。
-- `docs/product/acceptance-policy.md`、`docs/product/glossary.md`：核验验收和术语公共约束。
-- 与本 Change 直接关联的产品需求、业务流程、用户故事、业务规则及其稳定 ID。
-- `docs/architecture/system-context.md`、`docs/architecture/domain-boundaries.md`：核验涉及的系统、模块、数据所有权和依赖边界。
-- `openspec/specs/**` 中与本功能 capability / domain 相关的现行规格；如有依赖 Change，也读取其已归档规格。
+- `docs/architecture/baseline-status.md`: verify whether it is FROZEN, plus the version, effective date, approvers, and pending amendments.
+- `docs/product/acceptance-policy.md`, `docs/product/glossary.md`: verify the shared acceptance and terminology constraints.
+- Product requirements, business flows, user stories, business rules, and their stable IDs directly related to this Change.
+- `docs/architecture/system-context.md`, `docs/architecture/domain-boundaries.md`: verify the systems, modules, data ownership, and dependency boundaries involved.
+- Current specs in `openspec/specs/**` related to this feature's capability / domain; also read the archived specs of dependency Changes, if any.
 
-### 3.2 按影响读取（命中才深入读取全文/相关章节）
+### 3.2 Impact-Based Reads (Read the Full Text/Relevant Sections Only When Matched)
 
-| 影响面 | 必须核验的基线文件 |
+| Impact area | Baseline files that must be verified |
 |---|---|
-| 新增/修改数据、实体、查询、事务 | `logical-erd.md`、`domain-boundaries.md`、`data-flows.md` |
-| 新增/修改服务、模块、异步流程、第三方依赖、部署 | `containers-and-deployment.md`、`technology-decisions.md`、相关 ADR、`data-flows.md` |
-| 新增/修改 HTTP API、鉴权、对外集成 | `api-conventions.md`、相关 ADR、安全/鉴权约定 |
-| 修改页面、路由、组件、状态或视觉系统 | `frontend-conventions.md`、已批准设计系统/组件规范 |
-| 修改质量要求、性能、安全、可靠性、可观测性 | `test-strategy.md` 及对应 NFR / ADR / 部署约束 |
-| 修改角色、跨功能业务规则、共享流程/术语 | 对应产品基线文件与权限/安全相关架构约定 |
+| Adding/modifying data, entities, queries, transactions | `logical-erd.md`, `domain-boundaries.md`, `data-flows.md` |
+| Adding/modifying services, modules, asynchronous flows, third-party dependencies, deployment | `containers-and-deployment.md`, `technology-decisions.md`, relevant ADRs, `data-flows.md` |
+| Adding/modifying HTTP APIs, authentication, external integration | `api-conventions.md`, relevant ADRs, security/authentication conventions |
+| Modifying pages, routes, components, state, or the visual system | `frontend-conventions.md`, approved design system/component specifications |
+| Modifying quality requirements, performance, security, reliability, observability | `test-strategy.md` and the corresponding NFR / ADR / deployment constraints |
+| Modifying roles, cross-feature business rules, shared flows/terminology | Corresponding product baseline files and permission/security-related architecture conventions |
 
-AI 不应无差别把所有文档全文塞入上下文；必须先读取基线状态和目录，再针对本 Change 的影响面读取相关文件/章节，并在基线影响清单中留下证据路径、版本和引用 ID。
+AI must not indiscriminately stuff the full text of all documents into context; it must first read the baseline status and catalog, then read the relevant files/sections for this Change's impact area, and leave evidence paths, versions, and reference IDs in the baseline impact list.
 
-## 4. 变更归属判定：留在 Change 还是提升到基线
+## 4. Change Attribution Decision: Stay in the Change or Elevate to the Baseline
 
-| 变化类型 | 权威落点 | 是否更新项目基线 | 典型例子 |
+| Change type | Authoritative landing point | Whether the project baseline is updated | Typical example |
 |---|---|---|---|
-| 当前功能独有的行为、规则、AC、异常场景 | 当前 Change 的 proposal / delta spec | 否 | 订单导出时的字段筛选规则 |
-| 当前功能独有的页面、按钮、接口和 API schema | 当前 Change 的页面清单、Figma 审计、OpenAPI | 否 | 新增 `GET /orders/{id}` |
-| 当前功能独有的表/字段/索引/迁移和查询 | 当前 Change 的 migration、后端设计、IO 目录 | 通常否 | 仅订单导出任务使用的状态字段 |
-| 当前功能独有的类、方法、内部 IO 编排 | 当前 Change 的详细设计和代码 | 否 | 某个功能调用 Redis 的一次性缓存实现 |
-| 新的共享业务规则、全局角色/权限语义、跨功能流程或公共术语 | 产品基线（必要时同步 OpenSpec 主规格） | 是，审批后 | 所有订单类操作必须满足统一的审批规则 |
-| 新功能成为已批准的产品范围、需要登记新的稳定 US/UC/BR ID | 产品需求/用户故事目录（只登记索引、摘要、状态和 ID）；详细行为/场景/AC 仍以该 Change 的 OpenSpec spec 为准 | 验收批准后更新产品目录；不复制完整功能规格 | 新增“批量导出订单”用户故事 ID；详细导出规则留在 Change spec |
-| 系统/模块边界、数据所有权、依赖方向、技术栈、部署拓扑变化 | 架构基线 + ADR | 是，审批后 | 拆分服务、改变模块数据所有权 |
-| 共享核心实体、关系、领域不变量或跨模块一致性变化 | 数据与领域基线 | 是，审批后 | 客户实体成为多个上下文共享的主数据 |
-| 全局 API 错误格式、认证、幂等、分页/兼容规则变化 | API 公共基线 | 是，审批后 | 全部 API 统一错误 envelope |
-| 全局前端组件、路由/状态管理、设计 token 规则变化 | 前端工程基线/设计系统 | 是，审批后 | 全站统一表单校验与错误呈现规范 |
-| 全局测试分层、发布门禁、SLO/NFR 阈值变化 | 测试策略/架构基线/ADR | 是，审批后 | 所有服务新增契约测试阻断门禁 |
+| Behavior, rules, AC, and exception scenarios unique to the current feature | The current Change's proposal / delta spec | No | Field filtering rules for order export |
+| Pages, buttons, endpoints, and API schemas unique to the current feature | The current Change's page list, Figma audit, OpenAPI | No | Add `GET /orders/{id}` |
+| Tables/fields/indexes/migrations and queries unique to the current feature | The current Change's migration, backend design, IO catalog | Usually no | Status field used only by the order export task |
+| Classes, methods, internal IO orchestration unique to the current feature | The current Change's detailed design and code | No | One-off cache implementation where a feature calls Redis |
+| New shared business rules, global role/permission semantics, cross-feature flows, or shared terminology | Product baseline (synchronize the OpenSpec main specs where necessary) | Yes, after approval | All order-type operations must satisfy unified approval rules |
+| A new feature becomes part of the approved product scope and requires new stable US/UC/BR IDs | Product requirements/user story catalog (register only the index, summary, status, and ID); detailed behavior/scenarios/AC remain governed by that Change's OpenSpec spec | Update the product catalog after acceptance approval; do not copy the full feature spec | Add a "Batch export orders" user story ID; detailed export rules remain in the Change spec |
+| Changes to system/module boundaries, data ownership, dependency direction, technology stack, deployment topology | Architecture baseline + ADR | Yes, after approval | Split a service, change module data ownership |
+| Changes to shared core entities, relationships, domain invariants, or cross-module consistency | Data and domain baseline | Yes, after approval | The customer entity becomes master data shared by multiple contexts |
+| Changes to global API error format, authentication, idempotency, pagination/compatibility rules | API public baseline | Yes, after approval | All APIs use a unified error envelope |
+| Changes to global frontend components, routing/state management, design token rules | Frontend engineering baseline/design system | Yes, after approval | Site-wide unified form validation and error presentation specification |
+| Changes to global test layering, release gates, SLO/NFR thresholds | Test strategy/architecture baseline/ADR | Yes, after approval | All services add a contract-test blocking gate |
 
-判定问题：
+Decision questions:
 
-注意：产品需求基线可以维护项目级 US/UC/BR 目录和稳定 ID；但某个功能的详细行为、Given/When/Then 场景、API schema 和 AC 仍留在对应 OpenSpec Change/归档规格中。新增一条产品故事索引不等于把整个功能设计升级为公共基线。
-1. 是否有至少两个功能/模块需要遵守或复用该规则？
-2. 是否改变已批准的系统边界、共享实体语义、数据所有权、公共契约或质量门禁？
-3. 如果下一个功能没有读取这个决定，会不会产生不一致、重复实现或兼容性风险？
+Note: The product requirements baseline may maintain a project-level US/UC/BR catalog and stable IDs; however, the detailed behavior, Given/When/Then scenarios, API schema, and AC of a feature remain in the corresponding OpenSpec Change/archived spec. Adding one product story index does not mean elevating the entire feature design to a public baseline.
+1. Do at least two features/modules need to follow or reuse this rule?
+2. Does it change approved system boundaries, shared entity semantics, data ownership, public contracts, or quality gates?
+3. If the next feature does not read this decision, will it create inconsistency, duplicate implementation, or compatibility risk?
 
-任一项为“是”时，至少创建基线变更候选项并进行评审；如果只是当前功能的局部实现或局部行为，留在 Change。不能仅以“未来可能复用”作为提升基线的充分依据。
+When any answer is "yes", at minimum create a baseline change candidate item and review it; if it is only a local implementation or local behavior of the current feature, leave it in the Change. "Possible reuse in the future" alone is not sufficient grounds for elevating to the baseline.
 
-## 5. 基线变更的时间点与流程
+## 5. Timing and Process of Baseline Changes
 
-### A. 功能开发前发现基线缺口/冲突
+### A. Baseline Gaps/Conflicts Found Before Feature Development
 
-1. 在功能需求阶段填写 `openspec/changes/<change-id>/design/baseline-impact.md`。
-2. 标记为 `BASELINE_CHANGE_REQUIRED`，提出影响域、目标版本、理由、替代方案和受影响 Change。
-3. 架构/数据/公共契约等约束若决定了功能设计，必须先走 ADR/基线修订审批，再冻结该 Change 的详细设计。
-4. 批准后更新相应基线文档和 `baseline-status.md` 版本；随后重新生成/复核本 Change 的基线影响清单，再继续功能设计。
+1. Fill in `openspec/changes/<change-id>/design/baseline-impact.md` during the feature requirements stage.
+2. Mark it as `BASELINE_CHANGE_REQUIRED` and propose the impact domain, target version, rationale, alternatives, and affected Changes.
+3. If architecture/data/public contract constraints determine the feature design, the ADR/baseline amendment approval must be completed first, before freezing that Change's detailed design.
+4. After approval, update the corresponding baseline documents and the version in `baseline-status.md`; then regenerate/re-check this Change's baseline impact list before continuing feature design.
 
-### B. 功能开发中发现必须改变基线
+### B. Changes Required to the Baseline Found During Feature Development
 
-1. 不允许直接编辑冻结基线，也不允许为了让代码通过而绕过基线。
-2. 暂停受影响的任务；不依赖该决策的独立任务只有在负责人确认安全时才可继续。
-3. 在当前 Change 的 `baseline-impact.md` 记录新发现，并创建/更新 ADR 或基线修订请求。
-4. 批准后更新基线版本；当前 Change 必须重新读取差异、更新设计和任务、重新运行受影响的验证。
-5. 若改变外部可观察行为，同时更新当前 Change 的 OpenSpec delta spec；若影响公共能力/既有承诺，还要评估主规格变更和兼容迁移。
+1. Directly editing a frozen baseline is not allowed, and bypassing the baseline to make code pass is not allowed.
+2. Pause affected tasks; independent tasks that do not depend on that decision may continue only after the owner confirms it is safe.
+3. Record the new finding in the current Change's `baseline-impact.md`, and create/update an ADR or baseline amendment request.
+4. After approval, update the baseline version; the current Change must re-read the differences, update design and tasks, and rerun affected verification.
+5. If externally observable behavior changes, also update the current Change's OpenSpec delta spec; if public capabilities/prior commitments are affected, also assess main-spec changes and compatibility migration.
 
-### C. 功能验收与归档时回写基线
+### C. Writing Back to the Baseline at Feature Acceptance and Archiving
 
-1. 只回写已批准、已实现、已验证且确实具有项目级复用价值的变化。
-2. 功能特有的 API、页面、物理表结构、IO 和测试案例留在归档 Change，不复制到全局基线。
-3. 对需要同步的产品需求目录、逻辑 ERD、公共约定、ADR 或架构说明，更新基线文档和版本记录；不得将未批准的实现事实自动提升为规范。
-4. 更新基线状态、审批人、生效日期、修订摘要和关联 Change ID；运行基线一致性审计。
-5. 归档 OpenSpec Change 后，在途 Change 对新基线版本执行影响复核，不得静默假定自动兼容。
+1. Write back only changes that are approved, implemented, verified, and genuinely valuable for project-level reuse.
+2. Feature-specific APIs, pages, physical table structures, IO, and test cases remain in the archived Change and are not copied into the global baseline.
+3. For product requirement catalogs, logical ERDs, public conventions, ADRs, or architecture descriptions that need synchronization, update the baseline documents and version records; unapproved implementation facts must not be automatically elevated to specification.
+4. Update the baseline status, approver, effective date, amendment summary, and related Change ID; run the baseline consistency audit.
+5. After archiving the OpenSpec Change, in-flight Changes perform an impact re-check against the new baseline version and must not silently assume automatic compatibility.
 
-## 6. 基线版本与在途 Change 的绑定
+## 6. Binding Baseline Versions to In-Flight Changes
 
-- `docs/architecture/baseline-status.md` 是基线状态索引；至少记录产品、架构、数据/领域、公共 API、前端工程、测试策略各域版本及冻结/审批信息。
-- 每个 Change 的 `design/baseline-impact.md` 必须记录开始时采用的基线域版本（baseline snapshot），并引用具体文件、章节/ID。
-- 基线状态发生变化时，比较 Change 记录的版本与当前版本；只复核受影响域，但必须留下 `NO_IMPACT` 或 `REBASE_REQUIRED` 结论和依据。
-- 已冻结基线采用增量版本更新：普通文字澄清可按项目规则做补丁版本；公共约束/模型变化至少升级次版本；系统边界/重大技术策略变化升级主版本。若团队采用其他版本策略，必须在 `baseline-status.md` 明确。
-- `workflow-state.json` 只记录索引、待审批和阻断，不取代基线文档、ADR 或审批证据。
+- `docs/architecture/baseline-status.md` is the baseline status index; it must record at least the versions and freeze/approval information for the product, architecture, data/domain, public API, frontend engineering, and test strategy domains.
+- Each Change's `design/baseline-impact.md` must record the baseline domain versions adopted at start (baseline snapshot) and reference specific files, sections/IDs.
+- When the baseline status changes, compare the versions recorded by the Change with the current versions; re-check only the affected domains, but a `NO_IMPACT` or `REBASE_REQUIRED` conclusion and its basis must be left on record.
+- Frozen baselines use incremental version updates: ordinary textual clarification may be a patch version per project rules; public constraint/model changes upgrade at least the minor version; system boundary/major technology strategy changes upgrade the major version. If the team uses another versioning strategy, it must be stated explicitly in `baseline-status.md`.
+- `workflow-state.json` records only the index, pending approvals, and blockers; it does not replace baseline documents, ADRs, or approval evidence.
 
-## 7. 功能 Change 的强制基线影响清单
+## 7. Mandatory Baseline Impact List for Feature Changes
 
-每个 Change 必须创建 `design/baseline-impact.md`（按 `templates/change-assets/design/baseline-impact.md`）：
+Every Change must create `design/baseline-impact.md` (according to `templates/change-assets/design/baseline-impact.md`):
 
-- 当前基线版本和各域状态；
-- 固定读取项与按影响读取项的核验结果；
-- 约束 ID / 文件 / 章节 / 版本 / 适用性 / 对当前功能的设计影响；
-- 复用的现有模块、领域实体、API 公共约定、前端组件和测试策略；
-- 与基线冲突、缺口和假设；
-- 归属分类：`CHANGE_ONLY`、`BASELINE_CHANGE_REQUIRED`、`BASELINE_UPDATE_AFTER_ACCEPTANCE`、`N/A`；
-- 需创建/更新的 ADR、基线修订请求、审批人、状态；
-- 在途 Change 的 rebase 结论；
-- 结论：`COMPATIBLE`、`BLOCKED_PENDING_BASELINE_CHANGE` 或 `APPROVED_BASELINE_AMENDMENT`。
+- Current baseline versions and the status of each domain;
+- Verification results for fixed reads and impact-based reads;
+- Constraint ID / file / section / version / applicability / design impact on the current feature;
+- Reused existing modules, domain entities, API public conventions, frontend components, and test strategy;
+- Conflicts, gaps, and assumptions relative to the baseline;
+- Attribution classification: `CHANGE_ONLY`, `BASELINE_CHANGE_REQUIRED`, `BASELINE_UPDATE_AFTER_ACCEPTANCE`, `N/A`;
+- ADRs, baseline amendment requests, approvers, and status to be created/updated;
+- Rebase conclusions for in-flight Changes;
+- Conclusion: `COMPATIBLE`, `BLOCKED_PENDING_BASELINE_CHANGE`, or `APPROVED_BASELINE_AMENDMENT`.
 
-这个文件从阶段 03 开始建立，在 06–07 设计时复核，在阶段 08 实现时仅追加发现，不擅自修改基线，在阶段 10 验收时完成回写核验。
+This file is created starting from stage 03, re-checked during 06–07 design, only appended with findings during stage 08 implementation without modifying the baseline unilaterally, and its write-back verification is completed during stage 10 acceptance.
 
-## 8. 角色和审批责任
+## 8. Roles and Approval Responsibilities
 
-| 决策范围 | 必要审批角色 |
+| Decision scope | Required approval roles |
 |---|---|
-| 产品规则、角色、流程、术语、验收政策 | 产品负责人/业务负责人 |
-| 系统边界、模块依赖、技术选型、部署拓扑、ADR | 架构负责人/技术负责人 |
-| 核心实体、数据所有权、共享数据不变量 | 数据负责人 + 架构负责人 |
-| 公共 API、前端公共规范、质量门禁 | 对应技术负责人；影响跨团队时由架构负责人批准 |
-| 单个功能行为和 AC | 产品负责人；技术实现由对应技术负责人评审 |
+| Product rules, roles, flows, terminology, acceptance policy | Product owner/business owner |
+| System boundaries, module dependencies, technology selection, deployment topology, ADR | Architecture owner/technical owner |
+| Core entities, data ownership, shared data invariants | Data owner + architecture owner |
+| Public API, frontend public specifications, quality gates | Corresponding technical owner; approved by the architecture owner when cross-team impact is involved |
+| Single feature behavior and AC | Product owner; technical implementation reviewed by the corresponding technical owner |
 
-AI 可以分析、提出候选修改和生成文档，不可代替负责人批准，不可自行宣布基线已冻结或升级。
+AI may analyze, propose candidate changes, and generate documents, but may not approve on behalf of the owners and may not unilaterally declare the baseline frozen or upgraded.
 
 
-## 9. 机器可执行的基线治理引擎（强制）
+## 9. Machine-Executable Baseline Governance Engine (Mandatory)
 
-本项目不再以 `baseline-status.md` 中的文字状态作为唯一判断依据。以下文件构成机器权威来源：
+This project no longer uses the textual status in `baseline-status.md` as the sole basis for judgment. The following files constitute the machine-authoritative source:
 
-- `docs/architecture/baseline-manifest.json`：总体/域版本、状态、审批、生效 revision、每个基线文件的 SHA-256。
-- `docs/architecture/constraint-registry.json`：稳定 Constraint ID、约束等级、适用范围、规则正文、来源章节、执行方式、负责人和审批状态。
-- `openspec/changes/<change-id>/design/baseline-binding.json`：当前 Change 对全部 ACTIVE 约束的逐条绑定、基线快照、设计证据、实现验证证据、例外审批和 rebase 结论。
-- `scripts/baseline-governance.py`：上述数据的唯一检查入口；`workflow.py` 在阶段进入/转换时调用它。
+- `docs/architecture/baseline-manifest.json`: overall/domain versions, status, approvals, effective revision, and the SHA-256 of each baseline file.
+- `docs/architecture/constraint-registry.json`: stable Constraint IDs, constraint levels, scope, rule text, source sections, enforcement method, owner, and approval status.
+- `openspec/changes/<change-id>/design/baseline-binding.json`: the current Change's binding of every ACTIVE constraint, baseline snapshot, design evidence, implementation verification evidence, exception approvals, and rebase conclusions.
+- `scripts/baseline-governance.py`: the sole check entry point for the above data; `workflow.py` invokes it on stage entry/transition.
 
-### 9.1 冻结条件
+### 9.1 Freeze Conditions
 
-项目总体架构设计阶段 03 的结束审计只有在以下条件全部满足时才允许转换：
+The end audit of project overall architecture design stage 03 permits transition only when all of the following conditions are satisfied:
 
-1. Manifest `status=FROZEN`，且六个必需域均为 `FROZEN`。
-2. 每个域具备语义版本、owner、approver、approved_at、effective_revision。
-3. 每份权威基线文件都存在且 SHA-256 与 Manifest 一致；约束注册表自身也有 SHA-256。
-4. 约束 ID 唯一、等级合法、来源文件属于对应域且来源章节真实存在。
-5. 不允许 DRAFT 约束混入冻结基线；ACTIVE 约束必须有 owner、approved_by、approved_at。
-6. 总体审批必须有 approver、approved_at 和仓库内 evidence 文件。
-7. 阶段 03 的 Evidence 必须将 Manifest 和 Constraint Registry 作为输出交接。
+1. Manifest `status=FROZEN`, and all six required domains are `FROZEN`.
+2. Each domain has a semantic version, owner, approver, approved_at, and effective_revision.
+3. Every authoritative baseline file exists and its SHA-256 matches the Manifest; the constraint registry itself also has a SHA-256.
+4. Constraint IDs are unique, levels are valid, source files belong to the corresponding domains, and the source sections actually exist.
+5. No DRAFT constraints may be mixed into a frozen baseline; ACTIVE constraints must have owner, approved_by, and approved_at.
+6. The overall approval must have an approver, approved_at, and an in-repository evidence file.
+7. The Evidence for stage 03 must hand off the Manifest and Constraint Registry as outputs.
 
-### 9.2 约束注册表规则
+### 9.2 Constraint Registry Rules
 
-每条约束至少包含：`id`、`domain`、`revision`、`status`、`level`、`scope`、`title`、`rule`、`rationale`、`source.file`、`source.section`、`enforcement`、`owner` 和审批字段。等级使用 `MUST`、`SHOULD`、`MAY`、`PROHIBITED`；状态使用 `DRAFT`、`ACTIVE`、`RETIRED`。
+Each constraint contains at least: `id`, `domain`, `revision`, `status`, `level`, `scope`, `title`, `rule`, `rationale`, `source.file`, `source.section`, `enforcement`, `owner`, and approval fields. Levels use `MUST`, `SHOULD`, `MAY`, `PROHIBITED`; statuses use `DRAFT`, `ACTIVE`, `RETIRED`.
 
-- MUST / PROHIBITED 是硬约束；除已批准的 Change 级例外外不得偏离。例外对象必须为空或状态完整的 `APPROVED`，被拒绝/待批的例外不能与 `COMPLIANT` 决策并存。
-- SHOULD 是强建议；若不遵守，必须给出理由和评审结论。
-- MAY 表示允许采用，不意味着必须采用。
-- 只有 ACTIVE 约束进入 Change 机器绑定；DRAFT 规则不能假装成有效基线。冻结注册表至少包含一条 ACTIVE 约束，所有 DRAFT 规则必须在冻结前转为 ACTIVE 或 RETIRED。
-- `AUTOMATED` / `HYBRID` 必须引用仓库内真实存在的 validator；`MANUAL` / `HYBRID` 必须要求人工证据。没有可执行校验器时不得伪称自动化。
-- 约束修改/停用/新增属于基线修订，不能仅编辑 Change 绑定文件。
+- MUST / PROHIBITED are hard constraints; they must not be deviated from except for approved Change-level exceptions. The exceptions object must be empty or have complete status `APPROVED`; rejected/pending exceptions cannot coexist with a `COMPLIANT` decision.
+- SHOULD is a strong recommendation; if not followed, a reason and review conclusion must be given.
+- MAY indicates that adoption is permitted, not that it is mandatory.
+- Only ACTIVE constraints enter Change machine binding; DRAFT rules cannot masquerade as an effective baseline. A frozen registry contains at least one ACTIVE constraint, and all DRAFT rules must be converted to ACTIVE or RETIRED before freezing.
+- `AUTOMATED` / `HYBRID` must reference a validator that actually exists in the repository; `MANUAL` / `HYBRID` must require human evidence. When there is no executable validator, automation must not be claimed falsely.
+- Modifying/deactivating/adding constraints constitutes a baseline amendment and must not be done merely by editing the Change binding file.
 
-### 9.3 Change 绑定与分阶段门禁
+### 9.3 Change Binding and Phased Gates
 
-创建 Change 辅助资产时运行：
+Run the following when creating Change auxiliary assets:
 
 ```bash
 python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 ```
 
-生成的 `baseline-binding.json` 必须覆盖当前注册表全部 ACTIVE 约束，禁止删除约束行。每条约束必须选择 `APPLICABLE` 或 `NOT_APPLICABLE`；N/A 必须写明理由。适用约束在设计阶段必须为 `COMPLIANT` 或 `EXCEPTION_APPROVED`，并关联真实设计证据文件。
+The generated `baseline-binding.json` must cover all ACTIVE constraints in the current registry, and deleting constraint rows is prohibited. Each constraint must be selected as `APPLICABLE` or `NOT_APPLICABLE`; N/A must state the reason. Applicable constraints must be `COMPLIANT` or `EXCEPTION_APPROVED` at the design stage and be linked to real design evidence files.
 
-实现阶段每条适用约束必须有 `implementation_verification.status=PASS` 和真实证据文件；确实只影响设计、不影响运行实现的约束，仍须显式写 `NOT_APPLICABLE` 和理由。`PENDING`、`NOT_RUN`、`SKIPPED` 不能视为通过。验收阶段还必须单独填写 `acceptance_verification`，以独立验收/复核证据再次确认约束遵守情况，不得直接复制实现阶段 PASS；N/A 同样必须说明理由。
+At the implementation stage, every applicable constraint must have `implementation_verification.status=PASS` and a real evidence file; constraints that genuinely only affect design and not runtime implementation must still explicitly be written as `NOT_APPLICABLE` with a reason. `PENDING`, `NOT_RUN`, and `SKIPPED` cannot be regarded as passing. The acceptance stage must additionally fill in `acceptance_verification` separately, reconfirming constraint compliance with independent acceptance/review evidence, and must not directly copy the PASS from the implementation stage; N/A likewise must state a reason.
 
-例外必须记录唯一 exception_id、偏离原因、范围、批准人、批准时间和仓库内审批证据。Change 级例外仅允许该 Change 在获批范围内偏离；它不修改、不降低项目基线，也不自动授权其他 Change。
+Exceptions must record a unique exception_id, deviation reason, scope, approver, approval time, and in-repository approval evidence. A Change-level exception permits only that Change to deviate within the approved scope; it does not modify or lower the project baseline, nor does it automatically authorize other Changes.
 
-工作流门禁映射：
+Workflow gate mapping:
 
-| 阶段 | 机器检查 | 目的 |
+| Stage | Machine check | Purpose |
 |---|---|---|
-| 08 基线冻结 | `audit --require-frozen` | 校验 Manifest、约束目录、哈希与审批 |
-| 04 提案规划 | `audit --require-frozen` | 确保项目基线仍有效 |
-| 10 需求细化 | `check-change --phase requirement` | 约束覆盖完整、适用性已判定、基线绑定已审批 |
-| 11–12 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
-| 09 转出及 10–13 | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
-| 14 / 15 | `check-change --phase implementation` | 适用约束有实现验证证据 |
-| 15 | `check-change --phase acceptance` | 所有约束完成最终验证 |
+| 08 Baseline freeze | `audit --require-frozen` | Verify Manifest, constraint catalog, hashes, and approvals |
+| 04 Proposal planning | `audit --require-frozen` | Ensure the project baseline is still effective |
+| 10 Requirements refinement | `check-change --phase requirement` | Constraint coverage complete, applicability determined, baseline binding approved |
+| 11–12 | `check-change --phase requirement` | Prevent early requirement bindings from being deleted/modified or baseline drift |
+| 09 Transition-out and 10–13 | `check-change --phase design` | Every constraint has a design conclusion and evidence, exceptions approved |
+| 14 / 15 | `check-change --phase implementation` | Applicable constraints have implementation verification evidence |
+| 15 | `check-change --phase acceptance` | All constraints complete final verification |
 
-### 9.4 基线演进和在途 Change rebase
+### 9.4 Baseline Evolution and In-Flight Change Rebase
 
-冻结后发现需要修改基线时，**必须先**运行：
+When the baseline needs modification after freezing, **it must first** run:
 
 ```bash
 python3 scripts/baseline-governance.py open-amendment \
   --request-id BCR-<id> --domains architecture,data_domain --opened-by <reviewer>
 ```
 
-该命令把总体状态改为 `UNDER_AMENDMENT` 并标记指定域，所有功能级入口立即 fail-closed。修改文档/约束后，必须同时升级总体 `overall_version` 和每个受影响域的语义版本，再运行 `refresh-hashes`；然后执行 `close-amendment --request-id <BCR-ID> --approved-by <负责人> --approved-at <日期> --effective-revision <git:commit或snapshot:sha256> --evidence <审批证据文件>`。命令会检查受影响域版本确实升级、哈希正确和证据存在，再恢复 FROZEN。完成后重新执行 `audit --require-frozen`。在此期间不允许功能开发继续消费正在修改的基线。
+This command changes the overall status to `UNDER_AMENDMENT` and marks the specified domains, and all feature-level entry points immediately fail-closed. After modifying documents/constraints, the overall `overall_version` and the semantic version of each affected domain must be upgraded at the same time, then run `refresh-hashes`; then execute `close-amendment --request-id <BCR-ID> --approved-by <owner> --approved-at <date> --effective-revision <git:commit or snapshot:sha256> --evidence <approval evidence file>`. The command checks that affected domain versions were actually upgraded, that hashes are correct, and that evidence exists, then restores FROZEN. After completion, rerun `audit --require-frozen`. During this period, feature development must not continue consuming a baseline that is being modified.
 
-在途 Change 的每个受影响域必须填写 `rebase_reviews`：当前 version、当前 fingerprint、结论、reviewer、reviewed_at、仓库内证据。每次总体版本变化还必须填写 `rebase_reviews.overall`，对总体升级给出独立影响结论。`NO_IMPACT` 可以保留原快照，但每个阶段都会重新校验该结论仍对应当前 fingerprint/version；需要改变设计/实现的，必须对总体和受影响域完成 rebase 并标记 `REBASE_COMPLETED`，再运行 `refresh-binding`。Refresh 会重置变化域的约束判断并撤销旧绑定审批，必须重新评审。
+Every affected domain of an in-flight Change must fill in `rebase_reviews`: current version, current fingerprint, conclusion, reviewer, reviewed_at, and in-repository evidence. Each overall version change must also fill in `rebase_reviews.overall`, giving an independent impact conclusion for the overall upgrade. `NO_IMPACT` may retain the original snapshot, but every stage revalidates that the conclusion still corresponds to the current fingerprint/version; where design/implementation need to change, rebase must be completed for the overall and affected domains and marked `REBASE_COMPLETED`, then `refresh-binding` must be run. Refresh resets constraint judgments in changed domains and revokes old binding approvals, requiring re-review.
 
-### 9.5 约束与安全边界
+### 9.5 Constraints and Safety Boundaries
 
-脚本验证的是仓库内 JSON、文件哈希、审批记录结构和证据存在性；不具备企业身份认证、电子签名或不可抵赖能力。必须把 `baseline-governance.py audit --require-frozen` 和适用 Change phase gate 接入 CI，并对基线文件/Manifest/Registry 设置 Git CODEOWNERS、受保护分支和必需审批。否则有权限直接修改脚本、状态 JSON 或绕过 CI 的 Agent/用户仍可能规避门禁。
+The scripts verify in-repository JSON, file hashes, approval record structure, and evidence existence; they do not provide enterprise identity authentication, electronic signatures, or non-repudiation. `baseline-governance.py audit --require-frozen` and the applicable Change phase gates must be wired into CI, and Git CODEOWNERS, protected branches, and required approvals must be set for baseline files/Manifest/Registry. Otherwise, an Agent/user with permission to directly modify scripts or state JSON or to bypass CI may still evade the gates.

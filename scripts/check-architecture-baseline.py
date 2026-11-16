@@ -17,11 +17,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-EXISTING_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?现有系统二开约束.*$")
-THIRD_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?第三方接口依赖清单.*$")
-API_THIRD_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?第三方接口与集成约定.*$")
+EXISTING_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?(?:现有系统二开约束|Existing System Secondary-Development Constraints).*$")
+THIRD_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?(?:第三方接口依赖清单|Third-Party Interface Dependency List).*$")
+API_THIRD_RE = re.compile(r"(?m)^(?:##|###)\s*(?:[0-9]+\.?\s*)?(?:第三方接口与集成约定|Third-Party Interface and Integration Conventions).*$")
 PLACEHOLDER_RE = re.compile(r"TODO|TBD|PENDING|待确认|待补充|\[填充\]", re.I)
-NONE_RE = re.compile(r"^(N/A|NONE|无|不适用)", re.I)
+NONE_RE = re.compile(r"^(N/A|NONE|无|不适用|none)", re.I)
 
 
 def section_body(text: str, pattern: re.Pattern[str]) -> str | None:
@@ -73,8 +73,8 @@ def main() -> int:
     third_active = bool(third) and not is_none(third)
 
     if existing_active:
-        if not any(keyword in existing for keyword in ("代码地址", "仓库", "commit", "分支")):
-            errors.append("现有系统二开约束 must record code access (代码地址/仓库/分支/commit)")
+        if not any(keyword in existing for keyword in ("代码地址", "仓库", "commit", "分支", "code address", "repository", "branch")):
+            errors.append("现有系统二开约束 / Existing System Secondary-Development Constraints must record code access (code address/repository/branch/commit)")
     if third_active:
         if not api.is_file():
             errors.append(f"missing {api}")
@@ -86,7 +86,7 @@ def main() -> int:
             errors.append(f"missing {flows}")
         else:
             flow_text = flows.read_text(encoding="utf-8", errors="replace")
-            if not re.search(r"第三方|EXTERNAL", flow_text):
+            if not re.search(r"第三方|EXTERNAL|third-party", flow_text, re.I):
                 errors.append("data-flows.md does not mention third-party / EXTERNAL data flow")
 
     constraints: list[str] = []

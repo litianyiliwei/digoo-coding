@@ -1,78 +1,78 @@
 ---
 name: project-architecture-baseline
-description: 项目总体架构设计。合并架构、数据/领域与公共契约基线，输出数据流转与逻辑 ERD，并在阶段结束审计中冻结基线。
+description: Project overall architecture design. Merges architecture, data/domain, and common contract baselines, outputs data flows and a logical ERD, and freezes the baseline in the stage-end audit.
 ---
 
-# 项目总体架构设计
+# Project Overall Architecture Design
 
-## 何时使用
-当流程进入“项目总体架构设计”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
+## When to Use
+Load this Skill when the workflow enters "project overall architecture design". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
 
-## 输入
+## Input
 
-读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
-已批准的 `docs/product/requirements-analysis.md`、`workflows.md`、`data-objects.csv`、`rd-matrix.csv`、`business-rules.md`、`glossary.md`、`acceptance-policy.md`、`open-questions.md`（只读）；`BASELINE-BRIEF.md`、`role-permission-matrix.csv`、`change-sizing.md`、`decisions.md`、`assumptions.md`、`id-conventions.md`、`BASELINE-INDEX.md`（常驻基线，先读简报）；现有仓库结构/技术约束；非功能需求；用户/技术负责人明确的技术选型偏好（本阶段必须显式询问，不得默认或自行拍板）。
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Approved `docs/product/requirements-analysis.md`, `workflows.md`, `data-objects.csv`, `rd-matrix.csv`, `business-rules.md`, `glossary.md`, `acceptance-policy.md`, `open-questions.md` (read-only); `BASELINE-BRIEF.md`, `role-permission-matrix.csv`, `change-sizing.md`, `decisions.md`, `assumptions.md`, `id-conventions.md`, `BASELINE-INDEX.md` (standing baselines; read the brief first); existing repository structure/technical constraints; non-functional requirements; technology selection preferences explicitly stated by the user/technical lead (this stage must ask explicitly and must not default or decide unilaterally).
 
-## 执行流程
-1. **强制技术选型与平台边界访谈（前置门禁）：** 在产出任何技术决策前，必须向用户逐项询问希望采用的选型及其约束，至少覆盖：后端语言/框架、前端框架/UI 组件库、数据库与存储、缓存/消息/任务调度、部署与运行环境（云/自托管/容器/信创）、认证与权限、构建/测试/CI 工具、既有系统集成、许可与成本、团队熟悉度与运维能力。还必须完成平台与集成边界访谈：客户端形态（Web/H5、微信小程序、Android、iOS、HarmonyOS、PDA/手持机、平板、桌面）；跨端方案（原生双端、Flutter、React Native、uni-app、Taro、混合）；若选 uni-app，逐项记录目标平台、原生插件清单、JS Bridge 接口（名称/参数/返回/错误/回调/超时）、平台差异矩阵、权限拒绝/降级、离线缓存/同步冲突、推送/深链、热更新/商店合规、插件许可/版本；设备/物联网协议（BLE/Modbus/LoRa/MQTT/HTTP）；第三方平台（GIS、天气、支付、短信、实名、政府溯源、物流）；接口边界（UI↔API、App↔Native、App↔Device、Backend↔Third-party、Backend↔IoT、异步事件、文件/对象存储）。每条边界记录协议、鉴权、契约、错误语义、超时/重试/幂等、版本兼容、测试/真机、责任人。先给出候选方案与权衡，再请用户确认；用户表示“无偏好”时也必须记录，并把推荐方案列为待确认候选。结果写入 `technology-decisions.md` 的“平台与集成边界访谈记录”，并在 `api-conventions.md` 增加“跨边界接口与集成约定”、`frontend-conventions.md` 增加“多端与原生能力”、`data-flows.md` 增加客户端/原生/设备数据流。还必须完成系统来源与现有代码/第三方接口访谈：明确新系统、基于现有系统二开，还是混合；若基于现有系统二开，要求代码地址（仓库 URL/本地路径/分支/commit），实际探索代码结构与技术栈、模块边界、API/数据模型、构建/测试/发布命令、既有规范与技术债，写入 `technology-decisions.md` 的“现有系统二开约束”，并转换为 `constraint-registry.json` 的 `LEGACY-*` 约束（含来源章节、等级、范围、执行方式、责任人）；代码不可访问时 BLOCKED，不得凭记忆假设。无论是否二开，都必须列出依赖的第三方接口：提供方、用途、协议、鉴权、SLA/配额、沙箱/测试账号、审批、数据共享/隐私、错误/超时、责任人，写入“第三方接口依赖清单”、`data-flows.md` 的 EXTERNAL 数据流和 `api-conventions.md` 的“第三方接口与集成约定”；无第三方接口写 NONE + 理由。
-2. 绘制系统上下文、模块/容器、部署和主要信任边界；技术决策写 ADR，记录用户确认结果、确认人和日期。
-3. **数据流转（强制）：** 按 `DF-xxx` 登记跨系统/跨模块/关键业务的同步请求、异步消息、数据读写、外部调用、事务边界、失败与补偿；每条数据流引用相关 FLOW/NODE/DO 与 RD 矩阵条目。
-4. **数据与领域基线（并入本阶段）：** 识别核心概念、领域边界、实体/值对象、生命周期和数据所有权；绘制逻辑 ERD，标注关系、基数、跨领域引用；定义命名、ID、审计字段、时间、删除、并发版本与保留规范；明确事务边界、唯一性/完整性规则、并发控制和一致性策略。逻辑 ERD 不是物理 DDL。
-5. **公共契约基线（并入本阶段）：** 约定 API 版本、operationId、认证授权、错误模型、分页、幂等和兼容策略；前端目录、路由、API 调用层、状态管理、表单与错误展示原则；测试层级、契约测试、集成测试、E2E、测试数据与环境策略；安全扫描、代码规范、日志隐私、可访问性和性能门禁。
-6. 区分强制规则、推荐规则和可申请例外的规则；区分稳定约束与提案级字段细节，共享领域边界改变必须发起基线变更评审。
-7. 交叉检查术语、角色权限、系统边界、核心领域、数据流转、API 错误模型和测试策略的一致性；按阻断/高/中/低风险列出矛盾、缺失和未决事项。
-8. **阶段结束审计与冻结（强制）：** 运行 `scripts/check-required-files.sh --strict`；核对 Manifest 与 Constraint Registry；由负责人执行 `baseline-governance.py freeze`，再执行 `audit --require-frozen`；审计报告写入 `docs/project/baseline-audit-report.md`。存在阻断项时不得建议冻结。
+## Execution Flow
+1. **Mandatory technology selection and platform boundary interview (pre-gate):** Before producing any technical decision, you must ask the user item by item about the selections and constraints they wish to adopt, covering at minimum: backend language/framework, frontend framework/UI component library, database and storage, cache/messaging/task scheduling, deployment and runtime environment (cloud/self-hosted/container/xinchuang domestic IT), authentication and authorization, build/test/CI tooling, existing system integration, licensing and cost, team familiarity, and O&M capability. You must also complete the platform and integration boundary interview: client form (Web/H5, WeChat Mini Program, Android, iOS, HarmonyOS, PDA/handheld, tablet, desktop); cross-platform approach (native dual-platform, Flutter, React Native, uni-app, Taro, hybrid); if uni-app is selected, record item by item the target platforms, native plugin list, JS Bridge interfaces (name/parameters/return/errors/callbacks/timeout), platform difference matrix, permission denial/degradation, offline cache/sync conflicts, push/deep links, hot update/app store compliance, plugin licensing/version; device/IoT protocols (BLE/Modbus/LoRa/MQTT/HTTP); third-party platforms (GIS, weather, payment, SMS, real-name verification, government traceability, logistics); interface boundaries (UI↔API, App↔Native, App↔Device, Backend↔Third-party, Backend↔IoT, asynchronous events, file/object storage). For each boundary, record protocol, authentication, contract, error semantics, timeout/retry/idempotency, version compatibility, testing/real-device, owner. First give candidate options and trade-offs, then ask the user to confirm; when the user says "no preference", you must also record it and list the recommended option as a candidate pending confirmation. Write the results into "Platform and Integration Boundary Interview Record" in `technology-decisions.md`, and add "Cross-Boundary Interface and Integration Conventions" to `api-conventions.md`, "Multi-Platform and Native Capabilities" to `frontend-conventions.md`, and client/native/device data flows to `data-flows.md`. You must also complete the system origin and existing code/third-party interface interview: clarify whether it is a new system, secondary development on an existing system, or a hybrid; if based on secondary development of an existing system, request the code location (repository URL/local path/branch/commit), actually explore the code structure and tech stack, module boundaries, APIs/data models, build/test/release commands, existing conventions, and technical debt, write them into "Existing System Secondary-Development Constraints" in `technology-decisions.md`, and convert them into `LEGACY-*` constraints in `constraint-registry.json` (including source section, level, scope, execution method, owner); when the code is inaccessible, BLOCKED — do not assume from memory. Whether or not it is secondary development, you must list the third-party interfaces depended on: provider, purpose, protocol, authentication, SLA/quota, sandbox/test account, approval, data sharing/privacy, errors/timeout, owner, and write them into "Third-Party Interface Dependency List", the EXTERNAL data flows in `data-flows.md`, and "Third-Party Interface and Integration Conventions" in `api-conventions.md`; if there are no third-party interfaces, write NONE + reason.
+2. Draw system context, modules/containers, deployment, and main trust boundaries; write technical decisions as ADRs, recording the user's confirmation result, confirmer, and date.
+3. **Data flows (mandatory):** Register cross-system/cross-module/key-business synchronous requests, asynchronous messages, data reads/writes, external calls, transaction boundaries, failures and compensation by `DF-xxx`; every data flow references the relevant FLOW/NODE/DO and RD matrix entries.
+4. **Data and domain baseline (merged into this stage):** Identify core concepts, domain boundaries, entities/value objects, lifecycle, and data ownership; draw the logical ERD, annotating relationships, cardinalities, and cross-domain references; define conventions for naming, IDs, audit fields, time, deletion, concurrency version, and retention; clarify transaction boundaries, uniqueness/integrity rules, concurrency control, and consistency strategy. The logical ERD is not physical DDL.
+5. **Common contract baseline (merged into this stage):** Agree on API versions, operationId, authentication/authorization, error model, pagination, idempotency, and compatibility strategy; frontend directory, routing, API call layer, state management, form and error display principles; test levels, contract tests, integration tests, E2E, test data and environment strategy; security scanning, code conventions, log privacy, accessibility, and performance gates.
+6. Distinguish mandatory rules, recommended rules, and rules eligible for exception; distinguish stable constraints from proposal-level field details; changes to shared domain boundaries must trigger a baseline change review.
+7. Cross-check consistency of terminology, role permissions, system boundaries, core domains, data flows, API error model, and test strategy; list contradictions, gaps, and open items by blocking/high/medium/low risk.
+8. **Stage-end audit and freeze (mandatory):** Run `scripts/check-required-files.sh --strict`; verify the Manifest and Constraint Registry; the owner executes `baseline-governance.py freeze`, then executes `audit --require-frozen`; the audit report is written to `docs/project/baseline-audit-report.md`. Do not recommend freezing when blocking items exist.
 
-## 输出
-`docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`（数据流转 + 客户端/原生/设备数据流 + 第三方 EXTERNAL 数据流）、`logical-erd.md`、`technology-decisions.md`（含技术选型访谈记录、平台/集成边界访谈记录、现有系统二开约束、第三方接口依赖清单）、`api-conventions.md`（含跨边界接口与集成约定、第三方接口与集成约定）、`frontend-conventions.md`（含多端与原生能力）、`test-strategy.md`（含原生桥接/设备/第三方测试策略）、`docs/adr/README.md`、`baseline-status.md`、`baseline-manifest.json`、`constraint-registry.json`（含 LEGACY-*/EXT-* 约束）、`docs/project/baseline-audit-report.md`。
+## Output
+`docs/architecture/system-context.md`, `domain-boundaries.md`, `containers-and-deployment.md`, `data-flows.md` (data flows + client/native/device data flows + third-party EXTERNAL data flows), `logical-erd.md`, `technology-decisions.md` (including technology selection interview record, platform/integration boundary interview record, existing system secondary-development constraints, third-party interface dependency list), `api-conventions.md` (including cross-boundary interface and integration conventions, third-party interface and integration conventions), `frontend-conventions.md` (including multi-platform and native capabilities), `test-strategy.md` (including native bridge/device/third-party test strategy), `docs/adr/README.md`, `baseline-status.md`, `baseline-manifest.json`, `constraint-registry.json` (including LEGACY-*/EXT-* constraints), `docs/project/baseline-audit-report.md`.
 
-## 质量与安全边界
-图和文字对同一边界的描述一致；选择有理由；关键非功能需求能被后续验证；数据流转引用闭合；未显式询问用户技术偏好或用户尚未确认的选型，不得标记为已批准；未决项必须写明负责人和阻塞条件，阶段不得完成。审批状态有负责人/证据；存在阻断项时不得冻结。
+## Quality and Safety Boundaries
+Descriptions of the same boundary in diagrams and text are consistent; choices have reasons; key non-functional requirements can be verified downstream; data flow references are fully closed; technology preferences not explicitly asked of the user, or selections the user has not confirmed, must not be marked as approved; open items must state owner and blocking conditions, and the stage must not complete. Approval status has owner/evidence; do not freeze when blocking items exist.
 
-## 与 OpenSpec / Superpowers 的边界
-- OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
-- Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
-- 不在本阶段自动提交、发布、归档或覆盖用户文件。
+## Boundaries with OpenSpec / Superpowers
+- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
+- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
+- Figma MCP input must be based on actually accessible links, nodes, and MCP responses.
+- Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
-## 推荐检查
-`scripts/check-required-files.sh --strict`；`python scripts/check-architecture-baseline.py --strict`（现有系统二开约束/第三方接口依赖清单/LEGACY-*/EXT-*）；`scripts/baseline-governance.py audit --require-frozen`
+## Recommended Checks
+`scripts/check-required-files.sh --strict`; `python scripts/check-architecture-baseline.py --strict` (existing system secondary-development constraints/third-party interface dependency list/LEGACY-*/EXT-*); `scripts/baseline-governance.py audit --require-frozen`
 
-## 实际工具调用要求
+## Actual Tool Invocation Requirements
 
-- **Superpowers：** `brainstorming` 的 stage-scoped 模式用于比较架构、平台与集成边界备选，澄清领域边界和一致性取舍，并记录问题/备选/决策；问题/决策必须覆盖“新系统/现有系统/代码地址/第三方接口”四个主题；结论写入 `technology-decisions.md` 等阶段既有产物，不另写独立设计文档。必须按当前宿主 Agent 的真实机制检查、读取或调用技能；不可用时用 `mode=equivalent` 并写 `reason`。阶段 evidence 必须写 `methods` 并运行 `python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence.json>`。
-- **OpenSpec：** 检查既有 specs、架构文档和 ADR；若 CLI 可用，执行 `openspec list --specs` 和 `openspec list --changes`，核对基线与现有规格的关系。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”。
-- **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
-- **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
+- **Superpowers:** The stage-scoped mode of `brainstorming` is used to compare architecture, platform, and integration boundary alternatives, clarify domain boundaries and consistency trade-offs, and record questions/alternatives/decisions; questions/decisions must cover the four topics "new system/existing system/code location/third-party interfaces"; write conclusions into stage artifacts such as `technology-decisions.md`, not a separate design document. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`. Stage evidence must write `methods` and run `python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence.json>`.
+- **OpenSpec:** Check existing specs, architecture documents, and ADRs; if the CLI is available, execute `openspec list --specs` and `openspec list --changes`, and verify the relationship between the baseline and existing specs. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked".
+- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
+- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
 
-## 输入/输出/交接契约（强制）
+## Input/Output/Handoff Contract (Mandatory)
 
-执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="project-architecture-baseline"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
+Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="project-architecture-baseline"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **本阶段输入：** 已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md（只读）；docs/product/BASELINE-BRIEF.md、role-permission-matrix.csv、change-sizing.md、decisions.md、assumptions.md、id-conventions.md、BASELINE-INDEX.md（常驻基线）；现有仓库结构/技术约束；非功能需求；用户/技术负责人技术选型偏好。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** docs/architecture/system-context.md；domain-boundaries.md；containers-and-deployment.md；data-flows.md；logical-erd.md；technology-decisions.md；api-conventions.md；frontend-conventions.md；test-strategy.md；docs/adr/README.md；baseline-status.md；baseline-manifest.json；constraint-registry.json；docs/project/baseline-audit-report.md。按模板生成并落盘。
-- **下游交接：** 冻结的项目总体架构基线、数据流转、逻辑 ERD、公共契约/测试策略、ACTIVE 约束目录、审计报告与审批记录。明确指出阶段 04/05 消费哪些文件/字段。
-- **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+- **Inputs for this stage:** Approved docs/product/requirements-analysis.md, workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, glossary.md, acceptance-policy.md, open-questions.md (read-only); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, id-conventions.md, BASELINE-INDEX.md (standing baselines); existing repository structure/technical constraints; non-functional requirements; user/technical lead technology selection preferences. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Outputs for this stage:** docs/architecture/system-context.md; domain-boundaries.md; containers-and-deployment.md; data-flows.md; logical-erd.md; technology-decisions.md; api-conventions.md; frontend-conventions.md; test-strategy.md; docs/adr/README.md; baseline-status.md; baseline-manifest.json; constraint-registry.json; docs/project/baseline-audit-report.md. Generate according to templates and write to disk.
+- **Downstream handoff:** Frozen project overall architecture baseline, data flows, logical ERD, common contracts/test strategy, ACTIVE constraint catalog, audit report, and approval records. Explicitly state which files/fields stages 04/05 consume.
+- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
+- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
 
-## 阶段结束审计与冻结（强制）
+## Stage-End Audit and Freeze (Mandatory)
 
-- `docs/architecture/baseline-manifest.json` 是版本/状态/审批/文件哈希的机器权威来源；`constraint-registry.json` 是稳定约束 ID 的机器权威来源；`baseline-status.md` 仅为人类可读镜像。
-- 冻结前逐条审查所有约束，确认来源章节、等级、适用范围、执行方法和审批人；正式批准的规则设为 ACTIVE，未决规则保持 DRAFT；不得由 AI 填造真实审批身份。
-- **初次冻结顺序：**
-  1. 完成 Manifest 的 project_id、总体版本、六个域的文件清单；各域填写 owner/approver/approved_at/effective_revision/approval_evidence，并在各域确已批准后设为 `FROZEN`；总体 `status` 暂时保持 `DRAFT`。
-  2. 完成 Constraint Registry：逐条审查 ID、来源章节、等级、范围、执行类型和 validator；正式批准的规则设为 `ACTIVE` 并填写 owner/approved_by/approved_at；明确废弃的设为 `RETIRED`；至少有一条 ACTIVE 约束。
-  3. 真实审批证据文件落盘后执行 `python scripts/baseline-governance.py refresh-hashes`。
-  4. 由负责人执行 `python scripts/baseline-governance.py freeze --approved-by <负责人> --approved-at <ISO日期> --evidence <审批证据路径>`。
-  5. 再执行 `python scripts/baseline-governance.py audit --require-frozen`；通过后才能提交阶段 03 Evidence。
-- 阶段 03 转换的 Evidence 必须包含 Manifest 与 Constraint Registry 两个输出；`workflow.py transition` 会再次进行冻结门禁。
-- 审计报告必须区分“基线正文已更新”“Change 局部记录”“待批准修订”，并检查 OpenSpec 主规格与项目设计基线是否一致。
-- 冻结后不得直接改文件；必须先 `open-amendment`。
+- `docs/architecture/baseline-manifest.json` is the machine-authoritative source for versions/status/approval/file hashes; `constraint-registry.json` is the machine-authoritative source for stable constraint IDs; `baseline-status.md` is only a human-readable mirror.
+- Before freezing, review every constraint one by one and confirm the source section, level, applicable scope, execution method, and approver; formally approved rules are set to ACTIVE, and pending rules remain DRAFT; AI must not fabricate real approval identities.
+- **Initial freeze order:**
+  1. Complete the Manifest's project_id, overall version, and file lists for the six domains; fill owner/approver/approved_at/effective_revision/approval_evidence for each domain, and set it to `FROZEN` after that domain is indeed approved; keep the overall `status` as `DRAFT` for now.
+  2. Complete the Constraint Registry: review each ID, source section, level, scope, execution type, and validator; set formally approved rules to `ACTIVE` and fill owner/approved_by/approved_at; set explicitly deprecated ones to `RETIRED`; there must be at least one ACTIVE constraint.
+  3. After the real approval evidence file is written to disk, run `python scripts/baseline-governance.py refresh-hashes`.
+  4. The owner runs `python scripts/baseline-governance.py freeze --approved-by <owner> --approved-at <ISO-date> --evidence <approval-evidence-path>`.
+  5. Then run `python scripts/baseline-governance.py audit --require-frozen`; only after passing may stage 03 Evidence be submitted.
+- Evidence converted in stage 03 must include both the Manifest and Constraint Registry outputs; `workflow.py transition` will run the freeze gate again.
+- The audit report must distinguish "baseline main text has been updated", "Change-local records", and "amendments pending approval", and must check whether the OpenSpec main specs are consistent with the project design baseline.
+- After freezing, files must not be modified directly; you must first run `open-amendment`.
 
-## 阶段边界与评审停等（强制）
+## Stage Boundaries and Review Stop (Mandatory)
 
-- 开始前运行 `python scripts/workflow.py check-entry --step 03-project-architecture-baseline [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
-- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 03-project-architecture-baseline --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
-- 只有用户明确回复“评审通过 03-project-architecture-baseline”后，才可运行 `python scripts/workflow.py approve --step 03-project-architecture-baseline --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
-- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
-- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。
+- Before starting, run `python scripts/workflow.py check-entry --step 03-project-architecture-baseline [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
+- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 03-project-architecture-baseline --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
+- Only after the user explicitly replies "Review passed 03-project-architecture-baseline" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 03-project-architecture-baseline --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
+- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

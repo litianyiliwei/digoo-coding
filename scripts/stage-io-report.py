@@ -46,14 +46,14 @@ def bullets(items):
     return "\n".join(f"- {x}" for x in items) if items else "- N/A"
 
 
-CONTENT_STARTS = ("下一阶段判定报告", "条件适用", "OpenSpec archive 结果")
+CONTENT_STARTS = ("next-stage determination report", "conditionally applicable", "OpenSpec archive result")
 
 
 def is_doc(value):
     text = str(value).strip()
-    if any(text.startswith(prefix) for prefix in CONTENT_STARTS):
+    if any(text.lower().startswith(prefix.lower()) for prefix in CONTENT_STARTS):
         return False
-    if "OpenAPI" in text or "OpenSpec specs" in text or text.startswith("Figma 文件"):
+    if "OpenAPI" in text or "OpenSpec specs" in text or text.lower().startswith("figma file"):
         return True
     return bool(re.search(r"(docs|templates|openspec|workflow|prompts|scripts)/|\.(md|csv|json|yaml|yml|pen|sh|py)\b", text))
 
@@ -66,48 +66,50 @@ def split_content_docs(items):
 
 def deps_for(step):
     if step == "00":
-        return "N/A（编排入口，不属于 DAG 阶段）"
+        return "N/A (orchestration entry point; not a DAG stage)"
     for s in stages:
         if s["id"].startswith(step + "-"):
             deps = s.get("dependencies", [])
-            return "、".join(f"`{d}`" for d in deps) if deps else "无（流程起点）"
+            return ", ".join(f"`{d}`" for d in deps) if deps else "none (process start)"
     return "PENDING"
 
 
 lines = [
-    "# 阶段输入输出总览",
+    "# Stage Input/Output Overview",
     "",
-    "> 状态：DERIVED（由权威契约自动生成，请勿手工编辑）",
-    "> Change ID：N/A（项目级流程总览）",
-    "> 来源基线：`docs/STEP-ARTIFACT-CONTRACTS.json`（输入/输出/审批/门禁）、`docs/WORKFLOW-STAGES.json`（依赖 DAG）",
-    "> 关联需求/AC：N/A（流程文档）",
-    f"> 生成版本：`src-sha256:{source_hash}`",
+    "> Language: English | [简体中文](STAGE-IO-OVERVIEW-zh.md)",
     "",
-    "> 本文件只汇总阶段交接面。字段级产物模板见 `docs/OUTPUT-TEMPLATE-MATRIX.csv`；流程入口见 `prompts/00-next-step.md`。",
-    "> 修改阶段交接必须先改两份 JSON 源文件，再执行 `python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md` 重新生成；`scripts/check-package.py` 会检查本文件是否过期。",
+    "> Status: DERIVED (auto-generated from the authoritative contracts; do not edit by hand)",
+    "> Change ID: N/A (project-level process overview)",
+    "> Source baseline: `docs/STEP-ARTIFACT-CONTRACTS.json` (inputs/outputs/approval/gates), `docs/WORKFLOW-STAGES.json` (dependency DAG)",
+    "> Related requirements/AC: N/A (process document)",
+    f"> Generation version: `src-sha256:{source_hash}`",
     "",
-    f"共 {len(contracts)} 个契约阶段：{len(stages)} 个 DAG 阶段 + 00 下一步编排（非 DAG 阶段）。",
+    "> This file summarizes only the stage handoff surface. Field-level artifact templates are in `docs/OUTPUT-TEMPLATE-MATRIX.csv`; the process entry point is `prompts/00-next-step.md`.",
+    "> To change stage handoffs, first change the two JSON source files, then regenerate with `python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md`; `scripts/check-package.py` verifies that this file is current.",
     "",
-    "## 阶段分组",
+    f"{len(contracts)} contract stages: {len(stages)} DAG stages + 00 next-step orchestration (non-DAG stage).",
     "",
-    "| 分组 | 阶段链路 | 说明 |",
+    "## Stage Groups",
+    "",
+    "| Group | Stage chain | Description |",
     "|---|---|---|",
-    "| 项目基线链 | 00 → 01 → 02 → 03 → 04 | 初始化 → 需求业务梳理 → 总体架构/基线冻结 → 路线图 |",
-    "| 提案交付链 | 04 → 05 → 06 → 07 → 08 → 09 → 10 | 提案需求 → 原型/页面清单 → 详细设计（含接口/测试） → 实现 → 独立验证 → 验收 |",
+    "| Project baseline chain | 00 → 01 → 02 → 03 → 04 | Initialization → requirements business analysis → architecture/baseline freeze → roadmap |",
+    "| Proposal delivery chain | 04 → 05 → 06 → 07 → 08 → 09 → 10 | Proposal requirements → prototype/page inventory → detailed design (incl. interfaces/tests) → implementation → independent verification → acceptance |",
     "",
-    "## 总览",
+    "## Overview",
     "",
-    "> 总览把输入/输出合并展示；逐阶段明细再拆分为“内容/材料”和“文档/文件”。",
-    "> 总览“精简输入”列是每阶段默认读取组；完整契约审计集与按需输入见逐阶段明细。",
+    "> The overview merges inputs and outputs; per-stage details further split them into \"content/material\" and \"documents/files\".",
+    "> The \"Lean inputs\" column is each stage's default read set; the full contract audit set and on-demand inputs are listed in the per-stage details.",
     "",
-    "| 阶段 | 名称 | 范围 | Skill | 依赖（DAG） | 精简输入（默认读取） | 输出 | 按需输入（触发后） |",
+    "| Stage | Name | Scope | Skill | Dependencies (DAG) | Lean inputs (default reads) | Outputs | On-demand inputs (when triggered) |",
     "|---|---|---|---|---|---|---|---|",
 ]
 for r in contracts:
     profile = (contract_doc.get("input_policy") or {}).get("stage_profiles", {}).get(r["step"])
     lean = profile.get("lean", []) if profile else r.get("inputs", [])
     on_demand = profile.get("on_demand", []) if profile else []
-    on_demand_cell = f"{len(on_demand)} 项（见明细）" if on_demand else "N/A"
+    on_demand_cell = f"{len(on_demand)} items (see details)" if on_demand else "N/A"
     lines.append(
         "| {step} | {title} | {scope} | `{skill}` | {deps} | {inputs} | {outputs} | {on_demand} |".format(
             step=r["step"], title=cell(r["title"]), scope=cell(r.get("scope", "PENDING")),
@@ -116,7 +118,7 @@ for r in contracts:
         )
     )
 
-lines += ["", "## 逐阶段明细", ""]
+lines += ["", "## Per-Stage Details", ""]
 for r in contracts:
     in_contents, in_docs = split_content_docs(r.get("inputs", []))
     out_contents, out_docs = split_content_docs(r.get("outputs", []))
@@ -124,70 +126,70 @@ for r in contracts:
     lines += [
         f"### {r['step']} {r['title']}",
         "",
-        f"- 范围：{r.get('scope', 'PENDING')}",
-        f"- Skill：`{r['skill']}`",
-        f"- Prompt：`{r.get('prompt', 'PENDING')}`",
-        f"- 依赖（DAG）：{deps_for(r['step'])}",
+        f"- Scope: {r.get('scope', 'PENDING')}",
+        f"- Skill: `{r['skill']}`",
+        f"- Prompt: `{r.get('prompt', 'PENDING')}`",
+        f"- Dependencies (DAG): {deps_for(r['step'])}",
         "",
     ]
     if profile:
         lines += [
-            "**精简输入（默认读取，预算内）**",
+            "**Lean inputs (default reads, within budget)**",
             "",
             bullets(profile.get("lean", [])),
             "",
-            f"> 预算：{len(profile.get('lean', []))}/{profile.get('max_files', 'N/A')} 条；超出时先拆分 Change 或缩小范围。",
+            f"> Budget: {len(profile.get('lean', []))}/{profile.get('max_files', 'N/A')} items; when exceeded, split the Change first or narrow the scope.",
             "",
-            "**按需输入（触发后读取，不计入默认预算）**",
+            "**On-demand inputs (read after a trigger; not counted in the default budget)**",
             "",
             bullets(profile.get("on_demand", [])),
             "",
         ]
     lines += [
-        "**完整契约输入（内容/材料，审计集）**",
+        "**Full contract inputs (content/material, audit set)**",
         "",
         bullets(in_contents),
         "",
-        "**完整契约输入（文档/文件，审计集）**",
+        "**Full contract inputs (documents/files, audit set)**",
         "",
         bullets(in_docs),
         "",
-        "**输出（内容/材料）**",
+        "**Outputs (content/material)**",
         "",
         bullets(out_contents),
         "",
-        "**输出（文档/文件）**",
+        "**Outputs (documents/files)**",
         "",
         bullets(out_docs),
         "",
     ]
     step_consumption = [c for c in consumption if c.get("step") == r["step"]]
     if step_consumption:
-        lines += ["**输出消费者**", ""]
+        lines += ["**Output consumers**", ""]
         for c in step_consumption:
-            target = "evidence-only" if c.get("evidence_only") else ("、".join(c.get("consumed_by", [])) or "无")
+            target = "evidence-only" if c.get("evidence_only") else (", ".join(c.get("consumed_by", [])) or "none")
             lines.append(f"- {c['artifact']} → {target}")
         lines.append("")
     lines += [
-        "**下游交接**",
+        "**Downstream handoff**",
         "",
         bullets(r.get("next_inputs", [])),
         "",
     ]
     if r.get("approval") or r.get("gate"):
-        lines += ["**审批与门禁**", ""]
+        lines += ["**Approval and gates**", ""]
         if r.get("approval"):
-            lines.append(f"- 审批：{r['approval']}")
+            lines.append(f"- Approval: {r['approval']}")
         if r.get("gate"):
-            lines.append(f"- 门禁：{r['gate']}")
+            lines.append(f"- Gate: {r['gate']}")
         lines.append("")
     bi = r.get("baseline_interaction")
     if bi:
-        lines += ["**基线交互**", ""]
-        for key, label in (("read", "只读"), ("produce", "产出/复核"), ("gate", "门禁")):
+        lines += ["**Baseline interaction**", ""]
+        for key, label in (("read", "Read-only"), ("produce", "Produce/review"), ("gate", "Gate")):
             if bi.get(key):
-                value = bi[key] if isinstance(bi[key], str) else "；".join(bi[key])
-                lines.append(f"- {label}：{value}")
+                value = bi[key] if isinstance(bi[key], str) else "; ".join(bi[key])
+                lines.append(f"- {label}: {value}")
         lines.append("")
     lines += ["---", ""]
 

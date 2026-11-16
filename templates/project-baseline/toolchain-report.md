@@ -1,37 +1,37 @@
-# 项目工具链检查报告
+# Project Toolchain Check Report
 
-- 项目：
-- 仓库路径：
-- 检查日期：
-- Agent/IDE：
-- 状态：DRAFT / READY_FOR_REVIEW / APPROVED
+- Project:
+- Repository path:
+- Check date:
+- Agent/IDE:
+- Status: DRAFT / READY_FOR_REVIEW / APPROVED
 
-## 工具与版本
+## Tools and Versions
 
-| 工具 | 是否安装 | 版本 | 检查命令 | 结果/退出码 | 备注 |
+| Tool | Installed | Version | Check command | Result/Exit code | Notes |
 |---|---|---|---|---|---|
 | Git | | | | | |
-| 运行时/语言 | | | | | |
-| 构建工具 | | | | | |
+| Runtime/Language | | | | | |
+| Build tool | | | | | |
 | OpenSpec CLI | | | | | |
 | Superpowers | | | | | |
 | Agent Skills | | | | | |
 
-## 仓库约定与目录盘点
+## Repository Conventions and Directory Inventory
 
-- 已有 AGENTS.md：
-- 已有 OpenSpec 配置：
-- 已有 Skill/Prompt：
-- 已有构建/测试入口：
-- 需要保留的既有约定：
+- Existing AGENTS.md:
+- Existing OpenSpec configuration:
+- Existing Skill/Prompt:
+- Existing build/test entry points:
+- Existing conventions to preserve:
 
-## 风险、缺口与阻断
+## Risks, Gaps, and Blockers
 
-| 项目 | 影响 | 处理方式 | 责任人/审批人 | 状态 |
+| Item | Impact | Handling | Owner/Approver | Status |
 |---|---|---|---|---|
 | | | | | |
 
-## 结论
+## Conclusion
 
-- 是否允许进入需求业务梳理：YES / NO
-- 前置条件：
+- Allowed to proceed to requirements business analysis: YES / NO
+- Preconditions:

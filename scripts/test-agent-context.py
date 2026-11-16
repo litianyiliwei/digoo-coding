@@ -64,7 +64,7 @@ def main() -> int:
         (root / "openspec" / "changes" / "demo" / "design.md").write_text("# design\n", encoding="utf-8")
 
         ok = run(root)
-        if ok.returncode != 0 or "精简输入" not in ok.stdout or "预算：lean 读取组 2/2" not in ok.stdout:
+        if ok.returncode != 0 or "Lean inputs" not in ok.stdout or "Budget: 2/2 lean read groups" not in ok.stdout:
             failures.append("lean bundle should pass within budget: " + ok.stdout + ok.stderr)
 
         (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(

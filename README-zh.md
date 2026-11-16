@@ -8,7 +8,7 @@
 
 | 项 | 值 |
 |---|---|
-| 工作流状态 | 阶段 `01-project-bootstrap` 已完成，下一步 `02-requirements-analysis`（需求业务梳理） |
+| 工作流状态 | 阶段 `01-project-bootstrap` 未完成，当前阶段为 `01-project-bootstrap`（项目初始化与工具链检查） |
 | 活动 Change | 无 |
 | 待审批 / 阻断项 | 无 |
 | 项目基线 | `v0.1.0` DRAFT，六个基线域均未冻结 |
@@ -42,11 +42,11 @@
 | `prompts/` | 与 Skill 一一对应的阶段 Prompt；`prompts/00-next-step.md` 是入口 |
 | `scripts/` | 结构、追踪、OpenAPI、测试、基线治理、工作流状态机等检查与工具脚本 |
 | `templates/` | 项目基线、Change 辅助产物、工作流证据与交接报告模板 |
-| `docs/` | 流程规范（`PROCESS-MAP.md`、`TEMPLATE-POLICY.md`、`BASELINE-FEATURE-INTERACTION.md` 等）与项目级基线骨架 |
+| `docs/` | 流程规范的中文译本（`PROCESS-MAP-zh.md`、`TEMPLATE-POLICY-zh.md`、`BASELINE-FEATURE-INTERACTION-zh.md` 等）与项目级基线骨架 |
 | `openspec/` | OpenSpec 配置与 Change/规格目录（当前为空骨架） |
 | `workflow/` | 阶段证据 `evidence/` 与 SHA-256 交接包 `handoffs/` |
 | `workflow-state.json` | 跨阶段状态索引；只通过 `scripts/workflow.py transition` 推进，禁止手改 |
-| `AGENTS.md` | 仓库级 Agent 约定（流程入口、模板政策、Agent 行为边界） |
+| `AGENTS-zh.md` | 仓库级 Agent 约定的简体中文译本；英文主文件为 `AGENTS.md` |
 
 ## 快速开始
 
@@ -55,7 +55,7 @@ Windows 环境若无 `python3` 命令，请使用 `python`；`.sh` 脚本会自�
 ```bash
 python scripts/next-step.py            # 只读：打印下一阶段
 python scripts/workflow.py status      # 工作流状态摘要
-python scripts/workflow.py check-entry --step 02-requirements-analysis
+python scripts/workflow.py check-entry --step 01-project-bootstrap
 python scripts/check-package.py        # 工具包自检
 bash scripts/check-required-files.sh   # 基线文件存在性（非 strict）
 ```
@@ -74,13 +74,15 @@ bash scripts/check-required-files.sh   # 基线文件存在性（非 strict）
 
 ## 进一步阅读
 
-- [AGENTS.md](AGENTS.md) — 仓库约定与流程入口
-- [docs/PROCESS-MAP.md](docs/PROCESS-MAP.md) — 阶段与产物全景
-- [docs/STAGE-IO-OVERVIEW.md](docs/STAGE-IO-OVERVIEW.md) — 逐阶段输入/输出总览（由契约自动生成）
-- [docs/P0-RUNTIME-GOVERNANCE.md](docs/P0-RUNTIME-GOVERNANCE.md) — 状态机、门禁、交接包与独立验证
-- [docs/BASELINE-FEATURE-INTERACTION.md](docs/BASELINE-FEATURE-INTERACTION.md) — 项目基线与功能 Change 的双向治理
-- [docs/TEMPLATE-POLICY.md](docs/TEMPLATE-POLICY.md) — 输出模板治理规范
-- [docs/STEP-ARTIFACT-CONTRACTS.md](docs/STEP-ARTIFACT-CONTRACTS.md) — 阶段交接契约（权威清单）
-- [scripts/README.md](scripts/README.md) — 检查脚本说明
+> 流程文档中英文同步维护，每份文档顶部提供语言切换；英文为主文档并沿用正式文件名，中文译本为同路径加 `-zh.md`；`scripts/README-zh.md` 为脚本说明的中文版。
+
+- [AGENTS-zh.md](AGENTS-zh.md) — 仓库约定与流程入口
+- [docs/PROCESS-MAP-zh.md](docs/PROCESS-MAP-zh.md) — 阶段与产物全景
+- [docs/STAGE-IO-OVERVIEW-zh.md](docs/STAGE-IO-OVERVIEW-zh.md) — 逐阶段输入/输出总览（由契约自动生成）
+- [docs/P0-RUNTIME-GOVERNANCE-zh.md](docs/P0-RUNTIME-GOVERNANCE-zh.md) — 状态机、门禁、交接包与独立验证
+- [docs/BASELINE-FEATURE-INTERACTION-zh.md](docs/BASELINE-FEATURE-INTERACTION-zh.md) — 项目基线与功能 Change 的双向治理
+- [docs/TEMPLATE-POLICY-zh.md](docs/TEMPLATE-POLICY-zh.md) — 输出模板治理规范
+- [docs/STEP-ARTIFACT-CONTRACTS-zh.md](docs/STEP-ARTIFACT-CONTRACTS-zh.md) — 阶段交接契约（权威清单）
+- [scripts/README-zh.md](scripts/README-zh.md) — 检查脚本说明
 
 > 说明：本文件是 [README.md](README.md) 的简体中文版本，两者同步维护；如有差异以 `README.md` 为准。

@@ -1,86 +1,86 @@
 ---
 name: acceptance-audit
-description: 人工验收、归档与基线回写。对照 AC 和证据验收；关闭阻断项后才归档与回写通用决策。
+description: Manual acceptance, archiving, and baseline write-back. Accept against ACs and evidence; archive and write back common decisions only after blocking items are closed.
 ---
 
-# 人工验收、归档与基线回写
+# Manual Acceptance, Archiving, and Baseline Write-Back
 
-## 何时使用
-当流程进入“人工验收、归档与基线回写”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
+## When to Use
+Load this Skill when the workflow enters "manual acceptance, archiving, and baseline write-back". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
 
-## 输入
+## Input
 
-读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
-阶段 09 的独立验证 PASS 报告与 JSON 证据（必须）；实现分支、AC、`design/user-stories.md`、`docs/product/acceptance-policy.md`、测试/构建报告、Figma/原型审计、OpenAPI、`design/baseline-impact.md`、当前 `baseline-status.md` 与已批准基线修订证据。
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Stage 09's independent verification PASS report and JSON evidence (mandatory); implementation branch, ACs, `design/user-stories.md`, `docs/product/acceptance-policy.md`, test/build reports, Figma/prototype audit, OpenAPI, `design/baseline-impact.md`, current `baseline-status.md`, and approved baseline amendment evidence.
 
-## 执行流程
-1. 先核验 `design/evidence/independent-verification-report.md` 与 `.json` 存在且 Verdict=PASS，并确认验证 revision 与当前待验收 revision 一致；缺失/FAIL/BLOCKED 时拒绝验收。
-2. 逐条记录 AC 的通过/失败/不适用及证据链接。
-3. 核对页面/事件、API 契约、数据迁移、权限、日志和可观测性；涉及 UI 时逐 PAGE 对照 `figma-audit.md`（目标框架/转码说明、token 实际值/PAGE 规格/状态）与真实 Figma 文件。**验收以机器证据为主**：无差异、非 `UI-DERIVED` 且 `figma-layout-check.json` PASS 的 PAGE 可按机器证据批量签收（逐 PAGE 行照常填写，注明“机器证据签收”）；仅对存在差异、`UI-DERIVED` 或未纳入断言的 PAGE 打开运行中的系统界面与 Figma 评审稿并排核对。在 `acceptance.md` 的 `## UI acceptance` 逐 PAGE 签收（ACCEPTED / DEVIATION_APPROVED + Figma node + 运行系统入口 + 差异/审批 + 验收方式 + 评审人），缺证据不得归档。**不保存截图；截图不是验收证据；机器几何证据 `figma-layout-check.json` 必须为 PASS。**
-4. 把发现分类为缺陷、需求变更或已批准偏差；需求变化另开/更新 Change。
-5. 检查阻断项、遗留风险、上线/回滚及人工验收人。
-6. 验收门禁通过后先处理已批准的基线回写：更新对应基线文档、域版本和状态登记，并复核在途 Change。
-7. 再按当前 OpenSpec CLI 流程归档，将功能行为 delta 合并到主规格；OpenSpec archive 与项目设计基线回写是独立判断。不要对未完成任务使用自动确认参数绕过检查。
+## Execution Flow
+1. First verify that `design/evidence/independent-verification-report.md` and `.json` exist with Verdict=PASS, and confirm that the verification revision matches the current revision pending acceptance; reject acceptance when missing/FAIL/BLOCKED.
+2. Record the pass/fail/not-applicable result and evidence link for each AC.
+3. Verify pages/events, API contracts, data migration, permissions, logs, and observability; when UI is involved, compare PAGE by PAGE against `figma-audit.md` (target framework/transcoding notes, actual token values/PAGE specifications/states) and the real Figma file. **Acceptance is primarily based on machine evidence**: PAGEs without differences, not `UI-DERIVED`, and with `figma-layout-check.json` PASS may be signed off in bulk based on machine evidence (still fill each PAGE row and note "machine evidence sign-off"); only for PAGEs with differences, `UI-DERIVED`, or not covered by assertions, open the running system UI and the Figma review deliverable for side-by-side verification. Sign off PAGE by PAGE in `## UI acceptance` of `acceptance.md` (ACCEPTED / DEVIATION_APPROVED + Figma node + running system entry + differences/approval + acceptance method + reviewer); missing evidence must not be archived. **Do not save screenshots; screenshots are not acceptance evidence; the machine geometry evidence `figma-layout-check.json` must be PASS.**
+4. Classify findings as defects, requirement changes, or approved deviations; requirement changes open/update a separate Change.
+5. Check blocking items, residual risks, go-live/rollback, and manual acceptance personnel.
+6. After the acceptance gate passes, first handle approved baseline write-back: update the corresponding baseline documents, domain versions, and status registration, and recheck in-flight Changes.
+7. Then archive according to the current OpenSpec CLI process, merging feature behavior deltas into the main specs; OpenSpec archive and project design baseline write-back are independent judgments. Do not use automatic confirmation parameters to bypass checks for incomplete tasks.
 
-## 输出
-`evidence/acceptance.md`、AC 验收矩阵、遗留风险、归档建议、基线回写项、更新后的基线版本登记（适用时）和在途 Change 复核清单。
+## Output
+`evidence/acceptance.md`, AC acceptance matrix, residual risks, archive recommendation, baseline write-back items, updated baseline version registration (when applicable), and the in-flight Change recheck list.
 
-## 质量与安全边界
-每个 AC 有证据或明确阻断；未验收不得宣称完成；归档前先查看差异与验证结果。UI 验收不得用截图；无差异 PAGE 可依据机器证据批量签收，但差异/`UI-DERIVED` PAGE 必须并排核对并记录审批。
+## Quality and Safety Boundaries
+Every AC has evidence or an explicit block; do not claim completion without acceptance; review differences and verification results before archiving. UI acceptance must not use screenshots; PAGEs without differences may be signed off in bulk based on machine evidence, but difference/`UI-DERIVED` PAGEs must be verified side by side and approvals recorded.
 
-## 与 OpenSpec / Superpowers 的边界
-- OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
-- Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
-- 不在本阶段自动提交、发布、归档或覆盖用户文件。
+## Boundaries with OpenSpec / Superpowers
+- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
+- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
+- Figma MCP input must be based on actually accessible links, nodes, and MCP responses.
+- Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
-## 推荐检查
+## Recommended Checks
 `scripts/verify-before-completion.sh <change-id>`
 
 
-## 实际工具调用要求
+## Actual Tool Invocation Requirements
 
-- **Superpowers：** 使用 `verification-before-completion` 验证真实测试证据，必要时使用 `requesting-code-review`/`receiving-code-review`。阶段 evidence 必须写 `methods`（至少 1 个决策和真实证据路径）并运行 `python scripts/check-method-evidence.py --step 10-acceptance-audit --evidence <evidence.json>`。有 `design/interface-catalog.csv` 时，逐行核对 interface_id 的 owner、测试与真机/模拟器/替身/人工证据；缺失不得归档。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时用 `mode=equivalent` 并写 `reason`。
-- **OpenSpec：** 运行 `openspec status --change <id>` 和 `openspec validate <id> --strict`；只有人工批准且所有门禁通过后才运行 `openspec archive <id>`，不使用 `-y` 绕过确认。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
-- **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
-- **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
+- **Superpowers:** Use `verification-before-completion` to verify real test evidence, and use `requesting-code-review`/`receiving-code-review` when necessary. Stage evidence must write `methods` (at least 1 decision and a real evidence path) and run `python scripts/check-method-evidence.py --step 10-acceptance-audit --evidence <evidence.json>`. When `design/interface-catalog.csv` exists, verify row by row the interface_id's owner, tests, and real-device/simulator/double/manual evidence; if missing, archiving is not allowed. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, use `mode=equivalent` and write `reason`.
+- **OpenSpec:** Run `openspec status --change <id>` and `openspec validate <id> --strict`; only after manual approval and all gates passing may you run `openspec archive <id>`, without using `-y` to bypass confirmation. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
+- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
+- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
 
-## 验收时的基线回写规则（强制）
+## Baseline Write-Back Rules During Acceptance (Mandatory)
 
-- 验收时逐项复核 `design/baseline-impact.md` 中的候选修订；只回写已批准、已实现、已验证且有跨功能复用价值的内容。
-- 功能专属 API、页面、物理表字段/迁移、IO 和测试用例留在归档 Change；不得复制到全局基线。
-- 需要回写时更新对应产品/架构/数据/公共契约/测试基线及 `docs/architecture/baseline-status.md` 的版本、审批人、生效日期、关联 Change/ADR；运行基线审计。
-- OpenSpec archive 更新行为主规格，不等于所有 Change 都要修改项目设计基线。两类更新分别判断和记录。
-- 基线更新后，列出受影响的在途 Change 并要求复核；禁止静默改变其既有基线快照。
-- 详细规则见 `docs/BASELINE-FEATURE-INTERACTION.md`。
+- During acceptance, review item by item the candidate amendments in `design/baseline-impact.md`; write back only content that is approved, implemented, verified, and valuable for cross-feature reuse.
+- Feature-specific APIs, pages, physical table fields/migrations, IOs, and test cases remain in the archived Change; do not copy them into the global baseline.
+- When write-back is needed, update the corresponding product/architecture/data/common contract/test baselines and the version, approver, effective date, and associated Change/ADR in `docs/architecture/baseline-status.md`; run the baseline audit.
+- OpenSpec archive updates the behavioral main specs; it does not mean every Change must modify the project design baseline. The two types of updates are judged and recorded separately.
+- After the baseline update, list affected in-flight Changes and require rechecking; silently changing their existing baseline snapshots is prohibited.
+- For detailed rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
 
-## 输入/输出/交接契约（强制）
+## Input/Output/Handoff Contract (Mandatory)
 
-执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="acceptance-audit"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
+Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="acceptance-audit"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **本阶段输入：** 已实现代码与测试证据；已批准 AC/规格/追踪矩阵；openspec/changes/<change-id>/design/user-stories.md（提案级 US/AC）、design/test-cases.csv（TEST 覆盖），以及涉及 UI 时的 design/figma-audit.md（目标框架/转码说明、token 实际值/PAGE 规格/状态）、design/figma-code/（目标框架设计代码）、design/figma-layout.csv（断言映射）、design/evidence/figma-layout-check.json（08 实测）与 code-review.md 的 UI fidelity；docs/product/acceptance-policy.md、docs/product/open-questions.md（只读）；代码审查记录；`design/baseline-impact.md` 与当前 `baseline-status.md`；已批准的基线修订请求/ADR（如有）；运行中的验收环境入口（URL/路由）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。**不使用截图。**
-- **本阶段输出：** openspec/changes/<change-id>/design/evidence/acceptance.md（含 UI Change 的 `## UI acceptance` 逐 PAGE 签收：Figma node、运行系统入口、差异/审批、验收方式、评审人）；验收报告与批准记录；条件适用的项目基线文档/版本登记/在途 Change 复核；OpenSpec archive 结果及更新后的主规格（仅批准后）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
-- **下游交接：** 已验收并归档的能力规格、验收证据、后续 Change 依赖。明确指出下一阶段消费哪些文件/字段。
-- **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
-
-
-## 独立验证前置门禁（P0）
-
-- 阶段 10 必须消费阶段 09 的独立验证报告和 JSON；Builder 自己的总结、单元测试结果或代码审查报告不能替代独立 Verifier。
-- 验证报告必须是 PASS，且被测 revision 与当前验收代码一致；若代码在验证后变化，必须重新执行阶段 09。
+- **Inputs for this stage:** Implemented code and test evidence; approved ACs/specs/traceability matrix; openspec/changes/<change-id>/design/user-stories.md (proposal-level US/ACs), design/test-cases.csv (TEST coverage), and, when UI is involved, design/figma-audit.md (target framework/transcoding notes, actual token values/PAGE specifications/states), design/figma-code/ (target-framework design code), design/figma-layout.csv (assertion mapping), design/evidence/figma-layout-check.json (08 measured results), and the UI fidelity in code-review.md; docs/product/acceptance-policy.md, docs/product/open-questions.md (read-only); code review records; `design/baseline-impact.md` and current `baseline-status.md`; approved baseline amendment requests/ADRs (if any); running acceptance environment entry (URL/route). Verify existence, version, and approval status item by item; stop and report when missing or unapproved. **Do not use screenshots.**
+- **Outputs for this stage:** openspec/changes/<change-id>/design/evidence/acceptance.md (including `## UI acceptance` PAGE-by-PAGE sign-off for UI Changes: Figma node, running system entry, differences/approval, acceptance method, reviewer); acceptance report and approval records; applicable project baseline documents/version registration/in-flight Change recheck; OpenSpec archive results and updated main specs (only after approval). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
+- **Downstream handoff:** Accepted and archived capability specs, acceptance evidence, and dependencies of subsequent Changes. Explicitly state which files/fields the next stage consumes.
+- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
+- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
 
 
-## 验收阶段的机器基线门禁（强制）
+## Independent Verification Precondition Gate (P0)
 
-- 验收时逐条核对 `baseline-binding.json` 中每条 ACTIVE 约束的最终验证状态和证据，并单独填写 `acceptance_verification`；不能简单复制 Builder 的 `implementation_verification`。例外仅在其批准范围内有效。
-- 基线版本或指纹变化必须有受影响域的当前 rebase 评审；不得静默沿用旧快照。
-- OpenSpec 归档/验收完成前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase acceptance`。
+- Stage 10 must consume the stage 09 independent verification report and JSON; the Builder's own summary, unit test results, or code review report cannot replace the independent Verifier.
+- The verification report must be PASS, and the revision under test must match the current acceptance code; if the code changes after verification, stage 09 must be rerun.
 
-## 阶段边界与评审停等（强制）
 
-- 开始前运行 `python scripts/workflow.py check-entry --step 10-acceptance-audit [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
-- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 10-acceptance-audit --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
-- 只有用户明确回复“评审通过 10-acceptance-audit”后，才可运行 `python scripts/workflow.py approve --step 10-acceptance-audit --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
-- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
-- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。
+## Machine Baseline Gates for the Acceptance Stage (Mandatory)
+
+- During acceptance, verify item by item the final verification status and evidence of each ACTIVE constraint in `baseline-binding.json`, and fill in `acceptance_verification` separately; do not simply copy the Builder's `implementation_verification`. Exceptions are valid only within their approved scope.
+- Baseline version or fingerprint changes must have a current rebase review of affected domains; do not silently reuse an old snapshot.
+- Before OpenSpec archiving/acceptance is complete, run `python3 scripts/baseline-governance.py check-change --change-id <id> --phase acceptance`.
+
+## Stage Boundaries and Review Stop (Mandatory)
+
+- Before starting, run `python scripts/workflow.py check-entry --step 10-acceptance-audit [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
+- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 10-acceptance-audit --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
+- Only after the user explicitly replies "Review passed 10-acceptance-audit" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 10-acceptance-audit --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
+- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

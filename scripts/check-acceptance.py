@@ -62,8 +62,10 @@ ui_change = False
 expected_pages = []
 if audit.is_file():
     audit_text = audit.read_text(encoding="utf-8")
-    ui_change = not re.search(r"^- 设计来源状态：N/A\s*$", audit_text, re.M)
+    ui_change = not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", audit_text, re.M)
     start = audit_text.find("## PAGE 与节点")
+    if start < 0:
+        start = audit_text.find("## PAGEs and Nodes")
     if start < 0:
         start = audit_text.find("## 页面覆盖")
     if start >= 0:
@@ -104,11 +106,11 @@ if ui_change:
             if not cells[3] or cells[3].lower() in {"todo", "tbd", "pending"}:
                 errors.append(f"UI acceptance {pid}: a live system entry (URL or route) is required")
             method = cells[5].strip()
-            if method not in {"机器证据签收", "并排核对"}:
-                errors.append(f"UI acceptance {pid}: 验收方式 must be 机器证据签收 or 并排核对")
+            if method not in {"机器证据签收", "并排核对", "machine evidence sign-off", "side-by-side verification"}:
+                errors.append(f"UI acceptance {pid}: acceptance method must be machine evidence sign-off or side-by-side verification (机器证据签收/并排核对)")
             deviation = cells[4].strip()
             if deviation and deviation.lower() not in {"-", "—", "无", "n/a", "none"}:
-                if "审批" not in deviation and cells[1].lower() not in {"approved deviation", "deviation approved"}:
+                if "审批" not in deviation and "approver" not in deviation.lower() and cells[1].lower() not in {"approved deviation", "deviation approved"}:
                     errors.append(f"UI acceptance {pid}: recorded deviation must name the approver")
             if not cells[6] or cells[6].lower() in {"todo", "tbd", "pending"}:
                 errors.append(f"UI acceptance {pid}: reviewer is required")

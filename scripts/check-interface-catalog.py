@@ -165,14 +165,15 @@ def main() -> int:
         errors.append(f"missing {design_path}")
     else:
         design_text = design_path.read_text(encoding="utf-8")
-        if "### 接口边界清单" not in design_text:
-            errors.append("design.md missing ### 接口边界清单")
+        heading = "### 接口边界清单" if "### 接口边界清单" in design_text else ("### Interface Boundary Inventory" if "### Interface Boundary Inventory" in design_text else "")
+        if not heading:
+            errors.append("design.md missing ### 接口边界清单 / ### Interface Boundary Inventory")
         if "interface-catalog.csv" not in design_text:
-            errors.append("design.md ### 接口边界清单 must reference interface-catalog.csv")
-        boundary = design_text.split("### 接口边界清单", 1)[1].split("### ", 1)[0] if "### 接口边界清单" in design_text else ""
-        if "第三方" in boundary and not boundary.strip().upper().startswith("N/A"):
+            errors.append("design.md interface boundary section must reference interface-catalog.csv")
+        boundary = design_text.split(heading, 1)[1].split("### ", 1)[0] if heading else ""
+        if ("第三方" in boundary or "third-party" in boundary.lower()) and not boundary.strip().upper().startswith("N/A"):
             if not any((row.get("interface_type") or "").strip().upper() == "THIRD_PARTY_API" for row in rows):
-                errors.append("design.md 接口边界清单 mentions 第三方 but interface-catalog.csv has no THIRD_PARTY_API row")
+                errors.append("design.md interface boundary section mentions third-party but interface-catalog.csv has no THIRD_PARTY_API row")
 
     for error in errors:
         print("ERROR:", error)

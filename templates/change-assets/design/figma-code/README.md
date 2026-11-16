@@ -1,20 +1,20 @@
-# Figma 目标框架设计代码
+# Figma Target-Framework Design Code
 
-- 来源：Figma MCP `get_design_context`（调用前已加载官方 `figma-design-to-code` Skill），每个 PAGE 一个文件（`PAGE-001.vue` … `PAGE-00N.vue`；React 栈为 `.tsx`/`.jsx`）。
-- 目标框架：`<Vue 3 + TypeScript + Element Plus / React + ...>`，必须与 `docs/architecture/technology-decisions.md` 一致。
-- 扩展名：`<.vue / .tsx / .jsx>`；技术选型变化时按新选型重转码，不得混用框架。
-- 转码方式：`get_design_context` 返回的参考实现（通常为 React + Tailwind）已按目标框架替换为项目组件库与 token；保留真实文案、字号/字重、间距、圆角、层级与 `data-node-id`，只做静态高保真页面，不接业务 API。
-- 替换登记：
+- Source: Figma MCP `get_design_context` (the official `figma-design-to-code` Skill was loaded before calling), one file per PAGE (`PAGE-001.vue` … `PAGE-00N.vue`; `.tsx`/`.jsx` for the React stack).
+- Target framework: `<Vue 3 + TypeScript + Element Plus / React + ...>`, must be consistent with `docs/architecture/technology-decisions.md`.
+- Extension: `<.vue / .tsx / .jsx>`; when the technology selection changes, retranscode according to the new selection and do not mix frameworks.
+- Transcoding method: the reference implementation returned by `get_design_context` (usually React + Tailwind) has been replaced with the project component library and tokens according to the target framework; real copy, font size/weight, spacing, radius, hierarchy, and `data-node-id` are preserved; static high-fidelity pages only, no business API integration.
+- Replacement register:
 
-| 来源（参考实现） | 目标（项目栈） | 说明 |
+| Source (reference implementation) | Target (project stack) | Notes |
 |---|---|---|
-| `<Tailwind class / 原始标签>` | `<Element Plus 组件 / CSS 变量>` | `<几何或视觉用途>` |
-| `<React 组件>` | `<Vue 组件 / composable>` | `<行为与状态>` |
+| `<Tailwind class / original tag>` | `<Element Plus component / CSS variable>` | `<geometry or visual purpose>` |
+| `<React component>` | `<Vue component / composable>` | `<behavior and state>` |
 
-- 转码偏差：`<无 / 差异 ID + 原因 + 审批人>`；结构性差异同步登记到 `figma-audit.md` 的 `## 差异与待确认`。
-- `data-node-id="..."` 与 `figma-layout.csv` 的 `figma_node_id` 一一对应；`figma-layout.csv` 是运行态几何断言的子集，`figma-audit.md` 是 token/状态/评审摘要。
-- 代码中的文字、字号、字重、间距、圆角和层级是 Figma 的真实值；实现时不得凭记忆改写。
-- 代码中的临时 Figma 资产 URL（`https://www.figma.com/api/mcp/asset/...`）必须下载到 `figma-assets/` 并替换，不得作为运行时资源。
-- 08 直接移植本目录代码为页面骨架，只补路由、API、状态、权限与业务逻辑；不得重写样式、布局或文案。确需视觉偏差时必须 `UI-DEVIATION` 审批。
-- 06 一次性生成并落盘；07/08 默认离线消费，仅在 Figma 文件版本变化或页面有歧义时按页重读（串行、避免限流）。
-- **UI 验证以机器证据为主**：无差异 PAGE 后续按 `figma-layout-check.json` 数值签收；仅差异/`UI-DERIVED` PAGE 人工复核。不保存截图。
+- Transcoding deviations: `<none / difference ID + reason + approver>`; structural differences are also registered in `## Differences and Pending Confirmation` of `figma-audit.md`.
+- `data-node-id="..."` corresponds one-to-one with `figma_node_id` in `figma-layout.csv`; `figma-layout.csv` is the subset of runtime geometry assertions, and `figma-audit.md` is the token/state/review summary.
+- The text, font size, weight, spacing, radius, and hierarchy in the code are the actual Figma values; they must not be rewritten from memory during implementation.
+- Temporary Figma asset URLs in the code (`https://www.figma.com/api/mcp/asset/...`) must be downloaded to `figma-assets/` and replaced; they must not be used as runtime resources.
+- 08 ports the code in this directory directly as page skeletons, adding only routing, API, state, permissions, and business logic; styles, layout, or copy must not be rewritten. If a visual deviation is truly necessary, it must be approved as `UI-DEVIATION`.
+- 06 generates and persists everything in one pass; 07/08 consume offline by default, and re-read page by page (serially, to avoid rate limiting) only when the Figma file version changes or a page is ambiguous.
+- **UI verification relies primarily on machine evidence**: PAGES with no differences are subsequently signed off according to the numeric values in `figma-layout-check.json`; only PAGES with differences/`UI-DERIVED` are manually reviewed. Screenshots are not stored.

@@ -1,75 +1,75 @@
-# Prompt：Figma 设计与评审（Figma-only）
+# Prompt: Figma Design and Review (Figma-only)
 
 ```text
-执行 `@figma-design-review`，Change：<change-id>。
+Execute `@figma-design-review`, Change: <change-id>.
 
-提案需求与 AC：<proposal-and-user-stories-paths>
-项目业务流程/RD 矩阵：<product-paths>
-前端规范：<frontend-conventions>（视觉规范取第 9 节）
-技术选型：<technology-decisions>（目标前端框架/组件库，06 转码必须按此执行）
-基线绑定：openspec/changes/<change-id>/design/baseline-binding.json
-Figma MCP：<figma-file-link-or-file-key>（必须实际可访问）
+Proposal requirements and AC: <proposal-and-user-stories-paths>
+Project business flows/RD matrix: <product-paths>
+Frontend conventions: <frontend-conventions> (visual conventions from Section 9)
+Technology decisions: <technology-decisions> (target frontend framework/component library; the 06 transcoding must follow these)
+Baseline binding: openspec/changes/<change-id>/design/baseline-binding.json
+Figma MCP: <figma-file-link-or-file-key> (must actually be accessible)
 
-先读已批准的 proposal/specs/user-stories 与项目 FLOW/NODE/DO/BR，确定本 Change 的页面范围。
+First read the approved proposal/specs/user-stories and the project FLOW/NODE/DO/BR, and determine the page scope of this Change.
 
-阶段 06 为 Figma-only，不再经过 pen.dev 原型或 PAGE HTML 交接：
-- 唯一 UI 契约是 `openspec/changes/<change-id>/design/figma-audit.md`：**单文件**记录 Figma 文件/版本、目标框架/转码说明、PAGE 清单、token **实际值**（颜色 hex、字号/行高、间距/圆角/阴影）、文字样式、每 PAGE 区块级规格、状态覆盖与决策、设计代码、断言范围、MCP 读取记录、差异与待确认、UI 评审 APPROVED。
-- 机器契约是 `openspec/changes/<change-id>/design/figma-code/`（每 PAGE 一个**目标框架对齐**的设计代码：Vue 栈为 `PAGE-00N.vue` + 该端组件库（Web 为 Element Plus，移动端为 uni-app 组件库），React 栈为 `PAGE-00N.tsx`/`.jsx`；含真实文案/字号/间距/层级/`data-node-id`）与 `figma-layout.csv`（精简断言表：`page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`）。06 建立断言子集，`route`/`dom_selector` 可由 07 填满。
-- **框架对齐转码（强制）**：首次调用 `get_design_context` 前先加载官方 `figma-design-to-code` Skill，并按总体技术选型把参考实现转码为目标框架代码；不得把 React/Tailwind 原始参考实现直接作为交付代码。`figma-code/README.md` 记录目标框架、扩展名、组件/样式/token 替换与偏差；08 直接移植，只补业务逻辑。
-- **不使用截图**：`get_design_context` 返回的渲染仅即时用作视觉对照，不得保存、登记或写入证据；不导出 `PAGE-*.default.png`，不保存实现截图；自动化视觉回归用 `scripts/check-figma-layout.py` 比较 Figma 节点几何与运行态 DOM，token 用 `scripts/check-design-tokens.py` 精确比对。无差异 PAGE 的后续 UI 验证以机器证据为主。
-- 图片/SVG 资产统一放 `openspec/changes/<change-id>/design/figma-assets/`，并生成 `README.md` 清单（文件名、来源 node、sha256、尺寸）；无资产写“无”。
-- 不维护 `design/design-tokens.json`；token 实际值写入 `figma-audit.md` 的“设计令牌（实际值）”表。
-- 无 UI 时：在 `figma-audit.md` 的“设计来源与选择”写入 `- 设计来源状态：N/A` 与 `- 无 UI 理由：<原因>`，再运行 `--strict` 校验；也可使用 `--no-ui --reason "<原因>" --strict` 显式验证。不得用空文件或缺少理由的 N/A 掩盖遗漏。
+Stage 06 is Figma-only and no longer goes through pen.dev prototypes or PAGE HTML handoff:
+- The only UI contract is `openspec/changes/<change-id>/design/figma-audit.md`: a **single file** recording the Figma file/version, target framework/transcoding notes, PAGE list, token **actual values** (color hex, font size/line height, spacing/radius/shadow), text styles, block-level specifications per PAGE, state coverage and decisions, design code, assertion scope, MCP read records, differences and pending confirmation, and UI review APPROVED.
+- The machine contract is `openspec/changes/<change-id>/design/figma-code/` (one **target-framework-aligned** design code file per PAGE: for the Vue stack, `PAGE-00N.vue` + that platform's component library (Element Plus for Web, uni-app component library for mobile); for the React stack, `PAGE-00N.tsx`/`.jsx`; containing real copy/font size/spacing/hierarchy/`data-node-id`) and `figma-layout.csv` (a condensed assertion table: `page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`). 06 establishes the assertion subset; `route`/`dom_selector` may be filled in by 07.
+- **Framework-aligned transcoding (mandatory)**: before calling `get_design_context` for the first time, load the official `figma-design-to-code` Skill, and transcode the reference implementation into target framework code according to the overall technology decisions; do not treat the raw React/Tailwind reference implementation as delivered code. `figma-code/README.md` records the target framework, extension, component/style/token substitutions and deviations; 08 ports it directly and only adds business logic.
+- **No screenshots**: the render returned by `get_design_context` is used only as an immediate visual reference and must not be saved, registered, or written into evidence; do not export `PAGE-*.default.png` and do not save implementation screenshots; automated visual regression uses `scripts/check-figma-layout.py` to compare Figma node geometry against the runtime DOM, and tokens are compared exactly with `scripts/check-design-tokens.py`. Subsequent UI verification for PAGES with no differences relies primarily on machine evidence.
+- Image/SVG assets are all placed in `openspec/changes/<change-id>/design/figma-assets/`, and a `README.md` inventory is generated (filename, source node, sha256, dimensions); if there are no assets, write `- Assets: none`.
+- Do not maintain `design/design-tokens.json`; token actual values are written into the `## Design Tokens (Actual Values)` table of `figma-audit.md`.
+- When there is no UI: write `- Design source status: N/A` and `- Reason for no UI: <reason>` in the `## Design Source and Selection` section of `figma-audit.md`, then run the `--strict` validation; you may also explicitly validate with `--no-ui --reason "<reason>" --strict`. Do not use empty files or an N/A without a reason to conceal omissions.
 
-执行步骤：
-1. 先要求用户选择设计来源（默认 Figma MCP AI 自动设计；人工 Figma 设计仅在用户明确选择时），并在 figma-audit.md 的“设计来源与选择”记录；设计来源状态必须为 APPROVED。
-2. **确定目标框架**：读取 `docs/architecture/technology-decisions.md` 与 `frontend-conventions.md` 第 1 节，在 figma-audit.md 的 `## 设计代码` 写入 `- 目标框架：<Vue 3 + TypeScript + Element Plus / React + ...>`、`- 设计代码扩展名：<.vue / .tsx / .jsx>` 与选型依据；选型 PENDING/冲突/读不到时阻断，不得自行选择。
-3. **一次性完整导出并框架对齐转码**：先加载官方 `figma-design-to-code` Skill（调用 `get_design_context` 时在 `skillNames` 登记，资源方式加载时前缀 `resource:`）；使用 Figma MCP 从已批准需求生成/确认真实 Figma 设计后，按 PAGE 逐页读取；`get_variable_defs` 至少覆盖全文件 token 实际值，`get_metadata` 每 PAGE 读取精确 `x/y/w/h`（用于断言表），`get_design_context` 每 PAGE 生成参考实现后立即转码为目标框架并落盘为 `figma-code/PAGE-001.vue … PAGE-00N.vue`（React 栈为 `.tsx`/`.jsx`）；保留真实文案/字号/间距/圆角/层级与 `data-node-id`，替换为目标组件库与项目 token，只做静态高保真页面，不接业务 API。返回的渲染仅即时对照，不保存。有图片/SVG 资产时立即下载到 `figma-assets/`。不得逐节点轮询，不得并行多个 Agent 读取同一文件。
-4. 在 figma-audit.md 建立 PAGE → node 映射、每 PAGE 区块级实际规格、状态覆盖与差异/待确认；状态覆盖至少包括 default、loading、empty、error、permission denied/降级、offline/weak network、push/deep link（适用时），并记录 Android/iOS/HarmonyOS 等多端差异；建立 `figma-layout.csv` 断言子集，断言范围必须在 `## 断言范围` 说明；设计代码中的文字/结构以目标框架代码为准。状态没有 Figma 画板时必须写明 07 设计决策、审批人和依据，不能声称已还原。
-5. 用户必须在真实 Figma 评审稿上完成 UI 评审，并在 `## UI 评审` 写入 `- UI 评审状态：APPROVED`、`- 评审人：...`、`- 评审证据：workflow/evidence/06-figma-ui-review.md`（文件必须真实存在）。
-6. MCP 不可用或读不到真实设计时阻断，不得用截图、手写 HTML 或臆造替代。PAGE ID 由 06 冻结，07–10 不得新增或重命名 PAGE。
-7. 完成后运行 `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`，退出码必须为 0。缺少目标框架、节点 CSV、断言映射、token 实际值、可见 TEXT 覆盖或 UI 评审时失败。
+Execution steps:
+1. First ask the user to choose the design source (default: Figma MCP AI automatic design; manual Figma design only when the user explicitly chooses it), and record it in the `## Design Source and Selection` section of figma-audit.md; the design source status must be APPROVED.
+2. **Determine the target framework**: read `docs/architecture/technology-decisions.md` and Section 1 of `frontend-conventions.md`, and write `- Target framework: <Vue 3 + TypeScript + Element Plus / React + ...>`, `- Design code extension: <.vue / .tsx / .jsx>`, and the rationale for the choice into the `## Design Code` section of figma-audit.md; if the technology decision is PENDING/conflicting/unreadable, block; do not choose on your own.
+3. **One-time complete export and framework-aligned transcoding**: first load the official `figma-design-to-code` Skill (register it in `skillNames` when calling `get_design_context`, and prefix with `resource:` when loading via the resource mechanism); after using Figma MCP to generate/confirm the real Figma design from the approved requirements, read one page at a time for each PAGE; `get_variable_defs` must cover at least the full-file token actual values, `get_metadata` reads the exact `x/y/w/h` of each PAGE (for the assertion table), and after `get_design_context` generates the reference implementation for each PAGE, immediately transcode it to the target framework and write it to disk as `figma-code/PAGE-001.vue … PAGE-00N.vue` (for the React stack, `.tsx`/`.jsx`); preserve real copy/font size/spacing/radius/hierarchy and `data-node-id`, substitute the target component library and project tokens, produce only static high-fidelity pages and do not connect business APIs. The returned render is for immediate comparison only and is not saved. Immediately download any image/SVG assets to `figma-assets/`. Do not poll node by node, and do not have multiple Agents read the same file in parallel.
+4. Establish the PAGE → node mapping, block-level actual specifications per PAGE, state coverage, and differences/pending confirmation in figma-audit.md; state coverage must at least include default, loading, empty, error, permission denied/degraded, offline/weak network, push/deep link (where applicable), and record differences across platforms such as Android/iOS/HarmonyOS; establish the assertion subset in `figma-layout.csv`, and the assertion scope must be explained in `## Assertion Scope`; text/structure in the design code follows the target framework code. When a state has no Figma artboard, you must write the 07 design decision, approver, and rationale; you may not claim it has been reproduced.
+5. The user must complete the UI review on the real Figma review file, and write `- UI review status: APPROVED`, `- Reviewer: ...`, and `- Review evidence: workflow/evidence/06-figma-ui-review.md` into `## UI Review` (the file must actually exist).
+6. If MCP is unavailable or the real design cannot be read, block; do not substitute screenshots, hand-written HTML, or fabrication. PAGE IDs are frozen by 06, and 07–10 must not add or rename PAGES.
+7. When done, run `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`; the exit code must be 0. Fail if the target framework, node CSV, assertion mapping, token actual values, visible TEXT coverage, or UI review is missing.
 
-正式产物请遵循 docs/TEMPLATE-POLICY.md 与 docs/OUTPUT-TEMPLATE-MATRIX.csv 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
-基线交互要求：先读 BASELINE-BRIEF.md，再按页面/前端影响读取相关基线；页面、元素、事件不得绕过已批准约束。发现冲突时记录约束 ID 并提交例外/BCR，不得自行修改 baseline-binding.json。完成后执行 python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement。
+Formal artifacts must follow the templates specified in docs/TEMPLATE-POLICY.md and docs/OUTPUT-TEMPLATE-MATRIX.csv; do not delete template fields, write PENDING for unknown items and explain why.
+Baseline interaction requirements: first read BASELINE-BRIEF.md, then read the relevant baselines according to page/frontend impact; pages, elements, and events must not bypass approved constraints. When a conflict is found, record the constraint ID and submit an exception/BCR; do not modify baseline-binding.json on your own. When done, run python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement.
 ```
 
-上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+Context: first run `python scripts/agent-context.py --stage <id> --change <change-id>` to get the condensed input; the full `inputs` are for audit only, and by default read from the condensed/on-demand list. At stage end, run `python scripts/check-output-context.py --stage <id> --strict` to check the summary output budget.
 
-## 运行前要填的变量
+## Variables to Fill Before Running
 
-- 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。
-- Change ID：本阶段为功能级，必须填写真实 Change ID。
-- 加载 Skill：按当前 Agent 的真实机制加载 `.claude/skills/figma-design-review/SKILL.md`，不能只把 Skill 名字当普通文本。
+- Input materials: replace the `<...>` placeholders with real paths, links, or content.
+- Change ID: this stage is feature-level; a real Change ID must be filled in.
+- Load Skill: load `.claude/skills/figma-design-review/SKILL.md` according to the current Agent's actual mechanism; do not treat the Skill name as plain text only.
 
-## 执行工具协议（必须遵守）
+## Execution Tool Protocol (Must Be Followed)
 
-- **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`；无法加载时明确报告并按本 Prompt 执行。
-- **Superpowers：** 交互/多端状态需要澄清时使用 `brainstorming` 的 stage-scoped 模式；结论写入 `figma-audit.md` 的状态覆盖/差异章节，不另写独立设计文档。阶段 evidence 可选写 `methods`（至少 2 个问题、1 个备选、1 个决策）；若写则运行 `python scripts/check-method-evidence.py --step 06-figma-design-review --evidence <evidence.json>`。先确认真实安装与可调用方式，不可用时用 `mode=equivalent` 并写 `reason`。
-- **OpenSpec：** 运行 `openspec status --change <id>` 并读取已批准 specs；本阶段不归档 Change。命令须真实执行并报告退出码/结果。
-- **Figma MCP：** 使用 `use_figma`、`get_metadata`、`get_variable_defs`、`get_design_context` 等实际可用工具生成/读取 Figma 文件、节点、组件和变量；首次调用 `get_design_context` 前必须加载官方 `figma-design-to-code` Skill；本阶段**一次性完整导出并转码**（token 实际值、每 PAGE 区块规格、目标框架设计代码 `figma-code/PAGE-00N.vue`（React 栈为 `.tsx`）、`figma-layout.csv` 断言表、真实图片/SVG 资产），资产立即下载到 `figma-assets/`；串行调用、按页批量，不逐节点轮询或并行多个 Agent，避免限流。返回的渲染仅即时对照，不保存；MCP 不可用或读不到真实设计时阻断，不得伪造或用截图替代。本阶段不使用 pen.dev。
-- **状态与门禁：** 仅在产物写入指定路径且脚本检查通过后更新 `workflow-state.json`；遇到待审批、缺输入或验证失败必须暂停。
-- **输出报告：** 列出实际读取文件、实际调用工具、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件。
+- **Loading project Skills:** load `.claude/skills/<skill-id>/SKILL.md` according to the current Agent's actual mechanism; if it cannot be loaded, report clearly and execute per this Prompt.
+- **Superpowers:** when interactive/multi-platform states need clarification, use the stage-scoped mode of `brainstorming`; write conclusions into the state coverage/differences sections of `figma-audit.md`, do not write a separate design document. Stage evidence may optionally write `methods` (at least 2 questions, 1 alternative, 1 decision); if written, run `python scripts/check-method-evidence.py --step 06-figma-design-review --evidence <evidence.json>`. First confirm the actual installation and invocation method; if unavailable, use `mode=equivalent` and write `reason`.
+- **OpenSpec:** run `openspec status --change <id>` and read the approved specs; this stage does not archive the Change. Commands must actually be executed and their exit codes/results reported.
+- **Figma MCP:** use actually available tools such as `use_figma`, `get_metadata`, `get_variable_defs`, and `get_design_context` to generate/read Figma files, nodes, components, and variables; before calling `get_design_context` for the first time you must load the official `figma-design-to-code` Skill; this stage does a **one-time complete export and transcoding** (token actual values, block specifications per PAGE, target framework design code `figma-code/PAGE-00N.vue` (for the React stack, `.tsx`), `figma-layout.csv` assertion table, real image/SVG assets), and download assets immediately to `figma-assets/`; call serially, batched by page; do not poll node by node or run multiple Agents in parallel, to avoid rate limiting. The returned render is for immediate comparison only and is not saved; if MCP is unavailable or the real design cannot be read, block; do not fabricate or substitute screenshots. This stage does not use pen.dev.
+- **State and gates:** update `workflow-state.json` only after the artifacts are written to the specified paths and the script checks pass; when encountering pending approval, missing input, or verification failure, you must pause.
+- **Output report:** list the files actually read, tools actually called, files generated/modified, check results, items not executed, and next steps. Do not automatically commit, publish, archive, or overwrite existing files.
 
-## 强制交付物交接
+## Mandatory Deliverable Handoff
 
-执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="figma-design-review"` 的记录。
+Before execution, read the `skill="figma-design-review"` record in `docs/STEP-ARTIFACT-CONTRACTS.md` and `docs/STEP-ARTIFACT-CONTRACTS.json`.
 
-- 输入核验：已批准 proposal/specs/design/user-stories；项目业务流程/数据对象/RD 矩阵/业务规则/角色权限/ID 约定（workflows、data-objects、rd-matrix、business-rules、role-permission-matrix、id-conventions）；`docs/product/open-questions.md`（只读）；`docs/architecture/technology-decisions.md`（目标前端框架/组件库）与 frontend-conventions 第 1、9 节；`docs/architecture/baseline-status.md`；`design/baseline-impact.md` 与 `design/baseline-binding.json`；Figma MCP 实际可访问能力（涉及 UI 时必须）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：`openspec/changes/<change-id>/design/figma-audit.md`（唯一 UI 契约：Figma 文件/版本 + 目标框架/转码说明 + token 实际值 + 文字样式 + PAGE 与 node + 每 PAGE 区块规格 + 设计代码 + 断言范围 + 状态覆盖/决策 + UI 评审 APPROVED；无 UI 时 N/A + 理由）、`design/figma-code/README.md` 与目标框架设计代码 `PAGE-001.vue … PAGE-00N.vue`（React 栈为 `.tsx`/`.jsx`）、`design/figma-layout.csv`（精简断言表，`route`/`dom_selector` 可由 07 填满）；有真实图片/SVG 时附 `design/figma-assets/README.md`。不再输出参考截图、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json`、`design-tokens.json`、分散的 token/contract JSON 或 06 初始化的 `traceability.csv`。
-- 下一步输入：`design/figma-audit.md`、`design/figma-code/` 与 `design/figma-layout.csv` 是 07/08/09/10 的唯一界面输入；07/08 默认离线消费，仅在 Figma 文件版本变化或页面有歧义时重新读取 Figma；不得要求每个阶段全量实时读取。PAGE ID 与页面集合在 06 冻结；`traceability.csv` 由 07 初始化 PAGE → AC 并合并 API/测试映射。
-- 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
-- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 06-figma-design-review”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 06-figma-design-review --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
-- 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
-- 若 `workflow-state.json` 中本阶段存在 `blocked_items`，`transition` 证据必须增加 `resolved_blockers`（含 `step_id`、`resolution` 与现有证据路径），否则 `transition` 仍会被阻断。
+- Input verification: approved proposal/specs/design/user-stories; project business flows/data objects/RD matrix/business rules/role permissions/ID conventions (workflows, data-objects, rd-matrix, business-rules, role-permission-matrix, id-conventions); `docs/product/open-questions.md` (read-only); `docs/architecture/technology-decisions.md` (target frontend framework/component library) and Sections 1 and 9 of frontend-conventions; `docs/architecture/baseline-status.md`; `design/baseline-impact.md` and `design/baseline-binding.json`; actual Figma MCP accessibility (mandatory when UI is involved). Report item by item whether each file exists, its version, and approval status; pause if not satisfied.
+- Must output: `openspec/changes/<change-id>/design/figma-audit.md` (the only UI contract: Figma file/version + target framework/transcoding notes + token actual values + text styles + PAGEs and nodes + block specifications per PAGE + design code + assertion scope + state coverage/decisions + UI review APPROVED; when there is no UI, N/A + reason), `design/figma-code/README.md` and target framework design code `PAGE-001.vue … PAGE-00N.vue` (for the React stack, `.tsx`/`.jsx`), `design/figma-layout.csv` (condensed assertion table; `route`/`dom_selector` may be filled in by 07); when there are real image/SVG assets, attach `design/figma-assets/README.md`. No longer output reference screenshots, `prototype.pen`, `PAGE-*.html`, `prototype.md`, `manifest.json`, `design-tokens.json`, scattered token/contract JSON, or the `traceability.csv` initialized by 06.
+- Next-step input: `design/figma-audit.md`, `design/figma-code/`, and `design/figma-layout.csv` are the only UI inputs for 07/08/09/10; 07/08 consume them offline by default and re-read Figma only when the Figma file version changes or a page is ambiguous; do not require every stage to read everything live in full. PAGE IDs and the page set are frozen at 06; `traceability.csv` is initialized by 07 with PAGE → AC and merges API/test mappings.
+- At stage completion, show the handoff report per `templates/workflow/step-handoff-report.md`; distinguish generated, draft, suggestion, pending confirmation, and not executed.
+- **Stage boundary (mandatory):** stage completion ≠ permission to enter the next stage. After the artifacts are written and checks pass, run `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<review summary>"` (the flow is frozen as pending review), show the report per the handoff template, and then **end the turn immediately**; before the user explicitly replies "review passed 06-figma-design-review", you are forbidden to read/execute the next stage's Prompt/Skill and forbidden to create next-stage artifacts. After approval, run `python scripts/workflow.py approve --step 06-figma-design-review --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval record>`, then run `transition`. Do not fill in approver/approved_at yourself, and do not treat artifact completion or self-check passing as approval.
+- Update `workflow-state.json` only after the gates pass and approval is complete; do not automatically cross approval points.
+- If `blocked_items` exists for this stage in `workflow-state.json`, the `transition` evidence must add `resolved_blockers` (including `step_id`, `resolution`, and existing evidence paths); otherwise `transition` will still be blocked.
 
-## 阶段结束审计（必须执行）
+## Stage-End Audit (Must Be Executed)
 
-- `figma-audit.md` 必须包含 `## 设计来源与选择`、`## 设计输入与风格参考`、`## 设计令牌（实际值）`、`## 文字样式（实际值）`、`## PAGE 与节点`、`## PAGE 关键规格`、`## 设计代码`、`## 断言范围`、`## 状态覆盖`、`## 资产清单`、`## MCP 读取记录`、`## 差异与待确认`、`## UI 评审`。
-- token 必须记录**实际值**（颜色 hex、字号/行高、间距/圆角/阴影），只有变量名或“共 N 个变量”不算通过；每 PAGE 必须有真实 node、画板尺寸、至少 3 个区块级几何/布局规格。
-- 每个 PAGE 必须有目标框架设计代码（Vue 栈 `figma-code/PAGE-00N.vue`，React 栈 `PAGE-00N.tsx`/`.jsx`），且 `## 设计代码` 必须写明目标框架、扩展名与选型依据；`figma-layout.csv` 必须覆盖每个 PAGE 的关键区块与主操作，几何/文本/字体值来自 Figma；结构性差异写入 `## 差异与待确认`。
-- 每个 PAGE 必须有 default 状态；Figma 无画板的状态必须写 07 决策、审批人和依据，不得声称已还原。
-- 真实图片/SVG 资产必须存在于 `design/figma-assets/` 并由 `README.md` 登记；**不得登记或保存参考截图**。
-- MCP 读取记录必须包含实际成功的 `get_metadata` 与 `get_variable_defs` 调用；不得只登记工具名或“未执行”。
-- UI 评审必须由设计负责人在真实 Figma 评审稿上完成，并写入 `- UI 评审状态：APPROVED`、评审人与存在的评审证据文件。
-- 运行 `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`，退出码必须为 0；审计结论写入交接报告。
+- `figma-audit.md` must contain `## Design Source and Selection`, `## Design Inputs and Style References`, `## Design Tokens (Actual Values)`, `## Text Styles (Actual Values)`, `## PAGEs and Nodes`, `## PAGE Key Specifications`, `## Design Code`, `## Assertion Scope`, `## State Coverage`, `## Asset List`, `## MCP Read Records`, `## Differences and Pending Confirmation`, `## UI Review`.
+- Tokens must record **actual values** (color hex, font size/line height, spacing/radius/shadow); variable names alone or "N variables in total" do not count as passing; each PAGE must have a real node, artboard dimensions, and at least 3 block-level geometry/layout specifications.
+- Each PAGE must have target framework design code (Vue stack `figma-code/PAGE-00N.vue`, React stack `PAGE-00N.tsx`/`.jsx`), and `## Design Code` must state the target framework, extension, and rationale for the choice; `figma-layout.csv` must cover each PAGE's key blocks and primary actions, with geometry/text/font values coming from Figma; structural differences are written into `## Differences and Pending Confirmation`.
+- Each PAGE must have a default state; for states without a Figma artboard, you must write the 07 decision, approver, and rationale; do not claim they have been reproduced.
+- Real image/SVG assets must exist in `design/figma-assets/` and be registered by `README.md`; **reference screenshots must not be registered or saved**.
+- MCP read records must include actually successful `get_metadata` and `get_variable_defs` calls; do not register only tool names or "not executed".
+- UI review must be completed by the design owner on the real Figma review file, and written as `- UI review status: APPROVED`, the reviewer, and an existing review evidence file.
+- Run `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`; the exit code must be 0; write the audit conclusion into the handoff report.

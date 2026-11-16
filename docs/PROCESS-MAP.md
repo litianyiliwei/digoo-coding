@@ -1,75 +1,77 @@
-# 阶段、Skill、Prompt 与 Script 对照
+# Stage, Skill, Prompt, and Script Cross-Reference
 
-| 阶段 | Skill ID | Prompt 文件 | 自动检查 |
+> Language: English | [简体中文](PROCESS-MAP-zh.md)
+
+| Stage | Skill ID | Prompt File | Automated Checks |
 |---|---|---|---|
-| 01 项目初始化与工具链检查 | `project-bootstrap` | `prompts/01-project-bootstrap.md` | `scripts/check-package.py` |
-| 02 需求业务梳理 | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `scripts/check-requirements.py --strict`（流程节点、数据对象、RD 矩阵结构）+ `python scripts/check-reference-research.py --strict`（参考产品与互联网调研：≥3 个问题、≥3 条来源、≥2 条对比） |
-| 03 项目总体架构设计 | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `scripts/check-required-files.sh --strict` + `python scripts/check-architecture-baseline.py --strict`（现有系统二开约束/第三方接口依赖清单/LEGACY-*/EXT-*） + 技术选型访谈记录 + 阶段结束审计 `baseline-governance.py freeze` / `audit --require-frozen` |
-| 04 提案拆分、依赖排序与路线图 | `proposal-planning` | `prompts/04-proposal-planning.md` | `baseline-governance.py audit --require-frozen` + `scripts/check-roadmap.py --strict` |
-| 05 提案级需求分析 | `feature-requirements` | `prompts/05-feature-requirements.md` | `scripts/check-requirements.py --change <change-id> --strict`（UC 可选）+ `baseline-governance.py check-change --phase requirement` + `scripts/check-baseline-impact.py <change-id>` |
-| 06 Figma 设计与评审（Figma-only） | `figma-design-review` | `prompts/06-figma-design-review.md` | `scripts/check-figma-audit.py --change <change-id> --strict --require-framework`（目标框架/转码说明 + 单文件 token 实际值 + 每 PAGE 区块规格 + figma-code/ 目标框架设计代码 + figma-layout.csv 断言映射 + 断言范围理由 + 状态决策 + UI 评审 APPROVED） |
-| 07 详细设计、接口与测试设计 | `detailed-design` | `prompts/07-detailed-design.md` | 涉及 UI 时读取 `figma-audit.md` 的 token 实际值、每 PAGE 规格、状态决策与 `figma-assets/`；默认离线消费，仅在版本变化/歧义时按页重读并避免限流；`openspec instructions design --change <change-id> --json` + `scripts/check-change.sh <change-id>` + `scripts/check-design-assets.sh <change-id> --strict --lint-api` + `scripts/check-design-sections.py --change <change-id>` + `scripts/check-test-cases.py --change <change-id> --strict` + `scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict` + 有 API 时 `scripts/check-api-traceability.py --change <change-id>` + `openspec validate <change-id> --strict` + `baseline-governance.py check-change --phase design` + 有跨边界接口时 `scripts/check-interface-catalog.py --change <change-id> --strict` |
-| 08 实现、TDD、验证与代码审查 | `implementation-orchestrator` | `prompts/08-implementation-orchestrator.md` | `baseline-governance.py check-change --phase implementation` + `scripts/test-all.sh` + `verify-before-completion.sh` + `scripts/check-figma-layout.py` + `scripts/check-design-tokens.py` + `scripts/check-code-review.py --change <change-id> --strict`（UI Change 直接移植目标框架设计代码，## UI fidelity 数值取自 figma-layout-check.json，仅差异/UI-DERIVED PAGE 需人工说明） |
-| 09 独立验证与验收证据 | `independent-verifier` | `prompts/09-independent-verification.md` | `openspec status --change <change-id>` + `openspec validate <change-id> --strict` + `scripts/check-independent-verification.py --report <report> --evidence <json>`（UI Change 校验 layout_checks 逐 PAGE 断言元素数/最大偏差/容差/缺失元素/判定与独立重跑记录）；PASS 后才进入阶段 10 |
-| 10 人工验收、归档与基线回写 | `acceptance-audit` | `prompts/10-acceptance-audit.md` | `baseline-governance.py check-change --phase acceptance` + `scripts/check-acceptance.py <change-id>` + `verify-before-completion.sh` |
+| 01 Project Initialization and Toolchain Check | `project-bootstrap` | `prompts/01-project-bootstrap.md` | `scripts/check-package.py` |
+| 02 Requirements Business Analysis | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `scripts/check-requirements.py --strict` (process nodes, data objects, RD matrix structure) + `python scripts/check-reference-research.py --strict` (reference products and internet research: ≥3 questions, ≥3 sources, ≥2 comparisons) |
+| 03 Overall Project Architecture Design | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `scripts/check-required-files.sh --strict` + `python scripts/check-architecture-baseline.py --strict` (Existing System Secondary-Development Constraints / Third-Party Interface Dependency List / LEGACY-*/EXT-*) + technology selection interview record + stage-end audit `baseline-governance.py freeze` / `audit --require-frozen` |
+| 04 Proposal Breakdown, Dependency Ordering, and Roadmap | `proposal-planning` | `prompts/04-proposal-planning.md` | `baseline-governance.py audit --require-frozen` + `scripts/check-roadmap.py --strict` |
+| 05 Proposal-Level Requirements Analysis | `feature-requirements` | `prompts/05-feature-requirements.md` | `scripts/check-requirements.py --change <change-id> --strict` (UC optional) + `baseline-governance.py check-change --phase requirement` + `scripts/check-baseline-impact.py <change-id>` |
+| 06 Figma Design and Review (Figma-only) | `figma-design-review` | `prompts/06-figma-design-review.md` | `scripts/check-figma-audit.py --change <change-id> --strict --require-framework` (target framework/conversion notes + single-file token actual values + per-PAGE block specifications + figma-code/ target-framework design code + figma-layout.csv assertion mapping + assertion scope rationale + state decisions + UI review APPROVED) |
+| 07 Detailed Design, Interfaces, and Test Design | `detailed-design` | `prompts/07-detailed-design.md` | When UI is involved, read the token actual values, per-PAGE specifications, state decisions, and `figma-assets/` from `figma-audit.md`; offline consumption by default, re-reading page by page only on version change/ambiguity while avoiding rate limiting; `openspec instructions design --change <change-id> --json` + `scripts/check-change.sh <change-id>` + `scripts/check-design-assets.sh <change-id> --strict --lint-api` + `scripts/check-design-sections.py --change <change-id>` + `scripts/check-test-cases.py --change <change-id> --strict` + `scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict` + when there is an API, `scripts/check-api-traceability.py --change <change-id>` + `openspec validate <change-id> --strict` + `baseline-governance.py check-change --phase design` + when there are cross-boundary interfaces, `scripts/check-interface-catalog.py --change <change-id> --strict` |
+| 08 Implementation, TDD, Verification, and Code Review | `implementation-orchestrator` | `prompts/08-implementation-orchestrator.md` | `baseline-governance.py check-change --phase implementation` + `scripts/test-all.sh` + `verify-before-completion.sh` + `scripts/check-figma-layout.py` + `scripts/check-design-tokens.py` + `scripts/check-code-review.py --change <change-id> --strict` (UI Changes directly port the target-framework design code; `## UI fidelity` values are taken from figma-layout-check.json, and only deviating/UI-DERIVED PAGEs require manual explanation) |
+| 09 Independent Verification and Acceptance Evidence | `independent-verifier` | `prompts/09-independent-verification.md` | `openspec status --change <change-id>` + `openspec validate <change-id> --strict` + `scripts/check-independent-verification.py --report <report> --evidence <json>` (UI Changes verify, in layout_checks, the per-PAGE asserted element count/max deviation/tolerance/missing elements/verdict and independent re-run record); Stage 10 is entered only after PASS |
+| 10 Manual Acceptance, Archiving, and Baseline Write-back | `acceptance-audit` | `prompts/10-acceptance-audit.md` | `baseline-governance.py check-change --phase acceptance` + `scripts/check-acceptance.py <change-id>` + `verify-before-completion.sh` |
 
-## 方法与证据门禁
+## Method and Evidence Gates
 
-- 02–10 的阶段 evidence 必须包含 `methods` 块；`python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` 可单独校验，`workflow.py transition` 会自动调用同一逻辑。
-- 02/03/04/05/07 的 `brainstorming` 至少记录问题/备选/决策；03/07 至少 4 个问题与 2 个备选。未记录不得推进。
-- 03 必须沟通“新系统 / 基于现有系统二开 / 混合、代码地址、第三方接口”：二开时实际读取代码并写入 `technology-decisions.md` 的“现有系统二开约束”与 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
-- 07 必须沟通“修改现有功能代码 / 新功能开发、代码地址、第三方接口”：修改现有功能时实际读取代码并写入 `design.md` 的 `### 现有代码变更影响`；第三方接口写入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行与 test/fakes 证据。
-- 07 存在 HTTP API、原生桥接、设备、第三方、异步或文件边界时，必须生成 `design/interface-catalog.csv` 并运行 `check-interface-catalog.py --change <change-id> --strict`；仅 HTTP API 的 Change 也要在目录中登记 `HTTP_API` 行。
-- OpenSpec/Superpowers 的逐阶段允许/禁止范围见 `docs/SUPERPOWERS-MAPPING.md` 的“OpenSpec 参与矩阵”与“阶段内方法模式”。
+- Stage evidence for 02–10 must include a `methods` block; `python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` can validate it separately, and `workflow.py transition` automatically calls the same logic.
+- The `brainstorming` for 02/03/04/05/07 must record at least questions/alternatives/decisions; 03/07 require at least 4 questions and 2 alternatives. Without such records, the stage must not advance.
+- 03 must discuss "new system / secondary development based on an existing system / hybrid, code location, third-party interfaces": for secondary development, actually read the code and write it into the `Existing System Secondary-Development Constraints` section of `technology-decisions.md` and the `LEGACY-*` entries of `constraint-registry.json`; third-party interfaces are written into `Third-Party Interface Dependency List`, EXTERNAL data flows, and API conventions.
+- 07 must discuss "modification of existing feature code / new feature development, code location, third-party interfaces": when modifying existing features, actually read the code and write it into `### Existing Code Change Impact` in `design.md`; third-party interfaces are written into `THIRD_PARTY_API` rows of `interface-catalog.csv` and test/fakes evidence.
+- When 07 has HTTP API, native bridge, device, third-party, asynchronous, or file boundaries, it must generate `design/interface-catalog.csv` and run `check-interface-catalog.py --change <change-id> --strict`; a Change with only HTTP API must also register `HTTP_API` rows in the catalog.
+- For the per-stage allowed/forbidden scope of OpenSpec/Superpowers, see the "OpenSpec Participation Matrix" and "In-Stage Method Patterns" in `docs/SUPERPOWERS-MAPPING.md`.
 
-## 上下文预算
+## Context Budget
 
-- 契约 `inputs` 是完整审计/溯源集；默认读取以 `input_policy.stage_profiles.lean` 为准（每阶段 ≤8 个读取组、约 ≤16000 字符）。
-- 读序：`BASELINE-BRIEF` → 当前 Change 产物 → 按命中 ID 定向读行/章节 → 完整基线/架构/ADR/完整 specs 仅在必要时按需读并记录原因。
-- 运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简包；`--full` 仅用于交接审计。
-- 输出采用引用式输出，不复制输入全文；摘要行数上限见 `output_policy.summary_budgets`。完整规则见 `docs/INPUT-OUTPUT-POLICY.md`。
+- The contract's `inputs` is the complete audit/traceability set; default reading follows `input_policy.stage_profiles.lean` (≤8 read groups per stage, about ≤16000 characters).
+- Reading order: `BASELINE-BRIEF` → current Change artifacts → targeted row/section reads by matched ID → full baselines/architecture/ADRs/full specs only when necessary and on demand, with the reason recorded.
+- Run `python scripts/agent-context.py --stage <id> --change <change-id>` to get the lean package; `--full` is only for handoff audits.
+- Output uses reference-style output and does not copy full input text; see `output_policy.summary_budgets` for summary line limits. Full rules are in `docs/INPUT-OUTPUT-POLICY.md`.
 
-## 检查策略说明
+## Check Strategy Notes
 
-> 说明：项目级与提案级都不产出 `use-cases` 文件。项目级用 FLOW/NODE 表达业务流程；提案级用例场景统一写在 delta spec 的 Scenario，US/AC 保留在 `design/user-stories.md`。
+> Note: neither the project level nor the proposal level produces `use-cases` files. The project level expresses business flows with FLOW/NODE; proposal-level use case scenarios are written uniformly in the Scenario sections of delta specs, and US/AC remain in `design/user-stories.md`.
 
-需求澄清、客户沟通、Figma 视觉与架构合理性不能由通用 Shell 脚本可靠判定；这些阶段有明确交付物和人工评审清单，而不是伪造一个自动化“通过”。
+Requirement clarification, customer communication, Figma visuals, and architectural soundness cannot be reliably determined by generic shell scripts; these stages have explicit deliverables and manual review checklists rather than a fabricated automated "pass".
 
-正式产物的模板等级与路径请参照 `docs/TEMPLATE-POLICY.md` 和 `docs/OUTPUT-TEMPLATE-MATRIX.csv`；变更模板目录后运行 `python3 scripts/check-output-template-matrix.py`。详细设计合并到 `design.md` 五节，API→IO 映射仅在存在 API 时强制。
+For formal artifact template levels and paths, refer to `docs/TEMPLATE-POLICY.md` and `docs/OUTPUT-TEMPLATE-MATRIX.csv`; after changing the template directory, run `python3 scripts/check-output-template-matrix.py`. Detailed design is consolidated into the five sections of `design.md`, and the API→IO mapping is mandatory only when APIs exist.
 
-## 项目基线与功能 Change 的交互
+## Interaction Between Project Baseline and Feature Changes
 
-- 阶段 04：按每个候选 Change 初步读取冻结基线，识别适用域、约束复用和潜在修订；在路线图中体现。
-- 阶段 05：强制创建 `openspec/changes/<change-id>/design/baseline-impact.md`，记录基线版本、文件/章节/ID、适用约束、复用项、冲突及分类。
-- 阶段 06–07：按设计域重新核验基线版本；基线变化必须得出 `NO_IMPACT` 或 `REBASE_REQUIRED`。
-- 阶段 08：遵循已批准基线；实现发现冲突时暂停受影响任务、提交 BCR/ADR，不得直接编辑冻结基线。
-- 阶段 10：只回写已批准、已实现、已验证且可跨功能复用的决策；功能特有细节保留在归档 Change。
-- 完整规则：`docs/BASELINE-FEATURE-INTERACTION.md`；Change 记录模板：`templates/change-assets/design/baseline-impact.md`。
+- Stage 04: for each candidate Change, preliminarily read the frozen baseline, identify applicable domains, constraint reuse, and potential amendments; reflect this in the roadmap.
+- Stage 05: mandatorily create `openspec/changes/<change-id>/design/baseline-impact.md`, recording the baseline version, files/sections/IDs, applicable constraints, reused items, conflicts, and classification.
+- Stages 06–07: re-verify the baseline version by design domain; any baseline change must result in `NO_IMPACT` or `REBASE_REQUIRED`.
+- Stage 08: follow the approved baseline; when implementation finds a conflict, pause the affected tasks and submit a BCR/ADR; frozen baselines must not be edited directly.
+- Stage 10: write back only decisions that are approved, implemented, verified, and reusable across features; feature-specific details remain in the archived Change.
+- Full rules: `docs/BASELINE-FEATURE-INTERACTION.md`; Change record template: `templates/change-assets/design/baseline-impact.md`.
 
-## 对话式继续流程
+## Conversational Continuation Flow
 
-- 在具备仓库访问和工具执行能力的 Agent 中，使用 `prompts/00-next-step.md` 或说“下一步”。
-- `workflow-state.json` 只用于定位；AI 必须检查真实文件、审批记录与 OpenSpec CLI 状态。
-- 项目基线阶段与功能 Change 阶段不同：需求业务梳理阶段只读取现有 OpenSpec specs；提案获批后才创建 Change。
-- 有 pending approval、阻断项、前置产物缺失或 CLI 验证失败时，不能自动前进。
+- In an Agent with repository access and tool execution capability, use `prompts/00-next-step.md` or say "next step".
+- `workflow-state.json` is only used for locating; the AI must check the real files, approval records, and OpenSpec CLI status.
+- Project baseline stages differ from feature Change stages: the requirements business analysis stage only reads existing OpenSpec specs; a Change is created only after the proposal is approved.
+- When there is a pending approval, a blocker, missing prerequisite artifacts, or a CLI validation failure, the process must not advance automatically.
 
-## 强制输入/输出交接
+## Mandatory Input/Output Handoff
 
-每个阶段的正式输入、正式输出、下游消费关系、审批点与质量门禁，以 `docs/STEP-ARTIFACT-CONTRACTS.md` 和机器可读的 `docs/STEP-ARTIFACT-CONTRACTS.json` 为准。每个 Skill/Prompt 均内嵌对应契约引用。阶段结束必须展示 `templates/workflow/step-handoff-report.md`；未批准产物不得作为下一阶段正式输入。
+The formal inputs, formal outputs, downstream consumption relationships, approval points, and quality gates of each stage are governed by `docs/STEP-ARTIFACT-CONTRACTS.md` and the machine-readable `docs/STEP-ARTIFACT-CONTRACTS.json`. Every Skill/Prompt embeds the corresponding contract reference. At the end of each stage, `templates/workflow/step-handoff-report.md` must be presented; unapproved artifacts must not serve as the formal inputs of the next stage.
 
-涉及 UI 时，阶段 06 的唯一 UI 契约是单文件 `design/figma-audit.md`（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、状态决策、设计代码、断言范围、UI 评审 APPROVED）与 `design/figma-code/`（06 按总体技术选型转码的目标框架设计代码：Vue 栈 `.vue` + Element Plus，React 栈 `.tsx`/`.jsx`）、`design/figma-layout.csv`（运行态断言映射）；07/08 默认离线消费，仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。07 以设计代码为基线填写 `### PAGE→BLOCK→组件映射`（只登记业务化适配与 `UI-DEVIATION`），填满 `route`/`dom_selector` 并定义响应式规则；08 直接移植设计代码、只补业务逻辑，运行 `check-figma-layout.py` 与 `check-design-tokens.py`，`code-review.md` 的 `## UI fidelity` 数值直接取自 `figma-layout-check.json`；09 在 `layout_checks` 独立重跑核验，人工抽查仅限差异/`UI-DERIVED`/未断言 PAGE（缺失/超差/未批准差异不得 PASS）；10 无差异 PAGE 按机器证据批量签收，差异/`UI-DERIVED` PAGE 并排核对后在 `## UI acceptance` 签收。**全流程不保存截图。** Figma 评审稿是视觉/组件/变量最终权威，PAGE ID 由 06 冻结。不再使用 pen.dev、prototype.pen、PAGE-*.html、prototype.md、manifest.json、design-tokens.json、page-inventory/block-inventory/interaction-map/design-spec/figma-handoff。
+When UI is involved, the sole UI contract of Stage 06 is the single file `design/figma-audit.md` (target framework/conversion notes, token actual values, text styles, per-PAGE block specifications, state decisions, design code, assertion scope, UI review APPROVED) together with `design/figma-code/` (the target-framework design code that 06 converts according to the overall technology selection: Vue stack `.vue` + Element Plus, React stack `.tsx`/`.jsx`) and `design/figma-layout.csv` (runtime assertion mapping); 07/08 consume them offline by default, re-reading page by page in batches only when the Figma file version changes or a page is ambiguous (serially, avoiding rate limiting). 07 uses the design code as the baseline to fill in `### PAGE→BLOCK→Component Mapping` (registering only business adaptations and `UI-DEVIATION`), fills in `route`/`dom_selector`, and defines responsive rules; 08 directly ports the design code and adds only business logic, runs `check-figma-layout.py` and `check-design-tokens.py`, and the values in `code-review.md`'s `## UI fidelity` are taken directly from `figma-layout-check.json`; 09 independently re-runs and verifies in `layout_checks`, with manual spot checks limited to deviating/`UI-DERIVED`/unasserted PAGEs (missing/out-of-tolerance/unapproved deviations must not PASS); 10 signs off non-deviating PAGEs in bulk based on machine evidence, and signs off deviating/`UI-DERIVED` PAGEs in `## UI acceptance` after side-by-side checking. **Screenshots are not saved throughout the process.** The Figma review draft is the final authority for visuals/components/variables, and PAGE IDs are frozen by 06. pen.dev, prototype.pen, PAGE-*.html, prototype.md, manifest.json, design-tokens.json, page-inventory/block-inventory/interaction-map/design-spec/figma-handoff are no longer used.
 
 ## P0 Runtime Governance
 
-- 阶段 DAG 以 `docs/WORKFLOW-STAGES.json` 为准；状态转换只能通过 `scripts/workflow.py transition`。
-- 每次成功转换生成 SHA-256 handoff manifest；下游入口自动核验上游交接文件未漂移；被后续阶段声明为输出的产物标记为 `mutable_by_design`，只核验存在性。
-- 阶段 08 实施后必须经过阶段 09 独立只读验证，PASS 后才进入阶段 10。
-- 返工使用 `workflow.py reopen --step <id> --reason <原因>`；当前 Change 验收后使用 `workflow.py next-change --change-id <id>` 开始下一个 Change。
-- 详细命令、Evidence JSON 和限制见 `docs/P0-RUNTIME-GOVERNANCE.md`。
+- The stage DAG is governed by `docs/WORKFLOW-STAGES.json`; state transitions may only go through `scripts/workflow.py transition`.
+- Each successful transition generates a SHA-256 handoff manifest; the downstream entry automatically verifies that upstream handoff files have not drifted; artifacts declared as outputs by later stages are marked `mutable_by_design` and only their existence is verified.
+- After Stage 08 implementation, Stage 09 independent read-only verification must be completed, and Stage 10 may be entered only after PASS.
+- For rework, use `workflow.py reopen --step <id> --reason <reason>`; after the current Change is accepted, use `workflow.py next-change --change-id <id>` to start the next Change.
+- For detailed commands, Evidence JSON, and limitations, see `docs/P0-RUNTIME-GOVERNANCE.md`.
 
-## Baseline Governance Engine 门禁
+## Baseline Governance Engine Gates
 
-- 项目基线冻结：`baseline-governance.py freeze` / `audit --require-frozen`；脚本核对各域状态、审批证据、约束来源和 SHA-256。
-- 项目基线修订：`open-amendment` 先将总体状态切换为 UNDER_AMENDMENT；修订期间所有 Change 阶段阻断；`close-amendment` 只有在受影响域版本升级、哈希刷新和审批证据齐全后才重新冻结。
-- Change 绑定：阶段 05 自动创建 `baseline-binding.json`，对全部 ACTIVE Constraint ID 建立逐条记录；阶段 06–07 由设计证据门禁，阶段 08/09 由实现证据门禁，阶段 10 由验收门禁。
-- 完整使用规则见 `docs/BASELINE-FEATURE-INTERACTION.md` 第 9 节；自动化检查并不等同于审批身份认证，仍须使用受保护分支/CI/CODEOWNERS。
+- Project baseline freezing: `baseline-governance.py freeze` / `audit --require-frozen`; the script verifies domain statuses, approval evidence, constraint sources, and SHA-256.
+- Project baseline amendment: `open-amendment` first switches the overall status to UNDER_AMENDMENT; all Change stages are blocked during amendment; `close-amendment` re-freezes only after the affected domains' versions are upgraded, hashes refreshed, and approval evidence is complete.
+- Change binding: Stage 05 automatically creates `baseline-binding.json`, establishing a record for every ACTIVE Constraint ID one by one; Stages 06–07 are gated by design evidence, Stages 08/09 by implementation evidence, and Stage 10 by acceptance.
+- See Section 9 of `docs/BASELINE-FEATURE-INTERACTION.md` for full usage rules; automated checks are not equivalent to approval identity authentication, and protected branches/CI/CODEOWNERS are still required.

@@ -121,7 +121,7 @@ def main():
     if profile:
         lean = profile.get('lean') or []
         max_files = profile.get('max_files', 8)
-        print('## 0. 精简输入（默认读取，预算内）')
+        print('## 0. Lean inputs (default reads, within budget)')
         for item in lean:
             print(f'- {item}')
             for raw in PATH_RE.findall(str(item)):
@@ -131,33 +131,33 @@ def main():
                     print(f'  - `{token}` [MISSING]')
                 elif exists is True:
                     print(f'  - `{token}` [OK]')
-        print(f'- 预算：lean 读取组 {len(lean)}/{max_files}；超出时先拆分 Change 或缩小范围。')
+        print(f'- Budget: {len(lean)}/{max_files} lean read groups; when exceeded, split the Change first or narrow the scope.')
         if len(lean) > max_files:
             print(f'CONTEXT_BUDGET_EXCEEDED: lean {len(lean)} > max_files {max_files}')
             sys.exit(1)
         print('')
-        print('## 1. 按需输入（仅触发后读取，不计入默认预算）')
+        print('## 1. On-demand inputs (read only after a trigger; not counted in the default budget)')
         for item in profile.get('on_demand') or []:
             print(f'- {item}')
         print('')
         if full:
-            print('## 2. 完整契约输入（审计用）')
+            print('## 2. Full contract inputs (for audit)')
             for item in row.get('inputs', []):
                 print(f'- {item}')
             print('')
         else:
-            print('## 2. 完整契约输入（审计用，默认不读；需要时加 --full）')
-            print(f'- 共 {len(row.get("inputs", []))} 条；默认按上面的精简/按需清单读取。')
+            print('## 2. Full contract inputs (audit-only; not read by default; add --full when needed)')
+            print(f'- {len(row.get("inputs", []))} items; read the lean/on-demand lists above by default.')
             print('')
     else:
-        print('## 0. 常驻读取（先读）')
+        print('## 0. Resident reads (read first)')
         for path in RESIDENT.get(row['step'].lstrip('0'), []):
             token, exists = check_path(path, change_id)
             print(f'- `{token}` [{"OK" if exists else "MISSING"}]')
             if exists is False:
                 missing.append(token)
         print('')
-        print('## 1. 契约输入')
+        print('## 1. Contract inputs')
         for item in row.get('inputs', []):
             print(f'- {item}')
             for raw in PATH_RE.findall(item):
@@ -169,16 +169,16 @@ def main():
                     print(f'  - `{token}` [OK]')
         print('')
 
-    print('## 3. 契约输出')
+    print('## 3. Contract outputs')
     for item in row.get('outputs', []):
         print(f'- {item.replace("<change-id>", change_id or "<change-id>")}')
 
     print('')
-    print('## 4. 门禁')
+    print('## 4. Gates')
     print(row.get('gate', '—'))
     print('')
-    print('## 5. 审批与下一步输入')
-    print(f'- 审批：{row.get("approval", "—")}')
+    print('## 5. Approval and next-stage inputs')
+    print(f'- Approval: {row.get("approval", "—")}')
     for item in row.get('next_inputs', []):
         print(f'- {item}')
 

@@ -1,37 +1,37 @@
-# 项目基线变更请求
+# Project Baseline Change Request
 
-- Request ID：`BCR-<id>`
-- 来源 Change：`<change-id>`
-- 影响基线域：产品 / 架构 / 数据领域 / 公共 API / 前端 / 测试质量
-- 状态：DRAFT / REVIEW / APPROVED / REJECTED / IMPLEMENTED
-- 提议人/日期：
-- 审批人：
+- Request ID: `BCR-<id>`
+- Source Change: `<change-id>`
+- Impacted baseline domain: Product / Architecture / Data Domain / Public API / Frontend / Test Quality
+- Status: DRAFT / REVIEW / APPROVED / REJECTED / IMPLEMENTED
+- Proposer/date:
+- Approver:
 
-## 1. 变更原因与证据
+## 1. Change Reason and Evidence
 
-## 2. 当前基线及版本
+## 2. Current Baseline and Version
 
-## 3. 拟修改约束/文件/章节
+## 3. Constraints/Files/Sections to Modify
 
-## 4. 备选方案与取舍
+## 4. Alternatives and Trade-offs
 
-## 5. 影响分析
+## 5. Impact Analysis
 
-- 受影响 Change：
-- 已归档功能/兼容影响：
-- 系统/数据/安全/部署/质量影响：
-- 迁移与回滚：
+- Affected Changes:
+- Impact on archived features/compatibility:
+- System/data/security/deployment/quality impact:
+- Migration and rollback:
 
-## 6. 决策
+## 6. Decision
 
-- 批准/拒绝：
-- 决策理由：
-- 生效版本/日期：
-- 关联 ADR：
+- Approve/Reject:
+- Decision rationale:
+- Effective version/date:
+- Related ADR:
 
-## 7. 实施与验证
+## 7. Implementation and Verification
 
-- 已更新基线文件：
-- 已更新 baseline-status.md：
-- 在途 Change 复核结果：
-- 审计/验证证据：
+- Updated baseline files:
+- Updated baseline-status.md:
+- Review results for in-flight Changes:
+- Audit/verification evidence:

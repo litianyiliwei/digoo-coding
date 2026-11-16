@@ -50,7 +50,7 @@ def ui_change():
     if not audit.is_file():
         return False
     text = audit.read_text(encoding="utf-8")
-    return not re.search(r"^- 设计来源状态：N/A\s*$", text, re.M)
+    return not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", text, re.M)
 
 
 def page_ids():
@@ -59,6 +59,8 @@ def page_ids():
         return []
     text = audit.read_text(encoding="utf-8")
     start = text.find("## PAGE 与节点")
+    if start < 0:
+        start = text.find("## PAGEs and Nodes")
     if start < 0:
         start = text.find("## 页面覆盖")
     end = text.find("\n## ", start + 1) if start >= 0 else -1
@@ -162,7 +164,7 @@ if ui_change():
                 errors.append(f"UI fidelity row records a difference but is not DEVIATION_APPROVED: {row}")
             if status == "deviation_approved":
                 approver = cells[6] if len(cells) > 6 else ""
-                if not approver and "审批人" not in cells[4]:
+                if not approver and "审批人" not in cells[4] and "approver" not in cells[4].lower():
                     errors.append(f"DEVIATION_APPROVED row must name the approver: {row}")
             if any(c.lower() in {"todo", "tbd", "pending", "open"} for c in cells):
                 errors.append(f"UI fidelity row contains unresolved placeholder: {row}")

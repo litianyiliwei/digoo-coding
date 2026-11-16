@@ -1,59 +1,59 @@
-# Prompt：实现、TDD、验证与代码审查
+# Prompt: Implementation, TDD, Verification, and Code Review
 
 ```text
-执行 `@implementation-orchestrator`，Change：<change-id>。
+Execute `@implementation-orchestrator`, Change: <change-id>.
 
-先读取 `openspec instructions apply --change <change-id>`、设计文档与 tasks。检查 Superpowers 当前可用技能。按复杂度使用 `brainstorming`、`using-git-worktrees`、`writing-plans`、`subagent-driven-development`/`executing-plans`；实施遵循 `test-driven-development`，调试使用 `systematic-debugging`，审查使用 `requesting-code-review` / `receiving-code-review`，完成前使用 `verification-before-completion`。有 `design/interface-catalog.csv` 时，逐行实现接口契约并为每个 interface_id 执行至少一个 TEST；原生/设备/第三方边界写清真机、模拟器、替身或人工验证证据，无法执行写 BLOCKED + 原因，不得伪报通过。阶段 evidence 必须写 `methods`：`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径，并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。
+First read `openspec instructions apply --change <change-id>`, the design document, and tasks. Check the currently available Superpowers skills. Use `brainstorming`, `using-git-worktrees`, `writing-plans`, `subagent-driven-development`/`executing-plans` according to complexity; implement following `test-driven-development`, debug using `systematic-debugging`, review using `requesting-code-review` / `receiving-code-review`, and use `verification-before-completion` before completion. When `design/interface-catalog.csv` exists, implement the interface contracts row by row and execute at least one TEST for each interface_id; for native/device/third-party boundaries, specify real-device, simulator, double, or manual verification evidence; if it cannot be executed, write BLOCKED + reason; do not falsely report passing. Stage evidence must write `methods`: `test-driven-development` and `verification-before-completion` each with at least 1 decision and a real evidence path, and run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`.
 
-一次完成一个可验证小任务：先写测试并观察预期失败，再实现最小代码、复测、重构、更新 tasks。不得擅改规格/OpenAPI；规格冲突先暂停并更新 Change。最终报告真实执行命令、退出码、测试/构建结果和未执行项，未执行不能写通过。
+Complete one verifiable small task at a time: first write the test and observe the expected failure, then implement the minimal code, re-test, refactor, and update tasks. Do not change the spec/OpenAPI without authorization; on a spec conflict, pause first and update the Change. The final report states the commands actually executed, exit codes, test/build results, and items not executed; "not executed" cannot be written as passed.
 
-涉及 UI 时（前端任务前/后必须执行）：
-- 读取 `design/figma-audit.md` 的目标框架/转码说明、token **实际值**、文字样式、每 PAGE 区块规格、状态决策，以及 `design/figma-code/`（06 已按总体技术选型转码的目标框架设计代码）与 `design/figma-layout.csv`（断言映射）；默认离线消费导出包，仅在文件版本变化或页面有歧义时按页批量重读 Figma（串行，避免限流）。
-- **直接以 `figma-code/` 为页面骨架**：将 `.vue`（React 栈为 `.tsx`/`.jsx`）设计代码移植到应用目录，只补路由、API、状态、权限与业务逻辑；不得重写样式/布局/文案。确需视觉改动时登记 `UI-DEVIATION`（原因、影响、审批人）并同步更新断言；先建立全局 token 层：CSS 变量 / 目标组件库主题 / 字体栈（含 Noto Sans SC），禁止在页面散落硬编码颜色/字号；实现必须满足 `figma-layout.csv` 的 `dom_selector`（优先使用稳定的 `data-test` / `data-figma-node`）。
-- 运行 `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`，生成 `design/evidence/figma-layout-check.json`；运行 `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`；两者退出码必须为 0。
-- 在 `design/evidence/code-review.md` 的 `## UI fidelity` 逐 PAGE 从 `figma-layout-check.json` 抄录 Figma node、断言元素数/最大偏差、布局证据、结论与审批人；**只有存在差异或 `UI-DERIVED` 的 PAGE 需要人工说明与审批，无差异 PAGE 不做逐页视觉复核**。缺少断言证据、元素缺失、几何超差或有未批准差异不得转出阶段 08。**不使用截图。**
-- 运行 `python scripts/check-code-review.py --change <change-id> --strict`，UI Change 会校验 `## UI fidelity` 与 `figma-layout-check.json`。
-正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
-基线交互要求：实施前复核 `design/baseline-impact.md` 和当前基线版本。若实现中发现冲突/缺口，暂停受影响任务、提交基线修订请求/ADR；不得直接编辑冻结基线。基线获批更新后，刷新 Change 的基线快照、设计和测试；实施前运行 `python3 scripts/check-baseline-impact.py <change-id> --strict`。
+When UI is involved (mandatory before/after frontend tasks):
+- Read the target framework/transcoding notes, token **actual values**, text styles, block specifications per PAGE, and state decisions in `design/figma-audit.md`, as well as `design/figma-code/` (target framework design code already transcoded by 06 per the overall technology decisions) and `design/figma-layout.csv` (assertion mapping); consume the exported package offline by default, and re-read Figma batch by page only when the file version changes or the page is ambiguous (serially, to avoid rate limiting).
+- **Use `figma-code/` directly as the page skeleton**: port the `.vue` (for the React stack, `.tsx`/`.jsx`) design code into the application directory, and only add routing, API, state, permissions, and business logic; do not rewrite styles/layout/copy. When a visual change is truly needed, register a `UI-DEVIATION` (reason, impact, approver) and synchronously update the assertions; first establish the global token layer: CSS variables / target component library theme / font stack (including Noto Sans SC); hard-coded colors/font sizes scattered in pages are forbidden; the implementation must satisfy the `dom_selector` in `figma-layout.csv` (prefer stable `data-test` / `data-figma-node`).
+- Run `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`, generating `design/evidence/figma-layout-check.json`; run `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`; both exit codes must be 0.
+- In `## UI fidelity` of `design/evidence/code-review.md`, copy per PAGE from `figma-layout-check.json` the Figma node, number of asserted elements/maximum deviation, layout evidence, conclusion, and approver; **only PAGES with differences or `UI-DERIVED` need manual explanation and approval; PAGES with no differences do not get page-by-page visual review**. Missing assertion evidence, missing elements, geometry out of tolerance, or unapproved differences block exit from stage 08. **Do not use screenshots.**
+- Run `python scripts/check-code-review.py --change <change-id> --strict`; for UI Changes it validates `## UI fidelity` and `figma-layout-check.json`.
+Formal artifacts must follow the templates specified in `docs/TEMPLATE-POLICY.md` and `docs/OUTPUT-TEMPLATE-MATRIX.csv`; do not delete template fields, write PENDING for unknown items and explain why.
+Baseline interaction requirements: before implementation, re-check `design/baseline-impact.md` and the current baseline version. If a conflict/gap is found during implementation, pause the affected tasks and submit a baseline amendment request/ADR; do not directly edit the frozen baseline. After the baseline update is approved, refresh the Change's baseline snapshot, design, and tests; before implementation run `python3 scripts/check-baseline-impact.py <change-id> --strict`.
 ```
 
-上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+Context: first run `python scripts/agent-context.py --stage <id> --change <change-id>` to get the condensed input; the full `inputs` are for audit only, and by default read from the condensed/on-demand list. At stage end, run `python scripts/check-output-context.py --stage <id> --strict` to check the summary output budget.
 
-## 运行前要填的变量
+## Variables to Fill Before Running
 
-- 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。
-- Change ID：只在功能级阶段使用；项目级阶段可以写 `N/A`。
-- 加载 Skill：在支持 Agent Skill 的 OpenCode 环境中使用 `@implementation-orchestrator`，或先显式加载同名 Skill。
+- Input materials: replace the `<...>` placeholders with real paths, links, or content.
+- Change ID: used only in feature-level stages; project-level stages may write `N/A`.
+- Load Skill: in an OpenCode environment that supports Agent Skills, use `@implementation-orchestrator`, or explicitly load the same-named Skill first.
 
-## 执行工具协议（必须遵守）
+## Execution Tool Protocol (Must Be Followed)
 
-- **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`（例如 OpenCode 支持时使用 `@<skill-id>`）；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 必须检查并按宿主机制加载可用的 `using-superpowers`、`writing-plans`、`test-driven-development`、必要时 `systematic-debugging`、`requesting-code-review`/`receiving-code-review`、`verification-before-completion`。阶段 evidence 必须写 `methods`（`test-driven-development` 与 `verification-before-completion` 各至少 1 个决策和真实证据路径），并运行 `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`。先检查技能是否真实安装/可发现，使用宿主 Agent 支持的调用方式读取其指引；不可用时用 `mode=equivalent` 并写 `reason`，禁止声称调用了未安装技能。
-- **OpenSpec：** 先运行 `openspec instructions apply --change <id> --json` 和 `openspec status --change <id>`；按批准 tasks 实施，完成后 `openspec validate <id> --strict`。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行，不得假装验证通过。
-- **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
-- **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。
+- **Loading project Skills:** load `.claude/skills/<skill-id>/SKILL.md` according to the current Agent's actual mechanism (for example, use `@<skill-id>` when OpenCode supports it); do not treat the Skill name as plain text only. If the repository Skill cannot be loaded, report clearly and execute per this Prompt.
+- **Superpowers:** you must check and load the available `using-superpowers`, `writing-plans`, `test-driven-development`, `systematic-debugging` when necessary, `requesting-code-review`/`receiving-code-review`, and `verification-before-completion` following the host mechanism. Stage evidence must write `methods` (`test-driven-development` and `verification-before-completion` each with at least 1 decision and a real evidence path), and run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`. First check whether the skills are actually installed/discoverable, and read their guidance using the invocation method supported by the host Agent; if unavailable, use `mode=equivalent` and write `reason`; claiming to have invoked an uninstalled skill is forbidden.
+- **OpenSpec:** first run `openspec instructions apply --change <id> --json` and `openspec status --change <id>`; implement per the approved tasks, then run `openspec validate <id> --strict`. Commands must actually be executed and their exit codes/results reported; if the CLI does not exist or fails, mark it as blocked/not executed; do not pretend verification passed.
+- **State and gates:** read/update `workflow-state.json`. Only when this stage's artifacts are written to the specified paths and the script checks pass may the stage be marked complete. When encountering pending approval, missing input, or verification failure, you must pause.
+- **Output report:** list the files actually read, Skills/CLI/scripts actually invoked, files generated/modified, check results, items not executed, and next steps. Do not automatically commit, publish, archive, or overwrite existing files unless the Prompt explicitly authorizes it and the gates have passed.
 
-## 强制交付物交接
+## Mandatory Deliverable Handoff
 
-执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="implementation-orchestrator"` 的记录。
+Before execution, read the `skill="implementation-orchestrator"` record in `docs/STEP-ARTIFACT-CONTRACTS.md` and `docs/STEP-ARTIFACT-CONTRACTS.json`.
 
-- 输入核验：已批准 tasks.md/design.md；设计五节、OpenAPI、IO 契约；design.md（含测试设计节）、design/test-cases.csv 与 traceability.csv；项目级工程规范/测试策略；docs/product/open-questions.md（只读）；涉及 UI 时 `design/figma-audit.md`（目标框架/转码说明、token 实际值/PAGE 规格/状态决策）、`design/figma-code/`（目标框架设计代码）与 `design/figma-layout.csv`（断言映射）及项目 token 文件；`docs/architecture/technology-decisions.md`（目标框架一致性）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：实际源代码/迁移/配置；自动化测试代码与运行结果；openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 `## UI fidelity` 数值表，数值直接取自 `figma-layout-check.json`；仅差异/`UI-DERIVED` PAGE 需人工说明与审批）与 `design/evidence/figma-layout-check.json`；实现/验证证据。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：代码差异、测试报告、审查结论、未解决问题、`figma-layout-check.json` 与 token 检查结果。在报告中明确这些文件如何被下游消费。
-- 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
-- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 08-implementation-orchestrator”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
-- 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
-
-
-## 独立验证交接（新增强制要求）
-
-Builder 完成后不直接进入人工验收。必须交接给独立 Skill `@independent-verifier`（阶段 `09-independent-verification`），使用独立 Agent/上下文只读验证代码、规格、AC、IO 契约并重新执行测试。Builder 不得自行生成 PASS 结论替代 Verifier。
+- Input verification: approved tasks.md/design.md; the five design sections, OpenAPI, and IO contracts; design.md (including the test design section), design/test-cases.csv, and traceability.csv; project-level engineering conventions/test strategy; docs/product/open-questions.md (read-only); when UI is involved, `design/figma-audit.md` (target framework/transcoding notes, token actual values/PAGE specifications/state decisions), `design/figma-code/` (target framework design code), `design/figma-layout.csv` (assertion mapping), and the project token file; `docs/architecture/technology-decisions.md` (target framework consistency). Report item by item whether each file exists, its version, and approval status; pause if not satisfied.
+- Must output: actual source code/migrations/configuration; automated test code and run results; openspec/changes/<change-id>/design/evidence/code-review.md (when UI is involved, including the `## UI fidelity` numeric table, with values taken directly from `figma-layout-check.json`; only difference/`UI-DERIVED` PAGES need manual explanation and approval) and `design/evidence/figma-layout-check.json`; implementation/verification evidence. Write into the repository per the templates; do not show them only in chat.
+- Next-step input: code diff, test report, review conclusion, unresolved issues, `figma-layout-check.json`, and token check results. In the report, clearly state how these files are consumed downstream.
+- At stage completion, show the handoff report per `templates/workflow/step-handoff-report.md`; distinguish generated, draft, suggestion, pending confirmation, and not executed.
+- **Stage boundary (mandatory):** stage completion ≠ permission to enter the next stage. After the artifacts are written and checks pass, run `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<review summary>"` (the flow is frozen as pending review), show the report per the handoff template, and then **end the turn immediately**; before the user explicitly replies "review passed 08-implementation-orchestrator", you are forbidden to read/execute the next stage's Prompt/Skill and forbidden to create next-stage artifacts. After approval, run `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval record>`, then run `transition`. Do not fill in approver/approved_at yourself, and do not treat artifact completion or self-check passing as approval.
+- Update `workflow-state.json` only after the gates pass and approval is complete; do not automatically cross approval points.
 
 
-## 代码审查内容门禁（必须执行）
+## Independent Verification Handoff (New Mandatory Requirement)
 
-阶段 08 转出前运行 `python scripts/check-code-review.py --change <change-id> --strict`，退出码必须为 0。`design/evidence/code-review.md` 必须填写真实 Change ID、审查人/工具、审查日期或 commit、`Review conclusion`（PASS/APPROVED/NO_BLOCKING_FINDINGS）、发现项及其关闭状态，并说明规格、安全、数据一致性与失败路径的审查结论；涉及 UI 时还必须包含 `## UI fidelity` 章节，逐 PAGE 列出 Figma node、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论、审批人与审查方式（机器证据/人工复核），且 `figma-layout-check.json` 的 `result` 必须为 PASS、无缺失元素、`max_delta_px` 不超过 `tolerance_px`。TODO/PENDING、未关闭发现项、缺失断言证据或有未批准差异阻断阶段 08。**截图不是证据，不得写入或引用 `ui-screens/`。**
+After completing, the Builder does not proceed directly to manual acceptance. It must hand off to the independent Skill `@independent-verifier` (stage `09-independent-verification`), which uses an independent Agent/context to verify the code, specs, AC, and IO contracts in read-only mode and re-execute tests. The Builder must not generate a PASS conclusion itself to replace the Verifier.
 
-## 机器基线实现门禁（必须执行）
 
-编码前先通过 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`。实现后为每条适用约束补充 PASS、验证方法和真实证据文件；阶段 08 转出前执行 `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`。
+## Code Review Content Gate (Must Be Executed)
+
+Before stage 08 exit, run `python scripts/check-code-review.py --change <change-id> --strict`; the exit code must be 0. `design/evidence/code-review.md` must fill in the real Change ID, reviewer/tool, review date or commit, `Review conclusion` (PASS/APPROVED/NO_BLOCKING_FINDINGS), findings and their closure status, and state the review conclusions for specs, security, data consistency, and failure paths; when UI is involved it must also contain the `## UI fidelity` section, listing per PAGE the Figma node, number of asserted elements/maximum deviation, layout evidence `design/evidence/figma-layout-check.json#PAGE-xxx`, differences, conclusion, approver, and review method (machine evidence/manual review), and the `result` of `figma-layout-check.json` must be PASS, with no missing elements and `max_delta_px` not exceeding `tolerance_px`. TODO/PENDING, unclosed findings, missing assertion evidence, or unapproved differences block stage 08. **Screenshots are not evidence and must not be written into or referenced from `ui-screens/`.**
+
+## Machine Baseline Implementation Gate (Must Be Executed)
+
+Before coding, first pass `python3 scripts/baseline-governance.py check-change --change-id <id> --phase design`. After implementation, add PASS, verification methods, and real evidence files for each applicable constraint; before stage 08 exit, execute `python3 scripts/baseline-governance.py check-change --change-id <id> --phase implementation`.

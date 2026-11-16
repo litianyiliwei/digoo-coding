@@ -2,6 +2,7 @@
 """Check one-to-one workflow step contracts against Skill and Prompt files."""
 from pathlib import Path
 import json, sys
+from method_evidence import TOPIC_ALIASES
 ROOT=Path(__file__).resolve().parents[1]
 data=json.loads((ROOT/'docs/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
 stages=json.loads((ROOT/'docs/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
@@ -17,9 +18,9 @@ for row in data.get('steps',[]):
     skill=SKILLS_DIR/sid/'SKILL.md'
     prompt=ROOT/row.get('prompt','')
     if not skill.is_file(): errors.append(f'missing Skill: {skill.relative_to(ROOT)}')
-    elif '## 输入/输出/交接契约（强制）' not in skill.read_text(encoding='utf-8'): errors.append(f'Skill missing handoff contract section: {sid}')
+    elif '## 输入/输出/交接契约（强制）' not in skill.read_text(encoding='utf-8') and '## Input/Output/Handoff Contract' not in skill.read_text(encoding='utf-8'): errors.append(f'Skill missing handoff contract section: {sid}')
     if not prompt.is_file(): errors.append(f'missing Prompt: {row.get("prompt")}')
-    elif '## 强制交付物交接' not in prompt.read_text(encoding='utf-8'): errors.append(f'Prompt missing handoff contract section: {row.get("prompt")}')
+    elif '## 强制交付物交接' not in prompt.read_text(encoding='utf-8') and '## Mandatory Deliverable Handoff' not in prompt.read_text(encoding='utf-8'): errors.append(f'Prompt missing handoff contract section: {row.get("prompt")}')
 # Cross-check contract rows against the authoritative stage DAG (docs/WORKFLOW-STAGES.json).
 # workflow-orchestrator is the "next step" entry point, intentionally not a DAG stage.
 ORCHESTRATOR_SKILLS={'workflow-orchestrator'}
@@ -65,9 +66,10 @@ for key, rule in policy.items():
             topic=str(topic).strip()
             if not topic:
                 continue
-            if skill_file.is_file() and topic not in skill_text:
+            aliases = [a.lower() for a in TOPIC_ALIASES.get(topic, [topic])]
+            if skill_file.is_file() and not any(a in skill_text.lower() for a in aliases):
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {skill_file.relative_to(ROOT)}')
-            if prompt_file.is_file() and topic not in prompt_text:
+            if prompt_file.is_file() and not any(a in prompt_text.lower() for a in aliases):
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {row.get("prompt")}')
 # Validate lean-context policies: every change stage has a lean default read
 # set within its declared file budget, plus an on-demand overflow list.

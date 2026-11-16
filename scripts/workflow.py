@@ -331,7 +331,7 @@ def cmd_request_review(args):
     if targets: print('REVIEW_TARGETS='+'; '.join(targets))
     print('STATUS=AWAITING_USER_REVIEW')
     print('NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.')
-    print(f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批证据路径>')
+    print(f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>')
     return 0
 
 def cmd_approve(args):

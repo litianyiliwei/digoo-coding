@@ -1,35 +1,35 @@
-# 业务流程（节点级）
+# Business Processes (Node Level)
 
-> 状态：DRAFT
-> 来源基线：访谈/业务材料/旧系统资料
-> 关联产物：`docs/product/data-objects.csv`、`docs/product/rd-matrix.csv`、`docs/product/business-rules.md`
-> 维护规则：每个 FLOW 拆到可执行节点；节点 ID 为 `NODE-<流程号>-<序号>`，主流程、替代流程、异常流程都要有节点。
+> Status: DRAFT
+> Source baseline: interviews/business materials/legacy system materials
+> Related artifacts: `docs/product/data-objects.csv`, `docs/product/rd-matrix.csv`, `docs/product/business-rules.md`
+> Maintenance rule: split every FLOW into executable nodes; node IDs are `NODE-<flow number>-<sequence>`; main flows, alternative flows, and exception flows all need nodes.
 
-## FLOW-001：<流程名称>
+## FLOW-001: <Process Name>
 
-- 状态：DRAFT
-- 业务目标：PENDING
-- 触发条件：PENDING
-- 前置条件：PENDING
-- 后置条件：PENDING
-- 参与者/角色：PENDING
-- 关联 RD/BR/AC：PENDING
+- Status: DRAFT
+- Business goal: PENDING
+- Trigger condition: PENDING
+- Preconditions: PENDING
+- Postconditions: PENDING
+- Participants/Roles: PENDING
+- Related RD/BR/AC: PENDING
 
-### 主流程节点
+### Main Flow Nodes
 
-| NODE ID | 节点名称 | 执行角色 | 输入数据对象 | 输出数据对象 | 前置条件 | 处理动作 | 异常/分支 | 下一节点 | 关联业务规则 |
+| NODE ID | Node name | Executing role | Input data object | Output data object | Preconditions | Processing action | Exception/Branch | Next node | Related business rules |
 |---|---|---|---|---|---|---|---|---|---|
 | NODE-001-01 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | NODE-001-02 | PENDING |
-| NODE-001-02 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | 结束 | PENDING |
+| NODE-001-02 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | End | PENDING |
 
-### 替代流程节点
+### Alternative Flow Nodes
 
-| NODE ID | 节点名称 | 执行角色 | 输入数据对象 | 输出数据对象 | 前置条件 | 处理动作 | 异常/分支 | 下一节点 | 关联业务规则 |
+| NODE ID | Node name | Executing role | Input data object | Output data object | Preconditions | Processing action | Exception/Branch | Next node | Related business rules |
 |---|---|---|---|---|---|---|---|---|---|
-| NODE-001-03 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | 结束 | PENDING |
+| NODE-001-03 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | End | PENDING |
 
-### 异常流程节点
+### Exception Flow Nodes
 
-| NODE ID | 节点名称 | 执行角色 | 输入数据对象 | 输出数据对象 | 前置条件 | 处理动作 | 异常/分支 | 下一节点 | 关联业务规则 |
+| NODE ID | Node name | Executing role | Input data object | Output data object | Preconditions | Processing action | Exception/Branch | Next node | Related business rules |
 |---|---|---|---|---|---|---|---|---|---|
-| NODE-001-04 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | 结束 | PENDING |
+| NODE-001-04 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | End | PENDING |

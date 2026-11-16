@@ -25,10 +25,16 @@ for f in "${required[@]}"; do
 done
 if (( missing )); then echo "Core design assets missing." >&2; exit 1; fi
 
-# design.md must carry the five unified sections.
-for section in '## 设计决策' '## 接口设计' '## 前端详细设计' '## 后端详细设计' '## 测试设计'; do
-  if ! grep -qF "$section" "$DESIGN"; then echo "ERROR MISSING SECTION: design.md -> $section"; missing=1; fi
-done
+# design.md must carry the five unified sections (English or Chinese headings).
+check_section() {
+  local zh="$1" en="$2"
+  if ! grep -qE "$zh|$en" "$DESIGN"; then echo "ERROR MISSING SECTION: design.md -> $zh / $en"; missing=1; fi
+}
+check_section '^## 设计决策$' '^## Design Decisions$'
+check_section '^## 接口设计$' '^## Interface Design$'
+check_section '^## 前端详细设计$' '^## Frontend Detailed Design$'
+check_section '^## 后端详细设计$' '^## Backend Detailed Design$'
+check_section '^## 测试设计$' '^## Test Design$'
 if (( missing )); then echo "design.md is missing unified design sections." >&2; exit 1; fi
 
 # API assets are conditional: required only when OpenAPI actually defines operations.

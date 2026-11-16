@@ -1,38 +1,46 @@
-# Figma 设计契约与 UI 评审（单文件）
+# Figma Design Contract and UI Review (Single File)
 
-- Change ID：`<change-id>`
-- Figma 文件/页面：`<真实 Figma 链接>`
-- fileKey：`<fileKey>`
-- 文件版本/快照时间：`<版本号、lastModified 或导出版本 / 时间>`
-- 设计来源状态：DRAFT
-- UI 评审状态：DRAFT
-- 机器契约：`figma-code/`（每 PAGE 一个**目标框架对齐**的设计代码：Vue 栈为 `.vue` + 该端组件库（Web 为 Element Plus，移动端为 uni-app 组件库），React 栈为 `.tsx`/`.jsx`）与 `figma-layout.csv`（精简几何/文本/字体断言表）
-- 资产目录：`figma-assets/`（仅图片/SVG 资产与 `README.md`；**不保存参考截图**）
+- Change ID: `<change-id>`
+- Figma file/page: `<real Figma link>`
+- fileKey: `<fileKey>`
+- File version/snapshot time: `<version number, lastModified, or export version / time>`
+- Design source status: DRAFT
+- UI review status: DRAFT
+- Machine contract: `figma-code/` (one **target-framework-aligned** design code file per PAGE: for the Vue stack, `.vue` + that platform's component library (Web uses Element Plus, mobile uses the uni-app component library); for the React stack, `.tsx`/`.jsx`) and `figma-layout.csv` (a concise geometry/text/font assertion table)
+- Asset directory: `figma-assets/` (image/SVG assets and `README.md` only; **reference screenshots are not stored**)
 
-> 本文件是 06 的唯一 UI 契约，也是 07/08/09/10 的唯一界面输入。
-> 真实 Figma 评审稿是视觉/结构/组件/变量的最终权威；本文件必须记录**实际值**与**每页规格**，不能只写变量名。
-> 机器判据是 `figma-layout.csv` 的预期几何/文本/字体与运行态 DOM 的数值断言（`scripts/check-figma-layout.py`），以及 `scripts/check-design-tokens.py` 的 token 实际值比对；**截图不是门禁证据**。实现以 `figma-code/` 的目标框架设计代码为准。
-> 06 一次性导出节点几何、token 与实际资产，并按总体技术选型转码；07/08 默认离线消费，仅在文件版本变化或页面有歧义时重新读取 Figma。
-> 无 UI 时：在“设计来源与选择”写入 `- 设计来源状态：N/A` 与 `- 无 UI 理由：<原因>`；无需填写 Figma/令牌/节点章节。
+> This file is the only UI contract for 06 and the only interface input for 07/08/09/10.
+> The real Figma review draft is the final authority for visuals/structure/components/variables; this file must record **actual values** and **per-page specifications**, not just variable names.
+> The machine criteria are the numeric assertions of expected geometry/text/font in `figma-layout.csv` against the runtime DOM (`scripts/check-figma-layout.py`), plus token actual-value comparison by `scripts/check-design-tokens.py`; **screenshots are not gate evidence**. Implementation follows the target-framework design code in `figma-code/`.
+> 06 exports node geometry, tokens, and real assets in one pass and transcodes according to the overall technology selection; 07/08 consume offline by default, and re-read Figma only when the file version changes or a page is ambiguous.
+> When there is no UI: write `- Design source status: N/A` and `- Reason for no UI: <reason>` in "Design Source and Selection"; there is no need to fill in the Figma/token/node sections.
 
-## 设计来源与选择
+## Design Source and Selection
 
-- 设计来源状态：APPROVED
-- 设计来源选择：Figma MCP AI 自动设计（人工 Figma 设计仅在用户明确选择时）
+- Design source status: APPROVED
+- Design source selection: Figma MCP AI automatic design (manual Figma design only when the user explicitly chooses it)
 
-| 项 | 内容 |
+| Item | Content |
 |---|---|
-| 设计来源选择 | Figma MCP AI 自动设计 / 人工 Figma 设计 |
-| 选择人/日期 | `<姓名或角色 / YYYY-MM-DD>` |
-| PAGE 清单 | `<PAGE-001…PAGE-00N>`，由本阶段冻结；07–10 不得新增或重命名 |
-| 文件版本 | `<Figma 版本/commit 或 lastModified>` |
-| 说明 | 本文件记录 token 实际值、每页规格与资产；未定义的页面/状态必须显式记为差异 |
+| Design source selection | Figma MCP AI automatic design / Manual Figma design |
+| Selector/date | `<name or role / YYYY-MM-DD>` |
+| PAGE list | `<PAGE-001…PAGE-00N>`, frozen in this stage; 07–10 must not add or rename |
+| File version | `<Figma version/commit or lastModified>` |
+| Notes | This file records token actual values, per-page specifications, and assets; undefined pages/states must be explicitly recorded as differences |
 
-## 设计令牌（实际值）
+## Design Inputs and Style References
 
-> 从 Figma 变量/样式实际读取；变量名不能替代实际值。颜色必须有 hex，间距/圆角/字号必须有单位。
+| Input | Source/path | Status |
+|---|---|---|
+| Requirements and AC | `openspec/changes/<change-id>/proposal.md`, `design/user-stories.md` | READ |
+| Figma MCP | Real Figma link/fileKey and `get_metadata`/`get_variable_defs` records | READ |
+| Design conventions | `docs/architecture/frontend-conventions.md` Section 9 and `docs/architecture/technology-decisions.md` | READ |
 
-| 变量 | 类型 | 实际值 | CSS 变量 / Element Plus 映射 |
+## Design Tokens (Actual Values)
+
+> Read from actual Figma variables/styles; variable names cannot replace actual values. Colors must have hex; spacing/radius/font size must have units.
+
+| Variable | Type | Actual value | CSS variable / Element Plus mapping |
 |---|---|---|---|
 | `color/bg` | COLOR | `#f4f7f1` | `--color-bg` |
 | `color/surface` | COLOR | `#ffffff` | `--color-surface` |
@@ -45,11 +53,11 @@
 | `space/page` | NUMBER | `22px` | `--space-page` |
 | `radius/card` | NUMBER | `10px` | `--radius-card` |
 | `radius/control` | NUMBER | `8px` | `--radius-control` |
-| `shadow/card` | EFFECT | `<实际值>` | `--shadow-card` |
+| `shadow/card` | EFFECT | `<actual value>` | `--shadow-card` |
 
-## 文字样式（实际值）
+## Text Styles (Actual Values)
 
-| 样式 | 字体 | 字重 | 字号 | 行高 | 字距 |
+| Style | Font family | Weight | Font size | Line height | Letter spacing |
 |---|---|---|---|---|---|
 | `Type/12 Regular` | Noto Sans SC | 400 | 12px | 100% | 0 |
 | `Type/13 Regular` | Noto Sans SC | 400 | 13px | 100% | 0 |
@@ -59,103 +67,103 @@
 | `Type/24 Bold` | Noto Sans SC | 700 | 24px | 100% | 0 |
 | `Type/44 Bold` | Noto Sans SC | 700 | 44px | 100% | 0 |
 
-## PAGE 与节点
+## PAGEs and Nodes
 
-| PAGE ID | Figma node | 画板尺寸 | 状态 |
+| PAGE ID | Figma node | Frame size | State |
 |---|---|---|---|
-| PAGE-001 登录 | `3:2` | 1440×900 | default |
-| PAGE-002 用户管理 | `5:2` | 1440×900 | default |
-| PAGE-003 角色与权限 | `7:2` | 1440×900 | default |
-| PAGE-004 审计日志 | `8:2` | 1440×900 | default |
-| PAGE-005 通知中心 | `9:2` | 1440×900 | default |
-| PAGE-006 系统配置 | `11:2` | 1440×900 | default |
+| PAGE-001 Login | `3:2` | 1440×900 | default |
+| PAGE-002 User Management | `5:2` | 1440×900 | default |
+| PAGE-003 Roles and Permissions | `7:2` | 1440×900 | default |
+| PAGE-004 Audit Log | `8:2` | 1440×900 | default |
+| PAGE-005 Notification Center | `9:2` | 1440×900 | default |
+| PAGE-006 System Configuration | `11:2` | 1440×900 | default |
 
-## PAGE 关键规格
+## PAGE Key Specifications
 
-> 每页必须有区块级实际值（位置/尺寸/布局/padding/gap/边框/圆角/字体/填充），不能只写“顶栏、侧栏、列表”。
-> 元素级文字/间距/字号/层级以 `figma-code/` 为参考；`figma-layout.csv` 是运行态断言子集；本表是区块摘要，不是唯一几何来源。
-> 完整 `get_design_context` 快照可附录在本页规格之后，禁止另建分散文件。
+> Each page must have block-level actual values (position/size/layout/padding/gap/border/radius/font/fill), not just "top bar, sidebar, list".
+> Element-level text/spacing/font size/hierarchy reference `figma-code/`; `figma-layout.csv` is the runtime assertion subset; this table is a block summary, not the only geometry source.
+> The full `get_design_context` snapshot may be appended after this page's specifications; do not create separate scattered files.
 
-### PAGE-001 登录
+### PAGE-001 Login
 
-| 区块 | Figma node | 位置/尺寸 | 布局/间距 | 填充/边框/圆角 | 字体/文本 |
+| Block | Figma node | Position/size | Layout/spacing | Fill/border/radius | Font/text |
 |---|---|---|---|---|---|
-| 品牌区 | `3:3` | x=0,y=0,w=600,h=900 | 纵向 gap 22, padding 22 | 填充 `color/brand` | `Type/44 Bold`、`Type/18 Regular`、`Type/14 Regular` |
-| 表单区 | `3:7` | x=600,y=0,w=840,h=900 | 居中, padding 64 | 填充 `color/bg` | — |
-| 表单卡 | `3:8` | x=210,y=265,w=420,h=370 | 纵向 gap 18, padding 18 | `color/surface`, 1px `color/border`, 圆角 10 | `Type/24 Bold`、`Type/13 Regular` |
-| 账号输入 | `3:12` | x=19,y=132,w=382,h=40 | 水平居中, 左右 padding 12 | `color/surface`, 1px `color/border`, 圆角 8 | `Type/13 Regular` |
-| 密码输入 | `<node>` | `<x,y,w,h>` | `<布局>` | `<填充/边框/圆角>` | `<字体>` |
-| 登录按钮 | `3:17` | x=19,y=280,w=66,h=39 | padding 18/10 | `color/brand`, 圆角 8 | `Type/14 Medium` |
-| 底部说明 | `<node>` | `<x,y,w,h>` | `<布局>` | `<填充>` | `<字体/文本>` |
+| Brand area | `3:3` | x=0,y=0,w=600,h=900 | vertical gap 22, padding 22 | fill `color/brand` | `Type/44 Bold`, `Type/18 Regular`, `Type/14 Regular` |
+| Form area | `3:7` | x=600,y=0,w=840,h=900 | centered, padding 64 | fill `color/bg` | — |
+| Form card | `3:8` | x=210,y=265,w=420,h=370 | vertical gap 18, padding 18 | `color/surface`, 1px `color/border`, radius 10 | `Type/24 Bold`, `Type/13 Regular` |
+| Account input | `3:12` | x=19,y=132,w=382,h=40 | horizontally centered, left/right padding 12 | `color/surface`, 1px `color/border`, radius 8 | `Type/13 Regular` |
+| Password input | `<node>` | `<x,y,w,h>` | `<layout>` | `<fill/border/radius>` | `<font>` |
+| Login button | `3:17` | x=19,y=280,w=66,h=39 | padding 18/10 | `color/brand`, radius 8 | `Type/14 Medium` |
+| Bottom note | `<node>` | `<x,y,w,h>` | `<layout>` | `<fill>` | `<font/text>` |
 
-<!-- 其余 PAGE 按上表格式补充；设计代码中的文字/结构以 figma-code/ 为准；断言范围在 ## 断言范围 说明。 -->
+<!-- Add the remaining PAGEs in the same table format; use figma-code/ as the authority for text/structure in the design code; the assertion scope is described in ## Assertion Scope. -->
 
-## 设计代码
+## Design Code
 
-- 目标框架：`<Vue 3 + TypeScript + Element Plus / React + ...>`（必须与 `docs/architecture/technology-decisions.md` 一致）
-- 设计代码扩展名：`<.vue / .tsx / .jsx>`
-- 选型依据：`<ADR-002 / technology-decisions 版本与批准日期>`
-- 转码方式：官方 `figma-design-to-code` Skill 加载记录；`get_design_context` 参考实现 → 目标框架组件/样式/token 的替换表；只做静态高保真页面，不接业务 API。
-- `figma-code/README.md`：说明来源、目标框架/扩展名、组件与样式/token 替换、转码偏差、`data-node-id` 与 `figma-layout.csv` 的对应关系。
-- `figma-code/PAGE-001.vue … PAGE-00N.vue`（React 栈为 `.tsx`/`.jsx`）：每 PAGE 一个目标框架设计代码，包含真实文案、字号/字重、间距、圆角、层级和 `data-node-id`。08 直接移植为页面骨架，只补路由/API/状态/权限/业务逻辑，不得重写样式、布局或文案。
-- `figma-layout.csv`：精简断言表，列包含 `page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`；坐标相对 PAGE 画板左上角。06 建立断言子集（`route`/`dom_selector` 可暂为 `PENDING`），07 必须填满。
-- 门禁：`python scripts/check-figma-audit.py --change <change-id> --strict --require-framework` 校验目标框架、每 PAGE 设计代码存在、断言表几何/文本/选择器完整；08/09 运行 `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`，逐元素比较预期 `x/y/w/h`、文本与字体；`python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>` 精确比对 token 实际值。
-- **UI 验证以机器证据为主**：无差异 PAGE 在 08/09/10 直接使用 `figma-layout-check.json` 数值；仅差异/`UI-DERIVED` PAGE 需要人工复核与审批。不保存参考截图或像素截图。
+- Target framework: `<Vue 3 + TypeScript + Element Plus / React + ...>` (must be consistent with `docs/architecture/technology-decisions.md`)
+- Design code extension: `<.vue / .tsx / .jsx>`
+- Selection basis: `<ADR-002 / technology-decisions version and approval date>`
+- Transcoding method: record of loading the official `figma-design-to-code` Skill; replacement table from the `get_design_context` reference implementation to target-framework components/styles/tokens; static high-fidelity pages only, no business API integration.
+- `figma-code/README.md`: explains the source, target framework/extension, component and style/token replacements, transcoding deviations, and the correspondence between `data-node-id` and `figma-layout.csv`.
+- `figma-code/PAGE-001.vue … PAGE-00N.vue` (`.tsx`/`.jsx` for the React stack): one target-framework design code file per PAGE, containing real copy, font size/weight, spacing, radius, hierarchy, and `data-node-id`. 08 ports these directly as page skeletons, adding only routing/API/state/permissions/business logic, and must not rewrite styles, layout, or copy.
+- `figma-layout.csv`: concise assertion table, columns include `page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`; coordinates are relative to the top-left corner of the PAGE frame. 06 establishes the assertion subset (`route`/`dom_selector` may temporarily be `PENDING`), 07 must fill them in.
+- Gates: `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework` validates the target framework, the existence of design code for each PAGE, and the completeness of assertion-table geometry/text/selectors; 08/09 run `python scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900`, comparing expected `x/y/w/h`, text, and fonts element by element; `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>` precisely compares token actual values.
+- **UI verification relies primarily on machine evidence**: PAGES with no differences use the numeric values in `figma-layout-check.json` directly in 08/09/10; only PAGES with differences/`UI-DERIVED` require manual review and approval. Reference screenshots or pixel screenshots are not stored.
 
-## 断言范围
+## Assertion Scope
 
-> `figma-layout.csv` 是运行态断言的唯一子集；未纳入断言的元素由设计代码与人工验收覆盖。若有结构性差异（Figma 有、实现无，或布局不同），必须在 `## 差异与待确认` 登记，等待设计负责人批准。
-> 每个 PAGE 至少 1 行断言；建议覆盖顶部/侧栏/主区/标题/主操作/表格卡等关键区块。
+> `figma-layout.csv` is the only subset of runtime assertions; elements not included in assertions are covered by the design code and manual acceptance. If there is a structural difference (present in Figma but absent in implementation, or different layout), it must be registered in `## Differences and Pending Confirmation` and wait for approval from the design owner.
+> Each PAGE must have at least 1 assertion row; it is recommended to cover key blocks such as the top bar/sidebar/main area/title/primary action/table card.
 
-| PAGE | 断言覆盖 | 未断言/说明 |
+| PAGE | Assertion coverage | Not asserted/notes |
 |---|---|---|
-| PAGE-001 | 品牌区、品牌标题、表单卡、表单标题、账号输入、按钮、底部说明 | 副标题/标签等由设计代码与人工验收覆盖 |
+| PAGE-001 | Brand area, brand title, form card, form title, account input, button, bottom note | Subtitle/labels, etc. are covered by the design code and manual acceptance |
 | PAGE-00N | `<...>` | `<...>` |
 
-## 状态覆盖
+## State Coverage
 
-> 每个 PAGE 必须列出适用的状态；“Figma 无帧”的状态必须写明 07 设计决策、审批人和参考依据，不能声称已还原。
-> 非 default 状态不要求截图；08 用断言映射覆盖可见元素与状态差异，09 独立核验，10 对无差异 PAGE 按机器证据批量签收、对差异/`UI-DERIVED` PAGE 并排核对。
+> Each PAGE must list the applicable states; states that "have no Figma frame" must document the 07 design decision, approver, and reference basis, and must not claim they have been reproduced.
+> Non-default states do not require screenshots; 08 covers visible elements and state differences via the assertion mapping, 09 verifies independently, and 10 batch-signs off PAGES with no differences based on machine evidence and performs side-by-side verification for PAGES with differences/`UI-DERIVED`.
 
-| PAGE ID | 状态 | Figma 是否有帧 | 说明/决策 |
+| PAGE ID | State | Figma has frame | Notes/decision |
 |---|---|---|---|
-| PAGE-001 | default | 是 | — |
-| PAGE-001 | loading | 否 | 07 设计决策：`<按钮 loading 样式/依据>`；审批人 `<...>` |
-| PAGE-001 | error | 否 | 07 设计决策：`<错误提示样式/依据>`；审批人 `<...>` |
-| PAGE-002 | default/empty/no-permission | 是/否/否 | 逐个说明 |
+| PAGE-001 | default | Yes | — |
+| PAGE-001 | loading | No | 07 design decision: `<button loading style/basis>`; approver `<...>` |
+| PAGE-001 | error | No | 07 design decision: `<error message style/basis>`; approver `<...>` |
+| PAGE-002 | default/empty/no-permission | Yes/No/No | Explain each individually |
 | … | … | … | … |
 
-## 资产清单
+## Asset List
 
-> 仅登记真实图片/SVG 资产（logo、图标、插图等），下载到 `figma-assets/`，不能保留 Figma 临时 URL。
-> **不得登记参考截图**（`PAGE-*.default.png` 等）；视觉比对使用 `figma-code/` / `figma-layout.csv`。
-> 有资产时同时写入 `figma-assets/README.md`（文件名、来源 node、sha256、尺寸）；无资产时删除上表并写 `- 资产：无`。
+> Only register real image/SVG assets (logo, icons, illustrations, etc.), downloaded to `figma-assets/`; Figma temporary URLs must not be kept.
+> **Reference screenshots must not be registered** (`PAGE-*.default.png`, etc.); visual comparison uses `figma-code/` / `figma-layout.csv`.
+> When there are assets, also write `figma-assets/README.md` (file name, source node, sha256, size); when there are no assets, delete the table above and write `- Assets: none`.
 
-| 资产 | 来源 node | 文件 | 尺寸 | 用途 |
+| Asset | Source node | File | Size | Purpose |
 |---|---|---|---|---|
 | `<logo>` | `<node>` | `figma-assets/asset-logo.svg` | `<w×h>` | `<...>` |
 
-## MCP 读取记录
+## MCP Read Records
 
-| 工具/命令 | 目标文件/节点 | 实际返回 | 时间 | 状态 |
+| Tool/command | Target file/node | Actual return | Time | Status |
 |---|---|---|---|---|
-| `get_variable_defs` | `<fileKey>` | token 实际值数量 | `<时间>` | 成功 |
-| `get_metadata` | 6 个 PAGE | 设计代码中的页面结构与 x/y/w/h | `<时间>` | 成功 |
-| `get_design_context` | `3:2`…`11:2`（按需） | 每页规格/样式/资产 | `<时间>` | 成功 |
+| `get_variable_defs` | `<fileKey>` | number of token actual values | `<time>` | Success |
+| `get_metadata` | 6 PAGEs | page structure and x/y/w/h in the design code | `<time>` | Success |
+| `get_design_context` | `3:2`…`11:2` (as needed) | per-page specifications/styles/assets | `<time>` | Success |
 
-## 差异与待确认
+## Differences and Pending Confirmation
 
-| 差异 ID | 需求/AC 要求 | Figma 实际情况 | 影响 | 选择/理由 | 审批人/状态 |
+| Difference ID | Requirement/AC requirement | Actual Figma status | Impact | Choice/reason | Approver/status |
 |---|---|---|---|---|---|
 | UI-DIFF-001 | `<...>` | `<...>` | `<...>` | `<...>` | `<...>` |
 
-## UI 评审
+## UI Review
 
-- UI 评审状态：DRAFT（设计负责人在真实 Figma 评审稿上评审后改为 APPROVED）
-- 评审人：`<姓名或角色>`
-- 评审日期：`<YYYY-MM-DD>`
-- 评审证据：`workflow/evidence/06-figma-ui-review.md`
-- 评审范围：PAGE 覆盖、关键区块、状态变体、权限/导航行为、token 实际值、`figma-code/` 的目标框架/页面结构与文案、`figma-layout.csv` 断言范围
+- UI review status: DRAFT (changed to APPROVED after the design owner reviews on the real Figma review draft)
+- Reviewer: `<name or role>`
+- Review date: `<YYYY-MM-DD>`
+- Review evidence: `workflow/evidence/06-figma-ui-review.md`
+- Review scope: PAGE coverage, key blocks, state variants, permission/navigation behavior, token actual values, target framework/page structure and copy of `figma-code/`, assertion scope of `figma-layout.csv`
 
-> 无法读取的字段必须登记为“未检查”，不得虚构 MCP 结果；Figma MCP 不可用时阻断阶段 06，而不是用截图或文字臆造替代。
-> 人工 UI 评审在真实 Figma 文件上完成；自动化视觉回归使用节点几何与运行态 DOM 的数值断言，不使用截图。
+> Fields that cannot be read must be registered as "not checked"; MCP results must not be fabricated; when Figma MCP is unavailable, block stage 06 rather than substitute screenshots or invented text.
+> Manual UI review is completed on the real Figma file; automated visual regression uses numeric assertions of node geometry against the runtime DOM, not screenshots.

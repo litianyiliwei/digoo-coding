@@ -15,30 +15,35 @@ if not path.is_file():
     sys.exit(2)
 text = path.read_text(encoding='utf-8')
 required_sections = [
-    '## 1. 基线状态快照', '## 2. 固定读取项核验', '## 3. 按影响读取项核验',
-    '## 4. 复用与一致性映射', '## 5. 变化归属判定',
-    '## 6. 基线冲突、缺口与候选修订', '## 7. 在途 Change 版本复核', '## 8. 结论与门禁'
+    ('## 1. 基线状态快照', '## 1. Baseline Status Snapshot'),
+    ('## 2. 固定读取项核验', '## 2. Fixed-Read Verification'),
+    ('## 3. 按影响读取项核验', '## 3. Impact-Based Read Verification'),
+    ('## 4. 复用与一致性映射', '## 4. Reuse and Consistency Mapping'),
+    ('## 5. 变化归属判定', '## 5. Change Ownership Classification'),
+    ('## 6. 基线冲突、缺口与候选修订', '## 6. Baseline Conflicts, Gaps, and Candidate Amendments'),
+    ('## 7. 在途 Change 版本复核', '## 7. In-Flight Change Version Review'),
+    ('## 8. 结论与门禁', '## 8. Conclusion and Gates'),
 ]
-missing = [s for s in required_sections if s not in text]
+missing = [zh for zh, en in required_sections if zh not in text and en not in text]
 if missing:
     for item in missing: print(f'ERROR: missing section: {item}')
     sys.exit(1)
 if args.strict:
     checks = {
-        'approved review state': re.search(r'^- 状态：APPROVED\s*$', text, re.M),
-        'current baseline version recorded': re.search(r'^- 当前基线版本：(?!\s*$|\s*TODO\s*$).+', text, re.M),
-        'classification recorded': re.search(r'^- 本 Change 基线分类：(CHANGE_ONLY|BASELINE_CHANGE_REQUIRED|BASELINE_UPDATE_AFTER_ACCEPTANCE|N/A)\s*$', text, re.M),
-        'final conclusion recorded': re.search(r'^- 总体结论：(COMPATIBLE|BLOCKED_PENDING_BASELINE_CHANGE|APPROVED_BASELINE_AMENDMENT)\s*$', text, re.M),
-        'detailed design gate recorded': re.search(r'^- 是否允许进入详细设计：(YES|NO)\s*$', text, re.M),
-        'Change ID recorded': re.search(r'^- Change ID：(?!<change-id>\s*$).+', text, re.M),
-        'approval evidence recorded': re.search(r'^- 审批人及证据：(?!\s*$).+', text, re.M),
+        'approved review state': re.search(r'^- (?:状态|Status）[:：]\s*APPROVED\s*$', text, re.M),
+        'current baseline version recorded': re.search(r'^- (?:当前基线版本|Current baseline version）[:：]\s*(?!\s*$|\s*TODO\s*$).+', text, re.M),
+        'classification recorded': re.search(r'^- (?:本 Change 基线分类|This Change baseline classification）[:：]\s*(CHANGE_ONLY|BASELINE_CHANGE_REQUIRED|BASELINE_UPDATE_AFTER_ACCEPTANCE|N/A)\s*$', text, re.M),
+        'final conclusion recorded': re.search(r'^- (?:总体结论|Overall conclusion）[:：]\s*(COMPATIBLE|BLOCKED_PENDING_BASELINE_CHANGE|APPROVED_BASELINE_AMENDMENT)\s*$', text, re.M),
+        'detailed design gate recorded': re.search(r'^- (?:是否允许进入详细设计|Allowed to enter detailed design）[:：]\s*(YES|NO)\s*$', text, re.M),
+        'Change ID recorded': re.search(r'^- Change ID[:：](?!<change-id>\s*$).+', text, re.M),
+        'approval evidence recorded': re.search(r'^- (?:审批人及证据|Approver and evidence）[:：]\s*(?!\s*$).+', text, re.M),
     }
     failed = [name for name, ok in checks.items() if not ok]
     if failed:
         print('ERROR: strict baseline impact gate failed: ' + ', '.join(failed))
         sys.exit(1)
-    conclusion = re.search(r'^- 总体结论：(\S+)\s*$', text, re.M).group(1)
-    allow = re.search(r'^- 是否允许进入详细设计：(\S+)\s*$', text, re.M).group(1)
+    conclusion = re.search(r'^- (?:总体结论|Overall conclusion）[:：]\s*(\S+)\s*$', text, re.M).group(1)
+    allow = re.search(r'^- (?:是否允许进入详细设计|Allowed to enter detailed design）[:：]\s*(\S+)\s*$', text, re.M).group(1)
     if conclusion == 'BLOCKED_PENDING_BASELINE_CHANGE' or allow != 'YES':
         print('ERROR: baseline impact decision blocks detailed design.')
         sys.exit(1)

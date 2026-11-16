@@ -13,7 +13,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CSS_VAR_RE = re.compile(r"--([A-Za-z0-9_-]+)\s*:\s*([^;]+);")
-TOKEN_SECTION = "## 设计令牌（实际值）"
+TOKEN_SECTION = ("## 设计令牌（实际值）", "## Design Tokens (Actual Values)")
+
+
+def section_any(text, titles):
+    for title in titles:
+        found = section(text, title)
+        if found:
+            return found
+    return ""
 
 
 def section(text, title):
@@ -33,7 +41,7 @@ def table_rows(section_text):
         if re.match(r"^\|[\s:|-]+\|$", stripped):
             continue
         cells = [c.strip() for c in stripped.strip("|").split("|")]
-        if cells and cells[0] in ("变量",):
+        if cells and cells[0] in ("变量", "Variable", "Token"):
             continue
         rows.append(cells)
     return rows
@@ -95,9 +103,9 @@ def main():
         sys.exit(2)
 
     text = audit.read_text(encoding="utf-8")
-    rows = table_rows(section(text, TOKEN_SECTION))
+    rows = table_rows(section_any(text, TOKEN_SECTION))
     if not rows:
-        print(f"BLOCKED: {TOKEN_SECTION} has no token rows", file=sys.stderr)
+        print(f"BLOCKED: {TOKEN_SECTION[0]} / {TOKEN_SECTION[1]} has no token rows", file=sys.stderr)
         sys.exit(2)
 
     values = parse_css(token_paths)

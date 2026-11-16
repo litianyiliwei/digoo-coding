@@ -71,6 +71,28 @@ def section(text, title):
     return text[start:end if end >= 0 else len(text)]
 
 
+def section_any(text, *titles):
+    for title in titles:
+        found = section(text, title)
+        if found:
+            return found
+    return ""
+
+
+SOURCE_SEC = ("## 设计来源与选择", "## Design Source and Selection")
+TOKEN_SEC = ("## 设计令牌（实际值）", "## Design Tokens (Actual Values)")
+TYPE_SEC = ("## 文字样式（实际值）", "## Text Styles (Actual Values)")
+PAGE_SEC = ("## PAGE 与节点", "## PAGEs and Nodes")
+SPEC_SEC = ("## PAGE 关键规格", "## PAGE Key Specifications")
+STATE_SEC = ("## 状态覆盖", "## State Coverage")
+CODE_SEC = ("## 设计代码", "## Design Code")
+ASSERT_SEC = ("## 断言范围", "## Assertion Scope")
+ASSET_SEC = ("## 资产清单", "## Asset List")
+MCP_SEC = ("## MCP 读取记录", "## MCP Read Records")
+UI_SEC = ("## UI 评审", "## UI Review")
+INPUT_SEC = ("## 设计输入与风格参考", "## Design Inputs and Style References")
+
+
 def table_rows(section_text, skip_first=()):
     rows = []
     for line in section_text.splitlines():
@@ -132,8 +154,8 @@ def page_ids_from_rows(rows):
 if no_ui:
     if AUDIT.is_file() and AUDIT.stat().st_size:
         text = AUDIT.read_text(encoding="utf-8")
-        if not re.search(r"^- 设计来源状态：N/A\s*$", section(text, "## 设计来源与选择"), re.M):
-            print("ERROR: --no-ui declared but design/figma-audit.md does not declare 设计来源状态：N/A; update it or drop --no-ui")
+        if not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", section_any(text, *SOURCE_SEC), re.M):
+            print("ERROR: --no-ui declared but design/figma-audit.md does not declare Design source status: N/A (设计来源状态：N/A); update it or drop --no-ui")
             sys.exit(1)
     print(f"Figma audit check passed: this Change explicitly has no UI. Reason: {reason}")
     sys.exit(0)
@@ -144,38 +166,46 @@ if not AUDIT.is_file() or not AUDIT.stat().st_size:
     sys.exit(1)
 
 text = AUDIT.read_text(encoding="utf-8")
-source_section = section(text, "## 设计来源与选择")
-if re.search(r"^- 设计来源状态：N/A\s*$", source_section, re.M):
-    if not re.search(r"^- 无 UI 理由：\s*\S", source_section, re.M):
-        print("ERROR: 无 UI 时必须在“设计来源与选择”写入“- 无 UI 理由：<原因>”")
+source_section = section_any(text, *SOURCE_SEC)
+if re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", source_section, re.M):
+    if not re.search(r"^- (?:无 UI 理由|Reason for no UI）[:：]\s*\S", source_section, re.M):
+        print("ERROR: a no-UI Change must write '- 无 UI 理由：<原因>' / '- Reason for no UI: <reason>' under Design Source and Selection")
         sys.exit(1)
     print("Figma audit check passed: this Change declares no UI in figma-audit.md.")
     sys.exit(0)
 
 errors, warnings = [], []
 required_sections = [
-    "## 设计来源与选择", "## 设计令牌（实际值）", "## 文字样式（实际值）",
-    "## PAGE 与节点", "## PAGE 关键规格", "## 状态覆盖",
-    "## 设计代码", "## 断言范围", "## 资产清单",
-    "## MCP 读取记录", "## 差异与待确认", "## UI 评审",
+    ("## 设计来源与选择", "## Design Source and Selection"),
+    ("## 设计令牌（实际值）", "## Design Tokens (Actual Values)"),
+    ("## 文字样式（实际值）", "## Text Styles (Actual Values)"),
+    ("## PAGE 与节点", "## PAGEs and Nodes"),
+    ("## PAGE 关键规格", "## PAGE Key Specifications"),
+    ("## 状态覆盖", "## State Coverage"),
+    ("## 设计代码", "## Design Code"),
+    ("## 断言范围", "## Assertion Scope"),
+    ("## 资产清单", "## Asset List"),
+    ("## MCP 读取记录", "## MCP Read Records"),
+    ("## 差异与待确认", "## Differences and Pending Confirmation"),
+    ("## UI 评审", "## UI Review"),
 ]
-for title in required_sections:
-    if title not in text:
-        errors.append(f"missing section: {title}")
+for zh, en in required_sections:
+    if zh not in text and en not in text:
+        errors.append(f"missing section: {zh} / {en}")
 
-if not re.search(r"(人工\s*Figma\s*设计|Figma\s*MCP\s*AI\s*自动设计)", source_section):
-    errors.append("设计来源与选择必须明确为“人工 Figma 设计”或“Figma MCP AI 自动设计”")
-if not re.search(r"^- 设计来源状态：APPROVED\s*$", source_section, re.M):
-    errors.append("设计来源与选择必须标记“- 设计来源状态：APPROVED”，否则 06 不得开始")
+if not re.search(r"(人工\s*Figma\s*设计|Figma\s*MCP\s*AI\s*自动设计|Manual\s+Figma\s+design|Figma\s+MCP\s+AI\s+automatic\s+design)", source_section, re.I):
+    errors.append("Design Source and Selection must state Manual Figma design or Figma MCP AI automatic design")
+if not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*APPROVED\s*$", source_section, re.M):
+    errors.append("Design Source and Selection must mark '- 设计来源状态：APPROVED' / '- Design source status: APPROVED' before stage 06 starts")
 
-required_inputs = ["需求与 AC", "Figma MCP", "设计规范"]
-input_section = section(text, "## 设计输入与风格参考")
+required_inputs = [("需求与 AC", "requirements and AC"), ("Figma MCP", "Figma MCP"), ("设计规范", "design conventions")]
+input_section = section_any(text, *INPUT_SEC)
 if not input_section:
-    errors.append("missing section: ## 设计输入与风格参考")
+    errors.append(f"missing section: {INPUT_SEC[0]} / {INPUT_SEC[1]}")
 else:
-    missing_inputs = [name for name in required_inputs if name not in input_section]
+    missing_inputs = [zh for zh, en in required_inputs if zh not in input_section and en.lower() not in input_section.lower()]
     if missing_inputs:
-        errors.append("设计输入与风格参考表缺少: " + "、".join(missing_inputs))
+        errors.append("Design Inputs and Style References table is missing: " + ", ".join(missing_inputs))
 
 figma_refs = re.findall(r"https://(?:www\.)?figma\.com/[^\s)）]*|node-id=[A-Za-z0-9:%-]+|fileKey[=:][A-Za-z0-9]+", text, re.I)
 figma_refs += re.findall(r"FIGMA-[A-Za-z0-9-]+", text)
@@ -183,8 +213,8 @@ if not figma_refs:
     errors.append("Figma 文件未登记：至少登记真实 Figma 链接、node-id、fileKey 或 FIGMA-ID")
 
 # --- Token actual values ---
-token_section = section(text, "## 设计令牌（实际值）")
-token_rows = table_rows(token_section, skip_first=("变量",))
+token_section = section_any(text, *TOKEN_SEC)
+token_rows = table_rows(token_section, skip_first=("变量", "Variable", "Token", "变量名"))
 if len(token_rows) < 3:
     errors.append("设计令牌至少需要 3 条实际值（颜色/间距/圆角等），变量名和数量不算规格")
 color_rows = [r for r in token_rows if len(r) >= 3 and re.search(r"#[0-9a-fA-F]{3,8}", r[2])]
@@ -202,8 +232,8 @@ for cells in token_rows:
         errors.append(f"令牌缺少 CSS 变量映射: {cells[0]}")
 
 # --- Typography actual values ---
-type_section = section(text, "## 文字样式（实际值）")
-type_rows = table_rows(type_section, skip_first=("样式",))
+type_section = section_any(text, *TYPE_SEC)
+type_rows = table_rows(type_section, skip_first=("样式", "Style", "Text style"))
 if len(type_rows) < 3:
     errors.append("文字样式至少需要 3 条实际值（字体/字重/字号/行高/字距）")
 for cells in type_rows:
@@ -218,7 +248,7 @@ for cells in type_rows:
         errors.append(f"文字样式缺少字重: {cells[0]}")
 
 # --- PAGE nodes (no reference images) ---
-page_section = section(text, "## PAGE 与节点")
+page_section = section_any(text, *PAGE_SEC)
 page_rows = table_rows(page_section, skip_first=("PAGE ID",))
 pages = page_ids_from_rows(page_rows)
 if not pages:
@@ -234,7 +264,7 @@ for pid in pages:
         errors.append(f"{pid}: missing frame size (e.g. 1440×900)")
 
 # --- Per-PAGE specs ---
-spec_section = section(text, "## PAGE 关键规格")
+spec_section = section_any(text, *SPEC_SEC)
 for pid in pages:
     heading = f"### {pid}"
     if heading not in spec_section:
@@ -249,7 +279,7 @@ for pid in pages:
         errors.append(f"{pid}: PAGE 关键规格 missing concrete dimensions")
 
 # --- States: default required; no reference image requirement ---
-state_section = section(text, "## 状态覆盖")
+state_section = section_any(text, *STATE_SEC)
 state_rows = table_rows(state_section, skip_first=("PAGE ID",))
 for pid in pages:
     rows = [r for r in state_rows if r and pid in r[0]]
@@ -264,8 +294,8 @@ for pid in pages:
         has_frame = "是" in cells[2] or "yes" in cells[2].lower()
         if not has_frame:
             decision = " ".join(cells[2:])
-            if "决策" not in decision and "审批" not in decision:
-                errors.append(f"{pid}/{cells[1]}: state without Figma frame needs explicit 07 决策/审批")
+            if not any(k in decision.lower() for k in ("决策", "审批", "decision", "approv")):
+                errors.append(f"{pid}/{cells[1]}: state without Figma frame needs an explicit 07 decision/approval")
 
 # --- Design code + compact layout assertion contract ---
 if not CODE_README.is_file():
@@ -323,16 +353,16 @@ if layout and not (layout and "__error__" in layout[0]):
         if pid not in layout_pages:
             errors.append(f"figma-layout.csv: PAGE {pid} has no assertion rows")
 
-code_section = section(text, "## 设计代码")
+code_section = section_any(text, *CODE_SEC)
 if "figma-code/" not in code_section or "get_design_context" not in code_section:
-    errors.append("## 设计代码 must reference figma-code/ and get_design_context")
+    errors.append("## 设计代码 / ## Design Code must reference figma-code/ and get_design_context")
 if require_framework:
-    m_framework = re.search(r"^- 目标框架：\s*\S", code_section, re.M)
-    m_ext = re.search(r"^- 设计代码扩展名：\s*(\.(?:vue|tsx|jsx))\s*$", code_section, re.M)
+    m_framework = re.search(r"^- (?:目标框架|Target framework）[:：]\s*\S", code_section, re.M)
+    m_ext = re.search(r"^- (?:设计代码扩展名|Design code extension）[:：]\s*(\.(?:vue|tsx|jsx))\s*$", code_section, re.M)
     if not m_framework:
-        errors.append("## 设计代码 must declare“- 目标框架：...” (technology-decisions.md)")
+        errors.append("## 设计代码 / ## Design Code must declare '- 目标框架：...' / '- Target framework: ...' (technology-decisions.md)")
     if not m_ext:
-        errors.append("## 设计代码 must declare“- 设计代码扩展名：.vue/.tsx/.jsx”")
+        errors.append("## 设计代码 / ## Design Code must declare '- 设计代码扩展名：.vue/.tsx/.jsx' / '- Design code extension: .vue/.tsx/.jsx'")
     if "figma-design-to-code" not in code_section:
         errors.append("## 设计代码 must record the official figma-design-to-code Skill usage")
     if m_framework:
@@ -343,7 +373,7 @@ if require_framework:
             expected = {".tsx", ".jsx"}
         else:
             expected = set()
-            errors.append("目标框架 must name Vue or React so the code extension can be verified")
+            errors.append("Target framework must name Vue or React so the code extension can be verified")
         if m_ext and expected and m_ext.group(1) not in expected:
             errors.append(
                 f"设计代码扩展名 {m_ext.group(1)!r} does not match 目标框架 (expected {sorted(expected)})"
@@ -354,18 +384,18 @@ if require_framework:
                 errors.append(
                     f"figma-code/ contains {sorted(actual)} but 目标框架 requires {sorted(expected)}"
                 )
-assertion_section = section(text, "## 断言范围")
+assertion_section = section_any(text, *ASSERT_SEC)
 if "figma-layout.csv" not in assertion_section:
-    errors.append("## 断言范围 must reference figma-layout.csv")
+    errors.append("## 断言范围 / ## Assertion Scope must reference figma-layout.csv")
 if "check-figma-layout.py" not in assertion_section and "check-figma-layout" not in assertion_section:
-    errors.append("## 断言范围 must name the runtime assertion gate (check-figma-layout.py)")
+    errors.append("## 断言范围 / ## Assertion Scope must name the runtime assertion gate (check-figma-layout.py)")
 
 # --- Assets: only real image/SVG files; reference screenshots are not assets ---
-asset_section = section(text, "## 资产清单")
-if re.search(r"资产：无|无图片/SVG 资产|无资产", asset_section):
+asset_section = section_any(text, *ASSET_SEC)
+if re.search(r"资产：无|无图片/SVG 资产|无资产|Assets: none|no images/SVG assets|no assets", asset_section, re.I):
     asset_rows = []
 else:
-    asset_rows = table_rows(asset_section, skip_first=("资产",))
+    asset_rows = table_rows(asset_section, skip_first=("资产", "Asset"))
 asset_names = []
 for cells in asset_rows:
     if len(cells) < 3:
@@ -391,29 +421,29 @@ if asset_names:
                 errors.append(f"资产清单 README 未登记: {name}")
 
 # --- MCP records: full node export + variable values are mandatory ---
-mcp_text = section(text, "## MCP 读取记录")
-mcp_rows = table_rows(mcp_text, skip_first=("工具/命令",))
+mcp_text = section_any(text, *MCP_SEC)
+mcp_rows = table_rows(mcp_text, skip_first=("工具/命令", "Tool/Command", "Tool"))
 tools = re.findall(r"(get_design_context|get_metadata|get_variable_defs|get_screenshot|use_figma|figma\s*mcp)", mcp_text, re.I)
 if not tools:
     errors.append("MCP 读取记录缺少真实 Figma MCP 工具调用")
 for required_tool in ("get_metadata", "get_variable_defs"):
-    if not any(required_tool in " ".join(r).lower() and ("成功" in " ".join(r) or "passed" in " ".join(r).lower())
+    if not any(required_tool in " ".join(r).lower() and (any(k in " ".join(r) for k in ("成功", "success", "passed")) or "pass" in " ".join(r).lower())
                for r in mcp_rows):
-        errors.append(f"MCP 读取记录缺少成功的 {required_tool} 调用；节点几何必须来自真实读取")
+        errors.append(f"MCP Read Records lack a successful {required_tool} call; node geometry must come from a real read")
 
 # --- UI review ---
-ui_section = section(text, "## UI 评审")
-if not re.search(r"^- UI 评审状态：APPROVED\s*$", ui_section, re.M):
-    errors.append("UI 评审必须标记“- UI 评审状态：APPROVED”，否则 06 不得通过")
-if not re.search(r"^- 评审人：.+$", ui_section, re.M):
-    errors.append("UI 评审缺少“- 评审人：”")
-m = re.search(r"^- 评审证据：(.+)$", ui_section, re.M)
+ui_section = section_any(text, *UI_SEC)
+if not re.search(r"^- (?:UI 评审状态|UI review status）[:：]\s*APPROVED\s*$", ui_section, re.M):
+    errors.append("UI Review must mark '- UI 评审状态：APPROVED' / '- UI review status: APPROVED'")
+if not re.search(r"^- (?:评审人|Reviewer）[:：]\s*.+$", ui_section, re.M):
+    errors.append("UI Review is missing '- 评审人：' / '- Reviewer: '")
+m = re.search(r"^- (?:评审证据|Review evidence）[:：]\s*(.+)$", ui_section, re.M)
 if not m:
-    errors.append("UI 评审缺少“- 评审证据：”")
+    errors.append("UI Review is missing '- 评审证据：' / '- Review evidence: '")
 else:
     ev = m.group(1).strip()
     if not resolve_asset(ev) and not (base / ev).is_file() and not (ROOT / ev).is_file():
-        errors.append(f"UI 评审证据文件不存在: {ev}")
+        errors.append(f"UI review evidence file does not exist: {ev}")
 
 for line_no, line in enumerate(text.splitlines(), 1):
     if re.search(r"PENDING|TODO|TBD|\[填充\]|<实际值>|<\.\.\.>", line, re.I):

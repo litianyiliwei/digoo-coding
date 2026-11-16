@@ -1,6 +1,6 @@
 # 项目工具链检查报告
 
-- 项目：智慧农业项目（当前仓库仅含 AI 研发流程工具包，无业务源代码）
+- 项目：项目（当前仓库仅含 AI 研发流程工具包，无业务源代码）
 - 仓库路径：D:\Work\灵犀智学\农业项目\agriculture
 - 检查日期：2026-10-30
 - Agent/IDE：Claude Code（Claude 桌面应用 Code tab；模型 claude-fable-5；Skill 工具可加载 `.claude/skills/*/SKILL.md`）

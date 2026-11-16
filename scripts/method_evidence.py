@@ -74,6 +74,20 @@ DEFAULT_POLICY: dict[str, dict[str, Any]] = {
 
 VALID_MODES = {"full", "stage-scoped", "equivalent"}
 
+TOPIC_GROUPS = [
+    ("新系统", "new system"),
+    ("现有系统", "existing system"),
+    ("代码地址", "code address", "code location"),
+    ("第三方接口", "third-party interfaces"),
+    ("现有功能", "existing feature", "existing functionality"),
+    ("新功能", "new feature", "new functionality"),
+]
+TOPIC_ALIASES = {}
+for _group in TOPIC_GROUPS:
+    for _term in _group:
+        TOPIC_ALIASES.setdefault(_term, set()).update(_group)
+TOPIC_ALIASES = {k: sorted(v) for k, v in TOPIC_ALIASES.items()}
+
 
 def load_policy(root: Path) -> dict[str, dict[str, Any]]:
     """Read method_policy from the contract, falling back to DEFAULT_POLICY."""
@@ -149,7 +163,7 @@ def _validate_entry(entry: Any, root: Path, change_id: str | None, required: dic
         topics = [str(t) for t in (required.get("required_topics") or []) if str(t).strip()]
         searchable = " ".join(questions + alternatives + decisions + [str(entry.get("summary") or "")])
         for topic in topics:
-            if topic.lower() not in searchable.lower():
+            if not any(alias.lower() in searchable.lower() for alias in TOPIC_ALIASES.get(topic, [topic])):
                 errors.append(f"{skill}: missing required topic '{topic}' in questions/alternatives/decisions/summary")
 
     artifact_section = _resolve(str(entry.get("artifact_section") or ""), change_id)

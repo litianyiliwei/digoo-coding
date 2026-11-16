@@ -1,66 +1,66 @@
-# 参考产品与互联网调研
+# Reference Products and Internet Research
 
-- Change ID：N/A（项目级）
-- 状态：DRAFT
-- 来源基线：用户访谈、参考产品资料、互联网公开信息
-- 关联需求/AC：FLOW/NODE/DO/RD/BR/NFR ID
-- 调研日期：PENDING
-- 调研执行人：PENDING
+- Change ID: N/A (project-level)
+- Status: DRAFT
+- Source baseline: user interviews, reference product materials, public internet information
+- Related requirements/AC: FLOW/NODE/DO/RD/BR/NFR ID
+- Research date: PENDING
+- Research executor: PENDING
 
-> 阶段 02 必须先与用户确认是否有参考产品；无论是否有参考产品，都必须在互联网完成调研并记录查询、来源、日期与结论。没有真实来源的“调研”不得通过。
+> Step 02 must first confirm with the user whether reference products exist; regardless of whether they exist, research must be completed on the internet with queries, sources, dates, and conclusions recorded. "Research" without real sources must not pass.
 
-## 1. 研究范围与问题
+## 1. Research Scope and Questions
 
-| Q ID | 研究问题 | 为什么重要 | 对应的业务域/FLOW |
+| Q ID | Research question | Why it matters | Corresponding business domain/FLOW |
 |---|---|---|---|
 | RQ-001 | PENDING | PENDING | PENDING |
 
-## 2. 参考产品清单
+## 2. Reference Product List
 
-- 参考产品状态：PRESENT / NONE
-- 无参考产品理由（状态为 NONE 时必填）：PENDING
+- Reference product status: PRESENT / NONE
+- Reason for no reference product: PENDING (required when status is NONE)
 
-| 产品/方案 | 类型（同类/相邻/替代） | 获取方式（官网/文档/试用/截图/用户提供） | 链接 | 调研日期 | 备注 |
+| Product/Solution | Type (same category/adjacent/substitute) | Access method (official site/docs/trial/screenshot/user-provided) | Link | Research date | Notes |
 |---|---|---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING |
 
-## 3. 研究记录
+## 3. Research Records
 
-| 序号 | 调研问题 | 使用的工具/方式 | 查询词或来源 | URL | 访问日期 | 关键发现 |
+| No. | Research question | Tools/methods used | Query terms or source | URL | Access date | Key findings |
 |---|---|---|---|---|---|---|
-| 1 | PENDING | WebSearch/WebFetch/用户材料 | PENDING | https://PENDING | PENDING | PENDING |
+| 1 | PENDING | WebSearch/WebFetch/user material | PENDING | https://PENDING | PENDING | PENDING |
 
-## 4. 对比与借鉴
+## 4. Comparison and Lessons
 
-| 对比项 | 参考产品做法 | 本项目候选做法 | 采纳/不采纳 | 理由 | 关联 FLOW/DO/BR |
+| Comparison item | Reference product approach | Candidate approach for this project | Adoption decision | Rationale | Related FLOW/DO/BR |
 |---|---|---|---|---|---|
-| PENDING | PENDING | PENDING | PENDING | PENDING | PENDING |
+| PENDING | PENDING | PENDING | adopt / do not adopt / partially adopt / N/A | PENDING | PENDING |
 
-## 5. 结论与假设
+## 5. Conclusions and Assumptions
 
-- 可借鉴结论：PENDING
-- 不借鉴结论及理由：PENDING
-- 新增/更新假设（ASM-xxx）：PENDING
-- 新增/更新决策（DEC-xxx）：PENDING
+- Reusable conclusions: PENDING
+- Conclusions not adopted and reasons: PENDING
+- New/updated assumptions (ASM-xxx): PENDING
+- New/updated decisions (DEC-xxx): PENDING
 
-## 6. 影响映射
+## 6. Impact Mapping
 
-| 研究结论 | 影响对象（FLOW/NODE/DO/BR/NFR） | 影响方式（新增/修改/无影响） | 处理状态 |
+| Research conclusion | Impacted object (FLOW/NODE/DO/BR/NFR) | Impact type (new/modified/no impact) | Handling status |
 |---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING |
 
-> 无影响时写 `N/A + 理由`，不得留空。
+> When there is no impact, write `N/A + reason`; do not leave it blank.
 
-## 7. 未决问题
+## 7. Open Questions
 
-| Q ID | 问题 | 负责人 | 截止/阻塞条件 |
+| Q ID | Question | Owner | Deadline/Blocking condition |
 |---|---|---|---|
 | Q-001 | PENDING | PENDING | PENDING |
 
-## 8. 来源与审批
+## 8. Sources and Approval
 
-- 调研日期：PENDING
-- 调研执行人：PENDING
-- 来源可信度/限制：PENDING
-- 产品/业务负责人：PENDING
-- 审批状态：DRAFT
+- Research date: PENDING
+- Research executor: PENDING
+- Source credibility/limitations: PENDING
+- Product/business owner: PENDING
+- Approval status: DRAFT

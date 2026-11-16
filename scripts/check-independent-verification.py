@@ -73,9 +73,14 @@ try:
         errors.append(f"{len(blockers)} blocker/critical finding(s) remain")
     if not any(x in md for x in ("判定：PASS", "Verdict: PASS", "Verdict：PASS")):
         errors.append("Markdown report does not state PASS")
-    for heading in ("## 1. 验证范围", "## 2. 验收标准", "## 3. 测试与检查", "## 7. 最终判定"):
-        if heading not in md:
-            errors.append(f"Markdown report missing section: {heading}")
+    for zh, en in (
+        ("## 1. 验证范围", "## 1. Verification Scope"),
+        ("## 2. 验收标准", "## 2. Acceptance Criteria"),
+        ("## 3. 测试与检查", "## 3. Test and Check"),
+        ("## 7. 最终判定", "## 7. Final Verdict"),
+    ):
+        if zh not in md and en not in md:
+            errors.append(f"Markdown report missing section: {zh} / {en}")
 
     # UI-bearing Changes require per-PAGE independent runtime geometry evidence.
     change = d["change_id"]
@@ -85,8 +90,10 @@ try:
     expected_pages = []
     if audit.is_file():
         audit_text = audit.read_text(encoding="utf-8")
-        ui_change = not re.search(r"^- 设计来源状态：N/A\s*$", audit_text, re.M)
+        ui_change = not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", audit_text, re.M)
         start = audit_text.find("## PAGE 与节点")
+        if start < 0:
+            start = audit_text.find("## PAGEs and Nodes")
         if start < 0:
             start = audit_text.find("## 页面覆盖")
         if start >= 0:
@@ -102,8 +109,8 @@ try:
         return next((x for x in candidates if x.is_file()), None)
 
     if ui_change:
-        if "## UI 一致性验证" not in md:
-            errors.append("UI Change report missing section: ## UI 一致性验证")
+        if "## UI 一致性验证" not in md and "## UI Consistency Verification" not in md:
+            errors.append("UI Change report missing section: ## UI Consistency Verification (UI 一致性验证)")
         checks = d.get("layout_checks") or []
         if not checks:
             errors.append("UI Change requires layout_checks with per-PAGE runtime geometry evidence")

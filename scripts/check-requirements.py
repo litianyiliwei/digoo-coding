@@ -101,9 +101,9 @@ def check_project():
             ERRORS.append(f'workflows.md: {flow} has no node rows')
     # Node table must expose role / input object / output object columns.
     header = [l for l in workflows if 'NODE ID' in l]
-    for need in ('执行角色', '输入数据对象', '输出数据对象'):
-        if not any(need in l for l in header):
-            ERRORS.append(f'workflows.md: node table header missing column: {need}')
+    for need, en in (('执行角色', 'executing role'), ('输入数据对象', 'input data object'), ('输出数据对象', 'output data object')):
+        if not any(need in l or en.lower() in l.lower() for l in header):
+            ERRORS.append(f'workflows.md: node table header missing column: {need} / {en}')
     do_ids = report_duplicates([(r['data_object_id'].strip(), n) for n, r in enumerate(do_rows, 2) if r.get('data_object_id')], 'data-objects.csv')
     for r in do_rows:
         doid = (r.get('data_object_id') or '').strip()

@@ -1,59 +1,59 @@
 ---
 name: project-bootstrap
-description: 项目初始化与工具链检查。初始化仓库上下文与工具状态；不覆盖用户文件。
+description: Project initialization and toolchain check. Initializes repository context and tool status; does not overwrite user files.
 ---
 
-# 项目初始化与工具链检查
+# Project Initialization and Toolchain Check
 
-## 何时使用
-当流程进入“项目初始化与工具链检查”时加载本 Skill。一次只处理一个明确阶段；不要提前执行后续阶段，也不要修改已批准内容。
+## When to Use
+Load this Skill when the workflow enters "project initialization and toolchain check". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
 
-## 输入
-仓库路径、项目摘要、当前工具和 IDE/Agent 环境。
+## Input
+Repository path, project summary, current tools, and IDE/Agent environment.
 
-## 执行流程
-1. 读取 README、目录结构、构建配置、CI、Git 状态和既有 OpenSpec 配置。
-2. 执行非破坏性工具探测；读取 `openspec --version`、`openspec init --help` 或相关帮助，不凭记忆猜参数。
-3. 检查当前 Agent 是否能发现 `.claude/skills/<name>/SKILL.md`，并确认 Superpowers 已安装及其真实技能名。
-4. 对缺失文件提出最小补充方案；任何覆盖、安装、删除、提交和 CI 修改均需用户明确授权。
+## Execution Flow
+1. Read the README, directory structure, build configuration, CI, Git status, and existing OpenSpec configuration.
+2. Run non-destructive tool probes; read `openspec --version`, `openspec init --help`, or related help output; do not guess parameters from memory.
+3. Check whether the current Agent can discover `.claude/skills/<name>/SKILL.md`, and confirm that Superpowers is installed and its actual skill names.
+4. Propose a minimal supplementary plan for missing files; any overwrite, installation, deletion, commit, and CI change requires explicit user authorization.
 
-## 输出
-工具状态表、现有目录/规则摘要、冲突与缺口清单、最小初始化计划；初始化 `docs/architecture/baseline-status.md` 时以 `templates/project-baseline/baseline-status.md` 为模板，不得仅写一个未版本化的 TODO 状态。
+## Output
+Tool status table, summary of existing directories/rules, conflict and gap list, minimal initialization plan; when initializing `docs/architecture/baseline-status.md`, use `templates/project-baseline/baseline-status.md` as the template, and do not write only an unversioned TODO status.
 
-## 质量与安全边界
-不覆盖已有文件；不把“找不到命令”写成“已安装”；所有未执行检查明确标记。
+## Quality and Safety Boundaries
+Do not overwrite existing files; do not write "not found" as "installed"; explicitly mark every check that was not executed.
 
-## 与 OpenSpec / Superpowers 的边界
-- OpenSpec 保存 Change 的 proposal、行为 delta specs、design 和 tasks；本 Skill 不替代 OpenSpec 自身校验。
-- Superpowers 用于研发方法论与执行纪律；只有确认真实安装且 Agent 可调用时才声称使用了某项技能。
-- Figma MCP 的输入必须基于实际可访问的链接、节点和 MCP 返回结果。
-- 不在本阶段自动提交、发布、归档或覆盖用户文件。
+## Boundaries with OpenSpec / Superpowers
+- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
+- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
+- Figma MCP input must be based on actually accessible links, nodes, and MCP responses.
+- Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
-## 推荐检查
+## Recommended Checks
 `scripts/check-package.py`
 
 
-## 实际工具调用要求
+## Actual Tool Invocation Requirements
 
-- **Superpowers：** `using-superpowers`（若存在）并检查当前 Agent 可用的 Superpowers 技能；不要自动安装或覆盖工具。必须按当前宿主 Agent 的真实机制检查、读取或调用技能。只在确实加载/执行后报告成功；不可用时明确说明并执行等价步骤。
-- **OpenSpec：** 若存在 `openspec/`，真实运行 `openspec version`、`openspec list --changes`、`openspec list --specs`；未初始化时只报告，未经用户批准不运行 init。命令必须真实执行并报告退出码/结果。CLI 不可用时标记为“未执行/阻断”，不得伪造校验结果。
-- **项目 Skill：** 按宿主 Agent 的实际机制加载本 Skill；仅在 Prompt 中提到技能名不等于已调用技能。
-- **状态更新：** 仅在产物写入指定路径且门禁通过后更新 `workflow-state.json`；遇到待审批或验证失败时记录阻断，不推进下一阶段。
+- **Superpowers:** `using-superpowers` (if present) and check the Superpowers skills available to the current Agent; do not automatically install or overwrite tools. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, state it explicitly and perform equivalent steps.
+- **OpenSpec:** If `openspec/` exists, actually run `openspec version`, `openspec list --changes`, `openspec list --specs`; when uninitialized, only report and do not run init without user approval. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
+- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
+- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
 
-## 输入/输出/交接契约（强制）
+## Input/Output/Handoff Contract (Mandatory)
 
-执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="project-bootstrap"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
+Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="project-bootstrap"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **本阶段输入：** 用户提供的项目目标与仓库位置；仓库现有目录/配置/AGENTS.md（若存在）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** AGENTS.md（仅缺失时创建或经批准修改）；workflow-state.json；docs/architecture/baseline-status.md（依据 `templates/project-baseline/baseline-status.md` 建立域版本登记）；工具链检查报告（docs/project/toolchain-report.md）。按模板生成并落盘；如路径包含 `<change-id>`，必须替换为当前真实 Change ID。
-- **下游交接：** 仓库约定与工具链报告；workflow-state.json。明确指出下一阶段消费哪些文件/字段。
-- **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+- **Inputs for this stage:** Project goals and repository location provided by the user; existing repository directories/configuration/AGENTS.md (if present). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Outputs for this stage:** AGENTS.md (created only when missing, or modified with approval); workflow-state.json; docs/architecture/baseline-status.md (establish domain version registration based on `templates/project-baseline/baseline-status.md`); toolchain check report (docs/project/toolchain-report.md). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
+- **Downstream handoff:** Repository conventions and toolchain report; workflow-state.json. Explicitly state which files/fields the next stage consumes.
+- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
+- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
 
-## 阶段边界与评审停等（强制）
+## Stage Boundaries and Review Stop (Mandatory)
 
-- 开始前运行 `python scripts/workflow.py check-entry --step 01-project-bootstrap [--change-id <id>]`；退出码非 0 时立即停止并报告，不得绕过。
-- 产物写完、检查通过只代表可送审：运行 `python scripts/workflow.py request-review --step 01-project-bootstrap --summary "<摘要>"`，按 `templates/workflow/step-handoff-report.md` 展示交接报告后**立即结束回合**；禁止在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
-- 只有用户明确回复“评审通过 01-project-bootstrap”后，才可运行 `python scripts/workflow.py approve --step 01-project-bootstrap --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>` 并执行 `transition`。不得自行填写 approver/approved_at，不得把自检通过当作批准。
-- `pending_approvals` 非空时禁止推进；`workflow-state.json` 只能通过 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
-- Claude Code 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑状态文件；待评审期间同样拒绝。遇到拒绝必须停止并说明，不得更换路径或禁用 hook 绕过。
+- Before starting, run `python scripts/workflow.py check-entry --step 01-project-bootstrap [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
+- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 01-project-bootstrap --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
+- Only after the user explicitly replies "Review passed 01-project-bootstrap" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 01-project-bootstrap --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
+- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

@@ -1,59 +1,59 @@
 ---
 name: workflow-orchestrator
-description: 当用户说“下一步/继续/接着做”时，根据仓库中的 workflow-state.json、真实产物、审批状态和 OpenSpec 状态决定唯一安全的下一阶段。
+description: When the user says "next step/continue/carry on" (下一步/继续/接着做), decide the single safe next stage based on workflow-state.json, real artifacts, approval status, and OpenSpec status in the repository.
 ---
 
-# 工作流推进器
+# Workflow Orchestrator
 
-## 触发条件
-用户说“下一步”“继续”“接着做”“继续研发流程”或要求恢复上次流程时使用。
+## Trigger Conditions
+Use when the user says "next step", "continue", "carry on", "continue the R&D workflow" (下一步/继续/接着做), or asks to resume the previous workflow.
 
-读取顺序：先读 `docs/product/BASELINE-BRIEF.md` 与当前 Change 产物；按命中的 ID 定向读取；完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因（见 `docs/INPUT-OUTPUT-POLICY.md`）。
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
 
-## 必须遵守
-1. 先读取 `workflow-state.json`、`docs/PROCESS-MAP.md`、`docs/OUTPUT-TEMPLATE-MATRIX.csv`，再检查当前阶段对应的真实文件。状态文件只是线索，不可代替文件校验。
-2. 检查当前 Agent 能发现哪些 Skill。若存在 Superpowers 的 `using-superpowers`，先按宿主 Agent 支持的方式加载它；然后按任务加载相关 Superpowers Skill。不要臆造调用语法或声称执行了未安装的 Skill。
-3. 如果 OpenSpec 已初始化，执行 `openspec list --changes`、`openspec list --specs`；对活动 Change 执行 `openspec status --change <id>`。在创建或编辑 OpenSpec artifact 前，按 CLI 实际版本使用 `openspec instructions <artifact> --change <id> --json` 获取指引。
-4. 若存在待审批项、阻断项、上一步必需产物缺失、校验失败或关键问题待用户确认，停止自动推进，明确提出需要用户决策的事项。
-5. 只推进一个阶段；不得一次性执行多个阶段，不得跳过审批门禁。
-6. 按下一阶段 Prompt 和 Skill 执行。Prompt 路径在 `prompts/`，Skill 路径在 `.claude/skills/<skill-id>/SKILL.md`。
-7. 调用工具必须真实执行：OpenSpec CLI 用终端命令；Superpowers 按当前 Agent 的技能加载机制读取/调用技能；Figma MCP 只能使用实际可用的 MCP 或已提供导出物。
-8. 完成后运行该阶段的检查脚本。只有产物实际存在、质量门禁通过且无需审批时，才通过 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>` 推进状态；禁止直接编辑 `completed_steps`/`current_step`。不得伪造测试结果。
-9. 如果当前阶段需要客户/产品/架构/设计人工批准，记录到 `pending_approvals`，等待用户明确批准后再继续。
-10. 输出：当前状态、检查证据、执行的工具/技能、下一步、阻断项。若只是分析尚未写入文件，不要标记完成。
+## Must Follow
+1. First read `workflow-state.json`, `docs/PROCESS-MAP.md`, `docs/OUTPUT-TEMPLATE-MATRIX.csv`, then check the real files corresponding to the current stage. The state file is only a clue and must not replace file validation.
+2. Check which Skills the current Agent can discover. If Superpowers' `using-superpowers` exists, first load it in the way supported by the host Agent; then load the relevant Superpowers Skills according to the task. Do not invent invocation syntax or claim to have executed a skill that is not installed.
+3. If OpenSpec is initialized, execute `openspec list --changes` and `openspec list --specs`; for active Changes execute `openspec status --change <id>`. Before creating or editing OpenSpec artifacts, use `openspec instructions <artifact> --change <id> --json` according to the actual CLI version to obtain guidance.
+4. If there are pending approvals, blocking items, missing required artifacts from the previous step, validation failures, or key questions awaiting user confirmation, stop automatic advancement and explicitly raise the items that need user decisions.
+5. Advance only one stage; do not execute multiple stages at once, and do not skip approval gates.
+6. Execute according to the next stage's Prompt and Skill. Prompt paths are in `prompts/`, and Skill paths are in `.claude/skills/<skill-id>/SKILL.md`.
+7. Tool calls must be actually executed: OpenSpec CLI uses terminal commands; Superpowers reads/invokes skills according to the current Agent's skill loading mechanism; Figma MCP may use only actually available MCP or provided exports.
+8. After completion, run the stage's check scripts. Advance state through `python3 scripts/workflow.py transition --step <step-id> --evidence <path>` only when artifacts actually exist, quality gates pass, and no approval is needed; direct editing of `completed_steps`/`current_step` is prohibited. Do not fabricate test results.
+9. If the current stage requires customer/product/architecture/design manual approval, record it in `pending_approvals` and wait for explicit user approval before continuing.
+10. Output: current status, check evidence, tools/skills executed, next step, blocking items. If it is only analysis not yet written to files, do not mark it completed.
 
-## OpenSpec 与 Superpowers 分工
-- OpenSpec：管理功能 Change 的 proposal/specs/design/tasks、状态、结构校验和归档。
-- Superpowers：约束发现/设计/计划/TDD/调试/审查/完成前验证的方法。
-- 本工具包的业务阶段 Skill：定义本项目每阶段的输入、输出、模板与门禁。
-三者互补，不能用提及名字代替实际加载或命令执行。
+## Division of Labor Between OpenSpec and Superpowers
+- OpenSpec: manages feature Change proposal/specs/design/tasks, status, structural validation, and archiving.
+- Superpowers: methods that constrain discovery/design/planning/TDD/debugging/review/pre-completion verification.
+- This toolkit's business-stage Skills: define each stage's inputs, outputs, templates, and gates for this project.
+The three are complementary; mentioning a name cannot replace actual loading or command execution.
 
-## 基线交互提示（强制）
+## Baseline Interaction Hints (Mandatory)
 
-- 选择功能级阶段时，除检查普通输入外，必须读取 `docs/BASELINE-FEATURE-INTERACTION.md` 和当前 `docs/architecture/baseline-status.md`。阶段 05 创建 baseline-impact；阶段 06–07 复核；阶段 08 不直接修改冻结基线；阶段 10 按审批结果回写。
+- When selecting feature-level stages, in addition to checking ordinary inputs, you must read `docs/BASELINE-FEATURE-INTERACTION.md` and the current `docs/architecture/baseline-status.md`. Stage 05 creates baseline-impact; stages 06–07 recheck; stage 08 does not directly modify the frozen baseline; stage 10 writes back according to approval results.
 
-## 输入/输出/交接契约（强制）
+## Input/Output/Handoff Contract (Mandatory)
 
-执行本 Skill 前后，必须遵守 `docs/STEP-ARTIFACT-CONTRACTS.md`，并读取 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="workflow-orchestrator"` 的契约记录。不得仅凭本 Skill 的简要“输入/输出”段落推断交接完成。
+Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="workflow-orchestrator"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **本阶段输入：** workflow-state.json；docs/PROCESS-MAP.md；docs/STEP-ARTIFACT-CONTRACTS.json；docs/OUTPUT-TEMPLATE-MATRIX.csv；真实产物与审批记录；OpenSpec CLI 当前状态（如已初始化）。逐项核验存在、版本、批准状态；缺失或未批准时停止并报告。
-- **本阶段输出：** 下一阶段判定报告（对话展示；不强制落盘）；workflow-state.json（仅在真实状态变化时由 transition 更新）。
-- **下游交接：** 所选阶段的 Input Contract 中全部文件。明确指出下一阶段消费哪些文件/字段。
-- **结束展示：** 使用 `templates/workflow/step-handoff-report.md`，展示输入核验、输出路径与摘要、追踪关系、自检命令/退出码、未执行项、待审批/阻断项和下一阶段输入。
-- **状态纪律：** 仅在真实产物落盘、门禁通过且所需审批完成后更新 `workflow-state.json`；草案/待审产物不得记为已完成。
+- **Inputs for this stage:** workflow-state.json; docs/PROCESS-MAP.md; docs/STEP-ARTIFACT-CONTRACTS.json; docs/OUTPUT-TEMPLATE-MATRIX.csv; real artifacts and approval records; current OpenSpec CLI status (if initialized). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Outputs for this stage:** next-stage determination report (displayed in conversation; not required to be written to disk); workflow-state.json (updated by transition only when the real state changes).
+- **Downstream handoff:** all files in the selected stage's Input Contract. Explicitly state which files/fields the next stage consumes.
+- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
+- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
 
 
-## P0 Runtime Guard (强制)
+## P0 Runtime Guard (Mandatory)
 
-- 阶段 DAG 读取 `docs/WORKFLOW-STAGES.json`，不得自行推断/改写依赖。
-- 执行前运行 `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；非 0 退出码表示禁止执行。
-- 阶段完成后生成符合 `workflow/evidence/<step-id>.json` 结构的证据，调用 `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`。禁止直接编辑 `completed_steps/current_step`。
-- transition 会生成 SHA-256 handoff；下一阶段必须核验全部上游 manifest。文件哈希变化时退回上游重审，不得静默刷新。
-- 阶段 08 后必须运行独立 `independent-verifier`，只有 PASS 才进入阶段 10。详情见 `docs/P0-RUNTIME-GOVERNANCE.md`。
+- The stage DAG reads `docs/WORKFLOW-STAGES.json`; do not infer/rewrite dependencies yourself.
+- Before execution, run `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`; a non-zero exit code means execution is prohibited.
+- After the stage completes, generate evidence conforming to the `workflow/evidence/<step-id>.json` structure and call `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`. Direct editing of `completed_steps/current_step` is prohibited.
+- transition generates a SHA-256 handoff; the next stage must verify all upstream manifests. When file hashes change, return to the upstream for re-review and do not silently refresh.
+- After stage 08, the independent `independent-verifier` must be run, and only PASS may enter stage 10. For details, see `docs/P0-RUNTIME-GOVERNANCE.md`.
 
-## 阶段边界与评审停等（强制）
+## Stage Boundaries and Review Stop (Mandatory)
 
-- 状态中存在 `pending_approvals` 时，只能报告 BLOCKED、待评审阶段与送审产物，禁止建议或执行任何下一阶段。
-- 用户只说“下一步”时，先核验真实产物与 `approvals_history`；上一阶段没有用户审批记录时不得 `transition`，只能报告待评审。
-- 任一阶段开始前必须运行 `check-entry`；阶段完成后必须 `request-review` 并立即结束回合，禁止在同一会话连续推进两个阶段。
-- 只有用户明确回复“评审通过 <step-id>”后，才可 `approve` 再 `transition`；不得自行填写 approver/approved_at。
+- When `pending_approvals` exists in the state, only report BLOCKED, the stage pending review, and the artifacts submitted for review; do not suggest or execute any next stage.
+- When the user only says "next step", first verify real artifacts and `approvals_history`; if the previous stage has no user approval record, do not `transition`, and only report that it is pending review.
+- Before any stage starts, `check-entry` must be run; after the stage completes, `request-review` must be run and the turn must end immediately; do not advance two stages consecutively in the same session.
+- Only after the user explicitly replies "Review passed <step-id>" (the workflow requires explicit user approval) may you `approve` and then `transition`; do not fill in approver/approved_at yourself.

@@ -1,64 +1,64 @@
-# 独立验证报告
+# Independent Verification Report
 
-- Change ID：
-- 验证者（Agent/人员/独立会话 ID）：
-- Builder（Agent/人员/会话 ID）：
-- 验证时间：
-- 判定：PASS / FAIL / BLOCKED
-- 被测 Revision（commit 或 diff fingerprint）：
-- 验证期间 Revision 是否保持不变：YES / NO
-- 只读约束是否遵守：YES / NO
+- Change ID:
+- Verifier (Agent/person/independent session ID):
+- Builder (Agent/person/session ID):
+- Verification time:
+- Verdict: PASS / FAIL / BLOCKED
+- Revision under test (commit or diff fingerprint):
+- Whether the Revision remained unchanged during verification: YES / NO
+- Whether the read-only constraint was observed: YES / NO
 
-## 1. 验证范围与输入版本
+## 1. Verification Scope and Input Versions
 
-| 输入 | 路径/版本 | 已读取 | 审批状态 |
+| Input | Path/version | Read | Approval status |
 |---|---|---|---|
 | OpenSpec proposal/specs/design/tasks | | | |
-| baseline-impact 与 baseline version | | | |
+| baseline-impact and baseline version | | | |
 | OpenAPI / API-IO / IO catalog | | | |
-| 前后端详细设计 / 测试设计 | | | |
+| Frontend/backend detailed design / test design | | | |
 
-## 2. 验收标准逐项验证
+## 2. Acceptance Criteria Verification
 
-| AC ID | 预期行为 | 验证方法 | 证据路径/测试 | 结果 PASS/FAIL/NOT_RUN |
+| AC ID | Expected behavior | Verification method | Evidence path/test | Result PASS/FAIL/NOT_RUN |
 |---|---|---|---|---|
 
-## 3. 测试与检查执行证据
+## 3. Test and Check Execution Evidence
 
-| 命令 | 退出码 | 结果 | 日志/报告路径 |
+| Command | Exit code | Result | Log/report path |
 |---|---:|---|---|
 
-## 4. 契约与工程约束检查
+## 4. Contract and Engineering Constraint Checks
 
-- API → IO 映射：
-- IO 契约/事务/幂等/异常：
-- 数据迁移与兼容性：
-- 权限/安全/隐私：
-- 基线约束：
-- OpenSpec tasks：
+- API → IO mapping:
+- IO contract/transactions/idempotency/exceptions:
+- Data migration and compatibility:
+- Permissions/security/privacy:
+- Baseline constraints:
+- OpenSpec tasks:
 
-## UI 一致性验证（涉及 UI 时必须）
+## UI Consistency Verification (required for UI Changes)
 
-> 逐 PAGE 使用独立重跑的运行态几何断言 `evidence/figma-layout-check.json`；不使用截图。
-> `layout_checks` 必须与本文表格一致；任 PAGE 缺失证据、超差或有未批准差异时 Verdict 不得 PASS。
+> Use the independently re-run runtime geometry assertions in `evidence/figma-layout-check.json` for each PAGE; do not use screenshots.
+> `layout_checks` must be consistent with the table in this document; if any PAGE lacks evidence, exceeds tolerance, or has unapproved differences, the Verdict must not be PASS.
 
-| PAGE | Figma node | 断言元素数 | 最大偏差 | 缺失/差异 | 判定 |
+| PAGE | Figma node | Number of assertion elements | Max deviation | Missing/difference | Verdict |
 |---|---|---|---|---|---|
-| PAGE-001 | `3:2` | 8 | 0.0px / tol 2px | 无 | PASS/FAIL/NOT_RUN |
+| PAGE-001 | `3:2` | 8 | 0.0px / tol 2px | None | PASS/FAIL/NOT_RUN |
 
-## 5. 发现项
+## 5. Findings
 
-| ID | 严重程度 | 描述 | 复现步骤/证据 | 责任阶段 |
+| ID | Severity | Description | Reproduction steps/evidence | Responsible stage |
 |---|---|---|---|---|
 
-## 6. 未执行项与限制
+## 6. Not-Executed Items and Limitations
 
-| 检查项 | 未执行原因 | 是否阻断 |
+| Check item | Reason not executed | Blocking |
 |---|---|---|
 
-## 7. 最终判定
+## 7. Final Verdict
 
-- Verdict：PASS / FAIL / BLOCKED
-- 允许进入人工验收：YES / NO
-- 退回阶段及修复要求：
-- 验证者说明：
+- Verdict: PASS / FAIL / BLOCKED
+- Allowed to enter manual acceptance: YES / NO
+- Return stage and remediation requirements:
+- Verifier notes:

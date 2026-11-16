@@ -9,20 +9,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 HEADINGS = {
-    "1": "研究范围与问题",
-    "2": "参考产品清单",
-    "3": "研究记录",
-    "4": "对比与借鉴",
-    "5": "结论与假设",
-    "6": "影响映射",
-    "7": "未决问题",
-    "8": "来源与审批",
+    "1": ("研究范围与问题", "Research Scope and Questions"),
+    "2": ("参考产品清单", "Reference Product List"),
+    "3": ("研究记录", "Research Records"),
+    "4": ("对比与借鉴", "Comparison and Lessons"),
+    "5": ("结论与假设", "Conclusions and Assumptions"),
+    "6": ("影响映射", "Impact Mapping"),
+    "7": ("未决问题", "Open Questions"),
+    "8": ("来源与审批", "Sources and Approval"),
 }
 PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|PENDING|待确认|待补充|\[填充\]")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 URL = re.compile(r"https?://[^\s|\]]+")
 IMPACT = re.compile(r"(FLOW-\d{3}|NODE-\d{3}-\d{2}|DO-\d{3}|BR-\d{3}|NFR-\d{3})")
-DECISION = re.compile(r"采纳|不采纳|部分采纳|N/A")
+DECISION = re.compile(r"采纳|不采纳|部分采纳|N/A|adopt|do not adopt|partially adopt", re.I)
 
 
 def sections(text: str) -> dict[str, list[str]]:
@@ -83,9 +83,9 @@ def main() -> int:
     text = path.read_text(encoding="utf-8")
     data = sections(text)
     errors: list[str] = []
-    for prefix, title in HEADINGS.items():
+    for prefix, titles in HEADINGS.items():
         if section(data, prefix) is None:
-            errors.append(f"missing section: ## {prefix}. {title}")
+            errors.append(f"missing section: ## {prefix}. {titles[0]} / {titles[1]}")
 
     if args.strict:
         for n, line in enumerate(text.splitlines(), 1):
@@ -97,20 +97,20 @@ def main() -> int:
         errors.append("section 1: need at least 3 research questions (table rows)")
 
     product_section = section(data, "2") or []
-    status_line = next((line for line in product_section if "参考产品状态" in line), None)
+    status_line = next((line for line in product_section if "参考产品状态" in line or "Reference product status" in line), None)
     status = None
     if status_line is None:
-        errors.append("section 2: missing '- 参考产品状态：PRESENT / NONE'")
+        errors.append("section 2: missing '- 参考产品状态：PRESENT / NONE' / '- Reference product status: PRESENT / NONE'")
     else:
         upper = status_line.upper()
         status = "NONE" if "NONE" in upper else "PRESENT" if "PRESENT" in upper else None
         if status is None:
-            errors.append("section 2: 参考产品状态 must be PRESENT or NONE")
+            errors.append("section 2: Reference product status must be PRESENT or NONE")
     if status == "NONE":
-        reason_line = next((line for line in product_section if "无参考产品理由" in line), None)
-        reason_text = reason_line.split("：", 1)[-1].strip() if reason_line else ""
+        reason_line = next((line for line in product_section if "无参考产品理由" in line or "Reason for no reference product" in line), None)
+        reason_text = re.split(r"[:：]", reason_line, 1)[-1].strip() if reason_line else ""
         if reason_line is None or has_placeholder(reason_text) or reason_text.upper() in {"N/A", "无", "NONE"}:
-            errors.append("section 2: 参考产品状态=NONE requires a non-placeholder 无参考产品理由")
+            errors.append("section 2: Reference product status=NONE requires a non-placeholder reason (无参考产品理由 / Reason for no reference product)")
     elif status == "PRESENT":
         products = table_rows(product_section)
         if not products:
@@ -147,7 +147,7 @@ def main() -> int:
     for index, cells in enumerate(comparisons, 1):
         joined = " | ".join(cells)
         if not DECISION.search(joined):
-            errors.append(f"section 4: comparison row {index} needs 采纳/不采纳/部分采纳/N/A")
+            errors.append(f"section 4: comparison row {index} needs adopt/do not adopt/partially adopt/N/A (采纳/不采纳/部分采纳/N/A)")
         if args.strict and has_placeholder(joined):
             errors.append(f"section 4: comparison row {index} has unresolved placeholder")
 
@@ -170,12 +170,12 @@ def main() -> int:
         errors.append("section 7: need at least one Q row or N/A + reason")
 
     source = "\n".join(section(data, "8") or [])
-    date_line = next((line for line in source.splitlines() if "调研日期" in line), "")
+    date_line = next((line for line in source.splitlines() if "调研日期" in line or "Research date" in line), "")
     if not DATE.search(date_line):
-        errors.append("section 8: 调研日期 must use YYYY-MM-DD")
-    status_line = next((line for line in source.splitlines() if "审批状态" in line), "")
+        errors.append("section 8: research date (调研日期 / Research date) must use YYYY-MM-DD")
+    status_line = next((line for line in source.splitlines() if "审批状态" in line or "Approval status" in line), "")
     if not re.search(r"DRAFT|APPROVED", status_line, re.I):
-        errors.append("section 8: 审批状态 must be DRAFT or APPROVED")
+        errors.append("section 8: approval status (审批状态 / Approval status) must be DRAFT or APPROVED")
 
     if errors:
         for error in errors:

@@ -1,60 +1,60 @@
-# Prompt：需求业务梳理
+# Prompt: Requirement Business Analysis
 
 ```text
-执行 `@requirements-analysis`。
+Execute `@requirements-analysis`.
 
-输入材料：<materials>
-项目目标/用户/角色：<goals-and-roles>
-既有 product 文档：<existing-product-docs>
+Input materials: <materials>
+Project goals/users/roles: <goals-and-roles>
+Existing product documents: <existing-product-docs>
 
-输出项目级需求业务梳理：docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md、open-questions.md、reference-research.md（参考产品与互联网调研）。
+Output the project-level requirement business analysis: docs/product/requirements-analysis.md, workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, glossary.md, acceptance-policy.md, open-questions.md, reference-research.md (reference products and internet research).
 
-参考产品与联网调研（前置）：
-- 先询问用户是否有参考产品/竞品/同类系统；请其提供名称、链接、截图、试用账号或文档，并记录回答。
-- 无论是否有参考产品，都必须使用 WebSearch/WebFetch（或宿主等价联网工具）完成互联网调研，至少 3 个研究问题、3 条不同来源（真实 URL + 访问日期）、2 条对比；输出 `docs/product/reference-research.md`，并运行 `python scripts/check-reference-research.py --strict`。
-- 无联网能力时标记 BLOCKED，写入 `open-questions.md`，不得通过阶段 02。
+Reference products and internet research (precondition):
+- First ask the user whether there are reference products/competitors/similar systems; ask them to provide names, links, screenshots, trial accounts, or documents, and record the answer.
+- Whether or not there are reference products, you must use WebSearch/WebFetch (or a host-equivalent internet tool) to complete internet research with at least 3 research questions, 3 distinct sources (real URLs + access dates), and 2 comparisons; output `docs/product/reference-research.md` and run `python scripts/check-reference-research.py --strict`.
+- When there is no internet capability, mark BLOCKED, write it into `open-questions.md`, and do not pass stage 02.
 
-要求：
-1. 业务流程必须完整、不得遗漏：覆盖全部业务域的主流程、替代流程、异常流程和后置条件；每个流程拆到可执行节点，节点 ID 用 NODE-<流程号>-<序号>。
-2. 每个节点必须登记执行角色、输入数据对象、输出/写入数据对象、前置条件、处理动作、异常/分支、下一节点、关联业务规则。
-3. 建立业务数据对象目录（DO-xxx）并输出 RD 矩阵（rd-matrix.csv）：逐行登记需求/规则 → 流程节点 → 角色 → 数据对象 → 访问类型；每个节点至少一条 RD 记录（或 N/A + 理由）。
-4. 本阶段不输出用户故事、用例或 AC：US/AC 留到阶段 05 提案级需求分析，由每个 Change 生成；用例场景写入提案级 spec 的 Scenario，不单独产出 `use-cases` 文件。
-5. 完成后运行 `python scripts/check-requirements.py --strict`，失败不得推进；按阶段结束审计核对流程节点与 RD 矩阵覆盖。
-6. 与 `brainstorming` 一起完成业务异常与边界清单：至少询问天气/季节、设备离线、人工接管、审计/溯源、监管上报、多角色、历史数据迁移、数据所有权与保留；未确认项写入 `open-questions.md`，不得擅自决策。
-7. 参考产品与互联网调研：必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成研究问题、参考产品、来源记录、对比、结论与影响映射，写入 `docs/product/reference-research.md`；至少 3 个研究问题、3 条不同来源、2 条对比，并记录访问日期与审批。无联网能力时标记 BLOCKED 并写入 `open-questions.md`，不得用记忆替代或通过阶段 02。
-8. 方法证据：阶段 evidence 必须写 `methods`：`brainstorming` 至少 3 个业务澄清问题、1 个备选方案、1 个决策；`internet-research` 至少 3 个研究问题、2 个对比、1 个决策。结果落点写 `docs/product/requirements-analysis.md`、`docs/product/open-questions.md` 或 `docs/product/reference-research.md`；运行 `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`。
-正式产物请遵循 `docs/TEMPLATE-POLICY.md` 与 `docs/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不要删除模板字段，未知项写 PENDING 并说明原因。
+Requirements:
+1. Business processes must be complete and omit nothing: cover the main processes, alternative processes, exception processes, and postconditions of all business domains; break each process down into executable nodes, with node IDs in the form NODE-<process-number>-<sequence-number>.
+2. Each node must register the executing role, input data objects, output/written data objects, preconditions, processing actions, exceptions/branches, next node, and associated business rules.
+3. Build a business data object catalog (DO-xxx) and output the RD matrix (rd-matrix.csv): register row by row requirement/rule → process node → role → data object → access type; each node must have at least one RD record (or N/A + reason).
+4. This stage does not output user stories, use cases, or AC: US/AC are deferred to stage 05 proposal-level requirements analysis and generated per Change; use-case scenarios are written into the proposal-level spec's Scenario, and no separate `use-cases` file is produced.
+5. When done, run `python scripts/check-requirements.py --strict`; failure means you may not proceed; check process node and RD matrix coverage during the stage-end audit.
+6. Together with `brainstorming`, complete the business exception and boundary checklist: at minimum ask about weather/season, device offline, manual takeover, audit/traceability, regulatory reporting, multiple roles, historical data migration, data ownership and retention; write unconfirmed items into `open-questions.md` and do not decide them on your own.
+7. Reference products and internet research: you must use the `internet-research` method (WebSearch/WebFetch or a host-equivalent internet tool) to complete research questions, reference products, source records, comparisons, conclusions, and impact mapping, written into `docs/product/reference-research.md`; at least 3 research questions, 3 distinct sources, 2 comparisons, and record access dates and approval. When there is no internet capability, mark BLOCKED and write it into `open-questions.md`; do not substitute memory or pass stage 02.
+8. Method evidence: the stage evidence must write `methods`: `brainstorming` at least 3 business clarification questions, 1 alternative, 1 decision; `internet-research` at least 3 research questions, 2 comparisons, 1 decision. Write the landing points into `docs/product/requirements-analysis.md`, `docs/product/open-questions.md`, or `docs/product/reference-research.md`; run `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`.
+For formal artifacts, follow the templates specified by `docs/TEMPLATE-POLICY.md` and `docs/OUTPUT-TEMPLATE-MATRIX.csv`; do not delete template fields, and write PENDING for unknown items with the reason.
 ```
 
-上下文：先运行 `python scripts/agent-context.py --stage <id> --change <change-id>` 获取精简输入；完整 `inputs` 仅用于审计，默认按精简/按需清单读取。阶段结束运行 `python scripts/check-output-context.py --stage <id> --strict` 检查摘要输出预算。
+Context: First run `python scripts/agent-context.py --stage <id> --change <change-id>` to obtain condensed inputs; the full `inputs` are only for audit, and by default read the condensed/on-demand list. At stage end, run `python scripts/check-output-context.py --stage <id> --strict` to check the summary output budget.
 
-## 运行前要填的变量
+## Variables to Fill Before Running
 
-- 输入材料：替换 `<...>` 占位符为真实路径、链接或内容。
-- Change ID：本阶段为项目级，写 `N/A`。
-- 加载 Skill：在支持 Agent Skill 的环境中使用 `@requirements-analysis`，或先显式加载同名 Skill。
+- Input materials: replace the `<...>` placeholders with real paths, links, or content.
+- Change ID: this stage is project-level, so write `N/A`.
+- Loading the Skill: in an environment that supports Agent Skills, use `@requirements-analysis`, or explicitly load the Skill of the same name first.
 
-## 执行工具协议（必须遵守）
+## Execution Tool Protocol (mandatory)
 
-- **加载本项目 Skill：** 按当前 Agent 的真实机制加载 `.claude/skills/<skill-id>/SKILL.md`；不能只把 Skill 名字当普通文本。若无法加载仓库 Skill，明确报告并按 Prompt 执行。
-- **Superpowers：** 使用 `using-superpowers` 与 `brainstorming` 的 stage-scoped 模式；先澄清目标、用户、痛点、范围和成功标准，并逐项询问业务异常/边界（天气/季节、设备离线、人工接管、审计/溯源、监管上报、多角色、历史数据迁移）。必须使用 `internet-research` 方法（WebSearch/WebFetch 或宿主等价联网工具）完成参考产品与市场调研，结果写入 `docs/product/reference-research.md`。结论写入 `requirements-analysis.md` 或 `open-questions.md`，不另写独立设计文档。阶段 evidence 必须写 `methods`（brainstorming 3/1/1，internet-research 3/2/1）并运行 `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`。先检查技能是否真实安装/可发现，不可用时用 `mode=equivalent` 并写 `reason`（联网调研不可用不属于 equivalent，必须 BLOCKED）。
-- **OpenSpec：** 仅运行 `openspec list --specs` 并阅读相关规格；本阶段不得创建 Change。命令须真实执行并报告退出码/结果；CLI 不存在或失败时标记为阻断/未执行。
-- **状态与门禁：** 读取/更新 `workflow-state.json`。仅当本阶段产物写入指定路径且脚本检查通过后，才将阶段记为完成。遇到待审批、缺输入或验证失败必须暂停。
-- **输出报告：** 列出实际读取文件、实际调用的 Skill/CLI/脚本、生成/修改文件、检查结果、未执行项和下一步。不得自动提交、发布、归档或覆盖既有文件，除非 Prompt 明确授权且门禁已通过。
+- **Load this project's Skill:** Load `.claude/skills/<skill-id>/SKILL.md` according to the current Agent's real mechanism; do not treat the Skill name as ordinary text. If the repository Skill cannot be loaded, report explicitly and execute according to the Prompt.
+- **Superpowers:** Use the stage-scoped mode of `using-superpowers` and `brainstorming`; first clarify goals, users, pain points, scope, and success criteria, and ask about business exceptions/boundaries item by item (weather/season, device offline, manual takeover, audit/traceability, regulatory reporting, multiple roles, historical data migration). You must use the `internet-research` method (WebSearch/WebFetch or a host-equivalent internet tool) to complete reference product and market research, writing the results into `docs/product/reference-research.md`. Write conclusions into `requirements-analysis.md` or `open-questions.md`; do not write a separate design document. The stage evidence must write `methods` (brainstorming 3/1/1, internet-research 3/2/1) and run `python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence <evidence.json>`. First check whether the skills are really installed/discoverable; when unavailable, use `mode=equivalent` and write `reason` (internet research being unavailable does not count as equivalent and must be BLOCKED).
+- **OpenSpec:** Only run `openspec list --specs` and read the relevant specs; this stage must not create a Change. Commands must actually run and their exit codes/results must be reported; when the CLI does not exist or fails, mark it as blocked/not executed.
+- **State and gates:** Read/update `workflow-state.json`. Mark the stage complete only after this stage's artifacts are written to the specified paths and the script checks pass. Pause when there are pending approvals, missing inputs, or failed verification.
+- **Output report:** List the files actually read, the Skills/CLI/scripts actually invoked, generated/modified files, check results, items not executed, and the next step. Do not auto-commit, publish, archive, or overwrite existing files unless the Prompt explicitly authorizes it and the gates have passed.
 
-## 强制交付物交接
+## Mandatory Deliverable Handoff
 
-执行前读取 `docs/STEP-ARTIFACT-CONTRACTS.md` 与 `docs/STEP-ARTIFACT-CONTRACTS.json` 中 `skill="requirements-analysis"` 的记录。
+Before execution, read the `skill="requirements-analysis"` record in `docs/STEP-ARTIFACT-CONTRACTS.md` and `docs/STEP-ARTIFACT-CONTRACTS.json`.
 
-- 输入核验：访谈/业务材料/旧系统资料；项目目标、用户、角色、约束；既有 docs/product/*；既有 OpenSpec specs（只读）。逐项报告文件是否存在、版本和批准状态；不满足时暂停。
-- 必须输出：docs/product/requirements-analysis.md；docs/product/workflows.md（含节点表）；docs/product/data-objects.csv；docs/product/rd-matrix.csv；docs/product/business-rules.md；docs/product/glossary.md；docs/product/acceptance-policy.md；docs/product/open-questions.md；docs/product/BASELINE-BRIEF.md；docs/product/role-permission-matrix.csv；docs/product/change-sizing.md；docs/product/decisions.md；docs/product/assumptions.md；docs/product/lessons.md；docs/product/id-conventions.md；docs/product/BASELINE-INDEX.md（运行 scripts/gen-baseline-index.py --write 生成）。按模板写入仓库，不要只在聊天中展示。
-- 下一步输入：业务流程与节点级角色/数据对象、业务数据对象目录、RD 矩阵、业务规则、术语与验收政策、未决问题；常驻基线简报、角色权限矩阵、Change 切片规则、决策/假设登记、ID 约定与基线索引。在报告中明确这些文件如何被下游（阶段 03 项目总体架构设计）消费。
-- 阶段完成时，按 `templates/workflow/step-handoff-report.md` 展示交接报告；区分已生成、草案、建议、待确认和未执行。
-- **阶段边界（强制）：** 阶段完成 ≠ 可进入下一阶段。产物写完、检查通过后运行 `python scripts/workflow.py request-review --step 02-requirements-analysis --summary "<送审摘要>"`（流程冻结为待评审），按交接模板展示报告后**立即结束回合**；用户明确回复“评审通过 02-requirements-analysis”前，禁止读取/执行下一阶段 Prompt/Skill、禁止创建下一阶段产物。批准后运行 `python scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再执行 `transition`。不得自行填写 approver/approved_at，不得把产物完成或自检通过当作批准。
-- 仅在门禁通过且审批完成后更新 `workflow-state.json`；不得自动跨越审批点。
+- Input verification: interviews/business materials/legacy system materials; project goals, users, roles, constraints; existing docs/product/*; existing OpenSpec specs (read-only). Report item by item whether each file exists, its version, and approval status; pause if not satisfied.
+- Required output: docs/product/requirements-analysis.md; docs/product/workflows.md (including the node table); docs/product/data-objects.csv; docs/product/rd-matrix.csv; docs/product/business-rules.md; docs/product/glossary.md; docs/product/acceptance-policy.md; docs/product/open-questions.md; docs/product/BASELINE-BRIEF.md; docs/product/role-permission-matrix.csv; docs/product/change-sizing.md; docs/product/decisions.md; docs/product/assumptions.md; docs/product/lessons.md; docs/product/id-conventions.md; docs/product/BASELINE-INDEX.md (generated by running scripts/gen-baseline-index.py --write). Write to the repository according to the templates; do not only show them in chat.
+- Inputs for the next step: business processes and node-level roles/data objects, business data object catalog, RD matrix, business rules, glossary and acceptance policy, open questions; resident baseline brief, role permission matrix, Change slicing rules, decision/assumption register, ID conventions, and baseline index. Clearly state in the report how these files are consumed downstream (stage 03 overall project architecture design).
+- When the stage completes, present the handoff report according to `templates/workflow/step-handoff-report.md`; distinguish generated, draft, proposed, pending confirmation, and not executed.
+- **Stage boundary (mandatory):** Stage completion ≠ permission to enter the next stage. After the artifacts are written and checks pass, run `python scripts/workflow.py request-review --step 02-requirements-analysis --summary "<review submission summary>"` (the workflow freezes into pending review), present the report according to the handoff template, and **end the turn immediately**; before the user explicitly replies "review approved 02-requirements-analysis", reading/executing the next stage's Prompt/Skill and creating next-stage artifacts are forbidden. After approval, run `python scripts/workflow.py approve --step 02-requirements-analysis --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval record>`, then run `transition`. Do not fill in approver/approved_at yourself, and do not treat artifact completion or self-check passing as approval.
+- Update `workflow-state.json` only after the gates pass and approval completes; do not automatically cross approval points.
 
-## 阶段结束审计（必须执行）
+## Stage-End Audit (mandatory)
 
-- 逐流程核对节点完整性：主流程、替代流程、异常流程都有 NODE；每个节点有角色、输入/输出数据对象、前置条件、动作、分支、下一节点。
-- 逐节点核对 RD 矩阵覆盖：每个 NODE 至少一条 RD 记录（或 N/A + 理由）；DO 引用不悬空。
-- 运行 `python scripts/check-requirements.py --strict`，退出码必须为 0；审计结论写入交接报告。
+- Check node completeness process by process: main processes, alternative processes, and exception processes all have NODEs; each node has role, input/output data objects, preconditions, actions, branches, and next node.
+- Check RD matrix coverage node by node: each NODE has at least one RD record (or N/A + reason); DO references do not dangle.
+- Run `python scripts/check-requirements.py --strict`; the exit code must be 0; write the audit conclusion into the handoff report.
