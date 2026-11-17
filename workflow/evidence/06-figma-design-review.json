@@ -1,0 +1,94 @@
+{
+  "step_id": "06-figma-design-review",
+  "change_id": "workflow-context-bundles",
+  "baseline_version": "0.2.2",
+  "outputs": [
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/figma-audit.md",
+      "status": "created",
+      "required": true,
+      "role": "N/A UI contract and reason for no UI"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/figma-code/",
+      "status": "n/a",
+      "required": true,
+      "role": "No target UI code because this Change contains no UI",
+      "waiver_reason": "Approved Change scope contains only local developer CLI behavior; no pages or visual components."
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/figma-layout.csv",
+      "status": "n/a",
+      "required": true,
+      "role": "No UI geometry assertion table",
+      "waiver_reason": "No Figma pages or UI elements exist in the approved Change scope."
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/figma-assets/README.md",
+      "status": "n/a",
+      "required": false,
+      "role": "No Figma image or SVG assets",
+      "waiver_reason": "No UI design or design assets were created."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 06-figma-design-review --change-id workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-entry.log"
+    },
+    {
+      "name": "Figma audit no-UI strict validation",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-figma-audit.py --change workflow-context-bundles --strict --no-ui --reason \"Approved Change scope contains only a local developer CLI and no user-facing UI.\"",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-figma-audit.log",
+      "note": "Initial invocation exposed invalid regex syntax in the checker; the checker was corrected and the final strict invocation passed."
+    },
+    {
+      "name": "Output context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 06 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-output-context.log",
+      "note": "No summary outputs are required for the N/A UI branch."
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-baseline-audit.log"
+    },
+    {
+      "name": "OpenSpec Change status",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec status --change workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-openspec-status.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-diff-check.log",
+      "note": "Git emitted line-ending conversion notices for existing modified files; no whitespace errors."
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17",
+    "evidence": "workflow/evidence/approval-06-figma-design-review-workflow-context-bundles-2026-11-17.md"
+  }
+}

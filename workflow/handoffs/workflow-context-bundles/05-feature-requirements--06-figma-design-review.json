@@ -1,0 +1,146 @@
+{
+  "version": "1.0",
+  "from_step": "05-feature-requirements",
+  "to_step": "06-figma-design-review",
+  "change_id": "workflow-context-bundles",
+  "created_at": "2026-11-17T02:46:01+00:00",
+  "baseline_version": "0.2.2",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "command": "python scripts/workflow.py check-entry --step 05-feature-requirements --change-id workflow-context-bundles",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-entry.log",
+      "status": "passed"
+    },
+    {
+      "name": "Strict requirements structure",
+      "command": "python scripts/check-requirements.py --change workflow-context-bundles --strict",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-requirements-check.log",
+      "status": "passed"
+    },
+    {
+      "name": "OpenSpec strict validation",
+      "command": "openspec validate workflow-context-bundles --strict",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-openspec-validate.log",
+      "status": "passed"
+    },
+    {
+      "name": "Baseline impact structure",
+      "command": "python scripts/check-baseline-impact.py workflow-context-bundles",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-baseline-impact.log",
+      "status": "passed"
+    },
+    {
+      "name": "Frozen baseline audit",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-baseline-audit.log",
+      "status": "passed"
+    },
+    {
+      "note": "No summary outputs detected; stage artifacts are formal source artifacts, not summaries.",
+      "name": "Output context budget",
+      "command": "python scripts/check-output-context.py --stage 05 --strict",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-output-context.log",
+      "status": "passed"
+    },
+    {
+      "name": "Method evidence",
+      "command": "python scripts/check-method-evidence.py --step 05-feature-requirements --evidence workflow/evidence/05-feature-requirements.json",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-method-evidence.log",
+      "status": "passed"
+    },
+    {
+      "note": "Git reports existing workspace line-ending conversion notices; no whitespace errors.",
+      "name": "Diff whitespace check",
+      "command": "git diff --check",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-diff-check.log",
+      "status": "passed"
+    },
+    {
+      "name": "Baseline binding requirement gate",
+      "command": "python scripts/baseline-governance.py check-change --change-id workflow-context-bundles --phase requirement",
+      "kind": "automated",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/05-baseline-binding.log",
+      "status": "passed"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "openspec/changes/workflow-context-bundles/proposal.md",
+      "sha256": "421f2a8d4be6b06d99848d0333da72b9fc30a9c4f0d5c3138aea91656207b954",
+      "size_bytes": 2742,
+      "role": "Change scope and proposal"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/specs/agent-context-bundles/spec.md",
+      "sha256": "2ca48ab456c41bd41f2008a0541579d285163c2ba68c5f82ee554bea98779cbb",
+      "size_bytes": 5195,
+      "role": "Normative observable behavior and scenarios"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design.md",
+      "sha256": "1ec584c0b5e9b25f23415f42b4b834ec1202c6742b558e09e4ae0a2a92a99dad",
+      "size_bytes": 1893,
+      "role": "Proposal-level design decisions",
+      "mutable_by_design": true
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/tasks.md",
+      "sha256": "414920222a82b42eea43af833cd6c92375629bb70b50bd97767d87877ebd9cac",
+      "size_bytes": 1184,
+      "role": "Initial TASK-ID implementation breakdown"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/user-stories.md",
+      "sha256": "c1a0a65f52cc8d47f8130ff9fbee3e1019e6ba005233ad06e6304f1338821cdb",
+      "size_bytes": 4321,
+      "role": "US/AC, traceability, and method landing points"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/baseline-impact.md",
+      "sha256": "79b5f9e9e20b9dc00337cd71e038cdea44366fdacaf6d6ceb35c25624c586fc9",
+      "size_bytes": 7316,
+      "role": "Baseline impact and ownership classification",
+      "mutable_by_design": true
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/baseline-binding.json",
+      "sha256": "01546d2df50ce90ef85eb689eeaaad248e3051796247e2bb1eea9cfbf4cdaecb",
+      "size_bytes": 12575,
+      "role": "12 active constraint applicability bindings",
+      "mutable_by_design": true
+    },
+    {
+      "path": "workflow/evidence/approval-baseline-binding-workflow-context-bundles-2026-11-17.md",
+      "sha256": "d1349ca91220e22f34ccfe3fb54f0aa212def6bbaffc39f8bbdc3df34efab2ed",
+      "size_bytes": 509,
+      "role": "User approval record for constraint applicability binding"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}

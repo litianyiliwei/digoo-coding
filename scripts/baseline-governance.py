@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -453,9 +454,49 @@ def check_change(change_id, phase):
     return errors
 
 
+def sync_workflow_state():
+    """Keep the workflow state's baseline index in step with the frozen manifest."""
+    script = ROOT / "scripts/workflow.py"
+    state = ROOT / "workflow-state.json"
+    if not script.is_file() or not state.is_file():
+        return
+    try:
+        result = subprocess.run([sys.executable, str(script), "sync-baseline-index"], capture_output=True, text=True, timeout=30)
+    except Exception as exc:
+        print(f"WARNING: workflow baseline index sync failed: {exc}", file=sys.stderr)
+        return
+    if result.returncode:
+        detail = (result.stdout + "\n" + result.stderr).strip()
+        print("WARNING: workflow baseline index sync failed: " + detail, file=sys.stderr)
+
+
+def state_baseline_errors(manifest):
+    state = ROOT / "workflow-state.json"
+    if not state.is_file():
+        return []
+    try:
+        data = json.loads(state.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return [f"workflow-state.json is invalid: {exc}"]
+    baseline = data.get("baseline") or {}
+    if not baseline:
+        return []
+    errors = []
+    if baseline.get("overall_version") and baseline.get("overall_version") != manifest.get("overall_version"):
+        errors.append("workflow-state baseline index is stale: overall "
+                      f"{baseline.get('overall_version')} != {manifest.get('overall_version')}; run workflow.py sync-baseline-index")
+    for name, cfg in (manifest.get("domains") or {}).items():
+        indexed = (baseline.get("domains") or {}).get(name) or {}
+        if indexed.get("version") and indexed.get("version") != cfg.get("version"):
+            errors.append(f"workflow-state baseline index is stale for {name}: "
+                          f"{indexed.get('version')} != {cfg.get('version')}")
+    return errors
+
+
 def cmd_audit(args):
     manifest, registry = read_inputs()
     errors = validate_manifest(manifest, registry, require_frozen=args.require_frozen)
+    errors.extend(state_baseline_errors(manifest))
     if errors:
         print("BASELINE_INVALID")
         for e in errors: print(" - " + e)
@@ -491,6 +532,7 @@ def cmd_open_amendment(args):
         raise ValueError("--domains must contain one or more valid domain IDs: " + ", ".join(DOMAINS))
     if not args.request_id.strip():
         raise ValueError("--request-id is required")
+    previous_fingerprints = domain_fingerprints(manifest, registry)
     manifest["status"] = "UNDER_AMENDMENT"
     for domain in chosen:
         manifest["domains"][domain]["status"] = "UNDER_AMENDMENT"
@@ -502,12 +544,13 @@ def cmd_open_amendment(args):
         "domains": chosen,
         "previous_overall_version": manifest.get("overall_version", ""),
         "previous_versions": {d: manifest["domains"][d].get("version", "") for d in chosen},
-        "previous_fingerprints": domain_fingerprints(manifest, registry),
+        "previous_fingerprints": previous_fingerprints,
         "opened_at": now(),
         "opened_by": args.opened_by or "",
         "status": "OPEN"
     })
     save_json(MANIFEST, manifest)
+    sync_workflow_state()
     print("BASELINE_AMENDMENT_OPENED; feature workflow gates are now blocked until re-freeze")
     return 0
 
@@ -528,6 +571,7 @@ def cmd_freeze(args):
         for error in errors: print(" - " + error)
         return 1
     save_json(MANIFEST, manifest)
+    sync_workflow_state()
     print("BASELINE_FROZEN=" + manifest["overall_version"])
     return 0
 
@@ -576,6 +620,7 @@ def cmd_close_amendment(args):
         for error in errors: print(" - " + error)
         return 1
     save_json(MANIFEST, candidate)
+    sync_workflow_state()
     print("BASELINE_AMENDMENT_CLOSED_AND_FROZEN=" + candidate["overall_version"])
     return 0
 

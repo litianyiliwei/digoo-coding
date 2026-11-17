@@ -68,17 +68,17 @@ python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "
 ```
 
 - `approve` validates that the approval evidence file actually exists, writes the approval record into `approvals_history`, and clears that stage's `pending_approvals`; only then can `transition` be executed.
-- `transition` requires a corresponding `approvals_history` record for all stages with `human_approval_required=true` (02–10); merely writing the approval in the evidence or using `handoff-create --approved` cannot bypass this.
+- `transition` requires a corresponding `approvals_history` record for all human-reviewed stages (01–10); merely writing the approval in the evidence or using `handoff-create` cannot bypass this.
 - `reopen` clears the approval records of the reverted stages; after rerunning, review must be performed again.
 - Under Claude Code, the PreToolUse hook in `.claude/settings.json` rejects writes to artifacts of stages after the current stage (shared artifacts excepted) and direct edits to `workflow-state.json`; it rejects them equally while review is pending. Other Agents should stop on their own based on `pending_approvals` and `current_step`.
 
 ### Clearing Approvals and Deadlock Boundaries
 
-- `pending_approvals` for the current stage do not block that stage's own `transition`. After approval is complete, first run `approve` to write `approvals_history`, then write `approval.status=approved`, `approver`, and `approved_at` in the evidence, and then run `transition`; the state machine atomically clears that stage's pending approval items.
+- `pending_approvals` for the current stage do not block that stage's own `transition`. After approval is complete, run `approve`: it verifies that every reviewed artifact hash in the review packet is unchanged, and appends a record to `approvals_history`. `transition` uses `approvals_history` as the approval authority, re-verifies the same hashes, and atomically clears that stage's pending approval item. The evidence `approval` block is descriptive and no longer has to say `approved`.
 - `blocked_items` for the current stage can be resolved through the evidence's `resolved_blockers`: for each item write `step_id`, `resolution`, and an existing in-repository evidence path; after a successful transition the state machine atomically clears that stage's blocker items. Blocker items of other stages still must be handled first.
 - Pending approval items of other stages or other Changes still prevent entry into subsequent stages.
-- If the current stage has pending approval items but the evidence does not give `status=approved`, `transition` refuses and the state does not advance; there is no "advance first, approve later" path.
-- When a stage with `human_approval_required=true` has no `approvals_history` record, `transition` refuses outright; `request-review` and explicit user approval must come first.
+- If a human-reviewed stage (01–10) has no non-superseded `approvals_history` record, `transition` refuses and the state does not advance; there is no "advance first, approve later" path. A stage that called `request-review` also needs a recorded approval even if its DAG flag is false.
+- When a human-reviewed stage (01–10) has no `approvals_history` record, `transition` refuses outright; `request-review` and explicit user approval must come first.
 - `check-entry` still reports the current stage's pending approval items; it is used to prevent re-executing that stage before approval, not to prevent submitting approved evidence.
 
 ### Rework Reopen
@@ -88,8 +88,21 @@ python3 scripts/workflow.py reopen --step 07-detailed-design --reason "Test desi
 ```
 
 - Removes the target stage and all its downstream stages according to the DAG dependency closure, clears those stages' `pending_approvals` / `blocked_items`, and sets `current_step` back to the target stage.
-- Appends `reopen_history`, recording the reason, removed stages, and time.
+- Does not delete approval history: matching `approvals_history` records are marked `superseded_at`/`supersede_reason`, and the removed approvals are copied into `reopen_history`.
+- Invalidates only outgoing handoffs (`from_step` in the removed set): they get `invalidated_at`/`invalidated_reason`; the incoming handoff from the still-completed predecessor stays valid so the reopened stage can re-enter.
+- Appends `reopen_history`, recording the reason, removed stages, superseded approvals, invalidated handoffs, and time.
 - After rerunning a stage, evidence and the handoff package must be regenerated; an old handoff manifest at the same path is overwritten by the new `transition`.
+
+### Reset to Uninitialized
+
+```bash
+python3 scripts/workflow.py reset-state --reason "user requested a clean restart" --note "..."
+```
+
+- Archives the full previous state under `workflow/evidence/state-reset-<timestamp>.json`.
+- Sets `completed_steps=[]`, `current_step=01-project-bootstrap`, clears `active_change_id`, pending/blocked items, approvals, transitions and baseline index, and records `reset_history` with a pointer to the archive.
+- Marks every existing handoff `invalidated`; stale evidence files remain on disk for audit.
+- This is an administrative reset, not a stage transition. Use it only on explicit user instruction.
 
 ### Multi-Change Iteration
 
@@ -166,11 +179,12 @@ Manual check:
 python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/07-detailed-design--08-implementation-orchestrator.json
 ```
 
-`handoff-create` is only for manually confirmed recovery/rebuild; it must not be used to bypass a failed gate or approval. If the state has already been committed but the process was interrupted before generating the manifest, regenerate with the original stage's approved evidence: `python3 scripts/workflow.py handoff-create --from-step <from> --to-step <to> --change-id <id> --evidence <original-stage-evidence.json>`. For project-level stages, omit `--change-id`; the 15 Verifier handoff must not be rebuilt using the manual `--file` approach, because the independent verifier check evidence must be preserved.
+`handoff-create` is only for manually confirmed recovery/rebuild; it must not be used to bypass a failed gate or approval. If the state has already been committed but the process was interrupted before generating the manifest, regenerate with the original stage's approved evidence: `python3 scripts/workflow.py handoff-create --from-step <from> --to-step <to> --change-id <id> --evidence <original-stage-evidence.json>`. For project-level stages, omit `--change-id`. `--evidence` is mandatory; the free-form `--file` path is no longer accepted, and the 09 independent-verification recovery must preserve the verifier evidence and PASS proof.
 
 ### Declarative Mutable Artifacts
 
 - If an artifact is also declared as an output by a later stage (for example, `baseline-status.md` by 01/03, `design.md` by 05/07, `baseline-impact.md` by 05/07, `lessons/decisions/assumptions` by 02/10), the handoff manifest records `mutable_by_design: true`. `traceability.csv` is initialized and merged by 07, is read-only in 08–10, and is no longer declared as a later output.
+- `handoff_policy.volatile_artifacts` in the contract additionally marks machine-managed or generated files (`workflow-state.json`, `AGENTS.md`, baseline status/manifest/registry, `BASELINE-INDEX.md`, `toolchain-report.md`). Handoffs record their existence but never their hash, so routine state, index and baseline refreshes do not invalidate an upstream approval.
 - Downstream verification only requires such artifacts to still exist and does not compare against the original hash; artifacts not declared by a later stage are still strictly compared by SHA-256.
 - This marker is generated automatically by `transition` and `handoff-create` according to `STEP-ARTIFACT-CONTRACTS.json` and may not be declared manually.
 

@@ -71,8 +71,8 @@ for key, rule in policy.items():
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {skill_file.relative_to(ROOT)}')
             if prompt_file.is_file() and not any(a in prompt_text.lower() for a in aliases):
                 errors.append(f'method_policy {key}: required topic {topic!r} not mentioned in {row.get("prompt")}')
-# Validate lean-context policies: every change stage has a lean default read
-# set within its declared file budget, plus an on-demand overflow list.
+# Validate lean-context policies: every requirements/design/Change stage has a
+# lean default read set within its declared file budget, plus on-demand inputs.
 input_policy=data.get('input_policy') or {}
 output_policy=data.get('output_policy') or {}
 if not input_policy.get('stage_profiles'):
@@ -80,7 +80,7 @@ if not input_policy.get('stage_profiles'):
 if not output_policy.get('summary_budgets'):
     errors.append('output_policy.summary_budgets is missing')
 profiles=input_policy.get('stage_profiles') or {}
-for step in ('03','04','05','06','07','08','09','10'):
+for step in ('02','03','04','05','06','07','08','09','10'):
     profile=profiles.get(step)
     if not profile:
         errors.append(f'input_policy missing stage profile: {step}')

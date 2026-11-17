@@ -1,0 +1,23 @@
+source_type,source_id,target_type,target_id,relationship,status,evidence,notes
+US,US-001,AC,AC-001,accepted_by,covered,design/user-stories.md,Rendered context value is traceable to the build-agent story
+US,US-001,AC,AC-002,accepted_by,covered,design/user-stories.md,Final text and group budget satisfy the same context story
+US,US-002,AC,AC-003,accepted_by,covered,design/user-stories.md,Task card value is traceable to the execution-agent story
+AC,AC-001,TEST,TEST-001,verified_by,covered,design/test-cases.csv,Valid deterministic selection and source provenance
+AC,AC-001,TEST,TEST-002,verified_by,covered,design/test-cases.csv,Invalid selectors and outside-root paths fail closed
+AC,AC-002,TEST,TEST-003,verified_by,covered,design/test-cases.csv,Normalized Unicode character and group boundaries
+AC,AC-002,TEST,TEST-004,verified_by,covered,design/test-cases.csv,Exception approval scope expiry and quota behavior
+AC,AC-003,TEST,TEST-005,verified_by,covered,design/test-cases.csv,Source-backed task card and explicit missing fields
+AC,AC-003,TEST,TEST-006,verified_by,covered,design/test-cases.csv,Unknown and cross-Change TASK IDs fail
+AC,AC-001,TEST,TEST-007,verified_by,covered,design/test-cases.csv,Workflow prompts inject body-only text and stop on render errors
+TASK,TASK-001,TEST,TEST-001,verified_by,covered,design/test-cases.csv,Configuration group and trigger bindings
+TASK,TASK-001,TEST,TEST-003,verified_by,covered,design/test-cases.csv,Configured budgets
+TASK,TASK-002,TEST,TEST-001,verified_by,covered,design/test-cases.csv,Rendered source selection and provenance
+TASK,TASK-002,TEST,TEST-002,verified_by,covered,design/test-cases.csv,Selector and path validation
+TASK,TASK-003,TEST,TEST-003,verified_by,covered,design/test-cases.csv,Character and group counting
+TASK,TASK-003,TEST,TEST-004,verified_by,covered,design/test-cases.csv,Approved exception behavior
+TASK,TASK-004,TEST,TEST-005,verified_by,covered,design/test-cases.csv,Task card field extraction
+TASK,TASK-004,TEST,TEST-006,verified_by,covered,design/test-cases.csv,TASK ID validation
+TASK,TASK-005,TEST,TEST-001,verified_by,covered,design/test-cases.csv,Documented CLI modes match the basic renderer
+TASK,TASK-005,TEST,TEST-005,verified_by,covered,design/test-cases.csv,Task-card usage is documented
+TASK,TASK-005,TEST,TEST-007,verified_by,covered,design/test-cases.csv,Prompt entry points use the rendered bundle
+TASK,TASK-006,TEST,TEST-007,verified_by,covered,design/test-cases.csv,Prompt usage stays consistent with CLI modes

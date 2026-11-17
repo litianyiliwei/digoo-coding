@@ -10,8 +10,17 @@ if len(sys.argv)>1 and sys.argv[1:] != ['--strict']:
 if not path.is_file(): print(f'MISSING: {path}', file=sys.stderr); sys.exit(1)
 text=path.read_text(encoding='utf-8')
 rows=[]
+in_roadmap=False
 for line_no,line in enumerate(text.splitlines(),1):
     s=line.strip()
+    if s.startswith('## '):
+        if s == '## 1. 路线图总表':
+            in_roadmap=True
+            continue
+        if in_roadmap:
+            break
+    if not in_roadmap:
+        continue
     if not s.startswith('|') or '---' in s: continue
     cells=[c.strip() for c in s.strip('|').split('|')]
     if cells and cells[0].lower() in {'change id','change-id'}: continue

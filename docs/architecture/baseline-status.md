@@ -1,62 +1,57 @@
 # 项目基线状态与版本登记
 
-- 项目名称：项目
-- 总体基线版本：`v0.1.0`
-- 总体状态：DRAFT
-- 最近生效日期：N/A（尚未冻结）
-- 产品负责人：PENDING（待业务/产品负责人指定；阻塞条件：阶段 02 需求基线评审）
-- 架构负责人：PENDING（待架构负责人指定；阻塞条件：阶段 03 架构基线评审）
-- 技术负责人：PENDING（待技术负责人指定；阻塞条件：阶段 03 技术选型评审）
-- 基线仓库版本/Commit：PENDING（基线冻结时按阶段 03 证据登记）
+- Change ID：N/A（项目级）
+- 状态：FROZEN（BCR-Q003-RISK-TIER-POLICY 已批准并于 2026-11-17 重冻）
+- 来源基线：Stage 02 已审批需求基线；Stage 03 架构草案
+- 关联需求/AC：RA-001、NFR-001、FLOW-001、DO-001–005、BR-001–007
+- 生成日期/版本：2026-11-17 / v0.3.0
 
-> 机器权威来源：`docs/architecture/baseline-manifest.json`（阶段 03 生成；当前尚不存在）。
-> 约束权威来源：`docs/architecture/constraint-registry.json`（阶段 03 生成；当前尚不存在）。
-> 本文件为阶段 01（project-bootstrap）初始化产物；2026-11-12 清理全部流程输出后按 `templates/project-baseline/baseline-status.md` 重建，仅登记 DRAFT 状态，未冻结任何域。
+- 项目名称：项目 AI coding 流程工具包
+- 总体基线版本：`v0.3.0`
+- 总体状态：FROZEN
+- 最近生效日期：2026-11-17
+- 产品/架构/技术负责人：用户/项目负责人（用户于 2026-11-17 确认）
+- 基线仓库版本/Commit：main / `91aab8e0f909921082a5096c0d3ac14e735baf18`（工作区内容由基线 SHA-256 绑定；未自动提交）
+
+> 机器权威来源：`baseline-manifest.json`；约束权威来源：`constraint-registry.json`。本文件仅为可读镜像。
 
 ## 1. 各基线域版本
 
 | 基线域 | 权威文件 | 版本 | 状态 | 审批人 | 生效日期 | 最近关联 Change / ADR |
 |---|---|---|---|---|---|---|
-| 产品 | `docs/product/*` | v0.1.0 | DRAFT | PENDING（待产品负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-| 架构 | `docs/architecture/system-context.md`、`domain-boundaries.md`、`containers-and-deployment.md`、`data-flows.md`、`technology-decisions.md`、`docs/adr/*` | v0.1.0 | DRAFT | PENDING（待架构负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-| 数据与领域 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | v0.1.0 | DRAFT | PENDING（待架构负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-| 公共 API | `docs/architecture/api-conventions.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-| 前端工程 | `docs/architecture/frontend-conventions.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-| 测试与质量 | `docs/architecture/test-strategy.md` | v0.1.0 | DRAFT | PENDING（待技术负责人指定） | N/A（未生效） | N/A（尚无 Change/ADR） |
-
-> 上述域文件尚未生成（由阶段 02/03 产出）；当前仅登记域与预期版本，不代表基线已建立。
+| 产品 | `docs/product/requirements-analysis.md`、workflows、DO、RD、business-rules、glossary、acceptance-policy | v0.3.0 | FROZEN | user | 2026-11-17 | BCR-Q003-RISK-TIER-POLICY |
+| 架构 | system-context、domain-boundaries、containers、data-flows、technology-decisions、ADR index | v0.2.2 | FROZEN | user | 2026-11-17 | ADR-001–003 APPROVED |
+| 数据与领域 | logical-erd、domain-boundaries、data-flows | v0.2.2 | FROZEN | user | 2026-11-17 | N/A |
+| 公共 API/CLI | `docs/architecture/api-conventions.md` | v0.2.0 | FROZEN | user | 2026-11-17 | N/A |
+| 前端工程 | `docs/architecture/frontend-conventions.md` | v0.2.0 | FROZEN | user | 2026-11-17 | N/A |
+| 测试与质量 | `docs/architecture/test-strategy.md` | v0.3.0 | FROZEN | user | 2026-11-17 | BCR-Q003-RISK-TIER-POLICY |
 
 ## 2. 生效规则
 
-- 状态为 `FROZEN` 的域是功能开发必须遵循的规范；功能 Change 必须记录实际引用的域版本。
-- `DRAFT` 域可以作为参考，但不能冒充已批准约束；影响该域的功能设计必须标记风险并取得负责人批准。
-- `UNDER_AMENDMENT` 表示存在基线修订；在审批生效前仍以旧版本为准，待修订规则不能提前作为强制要求。
-- 任何正式变更都必须记录修订版本、变更理由、审批人、生效日期、关联 ADR/Change 和受影响的在途 Change。
+FROZEN 域仅在负责人完成审阅、批准、证据登记和哈希检查后作为强制规范；DRAFT 域不代表已批准约束。基线修订需记录版本、理由、批准人、证据和受影响 Change。
 
 ## 3. 版本策略
 
-默认使用语义版本：
-- PATCH：不改变规范语义的澄清、错字、引用修正。
-- MINOR：新增兼容的共享规则、实体/公共约定或质量要求。
-- MAJOR：改变系统边界、数据所有权、公共契约或可能导致既有功能不兼容的约束。
+- PATCH：不改规范语义的澄清/修正。
+- MINOR：新增兼容规则、实体或公共约定。
+- MAJOR：改变系统边界、数据所有权、公共契约或兼容性。
 
-项目可采用其他策略，但必须在此明确并保持一致。
+## 4. 当前待处理项
 
-## 4. 当前待处理的基线修订
-
-| 修订 ID | 影响域 | 提出来源 Change | 变更摘要 | 状态 | 负责人/审批人 | 生效版本 |
-|---|---|---|---|---|---|---|
-| N/A | N/A | N/A | 暂无基线修订（基线尚未建立，阻塞于阶段 02/03） | N/A | PENDING（待负责人指定） | N/A |
+| ID | 影响域 | 摘要 | 状态 | 负责人 |
+|---|---|---|---|---|
+| Q-003 | 产品 / 测试与质量 | 风险判级矩阵及最低检查集 | RESOLVED; BCR-Q003-RISK-TIER-POLICY frozen in v0.3.0 | 用户 / 技术质量负责人 |
+| ARCH-STATUS-001 | 架构 | 将文件状态与已冻结批准事实同步；不改变规范语义 | RESOLVED；v0.2.1 于 2026-11-17 获批 | 用户/项目负责人 |
 
 ## 5. 冻结批准记录
 
 | 基线版本 | 审批范围 | 审批人 | 日期 | 证据/会议记录 |
 |---|---|---|---|---|
-| N/A | N/A（尚无冻结基线） | PENDING（待业务/架构/技术负责人） | N/A | N/A |
+| v0.2.0 | 流程工具包架构与 12 项约束 | user | 2026-11-17 | `workflow/evidence/approval-baseline-v0.2.0-2026-11-17.md` |
+| v0.2.1 | ARCH-STATUS-001 状态元数据同步 | user | 2026-11-17 | `workflow/evidence/approval-baseline-amendment-ARCH-STATUS-001-2026-11-17.md` |
+| v0.2.2 | ARCH-STATUS-002 生效日期及目录状态同步 | user | 2026-11-17 | `workflow/evidence/approval-baseline-amendment-ARCH-STATUS-002-2026-11-17.md` |
+| v0.3.0 | BCR-Q003-RISK-TIER-POLICY：风险判级与验证矩阵（product + test_quality） | user | 2026-11-17 | `workflow/evidence/approval-BCR-Q003-RISK-TIER-POLICY-2026-11-17.md` |
 
-## 6. 机器登记操作
+## 6. 冻结操作
 
-- DRAFT 阶段完成文档内容后，运行 `python3 scripts/baseline-governance.py refresh-hashes`。
-- 人工确认每个域的负责人、审批人、批准日期、生效 revision、审批证据和版本；将所有适用约束从 DRAFT 审批为 ACTIVE。
-- 将各域状态设置为 FROZEN 并填好域审批字段，随后执行 `python3 scripts/baseline-governance.py freeze --approved-by <负责人> --approved-at <日期> --evidence <审批证据文件>`。
-- 冻结后禁止直接编辑基线文件。先执行 `open-amendment`；修订、升级版本、重新计算哈希、审批后执行 `close-amendment`，才能恢复功能级门禁。
+用户于 2026-11-17 批准并冻结 v0.2.0；ARCH-STATUS-001/002 已按基线修订流程完成。BCR-Q003-RISK-TIER-POLICY 经用户批准，product 与 test_quality 升级至 v0.3.0，哈希刷新并重冻。冻结后的修改须通过 open-amendment。

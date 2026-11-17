@@ -1,0 +1,4 @@
+$ git diff --check
+No whitespace errors.
+Git reported a line-ending conversion warning for docs/project/toolchain-report.md (LF will be replaced by CRLF when Git next touches the file).
+Exit code: 0

@@ -1,0 +1,3 @@
+$ python scripts/workflow.py check-entry --step 01-project-bootstrap
+ENTRY_READY=01-project-bootstrap
+Exit code: 0

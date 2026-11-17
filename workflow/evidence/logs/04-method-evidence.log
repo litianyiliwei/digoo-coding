@@ -1,0 +1,4 @@
+Command: python scripts/check-method-evidence.py --step 04-proposal-planning --evidence workflow/evidence/04-proposal-planning.json
+Result:
+METHOD_EVIDENCE_PASSED=04-proposal-planning
+Exit code: 0

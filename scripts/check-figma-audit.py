@@ -154,7 +154,7 @@ def page_ids_from_rows(rows):
 if no_ui:
     if AUDIT.is_file() and AUDIT.stat().st_size:
         text = AUDIT.read_text(encoding="utf-8")
-        if not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", section_any(text, *SOURCE_SEC), re.M):
+        if not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", section_any(text, *SOURCE_SEC), re.M):
             print("ERROR: --no-ui declared but design/figma-audit.md does not declare Design source status: N/A (设计来源状态：N/A); update it or drop --no-ui")
             sys.exit(1)
     print(f"Figma audit check passed: this Change explicitly has no UI. Reason: {reason}")
@@ -167,8 +167,8 @@ if not AUDIT.is_file() or not AUDIT.stat().st_size:
 
 text = AUDIT.read_text(encoding="utf-8")
 source_section = section_any(text, *SOURCE_SEC)
-if re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", source_section, re.M):
-    if not re.search(r"^- (?:无 UI 理由|Reason for no UI）[:：]\s*\S", source_section, re.M):
+if re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", source_section, re.M):
+    if not re.search(r"^- (?:无 UI 理由|Reason for no UI)[:：]\s*\S", source_section, re.M):
         print("ERROR: a no-UI Change must write '- 无 UI 理由：<原因>' / '- Reason for no UI: <reason>' under Design Source and Selection")
         sys.exit(1)
     print("Figma audit check passed: this Change declares no UI in figma-audit.md.")
@@ -195,7 +195,7 @@ for zh, en in required_sections:
 
 if not re.search(r"(人工\s*Figma\s*设计|Figma\s*MCP\s*AI\s*自动设计|Manual\s+Figma\s+design|Figma\s+MCP\s+AI\s+automatic\s+design)", source_section, re.I):
     errors.append("Design Source and Selection must state Manual Figma design or Figma MCP AI automatic design")
-if not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*APPROVED\s*$", source_section, re.M):
+if not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*APPROVED\s*$", source_section, re.M):
     errors.append("Design Source and Selection must mark '- 设计来源状态：APPROVED' / '- Design source status: APPROVED' before stage 06 starts")
 
 required_inputs = [("需求与 AC", "requirements and AC"), ("Figma MCP", "Figma MCP"), ("设计规范", "design conventions")]
@@ -304,7 +304,7 @@ if not CODE_README.is_file():
 code_text_by_page = {}
 for pid in pages:
     matches = sorted(CODE_DIR.glob(f"{pid}.*")) if CODE_DIR.is_dir() else []
-    code_file = next((p for p in matches if p.suffix.lower() in {".tsx", ".ts", ".vue", ".md"}), None)
+    code_file = next((p for p in matches if p.suffix.lower() in {".tsx", ".jsx", ".vue"}), None)
     if not code_file:
         errors.append(f"missing design code for {pid}: {CODE_DIR.relative_to(ROOT)}/{pid}.vue (or .tsx/.jsx for React)")
     else:
@@ -357,8 +357,8 @@ code_section = section_any(text, *CODE_SEC)
 if "figma-code/" not in code_section or "get_design_context" not in code_section:
     errors.append("## 设计代码 / ## Design Code must reference figma-code/ and get_design_context")
 if require_framework:
-    m_framework = re.search(r"^- (?:目标框架|Target framework）[:：]\s*\S", code_section, re.M)
-    m_ext = re.search(r"^- (?:设计代码扩展名|Design code extension）[:：]\s*(\.(?:vue|tsx|jsx))\s*$", code_section, re.M)
+    m_framework = re.search(r"^- (?:目标框架|Target framework)[:：]\s*\S", code_section, re.M)
+    m_ext = re.search(r"^- (?:设计代码扩展名|Design code extension)[:：]\s*(\.(?:vue|tsx|jsx))\s*$", code_section, re.M)
     if not m_framework:
         errors.append("## 设计代码 / ## Design Code must declare '- 目标框架：...' / '- Target framework: ...' (technology-decisions.md)")
     if not m_ext:
@@ -433,11 +433,11 @@ for required_tool in ("get_metadata", "get_variable_defs"):
 
 # --- UI review ---
 ui_section = section_any(text, *UI_SEC)
-if not re.search(r"^- (?:UI 评审状态|UI review status）[:：]\s*APPROVED\s*$", ui_section, re.M):
+if not re.search(r"^- (?:UI 评审状态|UI review status)[:：]\s*APPROVED\s*$", ui_section, re.M):
     errors.append("UI Review must mark '- UI 评审状态：APPROVED' / '- UI review status: APPROVED'")
-if not re.search(r"^- (?:评审人|Reviewer）[:：]\s*.+$", ui_section, re.M):
+if not re.search(r"^- (?:评审人|Reviewer)[:：]\s*.+$", ui_section, re.M):
     errors.append("UI Review is missing '- 评审人：' / '- Reviewer: '")
-m = re.search(r"^- (?:评审证据|Review evidence）[:：]\s*(.+)$", ui_section, re.M)
+m = re.search(r"^- (?:评审证据|Review evidence)[:：]\s*(.+)$", ui_section, re.M)
 if not m:
     errors.append("UI Review is missing '- 评审证据：' / '- Review evidence: '")
 else:

@@ -8,7 +8,7 @@
 
 ## 1. Why Convergence
 
-Previously, the `inputs` of stages 05-10 mixed the complete product baseline, complete architecture baseline, ADRs, complete specs, and current Change artifacts together; although most entries said "read as needed," there was no default reading order, file budget, or trigger condition. In actual execution, two problems easily occurred:
+Previously, the `inputs` of stages 05-10 mixed the complete product baseline, complete architecture baseline, ADRs, complete specs, and current Change artifacts together; Stage 02 also lacked a generated lean read set. Although most entries said "read as needed," there was no default reading order, file budget, or trigger condition for every stage. In actual execution, two problems easily occurred:
 
 - Loading all of `docs/product/*` and `docs/architecture/*` into context at once, crowding out the current Change's key contracts;
 - Or reading only a few files while claiming "verified against the inputs," missing the sections that actually affect the design.
@@ -19,7 +19,7 @@ Now "the complete input set for auditing" and "the default lean reading set" are
 
 | Layer | Content | Reading Rule |
 |---|---|---|
-| 0 Resident | `docs/product/BASELINE-BRIEF.md` (≤1 page), `baseline-status.md` | Read first in every stage; do not repeatedly read the full baseline |
+| 0 Resident | `docs/product/BASELINE-BRIEF.md` when present (≤1 page); `baseline-status.md` when relevant | Read the brief first when it exists; Stage 02 may run before it exists and creates it from user-provided goals. Do not repeatedly read the full baseline |
 | 1 Current Change | `proposal.md`, `specs/<capability>/spec.md`, `user-stories.md`, `tasks.md`, `design.md`, `baseline-impact.md`, `baseline-binding.json` | Mandatory reading in Change stages |
 | 2 Targeted | The `FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE` rows or sections hit by this Change; architecture sections hit by the design domain | Read the relevant rows/sections by ID, not the whole file |
 | 3 On Demand | Complete `docs/product/*`, complete `docs/architecture/*`, `docs/adr/*`, `reference-research.md`, complete specs | Read only when Layers 0-2 cannot answer; the handoff report records the trigger reason |
@@ -32,7 +32,7 @@ Now "the complete input set for auditing" and "the default lean reading set" are
 
 ## 4. How to Read in Each Stage
 
-Run:
+Run for the current stage (Stage 02 is project-level discovery and does not require a Change ID):
 
 ```bash
 python scripts/agent-context.py --stage 07 --change <change-id>
@@ -40,7 +40,7 @@ python scripts/agent-context.py --stage 07 --change <change-id>
 
 The output is divided into:
 
-- `Lean inputs (read by default)`: read in order, starting with BASELINE-BRIEF and the current Change artifacts;
+- `Lean inputs (read by default)`: read in order from the current stage profile; Stage 02 starts with user-provided goals, while Change stages start with the brief and current Change artifacts;
 - `On-demand inputs (read after a trigger)`: read only when the corresponding design domain is hit/a decision conflicts;
 - `Complete contract inputs (for auditing, not read by default)`: shown only with `--full`, used for handoff auditing rather than default context.
 
@@ -59,6 +59,6 @@ The recommended line limits for summary files are in the contract's `output_poli
 
 ## 6. Relationship with Gates
 
-- `check-step-contracts.py` verifies that every stage 03-10 has `input_policy.stage_profiles`, and that the number of `lean` entries does not exceed `max_files`.
+- `check-step-contracts.py` verifies that every stage 02-10 has `input_policy.stage_profiles`, and that the number of `lean` entries does not exceed `max_files`.
 - The evidence of `workflow.py transition` is still audited against the complete `inputs`; lean reading will not let missing formal inputs pass.
 - Section 1 of the handoff report must list the files/sections actually read; on-demand files that were not read must not be claimed as reviewed.

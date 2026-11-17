@@ -1,0 +1,138 @@
+== test-workflow-runtime.py ==
+test_approve_clears_pending_and_records_user_approval (__main__.WorkflowRuntimeTests.test_approve_clears_pending_and_records_user_approval) ... ok
+test_approve_requires_pending_review_request (__main__.WorkflowRuntimeTests.test_approve_requires_pending_review_request) ... ok
+test_baseline_freeze_transition_requires_manifest_and_registry_outputs (__main__.WorkflowRuntimeTests.test_baseline_freeze_transition_requires_manifest_and_registry_outputs) ... ok
+test_builder_and_verifier_stages_require_review (__main__.WorkflowRuntimeTests.test_builder_and_verifier_stages_require_review) ... ok
+test_change_scoped_approval_is_not_reused_across_changes (__main__.WorkflowRuntimeTests.test_change_scoped_approval_is_not_reused_across_changes) ... ok
+test_declared_downstream_output_is_mutable_in_handoff (__main__.WorkflowRuntimeTests.test_declared_downstream_output_is_mutable_in_handoff) ... ok
+test_dependency_guard_blocks_skipped_stage (__main__.WorkflowRuntimeTests.test_dependency_guard_blocks_skipped_stage) ... ok
+test_equivalent_method_requires_reason (__main__.WorkflowRuntimeTests.test_equivalent_method_requires_reason) ... ok
+test_feature_entry_requires_frozen_project_baseline (__main__.WorkflowRuntimeTests.test_feature_entry_requires_frozen_project_baseline) ... ok
+test_feature_transition_rejects_missing_human_approval (__main__.WorkflowRuntimeTests.test_feature_transition_rejects_missing_human_approval) ... ok
+test_first_transition_creates_hash_handoff_and_advances (__main__.WorkflowRuntimeTests.test_first_transition_creates_hash_handoff_and_advances) ... ok
+test_handoff_create_rejects_approval_bypass_for_human_stage (__main__.WorkflowRuntimeTests.test_handoff_create_rejects_approval_bypass_for_human_stage) ... ok
+test_human_approval_required_for_feature_stage (__main__.WorkflowRuntimeTests.test_human_approval_required_for_feature_stage) ... ok
+test_human_stage_transition_requires_recorded_approval (__main__.WorkflowRuntimeTests.test_human_stage_transition_requires_recorded_approval) ... ok
+test_implementation_entry_blocks_when_impact_decision_is_not_approved (__main__.WorkflowRuntimeTests.test_implementation_entry_blocks_when_impact_decision_is_not_approved) ... ok
+test_implementation_entry_rechecks_strict_baseline_impact (__main__.WorkflowRuntimeTests.test_implementation_entry_rechecks_strict_baseline_impact) ... ok
+test_method_evidence_passes_with_questions_and_alternatives (__main__.WorkflowRuntimeTests.test_method_evidence_passes_with_questions_and_alternatives) ... ok
+test_method_evidence_required_for_stage_03 (__main__.WorkflowRuntimeTests.test_method_evidence_required_for_stage_03) ... ok
+test_method_evidence_requires_artifact_heading (__main__.WorkflowRuntimeTests.test_method_evidence_requires_artifact_heading) ... ok
+test_method_evidence_requires_declared_topics (__main__.WorkflowRuntimeTests.test_method_evidence_requires_declared_topics) ... ok
+test_method_evidence_requires_minimum_alternatives (__main__.WorkflowRuntimeTests.test_method_evidence_requires_minimum_alternatives) ... ok
+test_method_evidence_supports_multiple_required_skills (__main__.WorkflowRuntimeTests.test_method_evidence_supports_multiple_required_skills) ... ok
+test_modified_artifact_blocks_downstream_entry (__main__.WorkflowRuntimeTests.test_modified_artifact_blocks_downstream_entry) ... ok
+test_next_change_archives_change_phase_and_reopens_stage_05 (__main__.WorkflowRuntimeTests.test_next_change_archives_change_phase_and_reopens_stage_05) ... ok
+test_own_blocked_item_can_be_resolved_with_evidence (__main__.WorkflowRuntimeTests.test_own_blocked_item_can_be_resolved_with_evidence) ... ok
+test_own_blocked_item_requires_resolved_evidence (__main__.WorkflowRuntimeTests.test_own_blocked_item_requires_resolved_evidence) ... ok
+test_own_pending_approval_does_not_deadlock_transition (__main__.WorkflowRuntimeTests.test_own_pending_approval_does_not_deadlock_transition) ... ok
+test_own_pending_approval_requires_approved_evidence (__main__.WorkflowRuntimeTests.test_own_pending_approval_requires_approved_evidence) ... ok
+test_project_proposal_entry_runs_frozen_baseline_guard (__main__.WorkflowRuntimeTests.test_project_proposal_entry_runs_frozen_baseline_guard) ... ok
+test_reopen_removes_stage_and_all_dependents (__main__.WorkflowRuntimeTests.test_reopen_removes_stage_and_all_dependents) ... ok
+test_request_review_freezes_current_step (__main__.WorkflowRuntimeTests.test_request_review_freezes_current_step) ... ok
+test_stage_02_requires_internet_research (__main__.WorkflowRuntimeTests.test_stage_02_requires_internet_research) ... ok
+test_state_file_output_hash_is_taken_after_atomic_transition (__main__.WorkflowRuntimeTests.test_state_file_output_hash_is_taken_after_atomic_transition) ... ok
+test_transition_requires_all_declared_outputs_or_explicit_na_waiver (__main__.WorkflowRuntimeTests.test_transition_requires_all_declared_outputs_or_explicit_na_waiver) ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 0.676s
+
+OK
+REVIEW_REQUESTED=01-project-bootstrap
+CURRENT_STEP=01-project-bootstrap
+STATUS=AWAITING_USER_REVIEW
+NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.
+ON_APPROVAL=python scripts/workflow.py approve --step 01-project-bootstrap --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>
+APPROVED=01-project-bootstrap
+APPROVER=用户
+APPROVED_AT=2026-11-13
+NEXT=python scripts/workflow.py transition --step 01-project-bootstrap --evidence <stage evidence>
+HANDOFF_CREATED=workflow/handoffs/project/03-project-architecture-baseline--04-proposal-planning.json
+COMPLETED=03-project-architecture-baseline
+NEXT_STEP=01-project-bootstrap
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+CHANGE_CLOSED=change-a
+ACTIVE_CHANGE=change-b
+CURRENT_STEP=05-feature-requirements
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+TRANSITION_BLOCKED
+ - Blocked items exist: [{"step_id": "01-project-bootstrap", "reason": "awaiting external input"}]
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+REOPENED=02-requirements-analysis
+REMOVED=02-requirements-analysis, 03-project-architecture-baseline, 04-proposal-planning, 05-feature-requirements, 06-figma-design-review, 07-detailed-design, 08-implementation-orchestrator, 09-independent-verification, 10-acceptance-audit
+CURRENT_STEP=02-requirements-analysis
+REVIEW_REQUESTED=01-project-bootstrap
+CURRENT_STEP=01-project-bootstrap
+STATUS=AWAITING_USER_REVIEW
+NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.
+ON_APPROVAL=python scripts/workflow.py approve --step 01-project-bootstrap --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+HANDOFF_CREATED=workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json
+COMPLETED=01-project-bootstrap
+NEXT_STEP=02-requirements-analysis
+== test-baseline-impact.py ==
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.286s
+
+OK
+== test-reference-research.py ==
+test_none_status_requires_reason (__main__.ReferenceResearchTests.test_none_status_requires_reason) ... ok
+test_requires_reference_product_status (__main__.ReferenceResearchTests.test_requires_reference_product_status) ... ok
+test_requires_three_sources (__main__.ReferenceResearchTests.test_requires_three_sources) ... ok
+test_valid_research_passes (__main__.ReferenceResearchTests.test_valid_research_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.540s
+
+OK
+== test-output-context.py ==
+Output context regression tests passed.
+== test-interface-catalog.py ==
+Interface catalog regression tests passed.
+== test-independent-verification.py ==
+Independent verifier regression tests passed.
+== test-baseline-governance.py ==
+test_acceptance_requires_its_own_verification_evidence (__main__.BaselineGovernanceTests.test_acceptance_requires_its_own_verification_evidence) ... ok
+test_amendment_lifecycle_blocks_then_refreezes_with_version_bump (__main__.BaselineGovernanceTests.test_amendment_lifecycle_blocks_then_refreezes_with_version_bump) ... ok
+test_amendment_requires_overall_version_bump (__main__.BaselineGovernanceTests.test_amendment_requires_overall_version_bump) ... ok
+test_changed_domain_requires_explicit_no_impact_rebase (__main__.BaselineGovernanceTests.test_changed_domain_requires_explicit_no_impact_rebase) ... ok
+test_frozen_baseline_rejects_unrecorded_open_amendment (__main__.BaselineGovernanceTests.test_frozen_baseline_rejects_unrecorded_open_amendment) ... ok
+test_frozen_manifest_and_registry_pass (__main__.BaselineGovernanceTests.test_frozen_manifest_and_registry_pass) ... ok
+test_hash_drift_blocks_frozen_baseline (__main__.BaselineGovernanceTests.test_hash_drift_blocks_frozen_baseline) ... ok
+test_initial_freeze_requires_all_domain_approvals_and_hashes (__main__.BaselineGovernanceTests.test_initial_freeze_requires_all_domain_approvals_and_hashes) ... ok
+test_missing_constraint_binding_blocks (__main__.BaselineGovernanceTests.test_missing_constraint_binding_blocks) ... ok
+test_missing_implementation_evidence_blocks (__main__.BaselineGovernanceTests.test_missing_implementation_evidence_blocks) ... ok
+test_pending_design_blocks_design_phase (__main__.BaselineGovernanceTests.test_pending_design_blocks_design_phase) ... ok
+test_pending_exception_blocks (__main__.BaselineGovernanceTests.test_pending_exception_blocks) ... ok
+test_requirement_design_implementation_and_acceptance_pass (__main__.BaselineGovernanceTests.test_requirement_design_implementation_and_acceptance_pass) ... ok
+test_should_not_allow_frozen_file_edit_even_with_stale_binding (__main__.BaselineGovernanceTests.test_should_not_allow_frozen_file_edit_even_with_stale_binding) ... ok
+BASELINE_AMENDMENT_OPENED; feature workflow gates are now blocked until re-freeze
+BASELINE_HASHES_REFRESHED
+BASELINE_AMENDMENT_CLOSED_AND_FROZEN=1.0.1
+BASELINE_AMENDMENT_OPENED; feature workflow gates are now blocked until re-freeze
+BASELINE_HASHES_REFRESHED
+BASELINE_FROZEN=1.0.0
+
+----------------------------------------------------------------------
+Ran 14 tests in 1.080s
+
+OK
+== test-architecture-baseline.py ==
+Architecture baseline regression tests passed.
+== test-agent-context.py ==
+Agent context regression tests passed.

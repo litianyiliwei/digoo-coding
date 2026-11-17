@@ -1,0 +1,6 @@
+# Claude Code local (personal) settings — must stay untracked so each teammate keeps their own
+.claude/settings.local.json
+
+# Python bytecode
+__pycache__/
+*.pyc

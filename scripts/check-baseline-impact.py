@@ -7,7 +7,9 @@ ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('change_id', help='OpenSpec change-id or path to baseline-impact.md')
 parser.add_argument('--strict', action='store_true', help='Require approved baseline decision and design gate')
+parser.add_argument('--implementation', action='store_true', help='Also require explicit approval to enter implementation')
 args = parser.parse_args()
+strict = args.strict or args.implementation
 arg = Path(args.change_id)
 path = arg if arg.is_file() else ROOT / 'openspec/changes' / args.change_id / 'design/baseline-impact.md'
 if not path.is_file():
@@ -28,24 +30,27 @@ missing = [zh for zh, en in required_sections if zh not in text and en not in te
 if missing:
     for item in missing: print(f'ERROR: missing section: {item}')
     sys.exit(1)
-if args.strict:
+if strict:
+    allowed_field = ('是否允许进入实现', 'Allowed to enter implementation') if args.implementation else ('是否允许进入详细设计', 'Allowed to enter detailed design')
     checks = {
-        'approved review state': re.search(r'^- (?:状态|Status）[:：]\s*APPROVED\s*$', text, re.M),
-        'current baseline version recorded': re.search(r'^- (?:当前基线版本|Current baseline version）[:：]\s*(?!\s*$|\s*TODO\s*$).+', text, re.M),
-        'classification recorded': re.search(r'^- (?:本 Change 基线分类|This Change baseline classification）[:：]\s*(CHANGE_ONLY|BASELINE_CHANGE_REQUIRED|BASELINE_UPDATE_AFTER_ACCEPTANCE|N/A)\s*$', text, re.M),
-        'final conclusion recorded': re.search(r'^- (?:总体结论|Overall conclusion）[:：]\s*(COMPATIBLE|BLOCKED_PENDING_BASELINE_CHANGE|APPROVED_BASELINE_AMENDMENT)\s*$', text, re.M),
-        'detailed design gate recorded': re.search(r'^- (?:是否允许进入详细设计|Allowed to enter detailed design）[:：]\s*(YES|NO)\s*$', text, re.M),
+        'approved review state': re.search(r'^- (?:状态|Status)[:：]\s*APPROVED\s*$', text, re.M),
+        'current baseline version recorded': re.search(r'^- (?:当前基线版本|Current baseline version)[:：]\s*(?!\s*$|\s*TODO\s*$).+', text, re.M),
+        'classification recorded': re.search(r'^- (?:本 Change 基线分类|This Change baseline classification)[:：]\s*(CHANGE_ONLY|BASELINE_CHANGE_REQUIRED|BASELINE_UPDATE_AFTER_ACCEPTANCE|N/A)\s*$', text, re.M),
+        'final conclusion recorded': re.search(r'^- (?:总体结论|Overall conclusion)[:：]\s*(COMPATIBLE|BLOCKED_PENDING_BASELINE_CHANGE|APPROVED_BASELINE_AMENDMENT)\s*$', text, re.M),
+        'implementation gate recorded' if args.implementation else 'detailed design gate recorded': re.search(
+            r'^- (?:' + '|'.join(map(re.escape, allowed_field)) + r')[:：]\s*(YES|NO)\s*$', text, re.M),
         'Change ID recorded': re.search(r'^- Change ID[:：](?!<change-id>\s*$).+', text, re.M),
-        'approval evidence recorded': re.search(r'^- (?:审批人及证据|Approver and evidence）[:：]\s*(?!\s*$).+', text, re.M),
+        'approval evidence recorded': re.search(r'^- (?:审批人及证据|Approver and evidence)[:：]\s*(?!\s*$).+', text, re.M),
     }
     failed = [name for name, ok in checks.items() if not ok]
     if failed:
         print('ERROR: strict baseline impact gate failed: ' + ', '.join(failed))
         sys.exit(1)
-    conclusion = re.search(r'^- (?:总体结论|Overall conclusion）[:：]\s*(\S+)\s*$', text, re.M).group(1)
-    allow = re.search(r'^- (?:是否允许进入详细设计|Allowed to enter detailed design）[:：]\s*(\S+)\s*$', text, re.M).group(1)
+    conclusion = re.search(r'^- (?:总体结论|Overall conclusion)[:：]\s*(\S+)\s*$', text, re.M).group(1)
+    allow = re.search(r'^- (?:' + '|'.join(map(re.escape, allowed_field)) + r')[:：]\s*(\S+)\s*$', text, re.M).group(1)
     if conclusion == 'BLOCKED_PENDING_BASELINE_CHANGE' or allow != 'YES':
-        print('ERROR: baseline impact decision blocks detailed design.')
+        target = 'implementation' if args.implementation else 'detailed design'
+        print(f'ERROR: baseline impact decision blocks {target}.')
         sys.exit(1)
     # Markdown approval fields are not sufficient: the machine-readable binding must also pass.
     inferred_change_id = path.parent.parent.name if path.parent.name == 'design' else ''
@@ -60,5 +65,6 @@ if args.strict:
         print((gate.stdout + gate.stderr).strip())
         sys.exit(1)
 print(f'Baseline impact record structure passed: {path.relative_to(ROOT) if path.is_relative_to(ROOT) else path}')
-if args.strict:
-    print('Strict baseline impact gate passed: record approved and detailed design allowed.')
+if strict:
+    target = 'implementation' if args.implementation else 'detailed design'
+    print(f'Strict baseline impact gate passed: record approved and {target} allowed.')

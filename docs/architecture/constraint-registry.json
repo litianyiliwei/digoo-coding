@@ -1,0 +1,283 @@
+{
+  "schema_version": "1.0",
+  "registry_version": "0.3.0",
+  "description": "The 12 constraints in this registry were approved ACTIVE by the project owner on 2026-11-17; Q-003 risk-tier policy was approved under BCR-Q003-RISK-TIER-POLICY and is recorded in the product and test-quality baselines.",
+  "constraints": [
+    {
+      "id": "PRODUCT-CONTEXT-001",
+      "domain": "product",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "任务上下文限制",
+      "rule": "每次执行按当前阶段/任务加载相关资料；默认最多 8 组、目标 12,000 字符。",
+      "rationale": "降低无关上下文同时保留所需约束。",
+      "source": {
+        "file": "docs/product/business-rules.md",
+        "section": "1. 全局业务规则"
+      },
+      "enforcement": {
+        "type": "AUTOMATED",
+        "validator": "scripts/check-output-context.py",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "ARCH-BOUNDARY-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "显式模块契约",
+      "rule": "模块/阶段之间只能依赖已声明的文件契约、CLI 参数或数据结构。",
+      "rationale": "降低流程节点之间的隐式耦合。",
+      "source": {
+        "file": "docs/architecture/domain-boundaries.md",
+        "section": "1. 领域边界与数据所有权"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "ARCH-STATE-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "PROHIBITED",
+      "scope": "ALL_CHANGES",
+      "title": "禁止绕过状态机",
+      "rule": "不得手改工作流状态或未经用户批准前进阶段。",
+      "rationale": "保持审批和状态历史真实。",
+      "source": {
+        "file": "docs/architecture/system-context.md",
+        "section": "7. 关键非功能约束"
+      },
+      "enforcement": {
+        "type": "AUTOMATED",
+        "validator": "scripts/workflow.py",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "DATA-OWNERSHIP-001",
+      "domain": "data_domain",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "单一权威来源",
+      "rule": "每一类项目级流程事实应有唯一权威文件，摘要只引用 ID/路径。",
+      "rationale": "避免重复事实漂移。",
+      "source": {
+        "file": "docs/architecture/domain-boundaries.md",
+        "section": "3. 通用不变量"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "API-CLI-001",
+      "domain": "api",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "CLI 失败使用非零退出码",
+      "rule": "机器消费的流程命令必须以明确退出码表达失败，失败关闭。",
+      "rationale": "调用者不可将失败误判成功。",
+      "source": {
+        "file": "docs/architecture/api-conventions.md",
+        "section": "4. 响应结构"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "FE-NO-UI-001",
+      "domain": "frontend",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "SHOULD",
+      "scope": "ALL_CHANGES",
+      "title": "未批准 UI 栈不得预选",
+      "rule": "当前没有 UI；新增 UI 范围前必须经基线批准框架/组件方案。",
+      "rationale": "避免无依据地建立前端契约。",
+      "source": {
+        "file": "docs/architecture/frontend-conventions.md",
+        "section": "1. 技术栈与版本"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "QUALITY-EVIDENCE-001",
+      "domain": "test_quality",
+      "revision": "1.1",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "检查证据必须真实",
+      "rule": "所有已运行检查记录精确命令、退出码和证据路径，未运行项不得标 PASS；每个 Change 还须记录风险档位、命中信号、执行/跳过检查及理由、TEST/证据路径。",
+      "rationale": "确保验证范围由已批准风险规则确定且结果可复核。",
+      "source": {
+        "file": "docs/architecture/test-strategy.md",
+        "section": "6. 质量门禁与证据"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "LEGACY-TOOLKIT-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "保留现有工具链职责",
+      "rule": "包检查、回归测试和工作流状态迁移保持独立显式入口。",
+      "rationale": "当前仓库没有业务构建系统；避免隐式扩大门禁。",
+      "source": {
+        "file": "docs/architecture/technology-decisions.md",
+        "section": "4. 现有系统二开约束"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "LEGACY-TOOLKIT-002",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "尊重既有阶段治理",
+      "rule": "正式产物必须通过阶段契约、用户审批及适用脚本门禁。",
+      "rationale": "延续本仓库的阶段审查和不可越级规则。",
+      "source": {
+        "file": "docs/architecture/technology-decisions.md",
+        "section": "4. 现有系统二开约束"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "EXT-GITHUB-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "GitHub 同步由用户触发",
+      "rule": "向远端 GitHub 同步仓库内容只在用户明确触发的 Git 操作中发生。",
+      "rationale": "保护用户对远端仓库写入的控制。",
+      "source": {
+        "file": "docs/architecture/technology-decisions.md",
+        "section": "5. 第三方接口依赖清单"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "EXT-FIGMA-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "MUST",
+      "scope": "ALL_CHANGES",
+      "title": "Figma 设计证据必须真实读取",
+      "rule": "UI Change 必须通过可用的 Figma MCP 读取实际设计节点；不可用时阻塞。",
+      "rationale": "遵守 UI 设计来源及审计规则。",
+      "source": {
+        "file": "docs/architecture/technology-decisions.md",
+        "section": "5. 第三方接口依赖清单"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    },
+    {
+      "id": "EXT-WEB-001",
+      "domain": "architecture",
+      "revision": "1.0",
+      "status": "ACTIVE",
+      "level": "SHOULD",
+      "scope": "ALL_CHANGES",
+      "title": "公开研究来源可追溯",
+      "rule": "研究阶段记录官方来源 URL 和访问日期，不把外部网页内容当作项目批准规则。",
+      "rationale": "分离外部参考和本项目批准事实。",
+      "source": {
+        "file": "docs/architecture/technology-decisions.md",
+        "section": "5. 第三方接口依赖清单"
+      },
+      "enforcement": {
+        "type": "MANUAL",
+        "validator": "",
+        "evidence_required": true
+      },
+      "owner": "user / project owner",
+      "approved_by": "user",
+      "approved_at": "2026-11-17"
+    }
+  ]
+}

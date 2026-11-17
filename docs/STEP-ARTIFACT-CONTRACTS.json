@@ -1,5 +1,20 @@
 {
   "version": "2.0",
+  "handoff_policy": {
+    "hash_undeclared_outputs": false,
+    "require_evidence_for_review": true,
+    "require_evidence_for_handoff_recovery": true,
+    "volatile_artifacts": [
+      "workflow-state.json",
+      "AGENTS.md",
+      "docs/architecture/baseline-status.md",
+      "docs/architecture/baseline-manifest.json",
+      "docs/architecture/constraint-registry.json",
+      "docs/product/BASELINE-INDEX.md",
+      "docs/project/toolchain-report.md"
+    ],
+    "notes": "Volatile artifacts are machine-managed or generated; handoffs record their existence, not their hash. Extra evidence outputs not declared in this contract are audit-only and must not invalidate a reviewed handoff."
+  },
   "principles": [
     "The previous step's formal artifact is the next step's input; chat history is not formal input.",
     "workflow-state.json is an index, not a source of truth.",
@@ -73,8 +88,8 @@
   "input_policy": {
     "principle": "Read the small entry point first, then read by ID on demand; complete product/architecture baselines, ADRs, and complete specs are read only when necessary; never load everything into context by default.",
     "read_order": [
-      "0. Resident: docs/product/BASELINE-BRIEF.md (≤1 page)",
-      "1. Current Change artifacts: proposal/specs/user-stories/tasks/design/baseline-impact/baseline-binding",
+      "0. Resident: docs/product/BASELINE-BRIEF.md (when present; Stage 02 creates it if absent; ≤1 page)",
+      "1. Stage 02: user-provided project materials and existing baseline records; Change stages: current proposal/specs/user-stories/tasks/design/baseline-impact/baseline-binding",
       "2. Targeted: read only the FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE rows or sections matched by this Change",
       "3. On demand: complete product/architecture baselines, ADRs, reference-research, complete specs; record the trigger reason"
     ],
@@ -84,12 +99,34 @@
       "note": "When over budget, first split the Change, narrow the scope, or record the reason and files read in the handoff report; never stuff the entire baseline into context."
     },
     "rules": [
-      "Read BASELINE-BRIEF and current Change artifacts first, then read by ID on demand; complete product/architecture files are not default inputs.",
+      "Stage 02 is project-level discovery and may run before BASELINE-BRIEF exists; use the user goal as the source and create the brief in this stage. Later stages read the brief first and current Change artifacts next.",
+      "Read BASELINE-BRIEF and current Change artifacts first when present, then read by ID on demand; complete product/architecture files are not default inputs.",
       "Architecture files are the output of stage 03; stages 05–10 read the corresponding sections only when the design domain matches, never in full by default.",
       "ADRs are read only for decision conflicts/exceptions; complete specs are read only when the existing spec is insufficient.",
       "Section 1 of the handoff report must list the files/sections actually read; on-demand files not read must not be claimed as reviewed."
     ],
     "stage_profiles": {
+      "02": {
+        "lean": [
+          "User-provided interviews, business/legacy materials, project goals, users, roles, constraints, pain points, and success criteria; do not scan unrelated locations.",
+          "Stage 02 contract and required template rows: docs/STEP-ARTIFACT-CONTRACTS.json step 02; docs/OUTPUT-TEMPLATE-MATRIX.csv Requirements business analysis rows.",
+          "Stage 02 discovery and output rules: prompts/02-requirements-analysis.md; .claude/skills/requirements-analysis/SKILL.md",
+          "docs/product/BASELINE-BRIEF.md (when present; Stage 02 creates or refreshes it).",
+          "docs/product/open-questions.md (open questions and only relevant confirmed decisions, when present).",
+          "Existing requirements, flow, data, rule, role, glossary, and acceptance artifacts: matched IDs or sections only; do not load all of docs/product/* by default.",
+          "User-selected reference products or official sources matched to each research question; record actual queries, URLs, access dates, and findings.",
+          "docs/product/change-sizing.md and docs/product/id-conventions.md (relevant rules only, when present)."
+        ],
+        "on_demand": [
+          "Complete existing docs/product/* only when a conflict or baseline-wide re-evaluation requires it; record the trigger and sections read.",
+          "docs/product/reference-research.md when prior research exists and the current scope needs it refreshed or reconciled.",
+          "Run openspec list --specs; read relevant specs only and read-only. If no specs are found, record N/A instead of searching unrelated Changes.",
+          "docs/project/toolchain-report.md when checking build, test, or research feasibility.",
+          "docs/architecture/* and docs/adr/* only when existing approved architecture or decisions constrain a requirement.",
+          "Legacy, regulatory, and business materials only from locations or sources provided for this project."
+        ],
+        "max_files": 8
+      },
       "03": {
         "lean": [
           "docs/product/BASELINE-BRIEF.md (read first, ≤1 page)",
@@ -541,6 +578,7 @@
         "automated test code and run results",
         "openspec/changes/<change-id>/design/evidence/code-review.md (when UI is involved, includes a ## UI fidelity per-PAGE numeric table: Figma node/asserted element count/max deviation/layout evidence/deviations/conclusion/approver; numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation and approval)",
         "openspec/changes/<change-id>/design/evidence/figma-layout-check.json (per-element expected/actual/delta evidence from scripts/check-figma-layout.py)",
+        "openspec/changes/<change-id>/tasks.md (checkbox status updated by implementation; MUTABLE by 08)",
         "implementation/verification evidence",
         "conditionally applicable: baseline change request/ADR draft (when conflicts are found; do not update the frozen baseline without approval)"
       ],
@@ -1316,6 +1354,14 @@
         "08",
         "09",
         "10"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "08",
+      "artifact": "openspec/changes/<change-id>/tasks.md",
+      "consumed_by": [
+        "09"
       ],
       "evidence_only": false
     },

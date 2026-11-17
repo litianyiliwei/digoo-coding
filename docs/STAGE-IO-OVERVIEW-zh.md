@@ -6,7 +6,7 @@
 > Change ID：N/A（项目级流程总览）
 > 来源基线：`docs/STEP-ARTIFACT-CONTRACTS.json`（输入/输出/审批/门禁）、`docs/WORKFLOW-STAGES.json`（依赖 DAG）
 > 关联需求/AC：N/A（流程文档）
-> 生成版本：`src-sha256:2bc8e4d22a05`
+> 生成版本：`src-sha256:52a899ac12a5`
 
 > 本文件只汇总阶段交接面。字段级产物模板见 `docs/OUTPUT-TEMPLATE-MATRIX.csv`；流程入口见 `prompts/00-next-step.md`。
 > 本文件是英文主文件的中文译本；权威生成文件为 `docs/STAGE-IO-OVERVIEW.md`，修改契约后先运行 `python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md` 重新生成英文主文件，再同步更新本译本。
@@ -29,7 +29,7 @@
 |---|---|---|---|---|---|---|---|
 | 00 | 下一步编排 | 项目级与功能级通用 | `workflow-orchestrator` | N/A（编排入口，不属于 DAG 阶段） | workflow-state.json<br>docs/PROCESS-MAP.md<br>docs/STEP-ARTIFACT-CONTRACTS.json<br>docs/WORKFLOW-STAGES.json<br>docs/BASELINE-FEATURE-INTERACTION.md<br>docs/OUTPUT-TEMPLATE-MATRIX.csv<br>真实产物与审批记录<br>OpenSpec CLI 当前状态（如已初始化） | 下一阶段判定报告（对话展示；不强制落盘）<br>workflow-state.json（仅在真实状态变化时更新） | N/A |
 | 01 | 项目初始化与工具链检查 | 项目级 | `project-bootstrap` | 无（流程起点） | 用户提供的项目目标与仓库位置<br>仓库现有目录/配置/AGENTS.md（若存在） | AGENTS.md（仅缺失时创建或经批准修改）<br>workflow-state.json<br>docs/architecture/baseline-status.md（依据 templates/project-baseline/baseline-status.md）<br>docs/project/toolchain-report.md（依据 templates/project-baseline/toolchain-report.md） | N/A |
-| 02 | 需求业务梳理 | 项目级 | `requirements-analysis` | `01-project-bootstrap` | 访谈/业务材料/旧系统资料<br>项目目标、用户、角色、约束<br>既有 docs/product/*（若存在）<br>既有 OpenSpec specs（只读）<br>用户提供的参考产品（名称/链接/截图/账号；无则 NONE + 理由）<br>互联网调研工具与真实来源（WebSearch/WebFetch 或宿主等价能力；记录查询、URL、访问日期） | docs/product/requirements-analysis.md<br>docs/product/workflows.md（每个 FLOW 必须含完整节点表：节点角色、输入/输出数据对象、前置条件、处理动作、异常/分支、下一节点）<br>docs/product/data-objects.csv（业务数据对象目录）<br>docs/product/rd-matrix.csv（需求-数据对象矩阵：需求/规则 → 流程节点 → 角色 → 数据对象）<br>docs/product/business-rules.md<br>docs/product/glossary.md<br>docs/product/acceptance-policy.md<br>docs/product/open-questions.md<br>docs/product/BASELINE-BRIEF.md（一页式基线入口，≤1 页；阶段 03–05 常驻上下文）<br>docs/product/role-permission-matrix.csv（角色-能力-数据范围-访问级别）<br>docs/product/change-sizing.md（Change 切片预算与完成定义）<br>docs/product/decisions.md（DEC 决策日志）<br>docs/product/assumptions.md（ASM 假设登记）<br>docs/product/lessons.md（教训/反模式；验收后由阶段 10 追加）<br>docs/product/id-conventions.md（项目级/Change 级 ID 与并行分配规则）<br>docs/product/BASELINE-INDEX.md（由 scripts/gen-baseline-index.py 生成的常驻基线索引）<br>docs/product/reference-research.md（参考产品与互联网调研：研究问题/参考产品/来源记录/对比/结论/影响映射） | N/A |
+| 02 | 需求业务梳理 | 项目级 | `requirements-analysis` | `01-project-bootstrap` | 用户提供访谈/业务/旧系统资料及项目目标、用户、角色、约束<br>阶段 02 契约与模板对应行<br>阶段 02 Prompt/Skill 规则<br>存在时读取 BASELINE-BRIEF 与开放问题（只读相关项）<br>既有需求/流程/数据/规则仅按命中 ID/章节读取<br>用户指定的参考产品或匹配研究问题的官方来源<br>存在时读取 change-sizing 与 id-conventions 相关规则 | docs/product/requirements-analysis.md<br>docs/product/workflows.md（每个 FLOW 必须含完整节点表：节点角色、输入/输出数据对象、前置条件、处理动作、异常/分支、下一节点）<br>docs/product/data-objects.csv（业务数据对象目录）<br>docs/product/rd-matrix.csv（需求-数据对象矩阵：需求/规则 → 流程节点 → 角色 → 数据对象）<br>docs/product/business-rules.md<br>docs/product/glossary.md<br>docs/product/acceptance-policy.md<br>docs/product/open-questions.md<br>docs/product/BASELINE-BRIEF.md（一页式基线入口，≤1 页；阶段 03–05 常驻上下文）<br>docs/product/role-permission-matrix.csv（角色-能力-数据范围-访问级别）<br>docs/product/change-sizing.md（Change 切片预算与完成定义）<br>docs/product/decisions.md（DEC 决策日志）<br>docs/product/assumptions.md（ASM 假设登记）<br>docs/product/lessons.md（教训/反模式；验收后由阶段 10 追加）<br>docs/product/id-conventions.md（项目级/Change 级 ID 与并行分配规则）<br>docs/product/BASELINE-INDEX.md（由 scripts/gen-baseline-index.py 生成的常驻基线索引）<br>docs/product/reference-research.md（参考产品与互联网调研：研究问题/参考产品/来源记录/对比/结论/影响映射） | 6 项（见明细） |
 | 03 | 项目总体架构设计 | 项目级 | `project-architecture-baseline` | `02-requirements-analysis` | docs/product/BASELINE-BRIEF.md（先读，≤1 页）<br>docs/product/reference-research.md（技术选型/第三方判断）<br>docs/product/open-questions.md（仅相关条目）<br>docs/project/toolchain-report.md（工具链/测试命令）<br>docs/architecture/baseline-status.md（初始基线）<br>现有系统代码库地址/第三方接口清单（用户提供）<br>命中的 FLOW/NODE/DO/RD/BR 行（按 ID 定向读取） | docs/architecture/system-context.md<br>docs/architecture/domain-boundaries.md<br>docs/architecture/containers-and-deployment.md<br>docs/architecture/data-flows.md（数据流转：DF ID、同步/异步、事务边界、失败与补偿）<br>docs/architecture/logical-erd.md（逻辑实体、关系、数据所有权、领域不变量）<br>docs/architecture/technology-decisions.md（含技术选型访谈记录、候选比较、用户确认人与日期）<br>docs/architecture/api-conventions.md<br>docs/architecture/frontend-conventions.md<br>docs/architecture/test-strategy.md<br>docs/adr/README.md<br>docs/architecture/baseline-status.md（经本阶段结束审计的各域版本/冻结状态）<br>docs/architecture/baseline-manifest.json（机器权威版本/冻结状态/域文件 SHA-256）<br>docs/architecture/constraint-registry.json（稳定约束 ID 与审批状态）<br>docs/project/baseline-audit-report.md（本阶段结束审计报告） | 13 项（见明细） |
 | 04 | 提案拆分、依赖排序与路线图 | 项目级到功能级 | `proposal-planning` | `03-project-architecture-baseline` | docs/product/BASELINE-BRIEF.md<br>docs/product/change-sizing.md<br>docs/architecture/baseline-manifest.json<br>docs/architecture/constraint-registry.json<br>docs/architecture/baseline-status.md<br>docs/project/baseline-audit-report.md<br>docs/product/open-questions.md（仅相关条目）<br>命中的 FLOW/NODE/DO/BR 行 | docs/product/proposal-roadmap.md（含每个候选 Change 的范围/依赖/价值/基线适用域与潜在修订摘要） | 6 项（见明细） |
 | 05 | 提案级需求分析 | 单个功能 Change | `feature-requirements` | `04-proposal-planning` | docs/product/BASELINE-BRIEF.md<br>docs/product/change-sizing.md、id-conventions.md<br>docs/product/proposal-roadmap.md（当前行）<br>docs/architecture/baseline-status.md、baseline-manifest.json、constraint-registry.json<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP 行<br>openspec/specs/**（仅相关 capability）<br>docs/product/open-questions.md（仅相关条目）<br>docs/product/reference-research.md（仅范围/场景需要时） | openspec/changes/<change-id>/proposal.md<br>openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）<br>openspec/changes/<change-id>/tasks.md（初步任务）<br>openspec/changes/<change-id>/design.md（初始设计决策；≤1 页；接口/前端/后端/测试细节留到 07）<br>openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；AC 是测试与验证的唯一锚点）<br>openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md；07 更新设计复核结论）<br>openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，逐条绑定 ACTIVE Constraint ID；07 写入设计证据） | 9 项（见明细） |
@@ -136,6 +136,23 @@
 - Skill：`requirements-analysis`
 - Prompt：`prompts/02-requirements-analysis.md`
 - 依赖（DAG）：`01-project-bootstrap`
+
+**默认精简输入（最多 8 组）**
+
+- 用户提供的访谈、业务/旧系统资料，以及项目目标、用户、角色、约束和成功标准；不扫描无关路径。
+- 只读 Stage 02 契约记录与 `OUTPUT-TEMPLATE-MATRIX.csv` 对应模板行，以及 Stage 02 Prompt/Skill。
+- `BASELINE-BRIEF.md`（存在时；首次 Stage 02 可在本阶段创建）和 `open-questions.md` 中未决/相关决策项（存在时）。
+- 既有需求、流程、数据、规则、角色、术语和验收材料只按命中 ID/章节读取；默认不加载完整 `docs/product/*`。
+- 用户指定的参考产品或与研究问题匹配的官方来源；记录真实查询、URL、访问日期和发现。
+- `change-sizing.md` 与 `id-conventions.md` 中相关规则（存在时）。
+
+**按需输入**
+
+- 只有出现冲突或需要全面重审基线时，才读完整 `docs/product/*`，并记录触发原因和章节。
+- 需要更新/核对旧研究时读 `reference-research.md`；需要判断实现或研究可行性时读 `toolchain-report.md`。
+- 执行 `openspec list --specs`；只读相关规格。若无规格，记录 N/A，不搜索无关 Change。
+- 只有产品要求受架构约束或存在决策冲突时，才读相关架构章节/ADR。
+- 法规、业务或旧系统材料仅从用户为本项目提供的位置/来源读取。
 
 **完整契约输入（内容/材料，审计集）**
 

@@ -1,0 +1,97 @@
+{
+  "version": "1.0",
+  "from_step": "04-proposal-planning",
+  "to_step": "05-feature-requirements",
+  "change_id": null,
+  "created_at": "2026-11-17T02:11:20+00:00",
+  "baseline_version": "0.2.2",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 04-proposal-planning",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-entry.log"
+    },
+    {
+      "name": "Strict roadmap structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-roadmap.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-roadmap-check.log"
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-baseline-audit.log"
+    },
+    {
+      "name": "Stage output context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 04 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-output-context.log"
+    },
+    {
+      "name": "OpenSpec specs inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-openspec-specs.log"
+    },
+    {
+      "name": "OpenSpec Changes inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --changes",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-openspec-changes.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-diff-check.log"
+    },
+    {
+      "name": "Method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 04-proposal-planning --evidence workflow/evidence/04-proposal-planning.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-method-evidence.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/product/proposal-roadmap.md",
+      "sha256": "961b420ddce53b4ba998539f3d85adb82888c29839d1b1922b2b605f8baf7751",
+      "size_bytes": 10545,
+      "role": "Prioritized, dependency-ordered roadmap for AI coding workflow optimization"
+    },
+    {
+      "path": "scripts/check-roadmap.py",
+      "sha256": "881284072e3528dfac2ca0812e7a2e55e4f48aba64160e03491b62857f365985",
+      "size_bytes": 2037,
+      "role": "Shared roadmap checker now scopes validation to the roadmap table instead of unrelated Markdown tables"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}

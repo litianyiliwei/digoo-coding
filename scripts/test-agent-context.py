@@ -43,9 +43,12 @@ def contract(max_files: int) -> dict:
     }
 
 
-def run(root: Path) -> subprocess.CompletedProcess[str]:
+def run(root: Path, stage: str = "07") -> subprocess.CompletedProcess[str]:
+    command = [sys.executable, str(SCRIPT), "--root", str(root), "--stage", stage]
+    if stage != "02":
+        command.extend(["--change", "demo"])
     return subprocess.run(
-        [sys.executable, str(SCRIPT), "--root", str(root), "--stage", "07", "--change", "demo"],
+        command,
         capture_output=True, text=True,
     )
 
@@ -73,6 +76,29 @@ def main() -> int:
         over = run(root)
         if over.returncode == 0 or "CONTEXT_BUDGET_EXCEEDED" not in over.stdout:
             failures.append("lean bundle should fail over budget: " + over.stdout)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "docs" / "product").mkdir(parents=True)
+        stage02 = {
+            "steps": [{
+                "step": "02", "skill": "requirements-analysis", "prompt": "prompts/02-requirements-analysis.md",
+                "title": "Requirements analysis", "scope": "project-level", "inputs": ["project goals"],
+                "outputs": ["docs/product/requirements-analysis.md"], "next_inputs": [], "approval": "owner", "gate": "checks"
+            }],
+            "input_policy": {"stage_profiles": {"02": {
+                "lean": ["docs/product/BASELINE-BRIEF.md (when present)", "docs/product/open-questions.md (if present)", "User-provided project goal"],
+                "on_demand": ["docs/product/reference-research.md when prior research needs reconciliation"],
+                "max_files": 8
+            }}}
+        }
+        (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
+            json.dumps(stage02, ensure_ascii=False), encoding="utf-8"
+        )
+        optional = run(root, "02")
+        if (optional.returncode != 0 or "Budget: 3/8 lean read groups" not in optional.stdout
+                or "[OPTIONAL; absent]" not in optional.stdout):
+            failures.append("Stage 02 should allow not-yet-created optional baseline files: " + optional.stdout + optional.stderr)
 
     if failures:
         for failure in failures:

@@ -1,57 +1,63 @@
 # API 契约规范
 
 - Change ID：N/A（项目级架构基线）
-- 状态：DRAFT（初始化骨架；待阶段 03 填充）
-- 来源基线：PENDING（阶段 02 产品基线）
-- 关联需求/AC：PENDING（操作/FLOW ID）
-- 生成日期/版本：PENDING / v0.1.0
+- 状态：FROZEN（用户于 2026-11-17 批准）
+- 来源基线：用户确认的流程工具包范围、`docs/architecture/technology-decisions.md`
+- 关联需求/AC：RA-001、FLOW-001、DO-003–005、BR-003/005/006
+- 生成日期/版本：2026-11-17 / v0.2.0-draft
 
 ## 1. 基本约定
 
-PENDING。
+没有应用级 HTTP/REST/GraphQL API（N/A：无业务服务）。共享工具接口是稳定 CLI 参数、仓库相对文件路径、JSON/CSV/Markdown 契约和退出码；具体命令必须在 `scripts/README.md` 维护。
 
 ## 2. 认证与授权
 
-PENDING。
+应用 API：N/A。工作流写权限由仓库文件权限控制；越阶段操作必须有用户批准证据并通过工作流状态机。远程 Git/Figma 认证由宿主安全存储管理。
 
 ## 3. 请求头与追踪
 
-PENDING。
+HTTP 请求头：N/A。CLI 证据须记录命令、当前修订、退出码、执行时间及日志路径；敏感参数必须脱敏。
 
 ## 4. 响应结构
 
 ### 4.1 成功响应
 
-PENDING。
+退出码 0；机器消费命令可输出明确键值或 JSON，不把成功文字当作状态变更证明。
 
 ### 4.2 错误响应
 
-PENDING。
+非零退出码；说明错误对象和阻塞原因；门禁 fail-closed。不得捕获失败后仍报告 PASS。
 
 ## 5. 分页、排序与过滤
 
-PENDING。
+N/A：无列表查询服务。
 
 ## 6. 幂等与并发
 
-PENDING。
+只读检查应可重复运行；状态迁移对同一当前阶段/审批有唯一合法顺序。`workflow.py` 使用文件锁避免并行写；冲突时提示人工检查，不自动删锁。
 
 ## 7. 超时、重试与限流
 
-PENDING。
+本地检查由调用端控制运行时长；没有自动网络请求/业务重试策略。外部服务使用见 DF-005/006；失败由用户决定重试。
 
 ## 8. 文件上传
 
-PENDING。
+N/A：工具包不提供上传接口。阶段要求的 Figma 资源导出按 `AGENTS.md` 的专项文件策略执行。
 
 ## 9. 兼容性与废弃
 
-PENDING。
+共享 CLI 参数、证据 schema、ID 和阶段契约的破坏性变化须走基线修订及审批；不在功能 Change 内静默改变。
 
 ## 10. 安全与隐私
 
-PENDING。
+按最小权限读写仓库；路径解析不得逃逸工作区；日志与证据不记录秘密或真实用户个人信息；外部网页/MCP 内容视为不可信输入。
 
 ## 11. 服务路由与服务间契约
 
-PENDING。
+N/A：无应用服务或内部网络路由。脚本/阶段间数据契约见 `docs/STEP-ARTIFACT-CONTRACTS.json`。
+
+## 12. 第三方接口与集成约定
+
+- 无业务运行期第三方 API；开发工具边界为 GitHub Git (`EXT-GITHUB-001`)、UI Change 的 Figma MCP (`EXT-FIGMA-001`) 和按需公开资料 (`EXT-WEB-001`)。
+- Figma 交互限定于 UI 设计所需字段，服务不可读时阻断对应阶段；GitHub 同步必须由用户明确触发；来源 URL/访问日期记录在调研证据。
+- 协议、认证、数据范围、故障处理和责任人详见 `technology-decisions.md` 第 5 节及 `data-flows.md` DF-005/006。

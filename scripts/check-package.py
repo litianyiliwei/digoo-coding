@@ -56,28 +56,53 @@ r = subprocess.run([sys.executable, str(ROOT / "scripts/check-output-consumption
 if r.returncode:
     errors.append("Output consumption check failed: " + (r.stdout + r.stderr).strip().replace("\n", " | "))
 
-# Validate bash syntax of every shell script if bash exists.
-if shutil.which("bash"):
+# Validate bash syntax of every shell script using an executable Bash.
+def usable_bash_candidates():
+    """Yield Bash executables that can actually be launched on this host.
+
+    WindowsApps may expose a ``bash.exe`` alias when WSL is unavailable.
+    Prefer Git for Windows Bash in that case, while retaining PATH discovery
+    for Unix hosts and custom installations.
+    """
+    candidates = []
+    path_bash = shutil.which("bash")
+    if path_bash:
+        candidates.append(Path(path_bash))
+    if sys.platform == "win32":
+        git = shutil.which("git")
+        if git:
+            git_root = Path(git).resolve().parent.parent
+            candidates.extend((git_root / "bin" / "bash.exe", git_root / "usr" / "bin" / "bash.exe"))
+    seen = set()
+    bash_start_errors = []
+    for candidate in candidates:
+        key = str(candidate.resolve()).lower()
+        if key in seen or not candidate.is_file():
+            continue
+        seen.add(key)
+        try:
+            probe = subprocess.run([str(candidate), "--version"], capture_output=True, text=True, timeout=5)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            bash_start_errors.append(f"{candidate}: {exc}")
+            continue
+        if probe.returncode == 0:
+            yield candidate
+        else:
+            detail = (probe.stderr or probe.stdout).strip().replace("\n", " | ")
+            bash_start_errors.append(f"{candidate}: exit {probe.returncode}" + (f" ({detail})" if detail else ""))
+    usable_bash_candidates.start_errors = bash_start_errors
+
+
+bash_candidates = list(usable_bash_candidates())
+if bash_candidates:
+    bash = str(bash_candidates[0])
     for p in sorted((ROOT/"scripts").glob("*.sh")):
-        r=subprocess.run(["bash","-n",str(p)],capture_output=True,text=True)
+        r=subprocess.run([bash,"-n",str(p)],capture_output=True,text=True)
         if r.returncode: errors.append(f"Bash syntax error in {p.relative_to(ROOT)}: {r.stderr.strip()}")
-    contract_test = ROOT / "scripts/test-api-io-mapping.sh"
-    if contract_test.is_file():
-        r=subprocess.run(["bash", str(contract_test)],capture_output=True,text=True)
-        if r.returncode: errors.append(f"API→IO checker regression test failed: {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
-# Run standalone Python regression tests for the newer process checkers.
-for test_name in ("test-reference-research.py", "test-interface-catalog.py"):
-    test_path = ROOT / "scripts" / test_name
-    if test_path.is_file():
-        r=subprocess.run([sys.executable, str(test_path)],capture_output=True,text=True)
-        if r.returncode: errors.append(f"Regression test failed ({test_name}): {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
-# Run Python regression tests that do not need a live business project.
-for test_name in ("test-workflow-runtime.py", "test-architecture-baseline.py", "test-output-context.py", "test-agent-context.py"):
-    test_path = ROOT / "scripts" / test_name
-    if test_path.is_file():
-        r = subprocess.run([sys.executable, str(test_path)], capture_output=True, text=True)
-        if r.returncode:
-            errors.append(f"{test_name} failed: {(r.stdout + r.stderr).strip().replace(chr(10), ' | ')}")
+else:
+    details = "; ".join(usable_bash_candidates.start_errors)
+    message = "No usable Bash could be started. Check WSL/Git for Windows Bash availability and execution permissions; WindowsApps aliases may be unavailable."
+    errors.append(message + (f" Start errors: {details}" if details else ""))
 # Python syntax-check scripts without generating __pycache__ files.
 for p in sorted((ROOT/"scripts").glob("*.py")):
     r=subprocess.run([sys.executable,"-m","py_compile",str(p)],capture_output=True,text=True)
@@ -109,4 +134,4 @@ if errors:
     for e in errors: print("ERROR:",e)
     print(f"Package checks failed: {len(errors)} issue(s).")
     sys.exit(1)
-print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, output consumption, template matrix, Bash/Python syntax, API→IO regression tests.")
+print("Package checks passed: Skill names/frontmatter, prompt pairs, step input/output contracts, stage I/O overview freshness, output consumption, template matrix, Bash/Python syntax. Regression tests are separate commands.")

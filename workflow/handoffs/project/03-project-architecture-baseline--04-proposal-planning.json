@@ -1,0 +1,190 @@
+{
+  "version": "1.0",
+  "from_step": "03-project-architecture-baseline",
+  "to_step": "04-proposal-planning",
+  "change_id": null,
+  "created_at": "2026-11-17T01:59:42+00:00",
+  "baseline_version": "0.2.0",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 03-project-architecture-baseline",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-stage-entry-final.log"
+    },
+    {
+      "name": "Strict required baseline files",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-required-files.sh --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-required-files-final.log"
+    },
+    {
+      "name": "Architecture existing-system and external-interface checks",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-architecture-baseline.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-architecture-check-final.log"
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-baseline-audit-final.log"
+    },
+    {
+      "name": "Stage summary context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 03 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-output-context-final.log"
+    },
+    {
+      "name": "OpenSpec inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs; openspec list --changes",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-openspec-inventory-final.log"
+    },
+    {
+      "name": "Cross-document traceability and scope review",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "Codex desktop",
+      "evidence": "docs/project/baseline-audit-report.md"
+    },
+    {
+      "name": "Method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence workflow/evidence/03-project-architecture-baseline.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-method-evidence-final.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-diff-check-final.log"
+    },
+    {
+      "name": "Baseline amendment structural audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-baseline-audit-amendment.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/architecture/system-context.md",
+      "sha256": "60e716a3c6849dddfdcbbf212f2efe04b16ab1e8b80d005fd7e089ba3c005623",
+      "size_bytes": 4592,
+      "role": "system context and boundaries"
+    },
+    {
+      "path": "docs/architecture/domain-boundaries.md",
+      "sha256": "0e84600d2f07374b8427c46390c6054fafcb4e91730f8d6aa94fb5a602ab794e",
+      "size_bytes": 3458,
+      "role": "workflow domains and ownership"
+    },
+    {
+      "path": "docs/architecture/containers-and-deployment.md",
+      "sha256": "8dfd57b6d8485e9e2a5d619d5f93ffc3980cd464caa4a849b22bfb5ce2505d1f",
+      "size_bytes": 2891,
+      "role": "local execution and deployment topology"
+    },
+    {
+      "path": "docs/architecture/data-flows.md",
+      "sha256": "105fb737b8fd0d3d079bf9c8fa3418b68720e3cdd59cadf3733fe79ec0ff3f32",
+      "size_bytes": 3386,
+      "role": "local, GitHub and conditional Figma flows"
+    },
+    {
+      "path": "docs/architecture/logical-erd.md",
+      "sha256": "920182d952afbbcd9442a1cd703322ecf1f20d2303834b64822eed443b5e20fa",
+      "size_bytes": 3047,
+      "role": "logical process entities"
+    },
+    {
+      "path": "docs/architecture/technology-decisions.md",
+      "sha256": "6e62add11759c27bf49e7fadecbe4245c988296103733e6c2a629df9f77c8867",
+      "size_bytes": 7303,
+      "role": "technology interview, existing repository and external dependencies"
+    },
+    {
+      "path": "docs/architecture/api-conventions.md",
+      "sha256": "5c5347af58ff3e07f6e8a9eed522bfd18cae432bd676bf85f84efe5eeca91333",
+      "size_bytes": 2977,
+      "role": "CLI and external integration contracts"
+    },
+    {
+      "path": "docs/architecture/frontend-conventions.md",
+      "sha256": "8aedf731af2f35c095f6d8b4c7eb2b8d6c687685c91e67f6ead9c069a981e812",
+      "size_bytes": 2459,
+      "role": "frontend N/A scope and future UI gate"
+    },
+    {
+      "path": "docs/architecture/test-strategy.md",
+      "sha256": "498649e045bbb6c260859f3a59535ccf94e06e8d7ae832ddfb3c97c850726de7",
+      "size_bytes": 3332,
+      "role": "risk-tiered checks and evidence strategy"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "sha256": "3199f53eab8970c7756b8c856420af804c978e6dcd435a82deacba8950afba69",
+      "size_bytes": 1268,
+      "role": "ADR index"
+    },
+    {
+      "path": "docs/architecture/baseline-status.md",
+      "sha256": "487d81a6452e9f076b14c5d33a16221d396b4e8ca5ad95c59919ddadfdbb89a7",
+      "size_bytes": 3473,
+      "role": "human-readable DRAFT domain register"
+    },
+    {
+      "path": "docs/architecture/baseline-manifest.json",
+      "sha256": "f90b50393bf342fac44eb1a1f20407015fe09ae3f4185b2c6941a12aff9b29f8",
+      "size_bytes": 9762,
+      "role": "machine-readable DRAFT baseline manifest"
+    },
+    {
+      "path": "docs/architecture/constraint-registry.json",
+      "sha256": "c73d3b9e42a6e3b701ad3879e4de13a2fc5bc1d6bb426518f1874524ca28734c",
+      "size_bytes": 9537,
+      "role": "12 proposed DRAFT constraints"
+    },
+    {
+      "path": "docs/project/baseline-audit-report.md",
+      "sha256": "aaa4b7febcef628d4a563d5a0ca143054a54ca71c058e3d50209407ea089aba0",
+      "size_bytes": 4009,
+      "role": "cross-document audit and freeze decision"
+    },
+    {
+      "path": "scripts/check-required-files.sh",
+      "sha256": "fb19462e33ec81a5500595134a6212e72516374009a869a5b69c6a5187c7a6e5",
+      "size_bytes": 2063,
+      "role": "fixed false-positive placeholder detection in strict baseline file gate"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}

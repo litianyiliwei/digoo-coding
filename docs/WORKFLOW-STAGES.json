@@ -8,7 +8,7 @@
       "prompt": "prompts/01-project-bootstrap.md",
       "dependencies": [],
       "scope": "project",
-      "human_approval_required": false
+      "human_approval_required": true
     },
     {
       "id": "02-requirements-analysis",

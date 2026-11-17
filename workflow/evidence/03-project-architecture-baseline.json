@@ -1,0 +1,243 @@
+{
+  "step_id": "03-project-architecture-baseline",
+  "change_id": null,
+  "baseline_version": "0.2.0",
+  "methods": [
+    {
+      "skill": "brainstorming",
+      "mode": "equivalent",
+      "summary": "Compared architecture scope, technology and integration boundary alternatives; recorded user-confirmed toolkit scope/stack/interfaces and pending freeze approval.",
+      "reason": "The repository Superpowers brainstorming Skill is not discoverable as an invocable host Skill in this Codex session. The project architecture Skill/Prompt was read from the repository; equivalent structured clarification was used and no unavailable Skill is claimed.",
+      "questions": [
+        "Is this a new system or an existing system? The user selected the existing AI coding process toolkit as the architecture scope.",
+        "What is the existing system code address, repository, branch and commit? Read-only inspection found this repository at D:\\Work\\灵犀智学\\农业项目\\digoo-coding, branch main, commit 91aab8e0f909921082a5096c0d3ac14e735baf18, with no agricultural business code.",
+        "Which technology stack should the system use? The user confirmed retaining Python 3.11 and Markdown/JSON/CSV, with no frontend/backend.",
+        "Which third-party interfaces are required? The user confirmed no agricultural application runtime API; repository inspection also found development-time GitHub hosting and conditional Figma MCP/web research boundaries."
+      ],
+      "alternatives": [
+        "Build a new agriculture business application architecture versus architecture of the existing workflow toolkit; selected toolkit scope per approved Stage 02.",
+        "Introduce an application service/database/frontend versus retain local Python scripts and file-based contracts; user confirmed the current toolkit approach and no frontend/backend.",
+        "Treat all external services as absent versus distinguish no runtime APIs from GitHub SCM and conditional Figma/research interfaces; recorded the latter to reflect actual repository rules."
+      ],
+      "decisions": [
+        "Architecture covers only the existing AI coding toolkit; future agriculture application requires a new scope and architecture review.",
+        "Retain existing Python 3.11 and Markdown/JSON/CSV tools; no application frontend/backend or database is selected.",
+        "No agriculture business runtime API; GitHub, Figma MCP and public websites remain development-time/conditional dependencies, not business runtime services.",
+        "Keep all architecture constraints DRAFT until the user reviews the complete architecture candidate and explicitly approves baseline freeze."
+      ],
+      "open_questions": [
+        "Will the user approve freezing the candidate baseline after reviewing its architecture and DRAFT constraints?",
+        "Q-003 risk tiers and required check sets remain OPEN and must be resolved before Stage 08."
+      ],
+      "artifact_section": "docs/architecture/technology-decisions.md#1. 技术选型访谈记录",
+      "evidence": "workflow/evidence/03-architecture-interview-2026-11-17.md"
+    }
+  ],
+  "user_clarifications": [
+    {
+      "date": "2026-11-17",
+      "topic": "architecture scope",
+      "decision": "Existing AI coding process toolkit; consistent with approved Stage 02 scope."
+    },
+    {
+      "date": "2026-11-17",
+      "topic": "technology stack",
+      "decision": "Retain Python 3.11 and Markdown/JSON/CSV; no frontend/backend."
+    },
+    {
+      "date": "2026-11-17",
+      "topic": "runtime interfaces and approver",
+      "decision": "No agriculture runtime APIs; user is project/architecture baseline approver."
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/architecture/system-context.md",
+      "status": "updated",
+      "required": true,
+      "role": "system context and boundaries"
+    },
+    {
+      "path": "docs/architecture/domain-boundaries.md",
+      "status": "updated",
+      "required": true,
+      "role": "workflow domains and ownership"
+    },
+    {
+      "path": "docs/architecture/containers-and-deployment.md",
+      "status": "updated",
+      "required": true,
+      "role": "local execution and deployment topology"
+    },
+    {
+      "path": "docs/architecture/data-flows.md",
+      "status": "updated",
+      "required": true,
+      "role": "local, GitHub and conditional Figma flows"
+    },
+    {
+      "path": "docs/architecture/logical-erd.md",
+      "status": "updated",
+      "required": true,
+      "role": "logical process entities"
+    },
+    {
+      "path": "docs/architecture/technology-decisions.md",
+      "status": "updated",
+      "required": true,
+      "role": "technology interview, existing repository and external dependencies"
+    },
+    {
+      "path": "docs/architecture/api-conventions.md",
+      "status": "updated",
+      "required": true,
+      "role": "CLI and external integration contracts"
+    },
+    {
+      "path": "docs/architecture/frontend-conventions.md",
+      "status": "updated",
+      "required": true,
+      "role": "frontend N/A scope and future UI gate"
+    },
+    {
+      "path": "docs/architecture/test-strategy.md",
+      "status": "updated",
+      "required": true,
+      "role": "risk-tiered checks and evidence strategy"
+    },
+    {
+      "path": "docs/adr/README.md",
+      "status": "updated",
+      "required": true,
+      "role": "ADR index"
+    },
+    {
+      "path": "docs/architecture/baseline-status.md",
+      "status": "updated",
+      "required": true,
+      "role": "human-readable DRAFT domain register"
+    },
+    {
+      "path": "docs/architecture/baseline-manifest.json",
+      "status": "updated",
+      "required": true,
+      "role": "machine-readable DRAFT baseline manifest"
+    },
+    {
+      "path": "docs/architecture/constraint-registry.json",
+      "status": "updated",
+      "required": true,
+      "role": "12 proposed DRAFT constraints"
+    },
+    {
+      "path": "docs/project/baseline-audit-report.md",
+      "status": "updated",
+      "required": true,
+      "role": "cross-document audit and freeze decision"
+    },
+    {
+      "path": "scripts/check-required-files.sh",
+      "status": "updated",
+      "required": false,
+      "role": "fixed false-positive placeholder detection in strict baseline file gate"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 03-project-architecture-baseline",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-stage-entry-final.log"
+    },
+    {
+      "name": "Strict required baseline files",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-required-files.sh --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-required-files-final.log"
+    },
+    {
+      "name": "Architecture existing-system and external-interface checks",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-architecture-baseline.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-architecture-check-final.log"
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-baseline-audit-final.log"
+    },
+    {
+      "name": "Stage summary context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 03 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-output-context-final.log"
+    },
+    {
+      "name": "OpenSpec inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs; openspec list --changes",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-openspec-inventory-final.log"
+    },
+    {
+      "name": "Cross-document traceability and scope review",
+      "kind": "manual",
+      "status": "passed",
+      "reviewer": "Codex desktop",
+      "evidence": "docs/project/baseline-audit-report.md"
+    },
+    {
+      "name": "Method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence workflow/evidence/03-project-architecture-baseline.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-method-evidence-final.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-diff-check-final.log"
+    },
+    {
+      "name": "Baseline amendment structural audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/03-baseline-audit-amendment.log"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  },
+  "baseline_freeze": {
+    "status": "FROZEN_AND_AUDITED",
+    "version": "0.2.2",
+    "active_constraints": 12,
+    "freeze_evidence": "workflow/evidence/approval-baseline-v0.2.0-2026-11-17.md",
+    "amendments": [
+      "ARCH-STATUS-001",
+      "ARCH-STATUS-002"
+    ],
+    "current_open_question": "Q-003; must be resolved before Stage 08"
+  }
+}

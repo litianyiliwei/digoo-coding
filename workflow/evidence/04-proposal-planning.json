@@ -1,0 +1,117 @@
+{
+  "step_id": "04-proposal-planning",
+  "change_id": null,
+  "baseline_version": "0.2.2",
+  "methods": [
+    {
+      "skill": "brainstorming",
+      "mode": "equivalent",
+      "summary": "Compared independent vertical slices and their dependencies, then prioritized measurable context reduction and reliable execution while preserving approval and quality gates.",
+      "reason": "The Superpowers brainstorming skill was not discoverable as an invocable skill in this Codex session. The repository proposal-planning Skill and Prompt were read, and equivalent structured option analysis was recorded without claiming the unavailable skill was invoked.",
+      "questions": [
+        "Which issue most directly reduces AI coding effectiveness? The Stage 04 context package is already at 8/8 groups, but the generator does not report expanded character count, so the 12,000-character target is not evidenced.",
+        "Which improvements can be accepted independently, and what must precede risk-tiered checks? Runtime reliability, measured context bundles, and canonical artifact generation are independent; risk profiles should depend on the approved tag and check catalog contracts."
+      ],
+      "alternatives": [
+        "Deliver one large workflow rewrite versus four independently acceptable vertical slices; selected four slices to make value and regression boundaries reviewable.",
+        "Delete duplicate audit and handoff artifacts versus retain required evidence and generate derivative summaries from the canonical contract; selected canonical generation to preserve auditability while reducing repeated maintenance."
+      ],
+      "decisions": [
+        "Propose reliable-gate-runtime, workflow-context-bundles, artifact-source-of-truth, and risk-tier-check-profiles as separate Changes; the first three are parallel candidates and risk-tier profiles depend on the context and artifact contracts.",
+        "Prioritize actual rendered context measurement and preserve all approval, baseline, evidence-integrity, and required independent-verification gates."
+      ],
+      "open_questions": [
+        "User/product owner must approve roadmap ordering and the first Change before any OpenSpec Change is created.",
+        "Q-003 risk-tier criteria and check sets require technical/quality-owner review and an approved baseline amendment before implementation."
+      ],
+      "artifact_section": "docs/product/proposal-roadmap.md#1. 路线图总表",
+      "evidence": "docs/product/proposal-roadmap.md"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "docs/product/proposal-roadmap.md",
+      "status": "updated",
+      "required": true,
+      "role": "Prioritized, dependency-ordered roadmap for AI coding workflow optimization"
+    },
+    {
+      "path": "scripts/check-roadmap.py",
+      "status": "updated",
+      "required": false,
+      "role": "Shared roadmap checker now scopes validation to the roadmap table instead of unrelated Markdown tables"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 04-proposal-planning",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-entry.log"
+    },
+    {
+      "name": "Strict roadmap structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-roadmap.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-roadmap-check.log"
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-baseline-audit.log"
+    },
+    {
+      "name": "Stage output context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 04 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-output-context.log"
+    },
+    {
+      "name": "OpenSpec specs inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-openspec-specs.log"
+    },
+    {
+      "name": "OpenSpec Changes inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --changes",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-openspec-changes.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-diff-check.log"
+    },
+    {
+      "name": "Method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 04-proposal-planning --evidence workflow/evidence/04-proposal-planning.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/04-method-evidence.log"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  }
+}

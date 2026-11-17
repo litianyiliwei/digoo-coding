@@ -162,7 +162,7 @@ audit = ROOT / "openspec/changes" / change / "design/figma-audit.md"
 ui_change = False
 if audit.is_file():
     audit_text = audit.read_text(encoding="utf-8")
-    ui_change = not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", audit_text, re.M)
+    ui_change = not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", audit_text, re.M)
 if ui_change and frontend_body:
     if not re.search(r"--[A-Za-z0-9_-]+", frontend_body):
         errors.append("UI 前端详细设计必须包含 token → CSS 变量/Element Plus 映射（例如 --color-brand）")

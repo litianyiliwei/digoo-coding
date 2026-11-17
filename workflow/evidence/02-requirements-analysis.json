@@ -1,0 +1,153 @@
+{
+  "step_id": "02-requirements-analysis",
+  "change_id": null,
+  "baseline_version": "0.3.0",
+  "user_clarifications": [
+    {"date":"2026-11-16","topic":"reference research","decision":"No preferred reference product; use comparable official public documentation."},
+    {"date":"2026-11-16","topic":"context budget","decision":"Target 12,000 characters; default at most 8 read groups."},
+    {"date":"2026-11-16","topic":"verification","decision":"Low-risk changes may use targeted checks while retaining approvals and necessary hard gates."},
+    {"date":"2026-11-16","topic":"success metric","decision":"Prioritize reducing default context and duplicate outputs."},
+    {"date":"2026-11-17","topic":"risk policy","decision":"Q-003 was resolved through the user-approved BCR-Q003-RISK-TIER-POLICY; the automatic selector remains future implementation work."}
+  ],
+  "methods": [
+    {
+      "skill": "brainstorming",
+      "mode": "equivalent",
+      "summary": "Clarified process-optimization scope, compared context/gate/artifact alternatives, and recorded user-confirmed budget, targeted-check principle, and success priority for review.",
+      "reason": "The Superpowers brainstorming skill is not discoverable in this Codex session. Equivalent structured clarification was used through user questions, alternatives, open-question records, and explicit review status.",
+      "questions": [
+        "Should the scope optimize this AI coding process toolkit or include a separate agriculture application?",
+        "Which reference products or official workflows should be compared?",
+        "Should the default context target be 8,000, 12,000, or the current 16,000 characters?",
+        "May low-risk changes use targeted checks while required approvals and hard gates remain?",
+        "Which outcome should take priority: less context/duplication, shorter lead time, or correctness/verification coverage?"
+      ],
+      "alternatives": [
+        "Load complete baseline and audit inventories by default versus a task-scoped read set with triggered references.",
+        "Run one complete check suite for every change versus fast structural checks plus impact/risk-selected verification.",
+        "Repeat facts in multiple narrative outputs versus one authoritative artifact with concise ID/path references."
+      ],
+      "decisions": [
+        "Record the user's stated goal as AI coding workflow/toolkit optimization; keep business application implementation out of scope unless clarified.",
+        "User confirmed a default of at most eight read groups and a 12,000-character target; review the budget after a real Change pilot.",
+        "User confirmed low-risk changes may use targeted checks while retaining approvals and necessary hard gates; exact risk tiers/check sets remain open.",
+        "User prioritized reducing default context and duplicate outputs; delivery time and correctness remain guardrail measures."
+      ],
+      "open_questions": [
+          "Q-003 is resolved by BCR-Q003-RISK-TIER-POLICY; implementation of the automatic selector remains planned work."
+      ],
+      "artifact_section": "docs/product/requirements-analysis.md#1. 项目目标、范围与角色",
+      "evidence": "docs/product/requirements-analysis.md"
+    },
+    {
+      "skill": "internet-research",
+      "mode": "equivalent",
+      "summary": "Used WebSearch and opened three official documentation sources; compared context management, resumable review gates, and artifact boundaries.",
+      "reason": "A dedicated internet-research skill is not discoverable in this Codex session; official primary sources were searched and read directly using the available web tool.",
+      "questions": [
+        "How should persistent instructions and task context avoid loading unrelated knowledge?",
+        "How can a multi-step AI coding workflow preserve review gates and resume safely?",
+        "Which artifact boundaries prevent duplicate specifications and oversized handoffs?"
+      ],
+      "alternatives": [
+        "OpenSpec: capability-focused proposal/spec/design/task separation.",
+        "GitHub Spec Kit: resumable workflow runs with explicit review gates.",
+        "Claude Code official guidance: concise persistent context, scoped rules/skills, executable checks."
+      ],
+      "decisions": [
+        "User confirmed there is no preferred comparator; the three selected official public sources are accepted for comparison.",
+        "User confirmed the 12,000-character target and low-risk targeted-check principle while retaining approvals and necessary hard gates.",
+        "Partially adopt layered context and resumable review patterns; adopt one-authority-per-fact and separate fast checks from regression tests.",
+        "Do not replace existing user approval, frozen-baseline, or independent-verifier rules with a comparator's defaults."
+      ],
+      "open_questions": [
+          "Q-003 risk criteria and required check sets are approved; the automatic selector remains planned implementation work."
+      ],
+      "artifact_section": "docs/product/reference-research.md#4. Comparison and Lessons",
+      "evidence": "docs/product/reference-research.md"
+    }
+  ],
+  "outputs": [
+    {"path":"docs/product/requirements-analysis.md","status":"updated","required":true,"role":"requirements summary"},
+    {"path":"docs/product/workflows.md","status":"updated","required":true,"role":"single authoritative node-level process description"},
+    {"path":"docs/product/data-objects.csv","status":"updated","required":true,"role":"project data object catalog"},
+    {"path":"docs/product/rd-matrix.csv","status":"updated","required":true,"role":"node and data object traceability"},
+    {"path":"docs/product/business-rules.md","status":"updated","required":true,"role":"project workflow rules"},
+    {"path":"docs/product/glossary.md","status":"updated","required":true,"role":"shared process terminology"},
+    {"path":"docs/product/acceptance-policy.md","status":"updated","required":true,"role":"global acceptance rules"},
+    {"path":"docs/product/open-questions.md","status":"updated","required":true,"role":"pending owner decisions"},
+    {"path":"docs/product/reference-research.md","status":"updated","required":true,"role":"official comparator research; source records rechecked and Q-003 reconciled to approved BCR"},
+    {"path":"docs/product/BASELINE-BRIEF.md","status":"updated","required":true,"role":"resident context brief (59 lines)"},
+    {"path":"docs/product/role-permission-matrix.csv","status":"updated","required":true,"role":"workflow roles and capabilities"},
+    {"path":"docs/product/change-sizing.md","status":"updated","required":true,"role":"slicing, context and completion budget"},
+    {"path":"docs/product/decisions.md","status":"updated","required":true,"role":"approved decision log"},
+    {"path":"docs/product/assumptions.md","status":"updated","required":true,"role":"explicit assumptions and validation points"},
+    {"path":"docs/product/lessons.md","status":"updated","required":true,"role":"N/A record; no accepted Change lessons exist yet"},
+    {"path":"docs/product/id-conventions.md","status":"updated","required":true,"role":"project and Change ID conventions"},
+    {"path":"docs/product/BASELINE-INDEX.md","status":"updated","required":true,"role":"generated baseline index"}
+  ],
+  "checks": [
+    {
+      "name":"Stage entry",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/workflow.py check-entry --step 02-requirements-analysis",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-stage-entry.log"
+    },
+    {
+      "name":"Requirements structure and RD coverage",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/check-requirements.py --strict",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-requirements.log"
+    },
+    {
+      "name":"Reference research structure",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/check-reference-research.py --strict",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-reference-research.log"
+    },
+    {
+      "name":"Baseline index freshness",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/gen-baseline-index.py --check",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-baseline-index.log"
+    },
+    {
+      "name":"Summary context budgets",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/check-output-context.py --stage 02",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-output-context.log"
+    },
+    {
+      "name":"OpenSpec inventory",
+      "kind":"automated",
+      "status":"passed",
+      "command":"openspec list --specs",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-openspec-specs.log"
+    },
+    {
+      "name":"Method evidence",
+      "kind":"automated",
+      "status":"passed",
+      "command":"python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json",
+      "exit_code":0,
+      "log":"workflow/evidence/logs/02-r3-method-evidence.log"
+    }
+  ],
+  "approval": {
+    "required": true,
+    "status": "pending",
+    "approver": "",
+    "approved_at": ""
+  }
+}

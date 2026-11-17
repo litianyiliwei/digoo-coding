@@ -14,10 +14,15 @@ class WorkflowRuntimeTests(unittest.TestCase):
         w.ROOT=self.root; w.STATE=self.root/'workflow-state.json'
         (self.root/'workflow').mkdir()
         (self.root/'docs').mkdir()
-        state={'project_name':'test','active_change_id':'','completed_steps':[],'current_step':'01-project-bootstrap','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        state={'project_name':'test','active_change_id':'','completed_steps':[],'current_step':'01-project-bootstrap','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],
+               'approvals_history':[{'step_id':'01-project-bootstrap','change_id':'','approver':'用户','approved_at':'2026-11-13','evidence':'check.log','targets':[]}]}
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
         (self.root/'out.md').write_text('baseline output v1',encoding='utf-8')
         (self.root/'check.log').write_text('PASS\n',encoding='utf-8')
+        review_evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created','required':True}],
+                         'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python3 check.py','exit_code':0,'log':'check.log'}],
+                         'approval':{'required':False,'status':'not-required'}}
+        (self.root/'review-evidence.json').write_text(json.dumps(review_evidence),encoding='utf-8')
     def tearDown(self): self.tmp.cleanup()
     def test_first_transition_creates_hash_handoff_and_advances(self):
         state=w.load_state()
@@ -74,7 +79,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertEqual([],errors)
         self.assertEqual(['audit','--require-frozen'],calls[0][0])
 
-    def test_feature_entry_runs_manifest_and_change_binding_guards(self):
+    def test_feature_entry_requires_frozen_project_baseline(self):
         state={'project_name':'test','active_change_id':'demo-feature','completed_steps':['04-proposal-planning'],
                'current_step':'05-feature-requirements','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
         calls=[]
@@ -85,8 +90,37 @@ class WorkflowRuntimeTests(unittest.TestCase):
         finally:
             w.run_baseline_gate=original
         self.assertEqual([],errors)
-        self.assertEqual(['audit','--require-frozen'],calls[0])
-        self.assertEqual(['check-change','--change-id','demo-feature','--phase','requirement'],calls[1])
+        self.assertEqual([['audit','--require-frozen']],calls)
+
+    def test_implementation_entry_rechecks_strict_baseline_impact(self):
+        state={'project_name':'test','active_change_id':'demo-feature',
+               'completed_steps':['07-detailed-design'],
+               'current_step':'08-implementation-orchestrator','pending_approvals':[],
+               'blocked_items':[],'last_completed_outputs':[]}
+        calls=[]
+        original_gate,original_impact=w.run_baseline_gate,w.run_baseline_impact_gate
+        w.run_baseline_gate=lambda args,label: calls.append(('baseline',args)) or ''
+        w.run_baseline_impact_gate=lambda change_id: calls.append(('impact',change_id)) or ''
+        try:
+            errors=w.check_entry('08-implementation-orchestrator',state,verify_handoffs=False)
+        finally:
+            w.run_baseline_gate,w.run_baseline_impact_gate=original_gate,original_impact
+        self.assertEqual([],errors)
+        self.assertIn(('impact','demo-feature'),calls)
+
+    def test_implementation_entry_blocks_when_impact_decision_is_not_approved(self):
+        state={'project_name':'test','active_change_id':'demo-feature',
+               'completed_steps':['07-detailed-design'],
+               'current_step':'08-implementation-orchestrator','pending_approvals':[],
+               'blocked_items':[],'last_completed_outputs':[]}
+        original_gate,original_impact=w.run_baseline_gate,w.run_baseline_impact_gate
+        w.run_baseline_gate=lambda args,label: ''
+        w.run_baseline_impact_gate=lambda change_id: (_ for _ in ()).throw(ValueError('decision says NO'))
+        try:
+            errors=w.check_entry('08-implementation-orchestrator',state,verify_handoffs=False)
+        finally:
+            w.run_baseline_gate,w.run_baseline_impact_gate=original_gate,original_impact
+        self.assertTrue(any('decision says NO' in error for error in errors),errors)
 
     def test_baseline_freeze_transition_requires_manifest_and_registry_outputs(self):
         state={'project_name':'test','active_change_id':'','completed_steps':['02-requirements-analysis'],
@@ -126,7 +160,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertTrue(w.BY_ID['09-independent-verification']['human_approval_required'])
 
     def test_request_review_freezes_current_step(self):
-        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready for review','target':[]})()
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready for review','target':[],'evidence':'review-evidence.json'})()
         self.assertEqual(0,w.cmd_request_review(args))
         state=w.load_state()
         self.assertEqual('01-project-bootstrap',state['current_step'])
@@ -135,7 +169,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertTrue(any('Pending approvals' in e for e in errors),errors)
 
     def test_approve_clears_pending_and_records_user_approval(self):
-        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready','target':[]})()
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready','target':[],'evidence':'review-evidence.json'})()
         self.assertEqual(0,w.cmd_request_review(args))
         approve_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,
                                      'approver':'用户','approved_at':'2026-11-13','evidence':'check.log'})()
@@ -185,9 +219,15 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertIsNotNone(w.approval_record(state,'05-feature-requirements','change-a'))
 
     def test_handoff_create_rejects_approval_bypass_for_human_stage(self):
+        self._write_method_artifact()
+        evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
+                  'outputs':[{'path':'out.md','status':'verified'}],
+                  'methods':[self._method_entry()],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'pending'}}
+        ep=self._write_evidence('handoff-recovery-evidence.json',evidence)
         args=type('Args',(),{'from_step':'05-feature-requirements','to_step':'06-figma-design-review',
-                             'change_id':None,'evidence':None,'approved':True,'file':['out.md'],
-                             'baseline_version':''})()
+                             'change_id':'sample-change','evidence':str(ep),'baseline_version':''})()
         with self.assertRaisesRegex(ValueError,'recorded user approval'):
             w.cmd_handoff_create(args)
 
@@ -212,6 +252,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
     def test_own_pending_approval_does_not_deadlock_transition(self):
         state=w.load_state()
         state['pending_approvals']=[{'step_id':'01-project-bootstrap','artifact':'out.md','reason':'awaiting approval'}]
+        state['approvals_history']=[{'step_id':'01-project-bootstrap','change_id':'','approver':'Owner','approved_at':'2026-11-10','evidence':'check.log','targets':[]}]
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
                   'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
@@ -245,15 +286,16 @@ class WorkflowRuntimeTests(unittest.TestCase):
         ep=self._write_evidence('blocked-evidence.json',evidence)
         self.assertEqual(3,self._transition('01-project-bootstrap',ep))
 
-    def test_own_pending_approval_requires_approved_evidence(self):
+    def test_own_pending_approval_requires_recorded_approval(self):
         state=w.load_state()
         state['pending_approvals']=[{'step_id':'01-project-bootstrap','artifact':'out.md'}]
+        state['approvals_history']=[]
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
                   'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'status':'not-required'}}
         ep=self._write_evidence('unapproved-evidence.json',evidence)
-        with self.assertRaisesRegex(ValueError,'requires approved evidence'):
+        with self.assertRaisesRegex(ValueError,'Human approval required'):
             self._transition('01-project-bootstrap',ep)
 
     def test_reopen_removes_stage_and_all_dependents(self):
@@ -401,5 +443,81 @@ class WorkflowRuntimeTests(unittest.TestCase):
                   'methods':[self._method_entry(questions=['客户端形态？','跨端方案？','设备协议？','离线同步？'])]}
         errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
         self.assertTrue(any('required topic' in e for e in errors),errors)
+
+    def test_stage01_handoff_excludes_state_and_undeclared_outputs(self):
+        (self.root/'docs').mkdir(exist_ok=True)
+        (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
+        contract={'steps':[{'step':'01','outputs':['docs/out.md']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[
+            {'path':'docs/out.md','status':'created','required':True},
+            {'path':'workflow-state.json','status':'updated'}],
+            'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+            'approval':{'status':'not-required'}}
+        ep=self._write_evidence('declared-output-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        manifest=self.root/'workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json'
+        artifacts=[a['path'] for a in json.loads(manifest.read_text(encoding='utf-8'))['artifacts']]
+        self.assertEqual(['docs/out.md'],artifacts)
+
+    def test_request_review_pins_hashes_and_blocks_post_review_changes(self):
+        review_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready','target':[],'evidence':'review-evidence.json'})()
+        self.assertEqual(0,w.cmd_request_review(review_args))
+        state=w.load_state(); self.assertIn('targets',state['pending_approvals'][0])
+        (self.root/'out.md').write_text('changed after review',encoding='utf-8')
+        approve_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,
+                                     'approver':'用户','approved_at':'2026-11-17','evidence':'check.log'})()
+        with self.assertRaisesRegex(ValueError,'changed since request-review'):
+            w.cmd_approve(approve_args)
+
+    def test_stage01_transition_without_recorded_approval_is_blocked(self):
+        state=w.load_state(); state['approvals_history']=[]; w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created'}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':False,'status':'not-required'}}
+        ep=self._write_evidence('no-approval-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'Human approval required'):
+            self._transition('01-project-bootstrap',ep)
+
+    def test_reopen_preserves_approvals_and_invalidates_outgoing_handoffs(self):
+        state={'project_name':'test','active_change_id':'','completed_steps':['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline'],
+               'current_step':'04-proposal-planning','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],'approvals_history':[
+                   {'step_id':'02-requirements-analysis','change_id':'','approver':'用户','approved_at':'2026-11-13','evidence':'check.log'},
+                   {'step_id':'03-project-architecture-baseline','change_id':'','approver':'用户','approved_at':'2026-11-13','evidence':'check.log'}]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        handoff_dir=self.root/'workflow/handoffs/project'; handoff_dir.mkdir(parents=True,exist_ok=True)
+        for name,from_step,to_step in [('02--03.json','02-requirements-analysis','03-project-architecture-baseline'),
+                                       ('03--04.json','03-project-architecture-baseline','04-proposal-planning')]:
+            (handoff_dir/name).write_text(json.dumps({'from_step':from_step,'to_step':to_step,'change_id':None,'approval':{'status':'approved'},'checks':[],'artifacts':[{'path':'out.md','sha256':w.hash_file(self.root/'out.md')}]}),encoding='utf-8')
+        args=type('Args',(),{'step':'03-project-architecture-baseline','reason':'design rework','note':''})()
+        self.assertEqual(0,w.cmd_reopen(args))
+        state=w.load_state()
+        self.assertEqual(['01-project-bootstrap','02-requirements-analysis'],state['completed_steps'])
+        active=[r for r in state['approvals_history'] if not r.get('superseded_at')]
+        self.assertEqual(['02-requirements-analysis'],[w.item_step(r) for r in active])
+        self.assertFalse(json.loads((handoff_dir/'02--03.json').read_text(encoding='utf-8')).get('invalidated_at'))
+        self.assertTrue(json.loads((handoff_dir/'03--04.json').read_text(encoding='utf-8')).get('invalidated_at'))
+
+    def test_reset_state_returns_to_uninitialized_and_archives_history(self):
+        state={'project_name':'test','active_change_id':'demo-change','completed_steps':['01-project-bootstrap'],
+               'current_step':'02-requirements-analysis','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],'baseline':{'overall_version':'0.3.0'},'approvals_history':[
+                   {'step_id':'01-project-bootstrap','change_id':'','approver':'用户','approved_at':'2026-11-13','evidence':'check.log'}]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        handoff_dir=self.root/'workflow/handoffs/project'; handoff_dir.mkdir(parents=True,exist_ok=True)
+        (handoff_dir/'01--02.json').write_text(json.dumps({'from_step':'01-project-bootstrap','to_step':'02-requirements-analysis','change_id':None,'approval':{'status':'approved'},'checks':[],'artifacts':[{'path':'out.md','sha256':w.hash_file(self.root/'out.md')}]}),encoding='utf-8')
+        args=type('Args',(),{'reason':'user requested uninitialized state','note':''})()
+        self.assertEqual(0,w.cmd_reset_state(args))
+        state=w.load_state()
+        self.assertEqual('01-project-bootstrap',state['current_step'])
+        self.assertEqual([],state['completed_steps'])
+        self.assertEqual('',state['active_change_id'])
+        self.assertEqual({},state['baseline'])
+        self.assertEqual([],state['approvals_history'])
+        self.assertEqual(1,len(state['reset_history']))
+        archive=self.root/state['reset_history'][0]['archive']
+        self.assertTrue(archive.is_file())
+        self.assertTrue(json.loads((handoff_dir/'01--02.json').read_text(encoding='utf-8')).get('invalidated_at'))
 
 if __name__=='__main__': unittest.main(verbosity=2)

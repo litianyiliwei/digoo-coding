@@ -1,0 +1,183 @@
+{
+  "version": "1.0",
+  "from_step": "02-requirements-analysis",
+  "to_step": "03-project-architecture-baseline",
+  "change_id": null,
+  "created_at": "2026-11-17T01:12:51+00:00",
+  "baseline_version": "0.1.0",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17",
+    "evidence": "workflow/evidence/approval-02-requirements-analysis-2026-11-17.md"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 02-requirements-analysis",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-stage-entry.log"
+    },
+    {
+      "name": "Requirements structure and RD coverage",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-requirements.log"
+    },
+    {
+      "name": "Reference research structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-reference-research.py --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-reference-research.log"
+    },
+    {
+      "name": "Baseline index freshness",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/gen-baseline-index.py --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-baseline-index.log"
+    },
+    {
+      "name": "Summary context budgets",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 02",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-output-context.log"
+    },
+    {
+      "name": "OpenSpec inventory",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec list --specs",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-openspec-specs.log"
+    },
+    {
+      "name": "Method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/02-method-evidence.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "docs/product/requirements-analysis.md",
+      "sha256": "95a5a250b5d69126e97e2d853a23fcf4bfd51f897f03246a0c3a5bf142087028",
+      "size_bytes": 5494,
+      "role": "requirements summary"
+    },
+    {
+      "path": "docs/product/workflows.md",
+      "sha256": "dd870ea2ae2ca7e18769b4a4b71840fab850db22d83bda307a02963bbd8031c5",
+      "size_bytes": 5048,
+      "role": "single authoritative node-level process description"
+    },
+    {
+      "path": "docs/product/data-objects.csv",
+      "sha256": "99359098838f428ff7e3e9d60fb855e07d79e0d837f2a589131adb5fcf9f4c3f",
+      "size_bytes": 1348,
+      "role": "project data object catalog"
+    },
+    {
+      "path": "docs/product/rd-matrix.csv",
+      "sha256": "910ad7eb3268a1464e07dd0eef07d1f8ada346854dbe71a4a983d016ac0c37f8",
+      "size_bytes": 2343,
+      "role": "node and data object traceability"
+    },
+    {
+      "path": "docs/product/business-rules.md",
+      "sha256": "67d6be706703a93ea4ddd1a5fd64f2794c03c2bdbeba3f1bed452b167f892880",
+      "size_bytes": 3571,
+      "role": "project workflow rules"
+    },
+    {
+      "path": "docs/product/glossary.md",
+      "sha256": "0810d19bae229efe1a540d9bbcb11494b6589be7549622058505497efc8f8bfb",
+      "size_bytes": 1580,
+      "role": "shared process terminology"
+    },
+    {
+      "path": "docs/product/acceptance-policy.md",
+      "sha256": "c5337053fd46fbe574303426a5216877712fabfa5af7fe6d36465fbf8860c42b",
+      "size_bytes": 2496,
+      "role": "global acceptance rules"
+    },
+    {
+      "path": "docs/product/open-questions.md",
+      "sha256": "a5e7305d6abda561519cd827aa970e08856739b3ab616be9056c5017075fd685",
+      "size_bytes": 1454,
+      "role": "pending owner decisions"
+    },
+    {
+      "path": "docs/product/reference-research.md",
+      "sha256": "9c4f1d9e9d722a44f9763afab35b1ae122a2ee41348c8476f884733c4d6896aa",
+      "size_bytes": 7773,
+      "role": "official comparator research"
+    },
+    {
+      "path": "docs/product/BASELINE-BRIEF.md",
+      "sha256": "99f8e605914d372cf1728565b6c38433661022988105547323ce7c1fcbad1cc7",
+      "size_bytes": 3260,
+      "role": "resident context brief (59 lines)"
+    },
+    {
+      "path": "docs/product/role-permission-matrix.csv",
+      "sha256": "33a4a9c43a0e28cbe0639441d8ca005f12cde6cab7fe14f27db71c8c2c00486c",
+      "size_bytes": 752,
+      "role": "workflow roles and capabilities"
+    },
+    {
+      "path": "docs/product/change-sizing.md",
+      "sha256": "6c37280d9fa978a749d74c782c9df33ffe4ca630ff4bc6ca8f601308d7d9eb89",
+      "size_bytes": 3191,
+      "role": "slicing, context and completion budget"
+    },
+    {
+      "path": "docs/product/decisions.md",
+      "sha256": "5460d63b9bff167ff126bf8f7ee7ff7a1a962f9ce98f0505cfcc3369ab0150bc",
+      "size_bytes": 1746,
+      "role": "approved decision log",
+      "mutable_by_design": true
+    },
+    {
+      "path": "docs/product/assumptions.md",
+      "sha256": "f647ced3ae689a1794490dfd56a947f407700666a5a4b7ece715052fe52a287a",
+      "size_bytes": 1063,
+      "role": "explicit assumptions and validation points",
+      "mutable_by_design": true
+    },
+    {
+      "path": "docs/product/lessons.md",
+      "sha256": "1aa3e46724d7abc408a6a04e512bacf078557eff0ac177e46f92ddef45152d9f",
+      "size_bytes": 696,
+      "role": "N/A record; no accepted Change lessons exist yet",
+      "mutable_by_design": true
+    },
+    {
+      "path": "docs/product/id-conventions.md",
+      "sha256": "67fdbf027afd08d015068d3aeceb8c99db535f722a1a94f7a1e3fdb7ed5c27f3",
+      "size_bytes": 1521,
+      "role": "project and Change ID conventions"
+    },
+    {
+      "path": "docs/product/BASELINE-INDEX.md",
+      "sha256": "656a22c45c2cab59ddbc285f880dbe718b09004f9bf154da8543f64e164dba44",
+      "size_bytes": 2692,
+      "role": "generated baseline index"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}

@@ -26,7 +26,7 @@ def relpath(p:Path):
 def load_state():
     if not STATE.exists(): raise ValueError(f'Missing {STATE.relative_to(ROOT)}')
     data=json.loads(STATE.read_text(encoding='utf-8'))
-    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[]}.items(): data.setdefault(k,v)
+    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[]}.items(): data.setdefault(k,v)
     if data.get('current_step') not in BY_ID and data.get('current_step')!='ALL_STEPS_COMPLETE': raise ValueError(f"Unknown current_step: {data.get('current_step')}")
     unknown=set(data['completed_steps'])-set(BY_ID)
     if unknown: raise ValueError('Unknown completed steps: '+', '.join(sorted(unknown)))
@@ -39,15 +39,20 @@ def item_step(item):
     return item.get('step_id') if isinstance(item,dict) else item
 
 def approval_record(state,step_id,change_id=None):
-    for item in (state.get('approvals_history') or []):
+    for item in reversed(state.get('approvals_history') or []):
+        if item.get('superseded_at'): continue
         if item_step(item)!=step_id: continue
         if change_id is not None and (item.get('change_id') or '')!=change_id: continue
         return item
     return None
 
 def contract_doc():
-    try:return json.loads((ROOT/CONTRACT_FILE).read_text(encoding='utf-8'))
-    except (FileNotFoundError,json.JSONDecodeError):return {'steps':[]}
+    path=ROOT/CONTRACT_FILE
+    if not path.exists():
+        # Test fixtures and pre-bootstrap checkouts may not have the contract yet.
+        return {'steps':[]}
+    try:return json.loads(path.read_text(encoding='utf-8'))
+    except json.JSONDecodeError as exc: raise ValueError(f'Invalid {CONTRACT_FILE}: {exc}')
 
 def contract_step_num(step_id):
     try:return int(step_id.split('-')[0])
@@ -66,6 +71,22 @@ def output_paths_for_step(step_id,cid=None):
     return paths
 
 MULTI_WRITER_ARTIFACTS={'baseline-binding.json'}
+VOLATILE_ARTIFACTS={
+    'workflow-state.json',
+    'AGENTS.md',
+    'docs/architecture/baseline-status.md',
+    'docs/architecture/baseline-manifest.json',
+    'docs/architecture/constraint-registry.json',
+    'docs/product/BASELINE-INDEX.md',
+    'docs/project/toolchain-report.md',
+}
+
+def volatile_artifacts():
+    extra=contract_doc().get('handoff_policy',{}).get('volatile_artifacts',[])
+    return VOLATILE_ARTIFACTS | {norm_path(x) for x in extra if isinstance(x,str)}
+
+def is_volatile(path):
+    return norm_path(path) in volatile_artifacts()
 
 def has_later_declared_output(path,sid,cid=None):
     if Path(str(path)).name in MULTI_WRITER_ARTIFACTS:return True
@@ -80,8 +101,10 @@ def has_later_declared_output(path,sid,cid=None):
 
 def annotate_mutable_artifacts(artifacts,sid,cid=None):
     for item in artifacts:
-        if has_later_declared_output(item['path'],sid,cid):
+        volatile=is_volatile(item['path'])
+        if has_later_declared_output(item['path'],sid,cid) or volatile:
             item['mutable_by_design']=True
+        if volatile: item['volatile']=True
     return artifacts
 
 def missing_declared_outputs(evidence,sid,cid=None):
@@ -89,12 +112,22 @@ def missing_declared_outputs(evidence,sid,cid=None):
     if not declared:return []
     ready={norm_path(o.get('path','')) for o in evidence.get('outputs',[]) if o.get('status') in ('created','updated','verified')}
     waived={norm_path(o.get('path','')) for o in evidence.get('outputs',[]) if o.get('status')=='n/a' and o.get('waiver_reason')}
+    def matches_contract(contract_path,artifact_path):
+        # Capability names are selected per Change, so contracts use this one
+        # path segment as a placeholder instead of requiring a literal directory.
+        marker='<capability>'
+        if marker not in contract_path:
+            return norm_path(contract_path)==norm_path(artifact_path)
+        prefix,suffix=contract_path.split(marker,1)
+        candidate=norm_path(artifact_path)
+        expression='^'+re.escape(norm_path(prefix))+'[^/]+'+re.escape(norm_path(suffix))+'$'
+        return re.fullmatch(expression,candidate) is not None
     def satisfied(path):
         p=norm_path(path)
         if p.endswith('/'):
             # Directory outputs are satisfied by any handed-off file under that directory.
             return p in waived or any(r.startswith(p) for r in ready)
-        return p in ready or p in waived
+        return any(matches_contract(p,r) for r in ready) or p in waived
     return [p for p in declared if not satisfied(p)]
 
 def atomic_json(path:Path,data):
@@ -122,8 +155,20 @@ def run_baseline_gate(args, *, label):
         raise ValueError(f'{label} blocked (exit={result.returncode}): {detail}')
     return result.stdout.strip()
 
+def run_baseline_impact_gate(change_id):
+    """Require an approved, implementation-allowing impact decision at Stage 08."""
+    command=[sys.executable,str(ROOT/'scripts'/'check-baseline-impact.py'),change_id,'--implementation']
+    result=subprocess.run(command,capture_output=True,text=True)
+    if result.returncode:
+        detail=(result.stdout+'\n'+result.stderr).strip()
+        raise ValueError('Implementation baseline-impact gate failed'+(': '+detail if detail else ''))
+    return result.stdout.strip()
+
 def baseline_phase_for_entry(step_id):
-    if step_id in ('05-feature-requirements','06-figma-design-review'):
+    # Stage 05 creates the initial baseline binding as one of its declared
+    # outputs. Require the frozen project baseline at entry, then validate the
+    # completed binding on transition and again at Stage 06 entry.
+    if step_id=='06-figma-design-review':
         return 'requirement'
     if step_id in ('07-detailed-design','08-implementation-orchestrator'):
         return 'design'
@@ -134,6 +179,8 @@ def baseline_phase_for_entry(step_id):
     return None
 
 def baseline_phase_for_transition(step_id):
+    if step_id=='05-feature-requirements':
+        return 'requirement'
     if step_id=='06-figma-design-review':
         return 'requirement'
     if step_id=='07-detailed-design':
@@ -226,6 +273,14 @@ def check_entry(step_id,state,change_id=None,verify_handoffs=True,allow_pending_
             run_baseline_gate(['check-change','--change-id',cid,'--phase',phase],label=f'Change baseline gate ({phase})')
         except Exception as exc:
             errors.append(str(exc))
+    # Stage 08 is the first point where code changes can consume the approved
+    # design. Recheck the Change-level decision here so a stale or blocking
+    # baseline-impact record cannot be bypassed by a valid baseline binding.
+    if step_id=='08-implementation-orchestrator' and cid:
+        try:
+            run_baseline_impact_gate(cid)
+        except Exception as exc:
+            errors.append(str(exc))
     if verify_handoffs:
         for dep,mp in zip(stage['dependencies'],incoming_manifests(step_id,cid)):
             ok,errs=verify_manifest(mp)
@@ -237,7 +292,18 @@ def check_entry(step_id,state,change_id=None,verify_handoffs=True,allow_pending_
                 if manifest.get('change_id')!=expected_cid: errors.append(f'Change ID mismatch in handoff: {relpath(mp)} expected={expected_cid}')
     return errors
 
-def parse_evidence(path,step_id,change_id):
+def declared_path_matches(contract_path,artifact_path):
+    contract_path=norm_path(contract_path); artifact_path=norm_path(artifact_path)
+    marker='<capability>'
+    if marker not in contract_path:
+        if contract_path.endswith('/'):
+            return artifact_path.startswith(contract_path)
+        return contract_path==artifact_path
+    prefix,suffix=contract_path.split(marker,1)
+    expression='^'+re.escape(prefix)+'[^/]+'+re.escape(suffix)+'$'
+    return re.fullmatch(expression,artifact_path) is not None
+
+def parse_evidence(path,step_id,change_id,require_approval=True,include_undeclared=False):
     p=(ROOT/path).resolve() if not Path(path).is_absolute() else Path(path).resolve()
     try:p.relative_to(ROOT.resolve())
     except ValueError: raise ValueError('Evidence file must be inside project root')
@@ -246,6 +312,7 @@ def parse_evidence(path,step_id,change_id):
     if change_id and e.get('change_id') not in (None,change_id): raise ValueError('Evidence change_id mismatch')
     outputs=e.get('outputs',[])
     if not outputs: raise ValueError('Evidence must list at least one output artifact')
+    declared=output_paths_for_step(step_id,change_id)
     artifacts=[]
     for o in outputs:
         status=o.get('status','created')
@@ -256,13 +323,28 @@ def parse_evidence(path,step_id,change_id):
         if status not in ('created','updated','verified'):
             if o.get('required',True): raise ValueError(f"Required output not ready: {o.get('path')} status={status}")
             continue
-        op=(ROOT/o['path']).resolve()
-        try: rel=op.relative_to(ROOT.resolve()).as_posix()
-        except ValueError: raise ValueError(f"Output escapes project root: {o.get('path')}")
-        if not op.is_file():
-            if o.get('required',True): raise ValueError(f"Required output missing: {rel}")
+        rel=norm_path(o['path'])
+        if not include_undeclared and declared and not any(declared_path_matches(d,rel) for d in declared):
+            # Extra outputs may be logged for audit, but they are not part of the
+            # reviewed handoff. This keeps mutable runtime state, generated indexes
+            # and toolkit scripts from invalidating an upstream approval.
             continue
-        artifacts.append({'path':rel,'sha256':hash_file(op),'size_bytes':op.stat().st_size,'role':o.get('role','output')})
+        op=(ROOT/o['path']).resolve()
+        try: out_rel=op.relative_to(ROOT.resolve()).as_posix()
+        except ValueError: raise ValueError(f"Output escapes project root: {o.get('path')}")
+        if op.is_dir():
+            files=[f for f in sorted(op.rglob('*')) if f.is_file()]
+            if not files:
+                if o.get('required',True): raise ValueError(f"Required directory output is empty: {out_rel}")
+                continue
+            for f in files:
+                child=out_rel.rstrip('/')+'/'+f.relative_to(op).as_posix()
+                artifacts.append({'path':child,'sha256':hash_file(f),'size_bytes':f.stat().st_size,'role':o.get('role','output')})
+            continue
+        if not op.is_file():
+            if o.get('required',True): raise ValueError(f"Required output missing: {out_rel}")
+            continue
+        artifacts.append({'path':out_rel,'sha256':hash_file(op),'size_bytes':op.stat().st_size,'role':o.get('role','output')})
     if not artifacts: raise ValueError('No existing output artifacts to hand off')
     checks=e.get('checks',[])
     if not checks: raise ValueError('Evidence must contain at least one gate check')
@@ -294,12 +376,12 @@ def parse_evidence(path,step_id,change_id):
             if not any(p.endswith(suffix) for p in paths):
                 raise ValueError(f'Independent verifier must output {suffix}')
         if not any('check-independent-verification.py' in c.get('command','') and c.get('exit_code')==0 for c in checks):
-            raise ValueError('15 requires a real check-independent-verification.py gate with exit_code=0')
+            raise ValueError('09-independent-verification requires a real check-independent-verification.py gate with exit_code=0')
     stage=BY_ID[step_id]
     approval=e.get('approval',{})
-    if (stage['human_approval_required'] or approval.get('required') is True) and approval.get('status')!='approved':
+    if require_approval and (stage['human_approval_required'] or approval.get('required') is True) and approval.get('status')!='approved':
         raise ValueError('Human approval required; evidence.approval.status must be approved')
-    if approval.get('status')=='approved' and (not approval.get('approver') or not approval.get('approved_at')):
+    if require_approval and approval.get('status')=='approved' and (not approval.get('approver') or not approval.get('approved_at')):
         raise ValueError('Approved evidence requires approver and approved_at')
     return e,artifacts
 
@@ -309,7 +391,8 @@ def cmd_request_review(args):
     Writing stage artifacts is not permission to start the next stage. This
     command freezes the workflow at the current step by adding a pending
     approval entry; next-step/check-entry then refuse to advance until the
-    user explicitly approves.
+    user explicitly approves. The review packet pins the artifact hashes that
+    the user is being asked to approve.
     """
     s=load_state(); sid=args.step; stage=BY_ID[sid]
     if s.get('current_step')!=sid:
@@ -320,15 +403,41 @@ def cmd_request_review(args):
     cid=args.change_id or s.get('active_change_id') or None
     if stage['scope']=='change' and not cid:
         raise ValueError('Change-scoped stage requires active_change_id / --change-id')
-    targets=args.target or output_paths_for_step(sid,cid)
+    ev=getattr(args,'evidence',None) or f'workflow/evidence/{sid}.json'
+    ev_path=(ROOT/ev).resolve()
+    try: ev_rel=ev_path.relative_to(ROOT.resolve()).as_posix()
+    except ValueError: raise ValueError('Review evidence must be inside project root')
+    if not ev_path.is_file():
+        raise ValueError(f'Review evidence missing: {ev}; generate evidence and run the stage checks before request-review')
+    e,artifacts=parse_evidence(ev_rel,sid,cid,require_approval=False)
+    missing_outputs=missing_declared_outputs(e,sid,cid)
+    if missing_outputs:
+        raise ValueError('Evidence omits declared stage outputs (mark N/A with waiver_reason when not applicable): '+', '.join(missing_outputs))
+    targets=[{'path':a['path'],'sha256':a['sha256'],'size_bytes':a['size_bytes']} for a in artifacts]
+    if args.target:
+        targets=[]
+        for raw in args.target:
+            p=(ROOT/raw).resolve()
+            try: rel=p.relative_to(ROOT.resolve()).as_posix()
+            except ValueError: raise ValueError(f'Review target escapes project root: {raw}')
+            if not p.is_file(): raise ValueError(f'Review target missing: {raw}')
+            targets.append({'path':rel,'sha256':hash_file(p),'size_bytes':p.stat().st_size})
+    checks=[{'name':c.get('name'),'status':c.get('status'),'exit_code':c.get('exit_code'),
+             'command':c.get('command'),'log':c.get('log')} for c in e.get('checks',[])]
+    packet={'step_id':sid,'change_id':cid,'summary':args.summary or '','created_at':now(),
+            'evidence':ev_rel,'targets':targets,'checks':checks}
+    packet_path=ROOT/'workflow/evidence'/f'{sid}-review.json'
+    atomic_json(packet_path,packet)
     entry={'step_id':sid,'change_id':cid,'requested_at':now(),
-           'summary':args.summary or '','targets':targets}
+           'summary':args.summary or '','evidence':ev_rel,'targets':targets,
+           'checks':checks,'review_packet':relpath(packet_path)}
     s['pending_approvals']=[x for x in (s.get('pending_approvals') or []) if item_step(x)!=sid]+[entry]
     s['last_updated']=now()
     atomic_json(STATE,s)
     print(f'REVIEW_REQUESTED={sid}')
     print('CURRENT_STEP='+s['current_step'])
-    if targets: print('REVIEW_TARGETS='+'; '.join(targets))
+    if targets: print('REVIEW_TARGETS='+'; '.join(t['path'] for t in targets))
+    print('REVIEW_PACKET='+relpath(packet_path))
     print('STATUS=AWAITING_USER_REVIEW')
     print('NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.')
     print(f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>')
@@ -348,13 +457,34 @@ def cmd_approve(args):
     try: ev.relative_to(ROOT.resolve())
     except ValueError: raise ValueError('Approval evidence must be inside project root')
     if not ev.is_file(): raise ValueError('Approval evidence file missing: '+args.evidence)
+    entry=pending[0]
+    targets=entry.get('targets') or []
+    for target in targets:
+        if not isinstance(target,dict) or not target.get('path'): continue
+        path=(ROOT/target['path']).resolve()
+        try: path.relative_to(ROOT.resolve())
+        except ValueError: raise ValueError('Review target escapes project root: '+str(target.get('path')))
+        if not path.is_file(): raise ValueError('Reviewed artifact is missing: '+str(target.get('path')))
+        if target.get('sha256') and hash_file(path)!=target['sha256']:
+            raise ValueError('Artifact changed since request-review; re-run request-review before approving: '+str(target.get('path')))
     rec={'step_id':sid,'change_id':args.change_id or s.get('active_change_id') or '',
          'approver':args.approver,'approved_at':args.approved_at,
-         'evidence':relpath(ev),'recorded_at':now()}
-    s['approvals_history']=[x for x in (s.get('approvals_history') or []) if item_step(x)!=sid]+[rec]
+         'evidence':relpath(ev),'recorded_at':now(),
+         'targets':targets,'review_packet':entry.get('review_packet','')}
+    s['approvals_history']=list(s.get('approvals_history') or [])+[rec]
     s['pending_approvals']=[x for x in s['pending_approvals'] if item_step(x)!=sid]
     s['last_updated']=now()
     atomic_json(STATE,s)
+    packet_rel=entry.get('review_packet')
+    if packet_rel:
+        packet_path=(ROOT/packet_rel).resolve()
+        if packet_path.is_file():
+            try:
+                packet=json.loads(packet_path.read_text(encoding='utf-8'))
+                packet['approval']={'approver':rec['approver'],'approved_at':rec['approved_at'],'evidence':rec['evidence'],'recorded_at':rec['recorded_at']}
+                atomic_json(packet_path,packet)
+            except Exception:
+                pass
     print(f'APPROVED={sid}')
     print('APPROVER='+args.approver)
     print('APPROVED_AT='+args.approved_at)
@@ -362,7 +492,7 @@ def cmd_approve(args):
     return 0
 
 def cmd_status(args):
-    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'completed_changes':s.get('completed_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'approvals_history':s.get('approvals_history',[]),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
+    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'completed_changes':s.get('completed_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'approvals_history':s.get('approvals_history',[]),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'reset_history':s.get('reset_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
 
 def cmd_check_entry(args):
     s=load_state(); errs=check_entry(args.step,s,args.change_id)
@@ -376,17 +506,31 @@ def cmd_handoff_verify(args):
     if ok: print(f'HANDOFF_VERIFIED={relpath(mp)}'); return 0
     print('HANDOFF_INVALID'); [print(' - '+e) for e in errs]; return 4
 
+def verify_review_targets(rec):
+    for target in rec.get('targets',[]) or []:
+        if not isinstance(target,dict) or not target.get('path'): continue
+        path=(ROOT/target['path']).resolve()
+        try: path.relative_to(ROOT.resolve())
+        except ValueError: raise ValueError('Review target escapes project root: '+str(target.get('path')))
+        if not path.is_file(): raise ValueError('Reviewed artifact is missing: '+str(target.get('path')))
+        if target.get('sha256') and hash_file(path)!=target['sha256']:
+            raise ValueError('Artifact changed since approval; re-run request-review: '+str(target.get('path')))
+
 def cmd_transition(args):
     s=load_state(); sid=args.step; stage=BY_ID[sid]
-    e,artifacts=parse_evidence(args.evidence,sid,args.change_id)
-    if stage.get('human_approval_required'):
-        cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
-        rec=approval_record(s,sid,cid if stage['scope']=='change' else None)
+    own_pending=[x for x in (s.get('pending_approvals') or []) if (x.get('step_id') if isinstance(x,dict) else x)==sid]
+    e,artifacts=parse_evidence(args.evidence,sid,args.change_id,require_approval=False)
+    cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
+    approval=e.get('approval',{}) if isinstance(e.get('approval'),dict) else {}
+    rec=approval_record(s,sid,cid if stage['scope']=='change' else None)
+    if stage.get('human_approval_required') or own_pending:
         if not rec:
             raise ValueError(f'Human approval required: run request-review, wait for the user, then run workflow.py approve --step {sid} before transition')
-        approval=e.get('approval',{}) if isinstance(e.get('approval'),dict) else {}
+        verify_review_targets(rec)
         if approval.get('approver') and rec.get('approver') and approval['approver']!=rec['approver']:
             raise ValueError('Evidence approver does not match the recorded user approval')
+        approval={'required':True,'status':'approved','approver':rec.get('approver',''),
+                  'approved_at':rec.get('approved_at',''),'evidence':rec.get('evidence','')}
     own_blocked=[x for x in (s.get('blocked_items') or [])
                  if (x.get('step_id') if isinstance(x,dict) else x)==sid]
     resolved=[r for r in (e.get('resolved_blockers') or []) if r.get('step_id')==sid]
@@ -405,10 +549,6 @@ def cmd_transition(args):
                      allow_blocked_for_step=sid if (own_blocked and resolved) else None)
     if errs:
         print('TRANSITION_BLOCKED'); [print(' - '+e) for e in errs]; return 3
-    cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
-    own_pending=[x for x in s.get('pending_approvals',[]) if (x.get('step_id') if isinstance(x,dict) else x)==sid]
-    if own_pending and e.get('approval',{}).get('status')!='approved':
-        raise ValueError('Pending approval for this stage requires approved evidence before transition')
     missing=missing_declared_outputs(e,sid,cid)
     if missing:
         raise ValueError('Evidence omits declared stage outputs (mark N/A with waiver_reason when not applicable): '+', '.join(missing))
@@ -429,10 +569,10 @@ def cmd_transition(args):
     s['last_completed_outputs']=[a['path'] for a in artifacts]
     s['last_updated']=now()
     evidence_path=Path(args.evidence); evidence_path=evidence_path if evidence_path.is_absolute() else ROOT/evidence_path
-    transition_record={'step_id':sid,'completed_at':s['last_updated'],'change_id':cid,'evidence_path':relpath(evidence_path),'outputs':[a['path'] for a in artifacts],'checks':[{'name':c.get('name'),'status':c.get('status'),'exit_code':c.get('exit_code')} for c in e.get('checks',[])],'approval':e.get('approval',{})}
+    transition_record={'step_id':sid,'completed_at':s['last_updated'],'change_id':cid,'evidence_path':relpath(evidence_path),'outputs':[a['path'] for a in artifacts],'checks':[{'name':c.get('name'),'status':c.get('status'),'exit_code':c.get('exit_code')} for c in e.get('checks',[])],'approval':approval}
     s.setdefault('transition_history',[]).append(transition_record)
     s['last_transition']=transition_record
-    if e.get('approval',{}).get('status')=='approved':
+    if approval.get('status')=='approved':
         s['pending_approvals']=[x for x in s.get('pending_approvals',[]) if x.get('step_id')!=sid and x!=sid]
     if own_blocked and resolved:
         s['blocked_items']=[x for x in s.get('blocked_items',[]) if (x.get('step_id') if isinstance(x,dict) else x)!=sid]
@@ -450,42 +590,38 @@ def cmd_transition(args):
     for nxt_stage in successors:
         outcid=cid if stage['scope']=='change' else None
         mp=manifest_path(sid,nxt_stage['id'],outcid)
-        manifest={'version':'1.0','from_step':sid,'to_step':nxt_stage['id'],'change_id':outcid,'created_at':now(),'baseline_version':e.get('baseline_version',''),'approval':e.get('approval',{}),'checks':e.get('checks',[]),'artifacts':artifacts}
+        manifest={'version':'1.0','from_step':sid,'to_step':nxt_stage['id'],'change_id':outcid,'created_at':now(),'baseline_version':e.get('baseline_version',''),'approval':approval,'checks':e.get('checks',[]),'artifacts':artifacts}
         atomic_json(mp,manifest)
         print(f'HANDOFF_CREATED={relpath(mp)}')
     print(f"COMPLETED={sid}"); print(f"NEXT_STEP={s['current_step']}")
     return 0
 
 def cmd_handoff_create(args):
-    # Explicit utility for re-creating a handoff after a predecessor has been re-approved.
+    # Explicit recovery utility: rebuild a handoff from the original approved
+    # stage evidence. Free-form --file manifests are intentionally unsupported.
     if args.from_step not in BY_ID or args.to_step not in BY_ID: raise ValueError('Unknown from/to step')
     if args.to_step not in [x['id'] for x in STAGES if args.from_step in x['dependencies']]: raise ValueError('to-step is not a direct successor')
+    if getattr(args,'file',None): raise ValueError('handoff-create no longer accepts --file; use the original stage --evidence')
+    if not args.evidence: raise ValueError('handoff-create requires --evidence (the original approved stage evidence)')
     state=load_state()
-    if BY_ID[args.from_step].get('human_approval_required'):
+    stage=BY_ID[args.from_step]
+    if stage['scope']=='change':
         cid=args.change_id or state.get('active_change_id') or None
-        rec=approval_record(state,args.from_step,cid if BY_ID[args.from_step]['scope']=='change' else None)
-        if not rec:
-            raise ValueError(f'{args.from_step} requires a recorded user approval; run request-review/approve first (--approved alone is not accepted)')
-    cid=args.change_id
-    evidence_data=None; checks=[]; approval={'status':'approved' if args.approved else 'not-recorded'}; baseline_version=args.baseline_version or ''
-    if args.evidence:
-        evidence_data,artifacts=parse_evidence(args.evidence,args.from_step,cid)
-        checks=evidence_data.get('checks',[]); approval=evidence_data.get('approval',{}); baseline_version=evidence_data.get('baseline_version','')
+        if not cid: raise ValueError('Change-scoped handoff-create requires --change-id or active_change_id')
     else:
-        if args.from_step=='09-independent-verification': raise ValueError('Verifier handoff recovery requires --evidence so PASS proof is preserved')
-        if BY_ID[args.from_step]['human_approval_required'] and not args.approved:
-            raise ValueError('Source stage requires --approved or an approved --evidence file')
-        artifacts=[]
-    for raw in ([] if evidence_data else args.file):
-        p=Path(raw); p=(ROOT/p).resolve() if not p.is_absolute() else p.resolve()
-        try: rel=p.relative_to(ROOT.resolve()).as_posix()
-        except ValueError: raise ValueError(f'File outside project: {raw}')
-        if not p.is_file(): raise ValueError(f'Missing file: {rel}')
-        artifacts.append({'path':rel,'sha256':hash_file(p),'size_bytes':p.stat().st_size,'role':'output'})
-    if not artifacts: raise ValueError('At least one --file is required')
+        cid=None
+    evidence_data,artifacts=parse_evidence(args.evidence,args.from_step,cid,require_approval=False)
+    approval=evidence_data.get('approval',{}) if isinstance(evidence_data.get('approval'),dict) else {}
+    if stage.get('human_approval_required'):
+        rec=approval_record(state,args.from_step,cid if stage['scope']=='change' else None)
+        if not rec:
+            raise ValueError(f'{args.from_step} requires a recorded user approval; run request-review/approve first')
+        verify_review_targets(rec)
+        approval={'required':True,'status':'approved','approver':rec.get('approver',''),
+                  'approved_at':rec.get('approved_at',''),'evidence':rec.get('evidence','')}
     annotate_mutable_artifacts(artifacts,args.from_step,cid)
     mp=manifest_path(args.from_step,args.to_step,cid)
-    atomic_json(mp,{'version':'1.0','from_step':args.from_step,'to_step':args.to_step,'change_id':cid,'created_at':now(),'baseline_version':baseline_version, 'approval':approval,'checks':checks,'artifacts':artifacts})
+    atomic_json(mp,{'version':'1.0','from_step':args.from_step,'to_step':args.to_step,'change_id':cid,'created_at':now(),'baseline_version':evidence_data.get('baseline_version',''),'approval':approval,'checks':evidence_data.get('checks',[]),'artifacts':artifacts})
     print(f'HANDOFF_CREATED={relpath(mp)}'); return 0
 
 def cmd_migrate_state(args):
@@ -493,23 +629,122 @@ def cmd_migrate_state(args):
         raise ValueError('migrate-state requires --reason')
     data=json.loads(STATE.read_text(encoding='utf-8'))
     valid=set(BY_ID); reset=set(args.reset_step or [])
+    # A reset step invalidates its whole downstream closure; otherwise the
+    # state can claim Stage 04 is complete while Stage 03 is being redone.
+    changed=True
+    while changed:
+        changed=False
+        for stage in STAGES:
+            if stage['id'] in reset: continue
+            if any(dep in reset for dep in stage['dependencies']):
+                reset.add(stage['id']); changed=True
+    removed=[x for x in ORDER if x in reset]
     old=list(data.get('completed_steps',[]))
     legacy=[s for s in old if s not in valid or s in reset]
     data.setdefault('legacy_completed_steps',[])
     data['legacy_completed_steps']=list(dict.fromkeys(data['legacy_completed_steps']+legacy))
     data['completed_steps']=[s for s in old if s in valid and s not in reset]
     completed=set(data['completed_steps'])
+    broken=[s for s in completed if any(d not in completed for d in BY_ID[s]['dependencies'])]
+    if broken:
+        raise ValueError('migrate-state would leave stages with incomplete dependencies: '+', '.join(broken))
+    superseded=supersede_approvals(data,set(removed),args.reason)
+    invalidated=invalidate_handoffs(removed,args.reason,'migrate-state','*')
     nxt=next((x for x in STAGES if x['id'] not in completed and all(d in completed for d in x['dependencies'])),None)
     data['current_step']=nxt['id'] if nxt else 'ALL_STEPS_COMPLETE'
     data['last_updated']=now()
     if getattr(args,'note',None):
         data['notes']=args.note
-    data.setdefault('topology_migrations',[]).append({'at':data['last_updated'],'reason':args.reason,'legacy_steps':legacy,'reset_steps':sorted(reset),'completed_steps':data['completed_steps'],'current_step':data['current_step']})
+    data.setdefault('topology_migrations',[]).append({'at':data['last_updated'],'reason':args.reason,'legacy_steps':legacy,'reset_steps':sorted(reset),'removed_steps':removed,'superseded_approvals':superseded,'invalidated_handoffs':invalidated,'completed_steps':data['completed_steps'],'current_step':data['current_step']})
     atomic_json(STATE,data)
     print(f'MIGRATED=workflow-state.json')
     print('COMPLETED='+', '.join(data['completed_steps']))
     print('LEGACY='+', '.join(data['legacy_completed_steps']))
     print('CURRENT_STEP='+data['current_step'])
+    return 0
+
+def supersede_approvals(state,removed,reason):
+    superseded=[]
+    for rec in (state.get('approvals_history') or []):
+        if item_step(rec) in removed and not rec.get('superseded_at'):
+            rec['superseded_at']=now(); rec['supersede_reason']=reason
+            superseded.append({'step_id':item_step(rec),'change_id':rec.get('change_id',''),'approver':rec.get('approver',''),'approved_at':rec.get('approved_at',''),'evidence':rec.get('evidence','')})
+    return superseded
+
+def invalidate_handoffs(from_steps,reason,source,change_id=None):
+    removed=set(from_steps); paths=[]
+    root=ROOT/'workflow/handoffs'
+    if not root.exists(): return paths
+    for mp in sorted(root.glob('**/*.json')):
+        try: m=json.loads(mp.read_text(encoding='utf-8'))
+        except Exception: continue
+        if m.get('from_step') not in removed: continue
+        actual_cid=m.get('change_id')
+        if change_id == '*':
+            pass
+        elif change_id is None:
+            if actual_cid not in (None,''): continue
+        else:
+            if actual_cid!=change_id: continue
+        m['invalidated_at']=now(); m['invalidated_reason']=reason; m['invalidated_by']=source
+        atomic_json(mp,m); paths.append(relpath(mp))
+    return paths
+
+def invalidate_all_handoffs(reason):
+    paths=[]
+    root=ROOT/'workflow/handoffs'
+    if not root.exists(): return paths
+    for mp in sorted(root.glob('**/*.json')):
+        try: m=json.loads(mp.read_text(encoding='utf-8'))
+        except Exception: continue
+        m['invalidated_at']=now(); m['invalidated_reason']=reason; m['invalidated_by']='state-reset'
+        atomic_json(mp,m); paths.append(relpath(mp))
+    return paths
+
+def cmd_reset_state(args):
+    """Return workflow-state.json to the pre-Stage-01 position, keeping an audit archive."""
+    s=load_state()
+    if not args.reason or not args.reason.strip(): raise ValueError('reset-state requires --reason')
+    stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+    archive=ROOT/'workflow/evidence'/f'state-reset-{stamp}.json'
+    archive_data={'archived_at':now(),'reason':args.reason,'note':getattr(args,'note','') or '',
+                  'previous_current_step':s.get('current_step'),'previous_completed_steps':s.get('completed_steps',[]),
+                  'previous_active_change_id':s.get('active_change_id',''),'previous_baseline_version':(s.get('baseline') or {}).get('overall_version',''),
+                  'state':s}
+    atomic_json(archive,archive_data)
+    invalidated=invalidate_all_handoffs(args.reason)
+    fresh={
+        'project_name':s.get('project_name','项目'),
+        'active_change_id':'',
+        'completed_steps':[],
+        'current_step':'01-project-bootstrap',
+        'pending_approvals':[],
+        'blocked_items':[],
+        'last_completed_outputs':[],
+        'notes':getattr(args,'note','') or '流程状态已由 reset-state 重置为未初始化；旧状态与交接已归档。',
+        'state_schema_version':'1.0',
+        'transition_history':[],
+        'topology_migrations':[],
+        'completed_substeps':[],
+        'current_substep':'',
+        'reopen_history':[],
+        'reset_history':[{
+            'at':now(),'reason':args.reason,'note':getattr(args,'note','') or '',
+            'archive':relpath(archive),'invalidated_handoffs':invalidated,
+            'previous_current_step':archive_data['previous_current_step'],
+            'previous_completed_steps':archive_data['previous_completed_steps'],
+            'previous_active_change_id':archive_data['previous_active_change_id'],
+            'previous_baseline_version':archive_data['previous_baseline_version'],
+        }],
+        'baseline':{},
+        'approvals_history':[],
+        'last_transition':None,
+    }
+    atomic_json(STATE,fresh)
+    print('STATE_RESET=UNINITIALIZED')
+    print('CURRENT_STEP=01-project-bootstrap')
+    print('ARCHIVE='+relpath(archive))
+    print('INVALIDATED_HANDOFFS='+str(len(invalidated)))
     return 0
 
 def cmd_reopen(args):
@@ -525,19 +760,26 @@ def cmd_reopen(args):
             if any(dep in removed for dep in stage['dependencies']):
                 removed.add(stage['id']); changed=True
     removed=[x for x in ORDER if x in removed]
-    def item_step(item): return item.get('step_id') if isinstance(item,dict) else item
+    stage=BY_ID[sid]
+    cid=(s.get('active_change_id') or None) if stage['scope']=='change' else None
+    if stage['scope']=='change' and not cid:
+        raise ValueError('Change-scoped reopen requires active_change_id')
+    removed_approvals=supersede_approvals(s,set(removed),args.reason)
+    invalidated=invalidate_handoffs(removed,args.reason,'reopen',cid)
     s['completed_steps']=[x for x in s['completed_steps'] if x not in removed]
     s['pending_approvals']=[x for x in s.get('pending_approvals',[]) if item_step(x) not in removed]
     s['blocked_items']=[x for x in s.get('blocked_items',[]) if item_step(x) not in removed]
-    s['approvals_history']=[x for x in s.get('approvals_history',[]) if item_step(x) not in removed]
     s['current_step']=sid
     s['last_updated']=now()
     s.setdefault('reopen_history',[]).append({
         'at':s['last_updated'],'reopened_step':sid,'removed_steps':removed,
-        'reason':args.reason,'note':getattr(args,'note','') or ''})
+        'reason':args.reason,'note':getattr(args,'note','') or '',
+        'removed_approvals':removed_approvals,'invalidated_handoffs':invalidated})
     atomic_json(STATE,s)
     print('REOPENED='+sid)
     print('REMOVED='+', '.join(removed))
+    print('SUPERSEDED_APPROVALS='+str(len(removed_approvals)))
+    print('INVALIDATED_HANDOFFS='+str(len(invalidated)))
     print('CURRENT_STEP='+sid)
     return 0
 
@@ -621,18 +863,19 @@ def main():
     sub.add_parser('status')
     p=sub.add_parser('check-entry'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id')
     p=sub.add_parser('handoff-verify'); p.add_argument('--manifest',required=True)
-    p=sub.add_parser('handoff-create'); p.add_argument('--from-step',required=True,choices=ORDER); p.add_argument('--to-step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--baseline-version'); p.add_argument('--approved',action='store_true'); p.add_argument('--evidence'); p.add_argument('--file',action='append',default=[])
+    p=sub.add_parser('handoff-create'); p.add_argument('--from-step',required=True,choices=ORDER); p.add_argument('--to-step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--baseline-version'); p.add_argument('--evidence',required=True)
     p=sub.add_parser('transition'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
-    p=sub.add_parser('request-review'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--summary',default=''); p.add_argument('--target',action='append',default=[])
+    p=sub.add_parser('request-review'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--summary',default=''); p.add_argument('--target',action='append',default=[]); p.add_argument('--evidence')
     p=sub.add_parser('approve'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--approver',required=True); p.add_argument('--approved-at',required=True); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
     p=sub.add_parser('check-methods'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
+    p=sub.add_parser('reset-state'); p.add_argument('--reason',required=True); p.add_argument('--note')
     p=sub.add_parser('next-change'); p.add_argument('--change-id',required=True); p.add_argument('--note')
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())

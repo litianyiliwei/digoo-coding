@@ -124,11 +124,15 @@ def main():
         print('## 0. Lean inputs (default reads, within budget)')
         for item in lean:
             print(f'- {item}')
+            optional = bool(re.search(r'\b(?:if|when) present\b', str(item), re.I))
             for raw in PATH_RE.findall(str(item)):
                 token, exists = check_path(raw, change_id)
                 if exists is False:
-                    missing.append(token)
-                    print(f'  - `{token}` [MISSING]')
+                    if optional:
+                        print(f'  - `{token}` [OPTIONAL; absent]')
+                    else:
+                        missing.append(token)
+                        print(f'  - `{token}` [MISSING]')
                 elif exists is True:
                     print(f'  - `{token}` [OK]')
         print(f'- Budget: {len(lean)}/{max_files} lean read groups; when exceeded, split the Change first or narrow the scope.')

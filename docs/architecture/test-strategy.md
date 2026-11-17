@@ -1,39 +1,62 @@
 # 测试策略
 
 - Change ID：N/A（项目级架构基线）
-- 状态：DRAFT（初始化骨架；待阶段 03 填充）
-- 来源基线：PENDING（阶段 02 产品基线）
-- 关联需求/AC：PENDING（AC/FLOW ID）
-- 生成日期/版本：PENDING / v0.1.0
+- 状态：FROZEN（BCR-Q003-RISK-TIER-POLICY，用户于 2026-11-17 批准）
+- 来源基线：Stage 02 BR-003/006/007、`scripts/README.md`、BCR-Q003-RISK-TIER-POLICY
+- 关联需求/AC：RA-001、NFR-001、FLOW-001、NODE-001-04–06、DO-004、RD-004–009、BR-003/006/007
+- 生成日期/版本：2026-11-17 / v0.3.0
 
 ## 1. 测试层级与门禁
 
-PENDING。
+1. 包/语法/契约结构检查：`python scripts/check-package.py`；不隐式运行回归测试。
+2. 变更相关检查：仅运行受影响脚本对应的检查器，并记录范围和跳过项。
+3. 回归测试：明确运行 `bash scripts/test-all.sh`（若当前环境可启动 Bash）或对应 `test-*.py`/`test-*.sh`；不可将未执行标记为 PASS。
+4. 阶段治理检查：运行阶段合同规定的脚本和工作流门禁。
+5. 独立验证：按变更影响范围由独立验证上下文只读执行；发现问题则退回实现。
+
+风险分级及最低检查集依据已批准的 `docs/product/business-rules.md` 第 2 节和 `docs/product/acceptance-policy.md` 第 2 节。档位只决定额外回归范围，不替代阶段契约规定的强制检查。
+
+### 1.1 风险档位执行入口
+
+| 档位 | 回归范围入口 | 必须附加的范围记录 |
+|---|---|---|
+| LOW | `python scripts/check-package.py`、阶段契约强制检查、变更 `design/test-cases.csv` 中适用 TEST 的实现和执行；不默认运行 `bash scripts/test-all.sh`。 | 逐条列出影响标签、未运行测试/检查及适用性理由；不能证明低风险时升档。 |
+| STANDARD | 执行 LOW 全部入口，并执行所有受影响模块回归；跨模块、共享契约或无法隔离测试时执行 `bash scripts/test-all.sh`。 | 记录模块/契约影响边界、回归选择依据、实际命令与退出码。 |
+| HIGH | 执行 `bash scripts/test-all.sh` 和阶段契约全部强制检查；再按 RISK/SECURITY/DATA/THIRD_PARTY/UI/BASELINE/WORKFLOW 影响运行对应安全、数据迁移、接口、Figma、基线治理和状态机检查。 | 记录每个命中信号、适用检查及证据；任一适用门禁未执行或失败即 BLOCKED。 |
+
+若 `bash scripts/test-all.sh` 或必要的边界检查无法运行，HIGH 变更保持 BLOCKED；不得用模块定向测试声明等价通过。所有档位均遵循 Stage 09 独立验证要求，且由各阶段合同列明的脚本/人工审批继续作为硬门禁。风险档位的选择、命令、退出码、跳过项、理由和证据必须写入本 Change 的实现证据；计划中的自动风险配置由 `risk-tier-check-profiles` 后续实现。
 
 ## 2. 后端测试规范
 
-PENDING。
+N/A：无后端/服务端应用。Python 流程工具按模块的确定性检查覆盖路径安全、状态迁移、证据模式、哈希和失败关闭行为；具体模块回归测试按变更触及范围选择。
 
 ## 3. 前端测试规范
 
-PENDING。
+N/A：当前无前端。若未来 UI Change 获批，须在技术栈确认后加入组件、可访问性和运行时布局机器校验；UI 数值偏差按已批准流程人工复核。
 
 ## 4. 非功能测试
 
-PENDING。
+- 上下文效率：`python scripts/check-output-context.py --stage <id>` 验证摘要产物限制；Stage 03 前可用 `scripts/agent-context.py --stage 03` 观察输入包。
+- 安全/治理：状态篡改、越阶段写入、路径越界和缺失审批应 fail-closed；通过对应 checker/回归用例验证。
+- 性能：无业务服务 SLA；对工具脚本运行耗时只作诊断，不承诺外部系统响应时间。
 
 ## 5. 测试数据与环境
 
-PENDING。
+脚本测试使用临时目录/隔离 fixture，不得把测试产物写入正式工作流状态或审批证据。运行 Python 3.11，涉及 Bash 时确认实际可启动 Bash；OpenSpec 检查用仓库现有 CLI。依赖不可用时如实阻塞。
 
 ## 6. 质量门禁与证据
 
-PENDING。
+每项检查记录精确命令、退出码、结果、日志路径、修订和适用理由；每条需求/AC映射到验证方式。阶段检查与测试分开记录；N/A 写理由；失败或未执行强制项不通过。
 
 ## 7. 人工验收
 
-PENDING。
+用户/产品负责人按阶段或 Change 评审实际产物；工具 PASS 不是批准。阶段状态只在用户明确审批并经工作流命令迁移后更新。
 
 ## 8. 测试职责
 
-PENDING。
+| 活动 | 责任角色 | 边界 |
+|---|---|---|
+| 变更相关检查/测试 | 构建 Agent | 真实执行并报告；可修改实现后重跑 |
+| 独立验证 | ROLE-003 | 只读复核批准修订及其证据 |
+| 人工验收/阶段审批 | 用户/产品负责人 | 明确接受或退回，不由 Agent 代签 |
+| 确定性状态/合同检查 | 流程工具 | 仅按脚本规则报告，不决定业务正确性 |

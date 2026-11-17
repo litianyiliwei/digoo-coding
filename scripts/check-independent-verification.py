@@ -90,7 +90,7 @@ try:
     expected_pages = []
     if audit.is_file():
         audit_text = audit.read_text(encoding="utf-8")
-        ui_change = not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", audit_text, re.M)
+        ui_change = not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", audit_text, re.M)
         start = audit_text.find("## PAGE 与节点")
         if start < 0:
             start = audit_text.find("## PAGEs and Nodes")

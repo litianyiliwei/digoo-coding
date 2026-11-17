@@ -1,0 +1,4 @@
+$ git diff --check
+No whitespace errors.
+Git warns that several Markdown/CSV working copies use LF and will be converted to CRLF on the next Git write.
+Exit code: 0

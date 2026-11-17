@@ -1,0 +1,1 @@
+Figma audit check passed: this Change explicitly has no UI. Reason: Approved Change scope contains only a local developer CLI and no user-facing UI.

@@ -50,7 +50,7 @@ def ui_change():
     if not audit.is_file():
         return False
     text = audit.read_text(encoding="utf-8")
-    return not re.search(r"^- (?:设计来源状态|Design source status）[:：]\s*N/A\s*$", text, re.M)
+    return not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", text, re.M)
 
 
 def page_ids():

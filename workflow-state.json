@@ -5,88 +5,38 @@
   "current_step": "01-project-bootstrap",
   "pending_approvals": [],
   "blocked_items": [],
-  "last_completed_outputs": [
-    "AGENTS.md",
-    "docs/architecture/baseline-status.md",
-    "docs/project/toolchain-report.md"
-  ],
-  "last_updated": "2026-11-13T08:26:45+00:00",
-  "notes": "2026-11-12 清理全部流程输出，回到初始化状态：仅保留阶段 01（project-bootstrap）产物，全部业务基线与 Change 产物已移出工作区（_trash/2026-11-12/），等待阶段 02（requirements-analysis）。",
+  "last_completed_outputs": [],
+  "notes": "重置前状态、基线与交接已归档；旧 handoff 标记为 invalidated。",
   "state_schema_version": "1.0",
   "transition_history": [],
   "topology_migrations": [],
   "completed_substeps": [],
   "current_substep": "",
-  "reopen_history": [
+  "reopen_history": [],
+  "reset_history": [
     {
-      "at": "2026-11-13T08:26:45+00:00",
-      "reopened_step": "01-project-bootstrap",
-      "removed_steps": [
-        "01-project-bootstrap",
-        "02-requirements-analysis",
-        "03-project-architecture-baseline",
-        "04-proposal-planning",
-        "05-feature-requirements",
-        "06-figma-design-review",
-        "07-detailed-design",
-        "08-implementation-orchestrator",
-        "09-independent-verification",
-        "10-acceptance-audit"
+      "at": "2026-11-17T09:27:58+00:00",
+      "reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+      "note": "重置前状态、基线与交接已归档；旧 handoff 标记为 invalidated。",
+      "archive": "workflow/evidence/state-reset-20261117T092758Z.json",
+      "invalidated_handoffs": [
+        "workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json",
+        "workflow/handoffs/project/02-requirements-analysis--03-project-architecture-baseline.json",
+        "workflow/handoffs/project/03-project-architecture-baseline--04-proposal-planning.json",
+        "workflow/handoffs/project/04-proposal-planning--05-feature-requirements.json",
+        "workflow/handoffs/workflow-context-bundles/05-feature-requirements--06-figma-design-review.json",
+        "workflow/handoffs/workflow-context-bundles/06-figma-design-review--07-detailed-design.json",
+        "workflow/handoffs/workflow-context-bundles/07-detailed-design--08-implementation-orchestrator.json"
       ],
-      "reason": "用户要求将阶段 01 置为未完成，重新执行项目初始化与工具链检查",
-      "note": ""
+      "previous_current_step": "02-requirements-analysis",
+      "previous_completed_steps": [
+        "01-project-bootstrap"
+      ],
+      "previous_active_change_id": "workflow-context-bundles",
+      "previous_baseline_version": "0.2.2"
     }
   ],
-  "baseline": {
-    "manifest": "docs/architecture/baseline-manifest.json",
-    "constraint_registry": "docs/architecture/constraint-registry.json",
-    "status": "docs/architecture/baseline-status.md",
-    "overall_version": "0.1.0",
-    "status_value": "DRAFT",
-    "domains": {
-      "product": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      },
-      "architecture": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      },
-      "data_domain": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      },
-      "api": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      },
-      "frontend": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      },
-      "test_quality": {
-        "version": "0.1.0",
-        "status": "DRAFT",
-        "owner": "",
-        "approver": "",
-        "approved_at": ""
-      }
-    }
-  },
-  "approvals_history": []
+  "baseline": {},
+  "approvals_history": [],
+  "last_transition": null
 }

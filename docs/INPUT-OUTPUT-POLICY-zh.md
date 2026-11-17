@@ -8,7 +8,7 @@
 
 ## 1. 为什么收敛
 
-此前阶段 05–10 的 `inputs` 把完整产品基线、完整架构基线、ADRs、完整 specs 和当前 Change 产物混在一起；虽然多数条目写了“按需读取”，但没有默认读取顺序、文件预算和触发条件。实际执行时容易出现两种问题：
+此前阶段 05–10 的 `inputs` 把完整产品基线、完整架构基线、ADRs、完整 specs 和当前 Change 产物混在一起；阶段 02 也没有生成精简默认读取集。虽然多数条目写了“按需读取”，但并非每个阶段都有默认读取顺序、文件预算和触发条件。实际执行时容易出现两种问题：
 
 - 一次性把 `docs/product/*`、`docs/architecture/*` 全量塞入上下文，挤掉当前 Change 的关键契约；
 - 或者只读少量文件却声称“已按输入核验”，遗漏真正影响设计的章节。
@@ -19,7 +19,7 @@
 
 | 层级 | 内容 | 读取规则 |
 |---|---|---|
-| 0 常驻 | `docs/product/BASELINE-BRIEF.md`（≤1 页）、`baseline-status.md` | 每阶段先读；不重复读完整基线 |
+| 0 常驻 | 存在时读取 `docs/product/BASELINE-BRIEF.md`（≤1 页）；相关时读取 `baseline-status.md` | 简报存在时先读；阶段 02 可能在简报生成前启动，应从用户提供的目标开始并在本阶段生成简报；不重复读完整基线 |
 | 1 当前 Change | `proposal.md`、`specs/<capability>/spec.md`、`user-stories.md`、`tasks.md`、`design.md`、`baseline-impact.md`、`baseline-binding.json` | Change 阶段必读 |
 | 2 定向 | 本 Change 命中的 `FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE` 行或章节；设计域命中的架构章节 | 按 ID 读相关行/节，不读整份文件 |
 | 3 按需 | 完整 `docs/product/*`、完整 `docs/architecture/*`、`docs/adr/*`、`reference-research.md`、完整 specs | 只有 0–2 层无法回答时才读；交接报告记录触发原因 |
@@ -32,7 +32,7 @@
 
 ## 4. 每阶段怎么读
 
-运行：
+按当前阶段运行（阶段 02 是项目级梳理，不需要 Change ID）：
 
 ```bash
 python scripts/agent-context.py --stage 07 --change <change-id>
@@ -40,7 +40,7 @@ python scripts/agent-context.py --stage 07 --change <change-id>
 
 输出分为：
 
-- `精简输入（默认读取）`：按顺序读，先读 BASELINE-BRIEF 与当前 Change 产物；
+- `精简输入（默认读取）`：按当前阶段配置顺序读取；阶段 02 从用户提供的目标开始，Change 阶段从 BASELINE-BRIEF 和当前 Change 产物开始；
 - `按需输入（触发后读取）`：只在对应设计域命中/决策冲突时读；
 - `完整契约输入（审计用，默认不读）`：加 `--full` 才显示，用于交接审计而不是默认上下文。
 
@@ -59,6 +59,6 @@ python scripts/agent-context.py --stage 07 --change <change-id>
 
 ## 6. 与门禁的关系
 
-- `check-step-contracts.py` 校验每个 03–10 阶段都有 `input_policy.stage_profiles`，且 `lean` 条数不超过 `max_files`。
+- `check-step-contracts.py` 校验每个 02–10 阶段都有 `input_policy.stage_profiles`，且 `lean` 条数不超过 `max_files`。
 - `workflow.py transition` 的 evidence 仍按完整 `inputs` 审计，不会因为精简读取而放过缺失的正式输入。
 - 交接报告第 1 节必须列出实际读取的文件/章节；未读的按需文件不得声称已审查。

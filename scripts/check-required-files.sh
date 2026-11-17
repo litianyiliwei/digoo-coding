@@ -34,7 +34,11 @@ missing=0
 placeholders=0
 for f in "${required[@]}"; do
   if [[ ! -s "$f" ]]; then echo "ERROR MISSING: $f"; missing=1; continue; fi
-  if grep -nE 'TODO(:|\b)|TBD|\[填充\]|待确认' "$f" >/dev/null; then
+  # "待确认" is valid business language for an open question or a field
+  # category, not necessarily an unfilled template. Detect explicit template
+  # markers; PENDING remains visible in non-strict mode and is handled by the
+  # artifact-specific gates that know whether unresolved items are allowed.
+  if grep -nE 'TODO(:|\b)|TBD|\[填充\]|^[[:space:]]*(待补充|待填写)([[:space:]（(：:]|$)' "$f" >/dev/null; then
     echo "WARN PLACEHOLDER: $f"
     placeholders=1
   fi

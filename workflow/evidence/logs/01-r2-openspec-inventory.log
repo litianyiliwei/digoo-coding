@@ -1,0 +1,7 @@
+$ openspec version
+OpenSpec 1.14.3 (npm, global)
+$ openspec list --changes
+No active changes found.
+$ openspec list --specs
+No specs found.
+Exit code: 0

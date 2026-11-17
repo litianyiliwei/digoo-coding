@@ -1,0 +1,3 @@
+$ python scripts/workflow.py check-entry --step 02-requirements-analysis
+ENTRY_READY=02-requirements-analysis
+Exit code: 0

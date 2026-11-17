@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "from_step": "06-figma-design-review",
+  "to_step": "07-detailed-design",
+  "change_id": "workflow-context-bundles",
+  "created_at": "2026-11-17T02:50:37+00:00",
+  "baseline_version": "0.2.2",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17",
+    "evidence": "workflow/evidence/approval-06-figma-design-review-workflow-context-bundles-2026-11-17.md"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 06-figma-design-review --change-id workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-entry.log"
+    },
+    {
+      "name": "Figma audit no-UI strict validation",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-figma-audit.py --change workflow-context-bundles --strict --no-ui --reason \"Approved Change scope contains only a local developer CLI and no user-facing UI.\"",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-figma-audit.log",
+      "note": "Initial invocation exposed invalid regex syntax in the checker; the checker was corrected and the final strict invocation passed."
+    },
+    {
+      "name": "Output context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 06 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-output-context.log",
+      "note": "No summary outputs are required for the N/A UI branch."
+    },
+    {
+      "name": "Frozen baseline audit",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py audit --require-frozen",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-baseline-audit.log"
+    },
+    {
+      "name": "OpenSpec Change status",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec status --change workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-openspec-status.log"
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-diff-check.log",
+      "note": "Git emitted line-ending conversion notices for existing modified files; no whitespace errors."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/figma-audit.md",
+      "sha256": "1c01154071cd267b5386bf9ccc8f551c2c5818c98002df74904f850f1385c401",
+      "size_bytes": 985,
+      "role": "N/A UI contract and reason for no UI"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}

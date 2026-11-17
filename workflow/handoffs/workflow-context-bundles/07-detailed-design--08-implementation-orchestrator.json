@@ -1,0 +1,195 @@
+{
+  "version": "1.0",
+  "from_step": "07-detailed-design",
+  "to_step": "08-implementation-orchestrator",
+  "change_id": "workflow-context-bundles",
+  "created_at": "2026-11-17T03:29:24+00:00",
+  "baseline_version": "0.2.2",
+  "approval": {
+    "required": true,
+    "status": "approved",
+    "approver": "user",
+    "approved_at": "2026-11-17"
+  },
+  "checks": [
+    {
+      "name": "Stage entry",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/workflow.py check-entry --step 07-detailed-design --change-id workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-entry.log"
+    },
+    {
+      "name": "OpenSpec status",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec status --change workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-openspec-status.log"
+    },
+    {
+      "name": "OpenSpec design instructions",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec instructions design --change workflow-context-bundles --json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-openspec-instructions.log"
+    },
+    {
+      "name": "OpenSpec strict validation",
+      "kind": "automated",
+      "status": "passed",
+      "command": "openspec validate workflow-context-bundles --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-openspec-validate.log"
+    },
+    {
+      "name": "Change structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-change.sh workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-check-change.log"
+    },
+    {
+      "name": "Unified design assets",
+      "kind": "automated",
+      "status": "passed",
+      "command": "bash scripts/check-design-assets.sh workflow-context-bundles --strict --lint-api",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-design-assets.log"
+    },
+    {
+      "name": "Design sections",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-design-sections.py --change workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-design-sections.log"
+    },
+    {
+      "name": "Test-case matrix",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-test-cases.py --change workflow-context-bundles --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-test-cases.log"
+    },
+    {
+      "name": "Traceability",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-traceability.py --file openspec/changes/workflow-context-bundles/traceability.csv --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-traceability.log"
+    },
+    {
+      "name": "API traceability",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-api-traceability.py --change workflow-context-bundles --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-api-traceability.log"
+    },
+    {
+      "name": "Strict requirements structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-requirements.py --change workflow-context-bundles --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-requirements.log"
+    },
+    {
+      "name": "Baseline impact structure",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-baseline-impact.py workflow-context-bundles",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-baseline-impact.log"
+    },
+    {
+      "name": "Baseline design phase",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/baseline-governance.py check-change --change-id workflow-context-bundles --phase design",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-baseline-design.log"
+    },
+    {
+      "name": "Equivalent method evidence",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-method-evidence.py --step 07-detailed-design --evidence workflow/evidence/07-detailed-design.json",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-method-evidence.log",
+      "note": "Superpowers brainstorming/writing-plans were unavailable; equivalent structured analysis and dependency-ordered planning are recorded."
+    },
+    {
+      "name": "Output context budget",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-output-context.py --stage 07 --strict",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-output-context.log",
+      "note": "No summary outputs are declared for this stage."
+    },
+    {
+      "name": "Diff whitespace check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/07-diff-check.log",
+      "note": "Only existing Git line-ending conversion notices; exit code 0."
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "openspec/changes/workflow-context-bundles/design.md",
+      "sha256": "dfb515666c70736e4fe297cfba8fecbf06570c871452acfe311ff9430e03fe45",
+      "size_bytes": 15379,
+      "role": "Unified detailed design, interface scope, code impact, task-path map, and test strategy"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/baseline-impact.md",
+      "sha256": "681fe6600477d05286025c083231da9f2aaa940aa31c4fb8d5824274b3624ca6",
+      "size_bytes": 8763,
+      "role": "Stage 07 baseline re-review and resolved configuration ownership"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/baseline-binding.json",
+      "sha256": "f74f5c3c1dd20864ec2488811cff2aa56e874ac4f442da95c7677f0f96c29ec4",
+      "size_bytes": 12669,
+      "role": "Applicable constraint design evidence linked to detailed design",
+      "mutable_by_design": true
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/design/test-cases.csv",
+      "sha256": "01fd78e553eb0fedc92ce1fd3f5a168fd49306cfddaf920c68cc6d9c000b47b7",
+      "size_bytes": 4631,
+      "role": "Seven planned AC-linked tests with explicit N/A UI/API/IO/interface fields"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/traceability.csv",
+      "sha256": "7b13b7edec7e0722447d5a8922c20bcc1cbd01ff6529eface3321f4eecba0553",
+      "size_bytes": 2508,
+      "role": "Single US/AC/TASK to TEST traceability matrix"
+    },
+    {
+      "path": "openspec/changes/workflow-context-bundles/api/openapi.yaml",
+      "sha256": "42ff788dfee4ad5fb104b4151c76c22ae7e0d36b4e75fe86ed09d11d82a880ea",
+      "size_bytes": 100,
+      "role": "Machine marker x-api-scope: none; no HTTP operations"
+    },
+    {
+      "path": "scripts/check-design-sections.py",
+      "sha256": "a4c8dd0d0b837ceab965a6127dcaaf61eedd5a8b244e8d130584a9487afe5cdc",
+      "size_bytes": 13286,
+      "role": "Corrected malformed no-UI regex so the design gate can validate a documented N/A frontend section"
+    }
+  ],
+  "invalidated_at": "2026-11-17T09:27:58+00:00",
+  "invalidated_reason": "用户要求把流程流转状态改到未初始化，先修复流程工具包再重新开始阶段流程",
+  "invalidated_by": "state-reset"
+}
