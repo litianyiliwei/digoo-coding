@@ -32,15 +32,15 @@
     {
       "name": "replace-with-real-check-name",
       "kind": "automated",
-      "status": "passed",
-      "command": "replace with the exact command actually executed",
-      "exit_code": 0,
-      "log": "workflow/evidence/logs/replace-with-real-command.log"
+      "status": "not-run",
+      "command": "",
+      "exit_code": null,
+      "log": ""
     }
   ],
   "approval": {
-    "required": false,
-    "status": "not-required",
+    "required": true,
+    "status": "pending",
     "approver": "",
     "approved_at": ""
   }

@@ -38,7 +38,7 @@ Do not overwrite existing files; do not write "not found" as "installed"; explic
 - **Superpowers:** `using-superpowers` (if present) and check the Superpowers skills available to the current Agent; do not automatically install or overwrite tools. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, state it explicitly and perform equivalent steps.
 - **OpenSpec:** If `openspec/` exists, actually run `openspec version`, `openspec list --changes`, `openspec list --specs`; when uninitialized, only report and do not run init without user approval. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
@@ -48,7 +48,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** AGENTS.md (created only when missing, or modified with approval); workflow-state.json; docs/architecture/baseline-status.md (establish domain version registration based on `templates/project-baseline/baseline-status.md`); toolchain check report (docs/project/toolchain-report.md). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
 - **Downstream handoff:** Repository conventions and toolchain report; workflow-state.json. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 ## Stage Boundaries and Review Stop (Mandatory)
 

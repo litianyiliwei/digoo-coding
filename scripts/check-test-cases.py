@@ -92,6 +92,9 @@ for row in rows:
     covered_acs.update(split_ids(row.get('ac_ids')))
 for ac in sorted(acs - covered_acs):
     errors.append(f'AC coverage: {ac} has no test case (add a test row, or a manual row with status n/a + reason)')
+extra_acs = sorted(covered_acs - acs) if acs else []
+if extra_acs:
+    errors.append('AC coverage: test cases reference unknown AC(s): ' + ', '.join(extra_acs))
 
 # Page coverage: every PAGE frozen in 06 figma-audit.md must appear in at
 # least one test case.
@@ -103,6 +106,9 @@ for row in rows:
     covered_pages.update(split_ids(row.get('page_ids')))
 for pid in sorted(pages - covered_pages):
     errors.append(f'UI coverage: {pid} has no test case/page_ids entry')
+extra_pages = sorted(covered_pages - pages) if pages else []
+if extra_pages:
+    errors.append('UI coverage: test cases reference PAGE(s) outside the frozen figma-audit PAGE list: ' + ', '.join(extra_pages))
 
 # Block coverage: every BLOCK in block-inventory.csv must appear in at least one test case.
 BLOCK = base / 'block-inventory.csv'

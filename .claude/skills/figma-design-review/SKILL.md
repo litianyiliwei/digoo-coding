@@ -87,7 +87,7 @@ Do not split subdirectories per page/per state, do not generate scattered token/
 - **Superpowers:** `brainstorming` (if actually available); when unavailable, explain and perform equivalent clarification steps.
 - **OpenSpec:** Run `openspec status --change <id>` and read approved specs; commands must be actually executed and the exit code/result reported.
 - **Figma MCP:** Rely on actually accessible capabilities; you must actually generate/read real Figma files, nodes, components, and variables; before the first call to `get_design_context` you must load the official `figma-design-to-code` Skill and transcode the results into target-framework design code; when unavailable, mark "not executed/blocked" and do not fabricate results. This stage does not use pen.dev.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to disk and the gates pass.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly.
 
 ## Input/Output/Handoff Contract (Mandatory)
 

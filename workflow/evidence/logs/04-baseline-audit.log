@@ -1,6 +1,0 @@
-Command: python scripts/baseline-governance.py audit --require-frozen
-Result:
-BASELINE_FROZEN_AND_VALID
-OVERALL_VERSION=0.2.2
-ACTIVE_CONSTRAINTS=12
-Exit code: 0

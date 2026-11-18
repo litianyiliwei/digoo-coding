@@ -17,14 +17,17 @@ assets=(
   "design/user-stories.md:design/user-stories.md"
   "design/figma-audit.md:design/figma-audit.md"
   "design/figma-code/README.md:design/figma-code/README.md"
+  "design/figma-assets/README.md:design/figma-assets/README.md"
   "design/figma-layout.csv:design/figma-layout.csv"
   "api/openapi.yaml:api/openapi.yaml"
   "design/api-io-mapping.csv:design/api-io-mapping.csv"
   "design/io-catalog.csv:design/io-catalog.csv"
+  "design/interface-catalog.csv:design/interface-catalog.csv"
   "design/test-cases.csv:design/test-cases.csv"
   "traceability.csv:traceability.csv"
   "evidence/code-review.md:design/evidence/code-review.md"
   "design/independent-verification-report.md:design/evidence/independent-verification-report.md"
+  "design/independent-verification.schema.json:design/evidence/independent-verification.schema.json"
   "evidence/acceptance.md:design/evidence/acceptance.md"
 )
 created=0; skipped=0

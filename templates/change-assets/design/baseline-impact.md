@@ -1,7 +1,7 @@
 # Baseline Applicability and Impact Record
 
 - Change ID: `<change-id>`
-- Status: DRAFT / REVIEW / APPROVED / BLOCKED
+- Status: APPROVED
 - Established in stage: 05-feature-requirements
 - Last review stage:
 - Current baseline version:
@@ -67,12 +67,12 @@
 
 ## 8. Conclusion and Gates
 
-- This Change baseline classification: CHANGE_ONLY / BASELINE_CHANGE_REQUIRED / BASELINE_UPDATE_AFTER_ACCEPTANCE / N/A
-- Overall conclusion: COMPATIBLE / BLOCKED_PENDING_BASELINE_CHANGE / APPROVED_BASELINE_AMENDMENT
-- Allowed to enter detailed design: YES / NO
-- Allowed to enter implementation: YES / NO
+- This Change baseline classification: CHANGE_ONLY
+- Overall conclusion: COMPATIBLE
+- Allowed to enter detailed design: YES
+- Allowed to enter implementation: NO
 - Baseline amendments that must be completed first:
-- Approver and evidence:
-- Next review occasion: 13a detailed design / 14 implementation findings / 15 acceptance and archiving
+- Approver and evidence: PENDING (owner and evidence path required before strict approval)
+- Next review occasion: 07 detailed design / 08 implementation findings / 10 acceptance and archiving
 
 > Rule: If a baseline change affects the architecture, data model, public contract, or test gates of the current feature, the baseline must first be approved and updated before detailed design and the implementation plan are frozen. `PENDING` must not be treated as approval.

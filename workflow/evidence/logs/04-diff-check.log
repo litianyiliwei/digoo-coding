@@ -1,2 +1,0 @@
-Command: git diff --check
-Result: Exit code 0. Git emitted line-ending normalization warnings for modified working-tree files (LF will be replaced by CRLF); it reported no whitespace errors.

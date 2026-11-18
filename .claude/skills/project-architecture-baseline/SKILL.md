@@ -43,7 +43,7 @@ Descriptions of the same boundary in diagrams and text are consistent; choices h
 - **Superpowers:** The stage-scoped mode of `brainstorming` is used to compare architecture, platform, and integration boundary alternatives, clarify domain boundaries and consistency trade-offs, and record questions/alternatives/decisions; questions/decisions must cover the four topics "new system/existing system/code location/third-party interfaces"; write conclusions into stage artifacts such as `technology-decisions.md`, not a separate design document. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`. Stage evidence must write `methods` and run `python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence.json>`.
 - **OpenSpec:** Check existing specs, architecture documents, and ADRs; if the CLI is available, execute `openspec list --specs` and `openspec list --changes`, and verify the relationship between the baseline and existing specs. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked".
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
@@ -53,7 +53,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** docs/architecture/system-context.md; domain-boundaries.md; containers-and-deployment.md; data-flows.md; logical-erd.md; technology-decisions.md; api-conventions.md; frontend-conventions.md; test-strategy.md; docs/adr/README.md; baseline-status.md; baseline-manifest.json; constraint-registry.json; docs/project/baseline-audit-report.md. Generate according to templates and write to disk.
 - **Downstream handoff:** Frozen project overall architecture baseline, data flows, logical ERD, common contracts/test strategy, ACTIVE constraint catalog, audit report, and approval records. Explicitly state which files/fields stages 04/05 consume.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 ## Stage-End Audit and Freeze (Mandatory)
 
@@ -68,6 +68,13 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - Evidence converted in stage 03 must include both the Manifest and Constraint Registry outputs; `workflow.py transition` will run the freeze gate again.
 - The audit report must distinguish "baseline main text has been updated", "Change-local records", and "amendments pending approval", and must check whether the OpenSpec main specs are consistent with the project design baseline.
 - After freezing, files must not be modified directly; you must first run `open-amendment`.
+
+## Question Coverage (Mandatory)
+
+- Before review, fill the 03 section of `docs/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
+- `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
+- Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
+- Run `python scripts/check-question-coverage.py --step 03-project-architecture-baseline --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.
 
 ## Stage Boundaries and Review Stop (Mandatory)
 

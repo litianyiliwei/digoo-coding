@@ -95,7 +95,7 @@ lines = [
     "| Group | Stage chain | Description |",
     "|---|---|---|",
     "| Project baseline chain | 00 → 01 → 02 → 03 → 04 | Initialization → requirements business analysis → architecture/baseline freeze → roadmap |",
-    "| Proposal delivery chain | 04 → 05 → 06 → 07 → 08 → 09 → 10 | Proposal requirements → prototype/page inventory → detailed design (incl. interfaces/tests) → implementation → independent verification → acceptance |",
+    "| Proposal delivery chain | 04 → 05 → 06 → 07 → 08 → 09 → 10 | Proposal requirements → Figma design/review → detailed design (incl. interfaces/tests) → implementation → independent verification → acceptance |",
     "",
     "## Overview",
     "",

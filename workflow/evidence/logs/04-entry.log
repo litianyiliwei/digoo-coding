@@ -1,4 +1,0 @@
-Command: python scripts/workflow.py check-entry --step 04-proposal-planning
-Result:
-ENTRY_READY=04-proposal-planning
-Exit code: 0

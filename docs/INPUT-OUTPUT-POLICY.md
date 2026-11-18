@@ -46,6 +46,8 @@ The output is divided into:
 
 The lean/on-demand list for each stage is authoritative in `input_policy.stage_profiles` of `docs/STEP-ARTIFACT-CONTRACTS.json`; `docs/STAGE-IO-OVERVIEW.md` displays it in sync.
 
+The orchestrator entry (`prompts/00-next-step.md`) must consume the generated lean package from `scripts/agent-context.py` and the per-step contract record, not hand-read the full 71 KB contract, 30 KB state file and 20 KB template matrix on every turn. Those full files are audit inputs; their targeted row/section is the default.
+
 ## 5. Output Optimization
 
 The output principle is **reference-style output**: do not copy the full input text; reference baselines, specifications, and upstream artifacts by ID/path/section; each output writes only the decisions, contracts, or evidence newly added in this stage.

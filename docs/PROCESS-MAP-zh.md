@@ -18,6 +18,7 @@
 ## 方法与证据门禁
 
 - 02–10 的阶段 evidence 必须包含 `methods` 块；`python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` 可单独校验，`workflow.py transition` 会自动调用同一逻辑。
+- 02/03/05/07 的阶段 evidence 还必须包含 `question_coverage` 块；`python scripts/check-question-coverage.py --step <step-id> --evidence <evidence.json>` 校验 `docs/QUESTION-COVERAGE-CHECKLIST-zh.md` 中的全部必答条目，`workflow.py request-review` / `transition` 会自动调用。
 - 02/03/04/05/07 的 `brainstorming` 至少记录问题/备选/决策；03/07 至少 4 个问题与 2 个备选。未记录不得推进。
 - 03 必须沟通“新系统 / 基于现有系统二开 / 混合、代码地址、第三方接口”：二开时实际读取代码并写入 `technology-decisions.md` 的“现有系统二开约束”与 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
 - 07 必须沟通“修改现有功能代码 / 新功能开发、代码地址、第三方接口”：修改现有功能时实际读取代码并写入 `design.md` 的 `### 现有代码变更影响`；第三方接口写入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行与 test/fakes 证据。

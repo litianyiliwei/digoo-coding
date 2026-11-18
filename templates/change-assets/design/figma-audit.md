@@ -4,8 +4,6 @@
 - Figma file/page: `<real Figma link>`
 - fileKey: `<fileKey>`
 - File version/snapshot time: `<version number, lastModified, or export version / time>`
-- Design source status: DRAFT
-- UI review status: DRAFT
 - Machine contract: `figma-code/` (one **target-framework-aligned** design code file per PAGE: for the Vue stack, `.vue` + that platform's component library (Web uses Element Plus, mobile uses the uni-app component library); for the React stack, `.tsx`/`.jsx`) and `figma-layout.csv` (a concise geometry/text/font assertion table)
 - Asset directory: `figma-assets/` (image/SVG assets and `README.md` only; **reference screenshots are not stored**)
 

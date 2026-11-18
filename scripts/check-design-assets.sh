@@ -89,7 +89,7 @@ if (( STRICT )); then api_trace_args+=(--strict); fi
 # stage 06 explicitly with --no-ui; in the latter case there is no file to re-check here.
 if [[ -f "$DIR/design/figma-audit.md" ]]; then
   figma_args=(--change "$CHANGE_ID")
-  if (( STRICT )); then figma_args+=(--strict); fi
+  if (( STRICT )); then figma_args+=(--strict --require-framework); fi
   "$PYTHON" "$ROOT/scripts/check-figma-audit.py" "${figma_args[@]}"
 else
   echo "Figma design contract: design/figma-audit.md absent; stage 06 must have declared no UI."

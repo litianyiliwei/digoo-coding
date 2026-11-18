@@ -2,6 +2,7 @@
 """Regression tests for workflow state machine and SHA-256 handoff guards."""
 import importlib.util, json, tempfile, unittest
 from pathlib import Path
+from question_coverage import DEFAULT_POLICY
 
 SCRIPT=Path(__file__).with_name('workflow.py')
 spec=importlib.util.spec_from_file_location('workflow_runtime',SCRIPT)
@@ -141,6 +142,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
                 {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
                 {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
                 'methods':[self._method_entry()],
+                'question_coverage':self._coverage('03-project-architecture-baseline'),
                 'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
                 'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
             ep=self.root/'baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -203,6 +205,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
                 {'path':'docs/architecture/baseline-manifest.json','status':'verified'},
                 {'path':'docs/architecture/constraint-registry.json','status':'verified'}],
                 'methods':[self._method_entry()],
+                'question_coverage':self._coverage('03-project-architecture-baseline'),
                 'checks':[{'name':'baseline-audit','kind':'automated','status':'passed','command':'python3 scripts/baseline-governance.py audit --require-frozen','exit_code':0,'log':'check.log'}],
                 'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-03'}}
             ep=self.root/'unapproved-baseline-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -223,6 +226,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'methods':[self._method_entry()],
+                  'question_coverage':self._coverage('05-feature-requirements'),
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self._write_evidence('handoff-recovery-evidence.json',evidence)
@@ -236,11 +240,30 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'methods':[self._method_entry()],
+                  'question_coverage':self._coverage('05-feature-requirements'),
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self.root/'feature-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'Human approval required'):
             w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
+
+    def test_question_coverage_required_for_stage_05(self):
+        self._write_method_artifact()
+        evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
+                  'outputs':[{'path':'out.md','status':'verified'}],
+                  'methods':[self._method_entry()],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'pending'}}
+        ep=self._write_evidence('no-coverage-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'Question coverage failed'):
+            w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
+
+    def test_check_coverage_subcommand_accepts_valid_coverage(self):
+        evidence={'step_id':'05-feature-requirements','change_id':None,
+                  'question_coverage':self._coverage('05-feature-requirements')}
+        ep=self._write_evidence('coverage-command-evidence.json',evidence)
+        args=type('Args',(),{'step':'05-feature-requirements','evidence':str(ep)})()
+        self.assertEqual(0,w.cmd_check_coverage(args))
 
     def _write_evidence(self, name, payload):
         ep=self.root/name; ep.write_text(json.dumps(payload),encoding='utf-8'); return ep
@@ -358,6 +381,10 @@ class WorkflowRuntimeTests(unittest.TestCase):
         ep=self._write_evidence('waived-output-evidence.json',evidence)
         self.assertEqual(0,self._transition('01-project-bootstrap',ep))
 
+    def _coverage(self, step):
+        items=DEFAULT_POLICY['stages'][step]['required_items']
+        return [{'item_id':item,'status':'n/a','reason':'runtime fixture: not applicable'} for item in items]
+
     def _method_entry(self, **overrides):
         entry={'skill':'brainstorming','mode':'stage-scoped','summary':'test methods',
                'questions':['新系统还是基于现有系统二开？','现有系统代码地址（仓库/分支/commit）？','依赖哪些第三方接口？','平台/跨端方案？'],
@@ -444,6 +471,72 @@ class WorkflowRuntimeTests(unittest.TestCase):
         errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
         self.assertTrue(any('required topic' in e for e in errors),errors)
 
+    def test_conditional_stage_skip_creates_skip_handoff(self):
+        state={'project_name':'test','active_change_id':'sample-change',
+               'completed_steps':['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline','04-proposal-planning','05-feature-requirements'],
+               'current_step':'06-figma-design-review','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'06-figma-design-review','change_id':'sample-change','skip':True,
+                  'reason':'Approved Change has no user-facing UI.',
+                  'checks':[{'name':'no-ui','kind':'automated','status':'passed',
+                             'command':'python scripts/check-figma-audit.py --change sample-change --strict --no-ui --reason "no UI"',
+                             'exit_code':0,'log':'check.log'}]}
+        ep=self._write_evidence('skip-evidence.json',evidence)
+        original=w.run_baseline_gate; w.run_baseline_gate=lambda *a,**k: ''
+        try:
+            args=type('Args',(),{'step':'06-figma-design-review','change_id':'sample-change','evidence':str(ep)})()
+            self.assertEqual(0,w.cmd_skip_stage(args))
+        finally:
+            w.run_baseline_gate=original
+        state=w.load_state()
+        self.assertIn('06-figma-design-review',state['completed_steps'])
+        self.assertIn('06-figma-design-review',state['skipped_steps'])
+        self.assertEqual('07-detailed-design',state['current_step'])
+        manifest=self.root/'workflow/handoffs/sample-change/06-figma-design-review--07-detailed-design.json'
+        ok,errors=w.verify_manifest(manifest)
+        self.assertTrue(ok,errors)
+
+    def test_request_review_excludes_volatile_state_from_targets(self):
+        (self.root/'docs').mkdir(exist_ok=True)
+        (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
+        contract={'steps':[{'step':'01','outputs':['docs/out.md','workflow-state.json']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[
+            {'path':'docs/out.md','status':'created','required':True},
+            {'path':'workflow-state.json','status':'updated'}],
+            'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+            'approval':{'status':'not-required'}}
+        ep=self._write_evidence('review-volatile-evidence.json',evidence)
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready','target':[],'evidence':str(ep)})()
+        self.assertEqual(0,w.cmd_request_review(args))
+        state=w.load_state()
+        targets=[t['path'] for t in state['pending_approvals'][0]['targets']]
+        self.assertEqual(['docs/out.md'],targets)
+        approve_args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,
+                                     'approver':'用户','approved_at':'2026-11-18','evidence':'check.log'})()
+        self.assertEqual(0,w.cmd_approve(approve_args))
+
+    def test_state_file_is_volatile_and_does_not_invalidate_handoff(self):
+        (self.root/'docs').mkdir(exist_ok=True)
+        (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
+        contract={'steps':[{'step':'01','outputs':['docs/out.md','workflow-state.json']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[
+            {'path':'docs/out.md','status':'created','required':True},
+            {'path':'workflow-state.json','status':'updated'}],
+            'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+            'approval':{'status':'not-required'}}
+        ep=self._write_evidence('volatile-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        manifest=self.root/'workflow/handoffs/project/01-project-bootstrap--02-requirements-analysis.json'
+        payload=json.loads(manifest.read_text(encoding='utf-8'))
+        state_artifact=[a for a in payload['artifacts'] if a['path']=='workflow-state.json'][0]
+        self.assertTrue(state_artifact.get('mutable_by_design'))
+        state=w.load_state(); state['pending_approvals']=[{'step_id':'02-requirements-analysis'}]
+        state['last_updated']=w.now(); w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        ok,errors=w.verify_manifest(manifest)
+        self.assertTrue(ok,errors)
+
     def test_stage01_handoff_excludes_state_and_undeclared_outputs(self):
         (self.root/'docs').mkdir(exist_ok=True)
         (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
@@ -519,5 +612,35 @@ class WorkflowRuntimeTests(unittest.TestCase):
         archive=self.root/state['reset_history'][0]['archive']
         self.assertTrue(archive.is_file())
         self.assertTrue(json.loads((handoff_dir/'01--02.json').read_text(encoding='utf-8')).get('invalidated_at'))
+
+    def test_abandon_change_clears_change_steps_and_records_history(self):
+        state={'project_name':'test','active_change_id':'sample-change',
+               'completed_steps':['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline','04-proposal-planning','05-feature-requirements','06-figma-design-review','07-detailed-design'],
+               'current_step':'08-implementation-orchestrator','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        handoff_dir=self.root/'workflow/handoffs/sample-change'; handoff_dir.mkdir(parents=True,exist_ok=True)
+        (handoff_dir/'07-detailed-design--08-implementation-orchestrator.json').write_text(json.dumps({'from_step':'07-detailed-design','to_step':'08-implementation-orchestrator','change_id':'sample-change','approval':{'status':'approved'},'checks':[],'artifacts':[{'path':'out.md','sha256':w.hash_file(self.root/'out.md')}]}),encoding='utf-8')
+        args=type('Args',(),{'change_id':'sample-change','reason':'roadmap changed','note':''})()
+        self.assertEqual(0,w.cmd_abandon_change(args))
+        state=w.load_state()
+        self.assertEqual('',state['active_change_id'])
+        self.assertEqual(['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline','04-proposal-planning'],state['completed_steps'])
+        self.assertEqual('05-feature-requirements',state['current_step'])
+        self.assertEqual('sample-change',state['abandoned_changes'][0]['change_id'])
+        self.assertTrue(json.loads((handoff_dir/'07-detailed-design--08-implementation-orchestrator.json').read_text(encoding='utf-8')).get('invalidated_at'))
+        self.assertTrue((self.root/'workflow/state-events.jsonl').is_file())
+
+    def test_transition_appends_state_event_log(self):
+        (self.root/'docs').mkdir(exist_ok=True)
+        (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
+        contract={'steps':[{'step':'01','outputs':['docs/out.md']}]}
+        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/out.md','status':'created','required':True}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'not-required'}}
+        ep=self._write_evidence('event-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        events=[json.loads(line) for line in (self.root/'workflow/state-events.jsonl').read_text(encoding='utf-8').splitlines()]
+        self.assertEqual('transition',events[-1]['event'])
 
 if __name__=='__main__': unittest.main(verbosity=2)

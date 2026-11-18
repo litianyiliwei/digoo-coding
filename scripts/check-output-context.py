@@ -48,6 +48,9 @@ def main() -> int:
             declared.append(path)
     errors: list[str] = []
     checked: list[str] = []
+    if not declared:
+        print(f"Output context check: stage {args.stage} declares no file outputs; nothing to check")
+        return 0
     for pattern, limits in budgets.items():
         rel = str(pattern).replace("<change-id>", args.change or "")
         rel = norm_path(rel)

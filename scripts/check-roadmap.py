@@ -14,7 +14,7 @@ in_roadmap=False
 for line_no,line in enumerate(text.splitlines(),1):
     s=line.strip()
     if s.startswith('## '):
-        if s == '## 1. 路线图总表':
+        if s in ('## 1. 路线图总表','## 1. Roadmap Overview','## Roadmap Overview','## 1. Roadmap'):
             in_roadmap=True
             continue
         if in_roadmap:

@@ -1,4 +1,0 @@
-Command: python scripts/check-roadmap.py --strict
-Result:
-Roadmap structure check passed: 4 named Change(s).
-Exit code: 0

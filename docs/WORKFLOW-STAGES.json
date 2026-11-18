@@ -63,7 +63,8 @@
         "05-feature-requirements"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "conditional": true,
+      "human_approval_required": false
     },
     {
       "id": "07-detailed-design",

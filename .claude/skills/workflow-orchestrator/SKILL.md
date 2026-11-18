@@ -18,7 +18,7 @@ Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Chang
 5. Advance only one stage; do not execute multiple stages at once, and do not skip approval gates.
 6. Execute according to the next stage's Prompt and Skill. Prompt paths are in `prompts/`, and Skill paths are in `.claude/skills/<skill-id>/SKILL.md`.
 7. Tool calls must be actually executed: OpenSpec CLI uses terminal commands; Superpowers reads/invokes skills according to the current Agent's skill loading mechanism; Figma MCP may use only actually available MCP or provided exports.
-8. After completion, run the stage's check scripts. Advance state through `python3 scripts/workflow.py transition --step <step-id> --evidence <path>` only when artifacts actually exist, quality gates pass, and no approval is needed; direct editing of `completed_steps`/`current_step` is prohibited. Do not fabricate test results.
+8. After completion, run the stage's check scripts, generate evidence, and run `python scripts/workflow.py request-review --step <step-id> --evidence <evidence.json> --summary "<summary>"`. Present the handoff report and end the turn. Only after the user explicitly replies "review passed <step-id>" may you run `workflow.py approve` and then `workflow.py transition`. Direct editing of `completed_steps`/`current_step` is prohibited. Do not fabricate test results.
 9. If the current stage requires customer/product/architecture/design manual approval, record it in `pending_approvals` and wait for explicit user approval before continuing.
 10. Output: current status, check evidence, tools/skills executed, next step, blocking items. If it is only analysis not yet written to files, do not mark it completed.
 
@@ -40,14 +40,14 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** next-stage determination report (displayed in conversation; not required to be written to disk); workflow-state.json (updated by transition only when the real state changes).
 - **Downstream handoff:** all files in the selected stage's Input Contract. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 
 ## P0 Runtime Guard (Mandatory)
 
 - The stage DAG reads `docs/WORKFLOW-STAGES.json`; do not infer/rewrite dependencies yourself.
 - Before execution, run `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`; a non-zero exit code means execution is prohibited.
-- After the stage completes, generate evidence conforming to the `workflow/evidence/<step-id>.json` structure and call `python3 scripts/workflow.py transition --step <step-id> --evidence <path>`. Direct editing of `completed_steps/current_step` is prohibited.
+- After the stage completes, run the stage checks, generate evidence conforming to `workflow/evidence/<step-id>.json`, run `python scripts/workflow.py request-review --step <step-id> --evidence <path>`, present the handoff report, and end the turn. Only after the user replies "review passed <step-id>" run `approve` and then `transition`. Direct editing of `completed_steps/current_step` is prohibited.
 - transition generates a SHA-256 handoff; the next stage must verify all upstream manifests. When file hashes change, return to the upstream for re-review and do not silently refresh.
 - After stage 08, the independent `independent-verifier` must be run, and only PASS may enter stage 10. For details, see `docs/P0-RUNTIME-GOVERNANCE.md`.
 

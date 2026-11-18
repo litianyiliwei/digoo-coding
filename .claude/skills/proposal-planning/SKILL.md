@@ -35,7 +35,7 @@ Each Change has independent acceptance conditions; no cyclic dependencies; do no
 - Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
 ## Recommended Checks
-`scripts/check-roadmap.py`
+`scripts/check-roadmap.py --strict`
 
 
 ## Actual Tool Invocation Requirements
@@ -43,7 +43,7 @@ Each Change has independent acceptance conditions; no cyclic dependencies; do no
 - **Superpowers:** The stage-scoped mode of `brainstorming`, first compare decomposition options, platform/native dependencies, and risks, write conclusions into `proposal-roadmap.md`, and create Changes only after approval. Stage evidence must write `methods` (at least 2 questions, 2 alternatives, 1 decision) and run `python scripts/check-method-evidence.py --step 04-proposal-planning --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
 - **OpenSpec:** First run `openspec list --specs` and `openspec list --changes`; only after the proposal is approved may you run `openspec new change <id>`. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Interaction Between Project Baselines and Feature Decomposition (Mandatory)
 
@@ -61,7 +61,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** docs/product/proposal-roadmap.md; scope/dependency/value description for each candidate Change. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
 - **Downstream handoff:** Approved Change list, priorities, dependency order. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 
 ## Machine Baseline Constraints (Mandatory)

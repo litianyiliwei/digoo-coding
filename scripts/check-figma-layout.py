@@ -151,6 +151,9 @@ def main():
             browser = pw.chromium.launch()
             for pid in page_ids:
                 rows = layout_by_page[pid]
+                routes = {str(row.get("route", "")).strip() for row in rows if str(row.get("route", "")).strip()}
+                if len(routes) != 1:
+                    fail(f"FAIL: {pid} rows use inconsistent routes: {sorted(routes)}", 1)
                 route = rows[0]["route"]
                 url = args.base_url.rstrip("/") + (route if route.startswith("/") else "/" + route)
                 context_args = {"viewport": {"width": width, "height": height}}

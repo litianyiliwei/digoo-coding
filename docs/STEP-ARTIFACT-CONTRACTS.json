@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "2.1",
   "handoff_policy": {
     "hash_undeclared_outputs": false,
     "require_evidence_for_review": true,
@@ -11,7 +11,10 @@
       "docs/architecture/baseline-manifest.json",
       "docs/architecture/constraint-registry.json",
       "docs/product/BASELINE-INDEX.md",
-      "docs/project/toolchain-report.md"
+      "docs/project/toolchain-report.md",
+      "docs/product/lessons.md",
+      "docs/product/decisions.md",
+      "docs/product/assumptions.md"
     ],
     "notes": "Volatile artifacts are machine-managed or generated; handoffs record their existence, not their hash. Extra evidence outputs not declared in this contract are audit-only and must not invalidate a reviewed handoff."
   },
@@ -83,6 +86,88 @@
       "required": [
         {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
       ]
+    }
+  },
+  "question_coverage_policy": {
+    "checklist": "docs/QUESTION-COVERAGE-CHECKLIST.md",
+    "checklist_zh": "docs/QUESTION-COVERAGE-CHECKLIST-zh.md",
+    "stages": {
+      "02-requirements-analysis": {
+        "required_items": [
+          "02-T01-01",
+          "02-T02-01",
+          "02-T03-01",
+          "02-T04-01",
+          "02-T04-02",
+          "02-T05-01",
+          "02-T06-01",
+          "02-T07-01",
+          "02-T07-02",
+          "02-T08-01",
+          "02-T09-01",
+          "02-T10-01",
+          "02-T11-01",
+          "02-T13-01",
+          "02-T14-01",
+          "02-T15-01"
+        ]
+      },
+      "03-project-architecture-baseline": {
+        "required_items": [
+          "03-T01-01",
+          "03-T02-01",
+          "03-T02-02",
+          "03-T03-01",
+          "03-T04-01",
+          "03-T05-01",
+          "03-T06-01",
+          "03-T07-01",
+          "03-T07-02",
+          "03-T08-01",
+          "03-T09-01",
+          "03-T10-01",
+          "03-T11-01",
+          "03-T12-01",
+          "03-T13-01",
+          "03-T14-01"
+        ]
+      },
+      "05-feature-requirements": {
+        "required_items": [
+          "05-T01-01",
+          "05-T03-01",
+          "05-T04-01",
+          "05-T05-01",
+          "05-T06-01",
+          "05-T07-01",
+          "05-T08-01",
+          "05-T09-01",
+          "05-T10-01",
+          "05-T11-01",
+          "05-T14-01",
+          "05-T15-01",
+          "05-T13-01"
+        ]
+      },
+      "07-detailed-design": {
+        "required_items": [
+          "07-T01-01",
+          "07-T04-01",
+          "07-T05-01",
+          "07-T06-01",
+          "07-T07-01",
+          "07-T08-01",
+          "07-T09-01",
+          "07-T10-01",
+          "07-T11-01",
+          "07-T12-01",
+          "07-T12-02",
+          "07-T15-01",
+          "07-T15-02",
+          "07-T13-01",
+          "07-T03-01"
+        ]
+      }
     }
   },
   "input_policy": {
@@ -253,7 +338,7 @@
       "docs/product/requirements-analysis.md": {"max_lines": 150},
       "docs/product/reference-research.md": {"max_lines": 120},
       "docs/project/baseline-audit-report.md": {"max_lines": 150},
-      "openspec/changes/<change-id>/design.md": {"max_lines": 400, "stage_max_lines": {"05": 80}},
+      "openspec/changes/<change-id>/design.md": {"max_lines": 400},
       "openspec/changes/<change-id>/design/evidence/code-review.md": {"max_lines": 150},
       "openspec/changes/<change-id>/design/evidence/independent-verification-report.md": {"max_lines": 150},
       "openspec/changes/<change-id>/design/evidence/acceptance.md": {"max_lines": 120}
@@ -261,7 +346,7 @@
     "stage_focus": {
       "02": "requirements-analysis contains only goals/roles/process conclusions and deviations; details go in workflows/data-objects/rd-matrix/business-rules.",
       "03": "Each architecture file covers its own domain; technology-decisions contains only decisions/interviews; do not copy the complete product baseline.",
-      "05": "design.md contains only proposal-level initial decisions (≤1 page); interface/frontend/backend/test details are deferred to 07.",
+      "05": "proposal.md contains proposal-level initial design decisions (≤1 page); do not create design.md; interface/frontend/backend/test details are deferred to 07.",
       "07": "design.md references figma-audit/interface-catalog/test-cases/traceability; do not copy the full Figma spec or the entire baseline.",
       "10": "acceptance.md references the independent-verification report/JSON and test-cases; contains only sign-off conclusions and deviations."
     }
@@ -306,8 +391,8 @@
       "outputs": [
         "AGENTS.md (created only if missing, or modified with approval)",
         "workflow-state.json",
-        "docs/architecture/baseline-status.md (based on templates/project-baseline/baseline-status.md)",
-        "docs/project/toolchain-report.md (based on templates/project-baseline/toolchain-report.md)"
+        "docs/architecture/baseline-status.md (based on the project baseline-status template)",
+        "docs/project/toolchain-report.md (based on the toolchain-report template)"
       ],
       "next_inputs": [
         "repository conventions and toolchain report",
@@ -386,7 +471,6 @@
         "docs/architecture/frontend-conventions.md",
         "docs/architecture/test-strategy.md",
         "docs/adr/README.md",
-        "docs/architecture/baseline-status.md (domain versions/freeze status after this stage's end audit)",
         "docs/architecture/baseline-manifest.json (machine-authoritative versions/freeze status/domain file SHA-256)",
         "docs/architecture/constraint-registry.json (stable constraint IDs and approval status)",
         "docs/project/baseline-audit-report.md (end-of-stage audit report)"
@@ -453,10 +537,9 @@
       "outputs": [
         "openspec/changes/<change-id>/proposal.md",
         "openspec/changes/<change-id>/specs/<capability>/spec.md (when applicable)",
-        "openspec/changes/<change-id>/tasks.md (initial tasks)",
-        "openspec/changes/<change-id>/design.md (initial design decisions; ≤1 page; interface/frontend/backend/test details deferred to 07)",
+        "openspec/changes/<change-id>/tasks.md (initial tasks; 08 updates checkboxes)",
         "openspec/changes/<change-id>/design/user-stories.md (user stories and AC; AC is the sole anchor for testing and verification)",
-        "openspec/changes/<change-id>/design/baseline-impact.md (based on templates/change-assets/design/baseline-impact.md; 07 updates the design review conclusions)",
+        "openspec/changes/<change-id>/design/baseline-impact.md (based on the baseline-impact template; 07 updates the design review conclusions)",
         "openspec/changes/<change-id>/design/baseline-binding.json (generated automatically from the current frozen baseline, binding each ACTIVE Constraint ID; 07 writes design evidence)"
       ],
       "next_inputs": [
@@ -484,7 +567,7 @@
       "title": "Figma design and review (Figma-only)",
       "scope": "single feature Change",
       "inputs": [
-        "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design.md, design/user-stories.md (approved proposal-level requirements and AC)",
+        "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design/user-stories.md (approved proposal-level requirements and AC; initial design decisions are in proposal.md)",
         "docs/product/workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, role-permission-matrix.csv, id-conventions.md (business processes/data objects/RD matrix/role permissions/ID conventions); docs/architecture/frontend-conventions.md (UI/frontend conventions, section 9 is the visual authority); docs/architecture/technology-decisions.md (overall technology selection, determines the target frontend framework/component library)",
         "docs/product/open-questions.md (read-only; do not decide unilaterally during generation)",
         "docs/product/reference-research.md (reference product and internet research conclusions; used for page and state reference)",
@@ -504,7 +587,12 @@
         "PAGE IDs and the page set are frozen in 06; 07 initializes PAGE→AC in traceability.csv; 08–10 are read-only and do not add or rename PAGEs",
         "Visual conventions come from section 9 of docs/architecture/frontend-conventions.md and the actual token values in figma-audit.md; the Figma review file and figma-code/ are the final reference for visuals/components/variables; do not maintain design-tokens.json or scattered token/contract JSON; screenshots are not gate evidence"
       ],
-      "approval": "the user (design owner) completes UI review on the real Figma review file and marks it APPROVED, and the Figma MCP audit passes",
+      "approval": "UI Changes: the user (design owner) completes UI review on the real Figma review file and marks it APPROVED, and the Figma MCP audit passes. No-UI Changes may skip the stage with a machine-verified no-UI check.",
+      "conditional": {
+        "skip_when": "no_ui",
+        "skip_command": "workflow.py skip-stage --step 06-figma-design-review --evidence workflow/evidence/06-figma-design-review-skip.json",
+        "required_check": "check-figma-audit.py --change <change-id> --strict --no-ui --reason \"<reason>\" (exit 0 and log present)"
+      },
       "gate": "scripts/check-figma-audit.py --change <change-id> --strict --require-framework (target framework/transcoding + actual token values + per-PAGE specs + per-PAGE code in figma-code/ + geometry/text/selector completeness of the figma-layout.csv assertion table + state decisions + UI review APPROVED); workflow.py automatically rechecks baseline-binding.json (requirement phase)"
     },
     {
@@ -514,7 +602,7 @@
       "title": "Detailed design, interface and test design",
       "scope": "single feature Change",
       "inputs": [
-        "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design.md, design/user-stories.md (proposal requirements, AC, and initial design decisions)",
+        "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design/user-stories.md (proposal requirements, AC, and initial design decisions recorded in proposal.md; 07 is the single writer of design.md)",
         "openspec/changes/<change-id>/tasks.md (task scope)",
         "existing functionality code location and accessibility (if modifying existing functionality code; including repository/path/branch/commit)",
         "third-party interface list and sandbox/contract/test-double requirements from the 03 baseline",
@@ -579,6 +667,7 @@
         "openspec/changes/<change-id>/design/evidence/code-review.md (when UI is involved, includes a ## UI fidelity per-PAGE numeric table: Figma node/asserted element count/max deviation/layout evidence/deviations/conclusion/approver; numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation and approval)",
         "openspec/changes/<change-id>/design/evidence/figma-layout-check.json (per-element expected/actual/delta evidence from scripts/check-figma-layout.py)",
         "openspec/changes/<change-id>/tasks.md (checkbox status updated by implementation; MUTABLE by 08)",
+        "openspec/changes/<change-id>/design/evidence/implementation-diff.json (commit/diff SHA-256 and changed paths at the verified revision)",
         "implementation/verification evidence",
         "conditionally applicable: baseline change request/ADR draft (when conflicts are found; do not update the frozen baseline without approval)"
       ],
@@ -617,6 +706,7 @@
         "openspec/changes/<change-id>/design/baseline-binding.json (approved constraint bindings)",
         "docs/architecture/baseline-status.md (current version)",
         "openspec/changes/<change-id>/design/evidence/figma-layout-check.json (measured in 08; 09 must independently rerun check-figma-layout.py)",
+        "openspec/changes/<change-id>/design/evidence/implementation-diff.json (commit/diff SHA-256 and changed paths at the verified revision)",
         "docs/adr/README.md and docs/adr/* (read approved architecture decisions on demand)"
       ],
       "outputs": [
@@ -645,6 +735,7 @@
         "openspec/changes/<change-id>/specs/<capability>/spec.md, design/user-stories.md, traceability.csv (approved AC/specs/traceability)",
         "openspec/changes/<change-id>/design.md (design basis)",
         "openspec/changes/<change-id>/design/evidence/code-review.md",
+        "openspec/changes/<change-id>/design/evidence/implementation-diff.json (verified revision fingerprint)",
         "openspec/changes/<change-id>/design/figma-audit.md (when UI is involved, verify the target framework/transcoding notes, actual token values/PAGE specs/state consistency with the Figma review file), design/figma-code/ (target-framework design code transcoded in 06 according to the overall technology selection), design/figma-layout.csv (assertion mapping), and design/evidence/figma-layout-check.json (must PASS)",
         "openspec/changes/<change-id>/design/test-cases.csv (acceptance test coverage evidence)",
         "openspec/changes/<change-id>/design/interface-catalog.csv (cross-boundary interface acceptance evidence)",
@@ -660,9 +751,7 @@
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/evidence/acceptance.md (when UI is involved, includes ## UI acceptance per-PAGE sign-off: Figma node/running system entry/deviation approval/acceptance method (machine evidence/side-by-side check)/reviewer)",
-        "docs/product/lessons.md (append reusable lessons from this change; N/A + reason if none)",
-        "docs/product/decisions.md (status updates affected by acceptance results)",
-        "docs/product/assumptions.md (status updates affected by acceptance results)",
+        "shared mutable write-back: lessons/decisions/assumptions registries (owned by Stage 02; Stage 10 appends/updates them without re-declaring them as outputs)",
         "acceptance report and approval records",
         "OpenSpec archive results and updated main specs (only after approval)"
       ],
@@ -1050,20 +1139,6 @@
     },
     {
       "step": "03",
-      "artifact": "docs/architecture/baseline-status.md",
-      "consumed_by": [
-        "04",
-        "05",
-        "06",
-        "07",
-        "08",
-        "09",
-        "10"
-      ],
-      "evidence_only": false
-    },
-    {
-      "step": "03",
       "artifact": "docs/architecture/baseline-manifest.json",
       "consumed_by": [
         "04",
@@ -1125,18 +1200,6 @@
         "07",
         "08",
         "09"
-      ],
-      "evidence_only": false
-    },
-    {
-      "step": "05",
-      "artifact": "openspec/changes/<change-id>/design.md",
-      "consumed_by": [
-        "06",
-        "07",
-        "08",
-        "09",
-        "10"
       ],
       "evidence_only": false
     },
@@ -1296,30 +1359,6 @@
       "evidence_only": true
     },
     {
-      "step": "10",
-      "artifact": "docs/product/lessons.md",
-      "consumed_by": [
-        "FUTURE"
-      ],
-      "evidence_only": false
-    },
-    {
-      "step": "10",
-      "artifact": "docs/product/decisions.md",
-      "consumed_by": [
-        "FUTURE"
-      ],
-      "evidence_only": false
-    },
-    {
-      "step": "10",
-      "artifact": "docs/product/assumptions.md",
-      "consumed_by": [
-        "FUTURE"
-      ],
-      "evidence_only": false
-    },
-    {
       "step": "07",
       "artifact": "openspec/changes/<change-id>/design/test-cases.csv",
       "consumed_by": [
@@ -1362,6 +1401,15 @@
       "artifact": "openspec/changes/<change-id>/tasks.md",
       "consumed_by": [
         "09"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "08",
+      "artifact": "openspec/changes/<change-id>/design/evidence/implementation-diff.json",
+      "consumed_by": [
+        "09",
+        "10"
       ],
       "evidence_only": false
     },

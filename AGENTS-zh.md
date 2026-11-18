@@ -2,7 +2,7 @@
 
 > 语言：简体中文 ｜ [English](AGENTS.md)
 
-> 状态：APPROVED（2026-10-30 由 project-bootstrap 阶段创建，2026-10-30 经用户确认；2026-11-13 按用户要求转为英文主文档，中文译本为 `AGENTS-zh.md`；仓库尚无源代码，技术栈相关约定为 PENDING，待架构阶段补充）
+> 状态：APPROVED（2026-10-30 由 project-bootstrap 阶段创建，2026-10-30 经用户确认；2026-11-13 按用户要求转为英文主文档，中文译本为 `AGENTS-zh.md`；2026-11-18 流程已重置为阶段 01，旧项目数据已移出工作区；工具包自身为 Python 3.11 + Markdown/JSON/CSV，项目专属架构约定将在阶段 03 重新建立）
 > 下游消费：所有阶段的 Agent（Claude/OpenCode 等）；需求发现（阶段 02）起必须遵守本文件的流程入口与模板政策。
 
 ## 项目目标
@@ -21,12 +21,14 @@
 - **开始任何阶段前** 必须运行 `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；退出码非 0 时立即停止并报告阻断原因，不得绕过。
 - **每个阶段结束流程（顺序不可变）：**
   1. 生成 `workflow/evidence/<step-id>.json` 并运行该阶段全部检查脚本；
-  2. 运行 `python3 scripts/workflow.py request-review --step <step-id> --summary "<送审摘要>"`，把流程冻结为“待评审”（`current_step` 不前进）；
+  2. 运行 `python3 scripts/workflow.py request-review --step <step-id> --evidence workflow/evidence/<step-id>.json --summary "<送审摘要>"`，生成固定产物哈希的评审包，并把流程冻结为“待评审”（`current_step` 不前进）；
   3. 按 `templates/workflow/step-handoff-report.md` 展示交接报告（产物路径、摘要、检查结果/退出码、待确认项、下一阶段输入）后**立即结束回合**，不得继续。
 - **只有用户明确回复“评审通过 <step-id>”后**，才可运行 `python3 scripts/workflow.py approve --step <step-id> --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再运行 `transition`。不得自行填写 approver/approved_at，不得把“产物完成”“检查通过”或 Agent 自己的判断当作批准。
 - **08（实现）与 09（独立验证）同样必须等待用户评审**；09 由独立 Verifier 在独立上下文完成，Builder 不得在同一会话代跑验证并自动进入 10。
-- `pending_approvals` 非空时不得推进任何阶段；`workflow-state.json` 只能由 `check-entry`/`request-review`/`approve`/`transition` 等命令管理，禁止直接编辑。
-- Claude Code 下由 `.claude/settings.json` 的 PreToolUse hook 拒绝写入当前阶段之后的阶段产物（共享产物除外）以及直接编辑 `workflow-state.json`；待评审期间同样拒绝。被拒绝时必须停止并说明，不得绕过（更换写入路径、禁用 hook 或改用其他工具规避均属违规）。
+- **06 为条件阶段**：无 UI 的 Change 必须先运行 `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<理由>"`，再运行 `workflow.py skip-stage --step 06-figma-design-review --evidence workflow/evidence/06-figma-design-review-skip.json`；有 UI 的 Change 必须完成完整 Figma 评审，且 evidence 要设置 `approval.required=true`。
+- `pending_approvals` 非空时不得推进任何阶段；`workflow-state.json` 只能由 `workflow.py` 命令（`request-review`/`approve`/`transition`/`reopen`/`reset-state`/`migrate-state`）写入，`check-entry` 为只读命令；禁止直接编辑状态文件。
+- Claude Code 下由 `.claude/settings.json` 的 PreToolUse hook 拒绝写入当前阶段之后的阶段产物、已完成阶段中非 volatile 的产物、待评审期间当前阶段的声明产物，以及直接编辑 `workflow-state.json`。被拒绝时必须停止并说明，不得绕过（更换写入路径、禁用 hook 或改用其他工具规避均属违规）。Bash 驱动的写入不在该 hook 拦截范围内，属于已记录的信任边界。
+- 交接只对已批准的决策/验收产物做哈希。机器管理或生成的文件（`workflow-state.json`、`AGENTS.md`、baseline status/manifest/registry、`BASELINE-INDEX.md`、`toolchain-report.md`）为 volatile：handoff 只验证存在，不校验哈希。契约未声明的额外 evidence 输出仅用于审计，不得使已评审交接失效。
 
 ## 模板与产物规则
 

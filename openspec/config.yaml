@@ -5,7 +5,7 @@ context: |
   Requirements must distinguish confirmed facts, assumptions, and open decisions; do not invent business rules or tool-read results.
   Stable project-level decisions live in docs/ and docs/adr/; feature-level behavior changes are recorded as OpenSpec Changes.
   Specs describe externally observable behavior and must not include class names, framework choices, or step-by-step implementation plans.
-  Detailed frontend/backend design may be kept as auxiliary files in each Change directory and referenced from design.md.
+  Detailed frontend/backend/test design lives in the five sections of design.md; any additional Change-local artifact is referenced from design.md rather than maintained as a second design source.
 rules:
   proposal:
     - First read openspec/config.yaml, relevant specs, and existing Changes; reuse existing capability paths.

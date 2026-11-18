@@ -51,6 +51,17 @@ try:
     for ac in d["acceptance_checks"]:
         if not ac.get("id") or ac.get("result") != "PASS" or not ac.get("evidence"):
             errors.append(f"AC not independently passed: {ac.get('id', '<missing>')}")
+    change = d["change_id"]
+    stories = root / "openspec" / "changes" / str(change) / "design" / "user-stories.md"
+    if stories.is_file():
+        expected_acs = set(re.findall(r"AC-\d{3}", stories.read_text(encoding="utf-8")))
+        reported_acs = {str(ac.get("id", "")).strip() for ac in d["acceptance_checks"]}
+        missing_acs = sorted(expected_acs - reported_acs)
+        extra_acs = sorted(reported_acs - expected_acs)
+        if missing_acs:
+            errors.append("independent acceptance_checks missing AC(s): " + ", ".join(missing_acs))
+        if extra_acs:
+            errors.append("independent acceptance_checks reference unknown AC(s): " + ", ".join(extra_acs))
     if not d["test_runs"]:
         errors.append("test_runs is empty")
     for t in d["test_runs"]:
@@ -83,7 +94,6 @@ try:
             errors.append(f"Markdown report missing section: {zh} / {en}")
 
     # UI-bearing Changes require per-PAGE independent runtime geometry evidence.
-    change = d["change_id"]
     base = root / "openspec" / "changes" / str(change) / "design"
     audit = base / "figma-audit.md"
     ui_change = False
@@ -150,8 +160,13 @@ try:
         for pid in expected_pages:
             if pid not in covered:
                 errors.append(f"UI check missing PAGE: {pid}")
+        extra_pages = sorted(covered - set(expected_pages)) if expected_pages else []
+        if extra_pages:
+            errors.append("layout_checks reference PAGE(s) outside the frozen figma-audit PAGE list: " + ", ".join(extra_pages))
         if not any("check-figma-layout.py" in str(t.get("command", "")) for t in d["test_runs"]):
             errors.append("UI Change requires an independent check-figma-layout.py test run")
+        if not any("check-design-tokens.py" in str(t.get("command", "")) for t in d["test_runs"]):
+            errors.append("UI Change requires an independent check-design-tokens.py test run")
 
     if errors:
         print("INDEPENDENT_VERIFICATION_FAILED")

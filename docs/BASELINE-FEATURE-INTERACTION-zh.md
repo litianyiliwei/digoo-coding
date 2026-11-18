@@ -122,7 +122,7 @@ AI 不应无差别把所有文档全文塞入上下文；必须先读取基线�
 - 在途 Change 的 rebase 结论；
 - 结论：`COMPATIBLE`、`BLOCKED_PENDING_BASELINE_CHANGE` 或 `APPROVED_BASELINE_AMENDMENT`。
 
-这个文件从阶段 03 开始建立，在 06–07 设计时复核，在阶段 08 实现时仅追加发现，不擅自修改基线，在阶段 10 验收时完成回写核验。
+这个文件在阶段 05 建立，在 06–07 设计时复核，在阶段 08 实现时仅追加发现，不擅自修改基线，在阶段 10 验收时完成回写核验。
 
 ## 8. 角色和审批责任
 
@@ -187,13 +187,14 @@ python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 
 | 阶段 | 机器检查 | 目的 |
 |---|---|---|
-| 08 基线冻结 | `audit --require-frozen` | 校验 Manifest、约束目录、哈希与审批 |
+| 03 架构基线 | `audit --require-frozen` | 冻结后校验 Manifest、约束目录、哈希与审批 |
 | 04 提案规划 | `audit --require-frozen` | 确保项目基线仍有效 |
-| 10 需求细化 | `check-change --phase requirement` | 约束覆盖完整、适用性已判定、基线绑定已审批 |
-| 11–12 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
-| 09 转出及 10–13 | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
-| 14 / 15 | `check-change --phase implementation` | 适用约束有实现验证证据 |
-| 15 | `check-change --phase acceptance` | 所有约束完成最终验证 |
+| 05 提案需求 | `check-change --phase requirement` | 约束覆盖完整、适用性已判定、基线绑定已审批 |
+| 06 Figma 设计 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
+| 07 详细设计 | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
+| 08 实现 | `check-change --phase implementation` | 适用约束有实现验证证据 |
+| 09 独立验证 | `check-change --phase implementation` | 独立证据仍覆盖已批准实现约束 |
+| 10 验收 | `check-change --phase acceptance` | 所有约束完成最终验证 |
 
 ### 9.4 基线演进和在途 Change rebase
 

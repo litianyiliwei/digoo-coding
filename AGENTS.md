@@ -2,7 +2,7 @@
 
 > Language: English | [简体中文](AGENTS-zh.md)
 
-> Status: APPROVED (created 2026-10-30 by the project-bootstrap stage and confirmed by the user on 2026-10-30; converted to English as the main document on 2026-11-13 by user request, with the Chinese translation at `AGENTS-zh.md`; the repository has no source code yet, so technology-stack-related conventions are PENDING and will be supplemented in the architecture stage)
+> Status: APPROVED (created 2026-10-30 by the project-bootstrap stage and confirmed by the user on 2026-10-30; converted to English as the main document on 2026-11-13 by user request, with the Chinese translation at `AGENTS-zh.md`; the workflow was reset to Stage 01 on 2026-11-18 and previous project data was moved out of the workspace; the toolkit itself is Python 3.11 + Markdown/JSON/CSV, and project-specific architecture conventions will be re-established in Stage 03)
 > Downstream consumers: Agents in all stages (Claude/OpenCode, etc.); from requirements discovery (Stage 02) onward, they must follow this document's process entry and template policy.
 
 ## Project Goal
@@ -21,12 +21,14 @@ Project. The current repository only contains the AI R&D process toolkit (Skills
 - **Before starting any stage**, you must run `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`; if the exit code is non-zero, stop immediately and report the blocking reason; do not bypass it.
 - **The end-of-stage procedure for every stage (the order is immutable):**
   1. Generate `workflow/evidence/<step-id>.json` and run all check scripts for that stage;
-  2. Run `python3 scripts/workflow.py request-review --step <step-id> --summary "<review submission summary>"`, freezing the process as "pending review" (`current_step` does not advance);
+  2. Run `python3 scripts/workflow.py request-review --step <step-id> --evidence workflow/evidence/<step-id>.json --summary "<review submission summary>"`, which writes a review packet pinning the artifact hashes and freezes the process as "pending review" (`current_step` does not advance);
   3. After presenting the handoff report in accordance with `templates/workflow/step-handoff-report.md` (artifact paths, summary, check results/exit codes, items to confirm, next-stage inputs), **end the turn immediately** and do not continue.
 - **Only after the user explicitly replies "review passed <step-id>"** may you run `python3 scripts/workflow.py approve --step <step-id> --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval record>` and then run `transition`. Do not fill in approver/approved_at yourself, and do not treat "artifact complete", "checks passed", or the Agent's own judgment as approval.
 - **08 (implementation) and 09 (independent verification) must likewise wait for user review**; 09 is completed by an independent Verifier in an independent context, and the Builder must not run the verification in the same session and automatically enter 10.
-- When `pending_approvals` is non-empty, no stage may advance; `workflow-state.json` may only be managed by commands such as `check-entry`/`request-review`/`approve`/`transition`, and direct editing is forbidden.
-- Under Claude Code, the PreToolUse hook in `.claude/settings.json` rejects writes to stage artifacts later than the current stage (except shared artifacts) as well as direct edits to `workflow-state.json`; the same rejection applies while pending review. When rejected, you must stop and explain; bypassing is forbidden (changing the write path, disabling the hook, or using other tools to evade are all violations).
+- **06 is conditional**: a no-UI Change must first run `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<reason>"` and then `workflow.py skip-stage --step 06-figma-design-review --evidence workflow/evidence/06-figma-design-review-skip.json`; a UI Change must complete the full Figma review and its evidence must set `approval.required=true`.
+- When `pending_approvals` is non-empty, no stage may advance; `workflow-state.json` may only be written by `workflow.py` commands (`request-review`/`approve`/`transition`/`reopen`/`reset-state`/`migrate-state`); `check-entry` is read-only and direct editing is forbidden.
+- Under Claude Code, the PreToolUse hook in `.claude/settings.json` rejects writes to stage artifacts later than the current stage, to already-approved stage artifacts that are not volatile, to the current stage's declared artifacts while review is pending, and to `workflow-state.json` directly. When rejected, you must stop and explain; bypassing is forbidden (changing the write path, disabling the hook, or using other tools to evade are all violations). Bash-driven writes are not intercepted by this hook and remain a documented trust limitation.
+- Handoffs hash approved decision/acceptance artifacts only. Machine-managed or generated files (`workflow-state.json`, `AGENTS.md`, baseline status/manifest/registry, `BASELINE-INDEX.md`, `toolchain-report.md`) are volatile: handoffs record their existence, not their hash. Evidence outputs not declared in the stage contract are audit-only and must not invalidate a reviewed handoff.
 
 ## Template and Artifact Rules
 

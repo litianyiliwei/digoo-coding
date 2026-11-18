@@ -6,14 +6,15 @@
 
 ## 当前仓库状态
 
-| 项 | 值 |
-|---|---|
-| 工作流状态 | 阶段 `01-project-bootstrap` 未完成，当前阶段为 `01-project-bootstrap`（项目初始化与工具链检查） |
-| 活动 Change | 无 |
-| 待审批 / 阻断项 | 无 |
-| 项目基线 | `v0.1.0` DRAFT，六个基线域均未冻结 |
-| OpenSpec | 无活动 Change、无主规格（`openspec/changes/`、`openspec/specs/` 为空骨架） |
-| 业务源代码 | 无 |
+不要依赖静态快照；工作流状态由 `scripts/workflow.py` 命令管理：
+
+```bash
+python scripts/workflow.py status        # 当前阶段、审批、reset/reopen 历史
+python scripts/next-step.py              # 只读的下一阶段建议
+openspec list --changes                  # 活动 OpenSpec Change
+```
+
+基线权威为 `docs/architecture/baseline-manifest.json`（可读镜像：`docs/architecture/baseline-status.md`）。当前仓库包含 AI 研发流程工具包，尚无业务源代码。
 
 继续研发时，对 Agent 说“下一步 / 继续 / 接着做”，它会先加载 `workflow-orchestrator` Skill，依据 `workflow-state.json` 与真实产物判定唯一安全的下一阶段。
 
@@ -45,7 +46,7 @@
 | `docs/` | 流程规范的中文译本（`PROCESS-MAP-zh.md`、`TEMPLATE-POLICY-zh.md`、`BASELINE-FEATURE-INTERACTION-zh.md` 等）与项目级基线骨架 |
 | `openspec/` | OpenSpec 配置与 Change/规格目录（当前为空骨架） |
 | `workflow/` | 阶段证据 `evidence/` 与 SHA-256 交接包 `handoffs/` |
-| `workflow-state.json` | 跨阶段状态索引；只通过 `scripts/workflow.py transition` 推进，禁止手改 |
+| `workflow-state.json` | 跨阶段状态索引；只由 `scripts/workflow.py` 命令（`request-review`/`approve`/`transition`/`reopen`/`reset-state`）写入，禁止手改 |
 | `AGENTS-zh.md` | 仓库级 Agent 约定的简体中文译本；英文主文件为 `AGENTS.md` |
 
 ## 快速开始
@@ -57,10 +58,11 @@ python scripts/next-step.py            # 只读：打印下一阶段
 python scripts/workflow.py status      # 工作流状态摘要
 python scripts/workflow.py check-entry --step 01-project-bootstrap
 python scripts/check-package.py        # 工具包自检
+bash scripts/ci-check.sh               # 仓库全量 CI 检查
 bash scripts/check-required-files.sh   # 基线文件存在性（非 strict）
 ```
 
-进入某阶段前先运行 `check-entry --step <id>`（非 0 退出码表示禁止执行）；完成后按脚本提示生成证据并执行 `workflow.py transition`。
+进入某阶段前先运行 `check-entry --step <id>`（非 0 退出码表示禁止执行）；完成后运行检查、生成证据并执行 `workflow.py request-review`，结束回合等待用户明确回复“评审通过 <step-id>”，再运行 `approve` 与 `transition`。
 
 ## 核心规则
 
@@ -83,6 +85,11 @@ bash scripts/check-required-files.sh   # 基线文件存在性（非 strict）
 - [docs/BASELINE-FEATURE-INTERACTION-zh.md](docs/BASELINE-FEATURE-INTERACTION-zh.md) — 项目基线与功能 Change 的双向治理
 - [docs/TEMPLATE-POLICY-zh.md](docs/TEMPLATE-POLICY-zh.md) — 输出模板治理规范
 - [docs/STEP-ARTIFACT-CONTRACTS-zh.md](docs/STEP-ARTIFACT-CONTRACTS-zh.md) — 阶段交接契约（权威清单）
+- [docs/QUESTION-COVERAGE-CHECKLIST-zh.md](docs/QUESTION-COVERAGE-CHECKLIST-zh.md) — 02/03/05/07 逐阶段问题覆盖清单（阶段证据必填）
 - [scripts/README-zh.md](scripts/README-zh.md) — 检查脚本说明
 
 > 说明：本文件是 [README.md](README.md) 的简体中文版本，两者同步维护；如有差异以 `README.md` 为准。
+
+## 许可证
+
+Copyright (c) 2026 litianyiliwei。本项目基于 [MIT 许可证](LICENSE) 授权。

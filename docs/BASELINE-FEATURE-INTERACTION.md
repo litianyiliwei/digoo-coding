@@ -122,7 +122,7 @@ Every Change must create `design/baseline-impact.md` (according to `templates/ch
 - Rebase conclusions for in-flight Changes;
 - Conclusion: `COMPATIBLE`, `BLOCKED_PENDING_BASELINE_CHANGE`, or `APPROVED_BASELINE_AMENDMENT`.
 
-This file is created starting from stage 03, re-checked during 06–07 design, only appended with findings during stage 08 implementation without modifying the baseline unilaterally, and its write-back verification is completed during stage 10 acceptance.
+This file is created in stage 05, re-checked during 06–07 design, only appended with findings during stage 08 implementation without modifying the baseline unilaterally, and its write-back verification is completed during stage 10 acceptance.
 
 ## 8. Roles and Approval Responsibilities
 
@@ -187,13 +187,14 @@ Workflow gate mapping:
 
 | Stage | Machine check | Purpose |
 |---|---|---|
-| 08 Baseline freeze | `audit --require-frozen` | Verify Manifest, constraint catalog, hashes, and approvals |
+| 03 Architecture baseline | `audit --require-frozen` | Verify Manifest, constraint catalog, hashes, and approvals after the freeze |
 | 04 Proposal planning | `audit --require-frozen` | Ensure the project baseline is still effective |
-| 10 Requirements refinement | `check-change --phase requirement` | Constraint coverage complete, applicability determined, baseline binding approved |
-| 11–12 | `check-change --phase requirement` | Prevent early requirement bindings from being deleted/modified or baseline drift |
-| 09 Transition-out and 10–13 | `check-change --phase design` | Every constraint has a design conclusion and evidence, exceptions approved |
-| 14 / 15 | `check-change --phase implementation` | Applicable constraints have implementation verification evidence |
-| 15 | `check-change --phase acceptance` | All constraints complete final verification |
+| 05 Proposal requirements | `check-change --phase requirement` | Constraint coverage complete, applicability determined, baseline binding approved |
+| 06 Figma design review | `check-change --phase requirement` | Prevent early requirement bindings from being deleted/modified or baseline drift |
+| 07 Detailed design | `check-change --phase design` | Every constraint has a design conclusion and evidence, exceptions approved |
+| 08 Implementation | `check-change --phase implementation` | Applicable constraints have implementation verification evidence |
+| 09 Independent verification | `check-change --phase implementation` | Independent evidence still covers the approved implementation constraints |
+| 10 Acceptance | `check-change --phase acceptance` | All constraints complete final verification |
 
 ### 9.4 Baseline Evolution and In-Flight Change Rebase
 

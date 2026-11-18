@@ -1,6 +1,16 @@
-# Claude Code local (personal) settings — must stay untracked so each teammate keeps their own
-.claude/settings.local.json
-
-# Python bytecode
+# Python and runtime artifacts
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Workflow lock/temp files
+*.lock
+*.tmp
+
+# Local agent settings and scratch data
+.claude/settings.local.json
+_trash/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

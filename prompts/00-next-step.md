@@ -28,10 +28,10 @@ Do not cross multiple stages at once, and do not auto-commit, publish, overwrite
 Before execution, read the `skill="workflow-orchestrator"` record in `docs/STEP-ARTIFACT-CONTRACTS.md` and `docs/STEP-ARTIFACT-CONTRACTS.json`.
 
 - Input verification: workflow-state.json; docs/PROCESS-MAP.md; docs/STEP-ARTIFACT-CONTRACTS.json; docs/OUTPUT-TEMPLATE-MATRIX.csv; real artifacts and approval records; current OpenSpec CLI state (if initialized). Report item by item whether each file exists, its version, and approval status; pause if not satisfied.
-- Required output: next-stage determination report (shown in conversation; not required to be written to disk); workflow-state.json (updated only when the real state changes). The state file is written by `workflow.py transition`; do not manually write stage artifacts.
+- Required output: next-stage determination report (shown in conversation; not required to be written to disk); `workflow-state.json` is written only by workflow commands (`request-review`/`approve`/`transition`), never by hand. Do not manually write stage artifacts.
 - Inputs for the next step: all files in the selected stage's Input Contract. Clearly state in the report how these files are consumed downstream.
 - When the stage completes, present the handoff report according to `templates/workflow/step-handoff-report.md`; distinguish generated, draft, proposed, pending confirmation, and not executed.
-- Only after the gates pass and approval completes, update `workflow-state.json` via `workflow.py transition`; do not automatically cross approval points, and do not directly edit the state file.
+- Only after the gates pass, the user has replied "review passed <step-id>", and `approve` has been run may you run `workflow.py transition`; do not automatically cross approval points, and do not directly edit the state file.
 - **Stop when pending review (mandatory):** When `pending_approvals` is non-empty, you may only report BLOCKED, the pending-review stage, and the submitted artifacts; proposing or executing any next stage is forbidden; you must wait for the user to explicitly reply "review passed <step-id>", then run `approve` before `transition`.
 
 

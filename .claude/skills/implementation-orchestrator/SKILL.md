@@ -47,7 +47,7 @@ Do not replace tests with code generation; do not report unexecuted checks as pa
 - **Superpowers:** Check and load `using-superpowers`, `writing-plans`, and `test-driven-development` per the host mechanism; `systematic-debugging` on failures; `requesting-code-review`/`receiving-code-review` for review; `verification-before-completion` before completion. Stage evidence must write `methods` (`test-driven-development` and `verification-before-completion` each with at least 1 decision and a real evidence path) and run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, use `mode=equivalent` and write `reason`.
 - **OpenSpec:** First execute `openspec instructions apply --change <id> --json` and `openspec status --change <id>`; after completion, `openspec validate <id> --strict`, without unauthorized spec changes. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Baseline Discipline During Implementation (Mandatory)
 
@@ -65,12 +65,12 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** Actual source code/migrations/configuration; baseline change requests/ADR drafts when applicable (do not update the frozen baseline without approval); automated test code and run results; openspec/changes/<change-id>/design/evidence/code-review.md (including the `## UI fidelity` numeric table when UI is involved, with values taken directly from `figma-layout-check.json`; only PAGEs with differences/`UI-DERIVED` need manual explanation and approval); `design/evidence/figma-layout-check.json`; implementation/verification evidence. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
 - **Downstream handoff:** Code diff, test report, review conclusion, unresolved issues, `figma-layout-check.json`, and token check results. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 
 ## Independent Verification Handoff (New Mandatory Requirement)
 
-After the Builder completes, do not proceed directly to manual acceptance. You must hand off to the independent Skill `@independent-verifier` (stage `09-independent-verification`), using an independent Agent/context to read-only verify code, specs, ACs, and IO contracts and rerun tests. The Builder must not generate a PASS conclusion itself to replace the Verifier.
+Only after the user explicitly replies "review passed 08-implementation-orchestrator" and `approve`/`transition` have completed may you hand off to the independent Skill `@independent-verifier` (stage `09-independent-verification`), using an independent Agent/context to read-only verify code, specs, ACs, and IO contracts and rerun tests. The Builder must not generate a PASS conclusion itself to replace the Verifier.
 
 
 ## Machine Baseline Gates for the Implementation Stage (Mandatory)

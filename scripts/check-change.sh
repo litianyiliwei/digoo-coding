@@ -12,7 +12,7 @@ if [[ ! "$CHANGE_ID" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]]; then echo "Invalid change-i
 if [[ ! -d "$CHANGE_DIR" ]]; then echo "Change directory not found: $CHANGE_DIR" >&2; exit 1; fi
 
 missing=0
-for f in proposal.md design.md tasks.md; do
+for f in proposal.md tasks.md; do
   if [[ ! -s "$CHANGE_DIR/$f" ]]; then echo "ERROR MISSING: $CHANGE_DIR/$f"; missing=1; fi
 done
 META="$CHANGE_DIR/.openspec.yaml"

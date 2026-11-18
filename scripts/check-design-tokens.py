@@ -125,6 +125,7 @@ def main():
                 errors.append(f"{name}: CSS variable {var} is not defined in the token file(s)")
                 continue
             if kind not in ("COLOR", "NUMBER"):
+                errors.append(f"{name}: unsupported token kind {kind}; extend the checker before using this token")
                 continue
             resolved = resolve(values[var], values)
             expected = norm_value(actual, kind)

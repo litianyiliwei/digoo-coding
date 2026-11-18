@@ -20,7 +20,7 @@ Change ID, approved roadmap, project requirements business analysis (FLOW/NODE/D
 4. Write verifiable Given/When/Then for every US; every key story has at least one AC covering permissions, null values, boundaries, exceptions, duplicate submission, and concurrency (when applicable). For Changes involving multiple platforms/native/device, scenarios must also cover platform permissions (denial/degradation), offline/weak network, push/deep links, multi-platform differences, failure retry, idempotency/concurrency; write N/A + reason when not applicable.
 5. Complete `proposal.md`'s Why, What Changes, Capabilities, and Impact; capability paths use kebab-case and reuse existing paths.
 6. Write externally observable behavior into `specs/<capability>/spec.md`, using canonical ADDED/MODIFIED/REMOVED/RENAMED Requirements and Scenario.
-7. Put implementation methods in `design.md`, and put tasks only in `tasks.md` with checkboxes.
+7. Put proposal-level design decisions in `proposal.md`; do not create `design.md` here (Stage 07 is its single writer), and put tasks only in `tasks.md` with checkboxes.
 8. Annotate the corresponding US/AC/BR/FLOW/NODE/DO IDs, permissions, failure paths, and boundary conditions.
 9. When beyond baseline scope, first propose ADR/baseline changes; for pure documentation/refactoring Changes with no behavior change, use `skip_specs: true` per OpenSpec conventions, and do not fabricate requirements.
 10. After completion, run `python scripts/check-requirements.py --change <change-id> --strict` and `openspec validate <change-id> --strict`, and address all errors/warnings.
@@ -43,16 +43,16 @@ Specs describe WHAT and do not carry implementation details such as class names/
 
 ## Actual Tool Invocation Requirements
 
-- **Superpowers:** The stage-scoped mode of `brainstorming` checks the completeness of options, requirement boundaries, and multi-platform scenarios; write conclusions into `design/user-stories.md`, the spec's Scenario, or `design.md`, not a separate design document; do not start coding. Stage evidence must write `methods` (at least 3 questions, 1 alternative, 1 decision) and run `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
+- **Superpowers:** The stage-scoped mode of `brainstorming` checks the completeness of options, requirement boundaries, and multi-platform scenarios; write conclusions into `design/user-stories.md`, the spec's Scenario, or `proposal.md`, not a separate design document or `design.md`; do not start coding. Stage evidence must write `methods` (at least 3 questions, 1 alternative, 1 decision) and run `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
 - **OpenSpec:** Actually execute `openspec status --change <id>`, `openspec instructions <artifact> --change <id> --json`, `openspec validate <id> --strict`. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Project Baseline Reading and Applicability Determination (Mandatory)
 
 - Before starting requirements refinement, first read `docs/architecture/baseline-status.md`, relevant product baselines, `system-context.md`, `domain-boundaries.md`, and the architecture/data/API/frontend/test baselines of affected domains, and read relevant `openspec/specs/**`.
 - You must create `openspec/changes/<change-id>/design/baseline-impact.md` according to `templates/change-assets/design/baseline-impact.md`, recording baseline domain versions, actually read files/sections/IDs, constraints, reuse items, conflicts, and ownership classification.
-- Explain baseline impact in `proposal.md` / `design.md`. If changes to architecture, data ownership, common contracts, or global quality gates are prerequisites for the feature to exist, mark `BLOCKED_PENDING_BASELINE_CHANGE`; complete baseline amendment approval first, and do not design/code first and add paperwork later.
+- Explain baseline impact in `proposal.md`. If changes to architecture, data ownership, common contracts, or global quality gates are prerequisites for the feature to exist, mark `BLOCKED_PENDING_BASELINE_CHANGE`; complete baseline amendment approval first, and do not design/code first and add paperwork later.
 - A single feature's behavior, API, pages, physical table migrations, and local IO stay in the Change; only cross-feature shared rules/common contracts/core domain models/system-level constraints warrant a baseline amendment.
 - For detailed determination rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
 
@@ -61,10 +61,10 @@ Specs describe WHAT and do not carry implementation details such as class names/
 Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="feature-requirements"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Approved roadmap/current Change scope; project requirements business analysis (workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy) and frozen baseline; docs/product/BASELINE-BRIEF.md, change-sizing.md, role-permission-matrix.csv, decisions.md, assumptions.md, lessons.md, id-conventions.md (standing baselines); docs/product/acceptance-policy.md (project-level acceptance criteria; ACs align with the acceptance policy); associated FLOW/NODE/DO/BR IDs; existing OpenSpec specs; docs/product/open-questions.md (read-only). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** openspec/changes/<change-id>/proposal.md; openspec/changes/<change-id>/specs/<capability>/spec.md (when applicable); openspec/changes/<change-id>/tasks.md (initial tasks); openspec/changes/<change-id>/design.md (when there are design decisions); openspec/changes/<change-id>/design/user-stories.md (US/AC); openspec/changes/<change-id>/design/baseline-impact.md (mandatory for every Change); openspec/changes/<change-id>/design/baseline-binding.json. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
+- **Outputs for this stage:** openspec/changes/<change-id>/proposal.md (including proposal-level initial design decisions); openspec/changes/<change-id>/specs/<capability>/spec.md (when applicable); openspec/changes/<change-id>/tasks.md (initial tasks); openspec/changes/<change-id>/design/user-stories.md (US/AC); openspec/changes/<change-id>/design/baseline-impact.md (mandatory for every Change); openspec/changes/<change-id>/design/baseline-binding.json. Do not create `design.md` here; Stage 07 is its single writer. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
 - **Downstream handoff:** Approved proposal-level US/ACs (no separate use-case artifact; scenarios live in the spec `Scenario` section), scope boundaries, requirement traceability IDs, baseline snapshot, and constraint bindings. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 
 ## Machine Baseline Constraint Binding (Mandatory)
@@ -73,6 +73,13 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - After the Change auxiliary assets are created, `design/baseline-binding.json` must exist; if `new-change-assets.sh` is used it is generated automatically from the frozen registry, or you may run `python3 scripts/baseline-governance.py init-binding --change-id <id>`.
 - Do not delete/merge/rewrite machine-generated constraint IDs; fill in APPLICABLE or NOT_APPLICABLE and a specific reason for each ACTIVE constraint.
 - After the stage 05 manual approval binding, run `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement`; the handoff may occur only when this gate and the Markdown `baseline-impact.md` both pass.
+
+## Question Coverage (Mandatory)
+
+- Before review, fill the 05 section of `docs/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
+- `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
+- Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
+- Run `python scripts/check-question-coverage.py --step 05-feature-requirements --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.
 
 ## Stage Boundaries and Review Stop (Mandatory)
 

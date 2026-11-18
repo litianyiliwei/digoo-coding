@@ -1,0 +1,12 @@
+# Normalize line endings so handoff/baseline hashes are stable across checkouts.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.pdf binary
+*.zip binary
+*.pen binary

@@ -1,7 +1,0 @@
-Traceability structural check passed: 22 edge(s) in D:\Work\灵犀智学\农业项目\digoo-coding\openspec\changes\workflow-context-bundles\traceability.csv.
-Test-case matrix passed: 7 case(s), AC coverage 3/3, pages 0/0, blocks 0/0, APIs 0/0, IO 0/0, interfaces 0/0.
-Design section check passed: design.md has the required unified subsections.
-API traceability check skipped: no operationId in OpenAPI (x-api-scope: none).
-Figma audit check passed: this Change declares no UI in figma-audit.md.
-API scope: none (x-api-scope: none); API→IO checks skipped.
-Unified design (design.md sections), test-case matrix, traceability, interface catalog and API→IO mapping passed.

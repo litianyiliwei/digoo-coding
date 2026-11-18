@@ -1,6 +1,0 @@
-data_object_id,data_object_name,definition,key_attributes,owner_role,source_nodes,consumer_nodes,status,notes
-DO-001,变更意图,用户提出的目标范围边界与未决项,goal; scope; non-goals; constraints; questions,ROLE-001,NODE-001-01,NODE-001-02;NODE-001-03;NODE-001-08,READY_FOR_REVIEW,项目级最小输入契约
-DO-002,上下文包,当前阶段或任务实际需要读取的文件组与来源引用,stage; impact_tags; paths; reasons; file_count; char_count,ROLE-002,NODE-001-02,NODE-001-03;NODE-001-04;NODE-001-07,READY_FOR_REVIEW,默认不含完整基线或未触发资料
-DO-003,交付契约,本次可观察行为验收条件实施边界与任务,requirement_ids; acceptance; allowed_paths; tasks; applicable_checks,ROLE-002,NODE-001-03,NODE-001-04;NODE-001-05;NODE-001-06;NODE-001-09,READY_FOR_REVIEW,按风险和影响标签选择适用字段
-DO-004,验证证据,实现及独立验证产生的机器和人工证据,revision; command; exit_code; result; verifier; findings,ROLE-003,NODE-001-04;NODE-001-05;NODE-001-07;NODE-001-09,NODE-001-05;NODE-001-06;NODE-001-09,READY_FOR_REVIEW,必须引用可读取的真实证据
-DO-005,审批与交接记录,用户批准和受控状态迁移信息,stage_id; approver; approved_at; evidence; output_hashes,ROLE-004,NODE-001-06,后续阶段,READY_FOR_REVIEW,状态只由工作流命令更新

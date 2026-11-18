@@ -2,8 +2,10 @@
 """Print the next workflow stage from the authoritative DAG. Read-only.
 
 The stage DAG is read from docs/WORKFLOW-STAGES.json (the single source of
-truth); this script never mutates state. After finishing a stage, record
-evidence and run scripts/workflow.py transition — do not edit workflow-state.json.
+truth); this script never mutates state. After finishing a stage, run the stage
+checks, record evidence and call request-review; approve and transition only
+after the user explicitly replies "review passed <step-id>". Do not edit
+workflow-state.json.
 """
 import json, sys
 from pathlib import Path
@@ -55,7 +57,8 @@ def main():
             print("NEXT_STAGE_INPUTS=" + " ; ".join(contract["next_inputs"]))
             print("HANDOFF_REPORT=templates/workflow/step-handoff-report.md")
         print("NOTE=Verify actual files, approvals and OpenSpec status before executing; this script only reads state.")
-        print(f"NOTE=After finishing the stage, record evidence and run: python scripts/workflow.py transition --step {sid} --evidence workflow/evidence/{sid}.json")
+        print(f"NOTE=After finishing the stage, run the stage checks, record evidence and run: python scripts/workflow.py request-review --step {sid} --evidence workflow/evidence/{sid}.json --summary \"<review summary>\"")
+        print(f"NOTE=End the turn after request-review. Only after the user replies \"review passed {sid}\" run approve and then transition.")
         return 0
     print("ALL_STEPS_MARKED_COMPLETE")
     print("Verify final acceptance and archived OpenSpec state manually; no state was changed.")

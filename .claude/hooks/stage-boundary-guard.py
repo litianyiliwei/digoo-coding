@@ -50,13 +50,12 @@ def declared_outputs(row, cid):
     paths = []
     for entry in row.get('outputs', []):
         text = str(entry)
-        matches = list(PATH_TOKEN.finditer(text))
-        if matches:
-            for match in matches:
-                path = match.group(0)
-                if '<change-id>' in path:
-                    path = path.replace('<change-id>', cid) if cid else path.split('<change-id>')[0] or 'openspec/changes/'
-                paths.append(norm(path))
+        match = PATH_TOKEN.search(text)
+        if match:
+            path = match.group(0)
+            if '<change-id>' in path:
+                path = path.replace('<change-id>', cid) if cid else path.split('<change-id>')[0] or 'openspec/changes/'
+            paths.append(norm(path))
             continue
         token = text.strip().split()[0].strip('`（）(),')
         if FILE_TOKEN.match(token) and '/' not in token:
@@ -118,11 +117,23 @@ def main() -> int:
         return rel == declared
 
     # 1. Never write a future stage's declared output ahead of its stage.
-    future_only = set()
+    # A path also declared by an earlier/current stage is a shared artifact,
+    # not a future-only artifact (e.g. design.md by 05/07).
+    allowed = set()
+    for sid in order[:current_index + 1]:
+        row = by_step.get(sid.split('-')[0])
+        if row:
+            allowed.update(declared_outputs(row, cid))
+    future_paths = set()
     for sid in order[current_index + 1:]:
         row = by_step.get(sid.split('-')[0])
         if row:
-            future_only.update(declared_outputs(row, cid))
+            future_paths.update(declared_outputs(row, cid))
+    current_outputs = set()
+    current_row = by_step.get(current.split('-')[0])
+    if current_row:
+        current_outputs.update(declared_outputs(current_row, cid))
+    future_only = future_paths - allowed
     if any(matches(path) for path in future_only):
         if pending_steps:
             waiting = ', '.join(str(x) for x in sorted(pending_steps))
@@ -132,6 +143,9 @@ def main() -> int:
         return deny(reason + ' 请先完成当前阶段并运行 workflow.py request-review，结束回合等待用户评审。')
 
     # 2. Approved stage artifacts are read-only until that stage is reopened.
+    # Shared artifacts (also declared by the current or a later stage) are
+    # intentionally writable by their later owner; their handoff is mutable.
+    shared_artifacts = future_paths | current_outputs
     completed_outputs = set()
     for sid in order:
         if sid not in completed:
@@ -139,15 +153,11 @@ def main() -> int:
         row = by_step.get(sid.split('-')[0])
         if row:
             completed_outputs.update(declared_outputs(row, cid))
-    if any(matches(path) for path in completed_outputs if path not in volatile):
+    if any(matches(path) for path in completed_outputs if path not in volatile and path not in shared_artifacts):
         return deny(f'{rel} 属于已完成阶段 {current} 之前已批准的产物，不能直接改写；请先运行 workflow.py reopen --step <stage> --reason <reason> 并重新评审。')
 
     # 3. While a review is pending, the reviewed stage's artifacts are frozen.
     if current in pending_steps:
-        current_outputs = set()
-        row = by_step.get(current.split('-')[0])
-        if row:
-            current_outputs.update(declared_outputs(row, cid))
         if any(matches(path) for path in current_outputs if path not in volatile):
             return deny(f'阶段 {current} 正在等待用户评审，{rel} 已进入评审范围；如需修改，请先修改并重新运行 workflow.py request-review。')
 

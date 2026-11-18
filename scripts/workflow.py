@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from method_evidence import validate_methods
+from question_coverage import validate_coverage
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'workflow-state.json'
@@ -18,15 +19,23 @@ STAGES=json.loads(STAGES_FILE.read_text(encoding='utf-8'))['stages']
 BY_ID={s['id']:s for s in STAGES}
 ORDER=[s['id'] for s in STAGES]
 PATH_TOKEN=re.compile(r'(?:docs|templates|openspec|workflow|prompts|scripts|design)/[A-Za-z0-9_\-./<>*]+')
+FILE_TOKEN=re.compile(r'^[A-Za-z0-9_.\-]+\.[A-Za-z0-9]{2,5}$')
 
 def now(): return datetime.now(timezone.utc).isoformat(timespec='seconds')
+def append_event(event, **payload):
+    path=ROOT/'workflow/state-events.jsonl'
+    path.parent.mkdir(parents=True,exist_ok=True)
+    record={'event':event,'at':now()}
+    record.update(payload)
+    with path.open('a',encoding='utf-8') as stream:
+        stream.write(json.dumps(record,ensure_ascii=False,sort_keys=True)+'\n')
 def relpath(p:Path):
     try:return p.resolve().relative_to(ROOT.resolve()).as_posix()
     except ValueError: raise ValueError(f'Path escapes project root: {p}')
 def load_state():
     if not STATE.exists(): raise ValueError(f'Missing {STATE.relative_to(ROOT)}')
     data=json.loads(STATE.read_text(encoding='utf-8'))
-    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[]}.items(): data.setdefault(k,v)
+    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[],'skipped_steps':[],'skip_history':[],'abandoned_changes':[]}.items(): data.setdefault(k,v)
     if data.get('current_step') not in BY_ID and data.get('current_step')!='ALL_STEPS_COMPLETE': raise ValueError(f"Unknown current_step: {data.get('current_step')}")
     unknown=set(data['completed_steps'])-set(BY_ID)
     if unknown: raise ValueError('Unknown completed steps: '+', '.join(sorted(unknown)))
@@ -63,11 +72,16 @@ def output_paths_for_step(step_id,cid=None):
     if not row:return []
     paths=[]
     for entry in row.get('outputs',[]):
-        m=PATH_TOKEN.search(str(entry))
-        if not m:continue
-        path=norm_path(m.group(0))
-        if cid:path=path.replace('<change-id>',cid)
-        paths.append(path)
+        text=str(entry)
+        match=PATH_TOKEN.search(text)
+        if match:
+            path=norm_path(match.group(0))
+            if cid:path=path.replace('<change-id>',cid)
+            paths.append(path)
+            continue
+        token=text.strip().split()[0].strip('`（）(),')
+        if FILE_TOKEN.match(token) and '/' not in token:
+            paths.append(norm_path(token))
     return paths
 
 MULTI_WRITER_ARTIFACTS={'baseline-binding.json'}
@@ -210,8 +224,25 @@ def verify_manifest(path):
     errors=[]
     if m.get('from_step') not in BY_ID or m.get('to_step') not in BY_ID:
         errors.append('Handoff has unknown from_step / to_step')
-    elif m.get('to_step') not in [x['id'] for x in STAGES if m.get('from_step') in x['dependencies']]:
+        return False,errors
+    if m.get('to_step') not in [x['id'] for x in STAGES if m.get('from_step') in x['dependencies']]:
         errors.append('Handoff target is not a direct successor')
+    skipped=bool(m.get('skipped'))
+    if skipped:
+        if not BY_ID[m['from_step']].get('conditional'):
+            errors.append('Skip manifest is only valid for a conditional stage')
+        if not str(m.get('skip_reason','')).strip():
+            errors.append('Skip manifest requires a skip_reason')
+        ev=str(m.get('evidence','')).strip()
+        if not ev:
+            errors.append('Skip manifest requires an evidence path')
+        else:
+            ep=(ROOT/ev).resolve()
+            try: ep.relative_to(ROOT.resolve())
+            except ValueError: errors.append('Skip evidence path escapes project root')
+            else:
+                if not ep.is_file(): errors.append('Skip evidence file missing: '+ev)
+        if not m.get('checks'): errors.append('Skip manifest requires at least one machine check')
     elif BY_ID[m['from_step']]['human_approval_required'] and m.get('approval',{}).get('status')!='approved':
         errors.append('Source stage requires approved human approval in handoff manifest')
     for check in m.get('checks',[]):
@@ -223,19 +254,20 @@ def verify_manifest(path):
         if not any(x.endswith('independent-verification.json') for x in paths): errors.append('Verifier handoff missing JSON evidence')
         if not any('check-independent-verification.py' in c.get('command','') and c.get('exit_code')==0 for c in m.get('checks',[])):
             errors.append('Verifier handoff missing passing independent-verification checker')
-    for item in m.get('artifacts',[]):
-        p=(ROOT/item['path']).resolve()
-        try:p.relative_to(ROOT.resolve())
-        except ValueError: errors.append(f"Unsafe artifact path: {item.get('path')}"); continue
-        if not p.is_file(): errors.append(f"Missing artifact: {item['path']}"); continue
-        if item.get('mutable_by_design'):
-            # A later DAG stage declares this path as its own output; existence is required,
-            # but the original hash is allowed to drift by design (e.g. baseline-status,
-            # design.md, traceability.csv, lessons/decisions/assumptions).
-            continue
-        actual=hash_file(p)
-        if actual!=item.get('sha256'): errors.append(f"Hash mismatch: {item['path']} expected={item.get('sha256')} actual={actual}")
-    if not m.get('artifacts'): errors.append('Handoff contains no artifacts')
+    if not skipped:
+        for item in m.get('artifacts',[]):
+            p=(ROOT/item['path']).resolve()
+            try:p.relative_to(ROOT.resolve())
+            except ValueError: errors.append(f"Unsafe artifact path: {item.get('path')}"); continue
+            if not p.is_file(): errors.append(f"Missing artifact: {item['path']}"); continue
+            if item.get('mutable_by_design'):
+                # A later DAG stage declares this path as its own output; existence is required,
+                # but the original hash is allowed to drift by design (e.g. baseline-status,
+                # design.md, traceability.csv, lessons/decisions/assumptions).
+                continue
+            actual=hash_file(p)
+            if actual!=item.get('sha256'): errors.append(f"Hash mismatch: {item['path']} expected={item.get('sha256')} actual={actual}")
+        if not m.get('artifacts'): errors.append('Handoff contains no artifacts')
     return not errors,errors
 
 def incoming_manifests(step_id,change_id):
@@ -369,6 +401,9 @@ def parse_evidence(path,step_id,change_id,require_approval=True,include_undeclar
     method_errors=validate_methods(e,step_id,ROOT)
     if method_errors:
         raise ValueError('Method evidence failed: '+'; '.join(method_errors))
+    coverage_errors=validate_coverage(e,step_id,ROOT)
+    if coverage_errors:
+        raise ValueError('Question coverage failed: '+'; '.join(coverage_errors))
     if step_id=='09-independent-verification':
         paths={a['path'] for a in artifacts}
         required_suffixes=('independent-verification-report.md','independent-verification.json')
@@ -413,7 +448,7 @@ def cmd_request_review(args):
     missing_outputs=missing_declared_outputs(e,sid,cid)
     if missing_outputs:
         raise ValueError('Evidence omits declared stage outputs (mark N/A with waiver_reason when not applicable): '+', '.join(missing_outputs))
-    targets=[{'path':a['path'],'sha256':a['sha256'],'size_bytes':a['size_bytes']} for a in artifacts]
+    targets=[{'path':a['path'],'sha256':a['sha256'],'size_bytes':a['size_bytes']} for a in artifacts if not is_volatile(a['path'])]
     if args.target:
         targets=[]
         for raw in args.target:
@@ -434,6 +469,7 @@ def cmd_request_review(args):
     s['pending_approvals']=[x for x in (s.get('pending_approvals') or []) if item_step(x)!=sid]+[entry]
     s['last_updated']=now()
     atomic_json(STATE,s)
+    append_event('review_requested',step_id=sid,change_id=cid,review_packet=relpath(packet_path))
     print(f'REVIEW_REQUESTED={sid}')
     print('CURRENT_STEP='+s['current_step'])
     if targets: print('REVIEW_TARGETS='+'; '.join(t['path'] for t in targets))
@@ -475,6 +511,7 @@ def cmd_approve(args):
     s['pending_approvals']=[x for x in s['pending_approvals'] if item_step(x)!=sid]
     s['last_updated']=now()
     atomic_json(STATE,s)
+    append_event('approved',step_id=sid,change_id=rec['change_id'],approver=rec['approver'],targets=len(targets))
     packet_rel=entry.get('review_packet')
     if packet_rel:
         packet_path=(ROOT/packet_rel).resolve()
@@ -492,7 +529,7 @@ def cmd_approve(args):
     return 0
 
 def cmd_status(args):
-    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'completed_changes':s.get('completed_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'approvals_history':s.get('approvals_history',[]),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'reset_history':s.get('reset_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
+    s=load_state(); print(json.dumps({'project_name':s.get('project_name'),'active_change_id':s.get('active_change_id'),'current_step':s.get('current_step'),'completed_steps':s.get('completed_steps'),'skipped_steps':s.get('skipped_steps',[]),'completed_changes':s.get('completed_changes',[]),'abandoned_changes':s.get('abandoned_changes',[]),'pending_approvals':s.get('pending_approvals'),'blocked_items':s.get('blocked_items'),'approvals_history':s.get('approvals_history',[]),'last_transition':s.get('last_transition'),'transition_history':s.get('transition_history',[]),'reopen_history':s.get('reopen_history',[]),'reset_history':s.get('reset_history',[]),'skip_history':s.get('skip_history',[]),'change_history':s.get('change_history',[]),'baseline':s.get('baseline',{})},ensure_ascii=False,indent=2)); return 0
 
 def cmd_check_entry(args):
     s=load_state(); errs=check_entry(args.step,s,args.change_id)
@@ -516,6 +553,75 @@ def verify_review_targets(rec):
         if target.get('sha256') and hash_file(path)!=target['sha256']:
             raise ValueError('Artifact changed since approval; re-run request-review: '+str(target.get('path')))
 
+def cmd_skip_stage(args):
+    """Skip a conditional stage with machine evidence (currently Stage 06 no-UI)."""
+    s=load_state(); sid=args.step; stage=BY_ID[sid]
+    if not stage.get('conditional'):
+        raise ValueError(f'{sid} is not a conditional stage and cannot be skipped')
+    if s.get('current_step')!=sid:
+        raise ValueError(f"current_step is {s.get('current_step')}, not {sid}")
+    missing=[d for d in stage['dependencies'] if d not in s.get('completed_steps',[])]
+    if missing: raise ValueError('Uncompleted dependencies: '+', '.join(missing))
+    cid=args.change_id or s.get('active_change_id') or None
+    if stage['scope']=='change' and not cid:
+        raise ValueError('Change-scoped stage requires active_change_id / --change-id')
+    if s.get('pending_approvals') or s.get('blocked_items'):
+        raise ValueError('Resolve pending approvals and blockers before skipping a stage')
+    phase=baseline_phase_for_entry(sid)
+    if stage['scope']=='change' and phase and cid:
+        run_baseline_gate(['check-change','--change-id',cid,'--phase',phase],label=f'Change baseline skip gate ({phase})')
+    ev=args.evidence or f'workflow/evidence/{sid}-skip.json'
+    ep=(ROOT/ev).resolve()
+    try: ev_rel=ep.relative_to(ROOT.resolve()).as_posix()
+    except ValueError: raise ValueError('Skip evidence must be inside project root')
+    if not ep.is_file(): raise ValueError('Skip evidence file missing: '+ev)
+    e=json.loads(ep.read_text(encoding='utf-8'))
+    if e.get('step_id')!=sid: raise ValueError(f'Skip evidence step_id must be {sid}')
+    if cid and e.get('change_id') not in (None,cid): raise ValueError('Skip evidence change_id mismatch')
+    if e.get('skip') is not True: raise ValueError('Skip evidence must set "skip": true')
+    if not str(e.get('reason','')).strip(): raise ValueError('Skip evidence requires a reason')
+    checks=e.get('checks',[])
+    if not checks: raise ValueError('Skip evidence requires at least one machine check')
+    for check in checks:
+        if check.get('status')!='passed': raise ValueError('Skip checks must all pass')
+        if check.get('kind','automated')!='automated': raise ValueError('Skip checks must be automated')
+        if check.get('exit_code')!=0: raise ValueError('Skip automated checks must exit 0')
+        command=str(check.get('command',''))
+        if 'check-figma-audit' not in command or '--no-ui' not in command:
+            raise ValueError('Stage 06 skip requires a real check-figma-audit --no-ui check')
+        proof=str(check.get('log','')).strip()
+        if not proof: raise ValueError('Skip checks require a log path')
+        pp=(ROOT/proof).resolve()
+        try: pp.relative_to(ROOT.resolve())
+        except ValueError: raise ValueError('Skip check log escapes project root')
+        if not pp.is_file(): raise ValueError('Skip check log missing: '+proof)
+    s['completed_steps']=list(dict.fromkeys(s.get('completed_steps',[])+[sid]))
+    s['skipped_steps']=list(dict.fromkeys(s.get('skipped_steps',[])+[sid]))
+    s['pending_approvals']=[x for x in (s.get('pending_approvals') or []) if item_step(x)!=sid]
+    s['blocked_items']=[x for x in (s.get('blocked_items') or []) if item_step(x)!=sid]
+    s['last_updated']=now()
+    completed=set(s['completed_steps'])
+    nxt=next((x for x in STAGES if x['id'] not in completed and all(d in completed for d in x['dependencies'])),None)
+    s['current_step']=nxt['id'] if nxt else 'ALL_STEPS_COMPLETE'
+    record={'step_id':sid,'change_id':cid,'skipped_at':s['last_updated'],'reason':e.get('reason',''),
+            'evidence':ev_rel,'checks':checks,'conditional_reason':e.get('conditional_reason','')}
+    s.setdefault('skip_history',[]).append(record)
+    s['last_transition']=record
+    atomic_json(STATE,s)
+    append_event('skip',step_id=sid,change_id=cid,reason=e.get('reason',''))
+    successors=[x for x in STAGES if sid in x['dependencies']]
+    outcid=cid if stage['scope']=='change' else None
+    for nxt_stage in successors:
+        mp=manifest_path(sid,nxt_stage['id'],outcid)
+        atomic_json(mp,{'version':'1.0','from_step':sid,'to_step':nxt_stage['id'],'change_id':outcid,
+                        'created_at':now(),'skipped':True,'skip_reason':e.get('reason',''),
+                        'evidence':ev_rel,'checks':checks,'artifacts':[],
+                        'approval':{'status':'skipped','required':False}})
+        print(f'HANDOFF_CREATED={relpath(mp)}')
+    print(f'SKIPPED={sid}')
+    print('CURRENT_STEP='+s['current_step'])
+    return 0
+
 def cmd_transition(args):
     s=load_state(); sid=args.step; stage=BY_ID[sid]
     own_pending=[x for x in (s.get('pending_approvals') or []) if (x.get('step_id') if isinstance(x,dict) else x)==sid]
@@ -523,7 +629,7 @@ def cmd_transition(args):
     cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
     approval=e.get('approval',{}) if isinstance(e.get('approval'),dict) else {}
     rec=approval_record(s,sid,cid if stage['scope']=='change' else None)
-    if stage.get('human_approval_required') or own_pending:
+    if stage.get('human_approval_required') or own_pending or approval.get('required') is True:
         if not rec:
             raise ValueError(f'Human approval required: run request-review, wait for the user, then run workflow.py approve --step {sid} before transition')
         verify_review_targets(rec)
@@ -580,6 +686,7 @@ def cmd_transition(args):
     completed=set(s['completed_steps']); nxt=next((x for x in STAGES if x['id'] not in completed and all(d in completed for d in x['dependencies'])),None)
     s['current_step']=nxt['id'] if nxt else 'ALL_STEPS_COMPLETE'
     atomic_json(STATE,s)
+    append_event('transition',step_id=sid,change_id=cid,next_step=s['current_step'],artifacts=len(artifacts))
     for artifact in artifacts:
         ap=(ROOT/artifact['path']).resolve()
         if ap.is_file():
@@ -644,6 +751,7 @@ def cmd_migrate_state(args):
     data.setdefault('legacy_completed_steps',[])
     data['legacy_completed_steps']=list(dict.fromkeys(data['legacy_completed_steps']+legacy))
     data['completed_steps']=[s for s in old if s in valid and s not in reset]
+    data['skipped_steps']=[s for s in (data.get('skipped_steps') or []) if s not in reset]
     completed=set(data['completed_steps'])
     broken=[s for s in completed if any(d not in completed for d in BY_ID[s]['dependencies'])]
     if broken:
@@ -657,6 +765,7 @@ def cmd_migrate_state(args):
         data['notes']=args.note
     data.setdefault('topology_migrations',[]).append({'at':data['last_updated'],'reason':args.reason,'legacy_steps':legacy,'reset_steps':sorted(reset),'removed_steps':removed,'superseded_approvals':superseded,'invalidated_handoffs':invalidated,'completed_steps':data['completed_steps'],'current_step':data['current_step']})
     atomic_json(STATE,data)
+    append_event('migrate',reason=args.reason,removed_steps=len(removed),current_step=data['current_step'])
     print(f'MIGRATED=workflow-state.json')
     print('COMPLETED='+', '.join(data['completed_steps']))
     print('LEGACY='+', '.join(data['legacy_completed_steps']))
@@ -705,45 +814,53 @@ def cmd_reset_state(args):
     """Return workflow-state.json to the pre-Stage-01 position, keeping an audit archive."""
     s=load_state()
     if not args.reason or not args.reason.strip(): raise ValueError('reset-state requires --reason')
+    clean=bool(getattr(args,'clean',False))
     stamp=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-    archive=ROOT/'workflow/evidence'/f'state-reset-{stamp}.json'
-    archive_data={'archived_at':now(),'reason':args.reason,'note':getattr(args,'note','') or '',
-                  'previous_current_step':s.get('current_step'),'previous_completed_steps':s.get('completed_steps',[]),
-                  'previous_active_change_id':s.get('active_change_id',''),'previous_baseline_version':(s.get('baseline') or {}).get('overall_version',''),
-                  'state':s}
-    atomic_json(archive,archive_data)
+    archive=None; archive_data=None
+    if not clean:
+        archive=ROOT/'workflow/evidence'/f'state-reset-{stamp}.json'
+        archive_data={'archived_at':now(),'reason':args.reason,'note':getattr(args,'note','') or '',
+                      'previous_current_step':s.get('current_step'),'previous_completed_steps':s.get('completed_steps',[]),
+                      'previous_active_change_id':s.get('active_change_id',''),'previous_baseline_version':(s.get('baseline') or {}).get('overall_version',''),
+                      'state':s}
+        atomic_json(archive,archive_data)
     invalidated=invalidate_all_handoffs(args.reason)
     fresh={
         'project_name':s.get('project_name','项目'),
         'active_change_id':'',
         'completed_steps':[],
         'current_step':'01-project-bootstrap',
+        'skipped_steps':[],
+        'skip_history':[],
+        'abandoned_changes':[],
         'pending_approvals':[],
         'blocked_items':[],
         'last_completed_outputs':[],
-        'notes':getattr(args,'note','') or '流程状态已由 reset-state 重置为未初始化；旧状态与交接已归档。',
+        'notes':getattr(args,'note','') or ('流程状态已由 reset-state 清洁初始化为未初始化；旧项目数据已移出工作区。' if clean else '流程状态已由 reset-state 重置为未初始化；旧状态与交接已归档。'),
         'state_schema_version':'1.0',
         'transition_history':[],
         'topology_migrations':[],
         'completed_substeps':[],
         'current_substep':'',
         'reopen_history':[],
-        'reset_history':[{
+        'reset_history':([] if clean else [{
             'at':now(),'reason':args.reason,'note':getattr(args,'note','') or '',
             'archive':relpath(archive),'invalidated_handoffs':invalidated,
             'previous_current_step':archive_data['previous_current_step'],
             'previous_completed_steps':archive_data['previous_completed_steps'],
             'previous_active_change_id':archive_data['previous_active_change_id'],
             'previous_baseline_version':archive_data['previous_baseline_version'],
-        }],
+        }]),
         'baseline':{},
         'approvals_history':[],
         'last_transition':None,
     }
     atomic_json(STATE,fresh)
+    append_event('reset',reason=args.reason,clean=clean,archive=(relpath(archive) if archive else ''),
+                 invalidated_handoffs=len(invalidated))
     print('STATE_RESET=UNINITIALIZED')
     print('CURRENT_STEP=01-project-bootstrap')
-    print('ARCHIVE='+relpath(archive))
+    if archive: print('ARCHIVE='+relpath(archive))
     print('INVALIDATED_HANDOFFS='+str(len(invalidated)))
     return 0
 
@@ -767,6 +884,7 @@ def cmd_reopen(args):
     removed_approvals=supersede_approvals(s,set(removed),args.reason)
     invalidated=invalidate_handoffs(removed,args.reason,'reopen',cid)
     s['completed_steps']=[x for x in s['completed_steps'] if x not in removed]
+    s['skipped_steps']=[x for x in s.get('skipped_steps',[]) if x not in removed]
     s['pending_approvals']=[x for x in s.get('pending_approvals',[]) if item_step(x) not in removed]
     s['blocked_items']=[x for x in s.get('blocked_items',[]) if item_step(x) not in removed]
     s['current_step']=sid
@@ -776,11 +894,47 @@ def cmd_reopen(args):
         'reason':args.reason,'note':getattr(args,'note','') or '',
         'removed_approvals':removed_approvals,'invalidated_handoffs':invalidated})
     atomic_json(STATE,s)
+    append_event('reopen',step_id=sid,removed_steps=len(removed),reason=args.reason)
     print('REOPENED='+sid)
     print('REMOVED='+', '.join(removed))
     print('SUPERSEDED_APPROVALS='+str(len(removed_approvals)))
     print('INVALIDATED_HANDOFFS='+str(len(invalidated)))
     print('CURRENT_STEP='+sid)
+    return 0
+
+def cmd_abandon_change(args):
+    """Abandon the active Change without acceptance; project stages stay complete."""
+    s=load_state()
+    if s.get('pending_approvals') or s.get('blocked_items'):
+        raise ValueError('Resolve pending approvals and blockers before abandoning a Change')
+    old=s.get('active_change_id') or ''
+    if not old: raise ValueError('No active Change to abandon')
+    if args.change_id!=old: raise ValueError(f'--change-id must match active Change {old}')
+    if not args.reason or not args.reason.strip(): raise ValueError('abandon-change requires --reason')
+    change_steps=[x['id'] for x in STAGES if x['scope']=='change']
+    snapshot=[x for x in s.get('completed_steps',[]) if x in change_steps]
+    skipped_snapshot=[x for x in s.get('skipped_steps',[]) if x in change_steps]
+    superseded=supersede_approvals(s,set(change_steps),args.reason)
+    invalidated=invalidate_handoffs(change_steps,args.reason,'abandon-change',old)
+    s['completed_steps']=[x for x in s.get('completed_steps',[]) if x not in change_steps]
+    s['skipped_steps']=[x for x in s.get('skipped_steps',[]) if x not in change_steps]
+    s['pending_approvals']=[x for x in s.get('pending_approvals',[]) if item_step(x) not in change_steps]
+    s['blocked_items']=[x for x in s.get('blocked_items',[]) if item_step(x) not in change_steps]
+    s['active_change_id']=''
+    s['last_updated']=now()
+    completed=set(s['completed_steps'])
+    nxt=next((x for x in STAGES if x['id'] not in completed and all(d in completed for d in x['dependencies'])),None)
+    s['current_step']=nxt['id'] if nxt else 'ALL_STEPS_COMPLETE'
+    s.setdefault('abandoned_changes',[]).append({
+        'change_id':old,'abandoned_at':s['last_updated'],'reason':args.reason,
+        'note':getattr(args,'note','') or '','completed_steps':snapshot,'skipped_steps':skipped_snapshot,
+        'superseded_approvals':superseded,'invalidated_handoffs':invalidated})
+    atomic_json(STATE,s)
+    append_event('abandon_change',change_id=old,reason=args.reason,invalidated_handoffs=len(invalidated))
+    print('CHANGE_ABANDONED='+old)
+    print('CURRENT_STEP='+s['current_step'])
+    print('SUPERSEDED_APPROVALS='+str(len(superseded)))
+    print('INVALIDATED_HANDOFFS='+str(len(invalidated)))
     return 0
 
 def cmd_next_change(args):
@@ -803,6 +957,7 @@ def cmd_next_change(args):
         'change_id':old,'steps':change_steps,'completed_at':record.get('completed_at',''),
         'acceptance_evidence':record.get('evidence_path','')})
     s['completed_steps']=[x for x in s['completed_steps'] if x not in change_steps]
+    s['skipped_steps']=[x for x in s.get('skipped_steps',[]) if x not in change_steps]
     s['active_change_id']=args.change_id
     s['last_updated']=now()
     completed=set(s['completed_steps'])
@@ -812,6 +967,7 @@ def cmd_next_change(args):
         'at':s['last_updated'],'completed_change_id':old,'next_change_id':args.change_id,
         'note':getattr(args,'note','') or ''})
     atomic_json(STATE,s)
+    append_event('next_change',completed_change=old,active_change=args.change_id)
     print('CHANGE_CLOSED='+old)
     print('ACTIVE_CHANGE='+args.change_id)
     print('CURRENT_STEP='+s['current_step'])
@@ -832,6 +988,7 @@ def cmd_sync_baseline_index(args):
         'status_value':manifest.get('status',''),'domains':domains}
     s['last_updated']=now()
     atomic_json(STATE,s)
+    append_event('baseline_index_synced',overall_version=s['baseline'].get('overall_version',''))
     print('BASELINE_INDEX_SYNCED='+str(s['baseline']['overall_version']))
     return 0
 
@@ -858,6 +1015,29 @@ def cmd_check_methods(args):
     print(f'METHOD_EVIDENCE_PASSED={args.step}')
     return 0
 
+def cmd_check_coverage(args):
+    p=(ROOT/args.evidence).resolve() if not Path(args.evidence).is_absolute() else Path(args.evidence).resolve()
+    try:
+        p.relative_to(ROOT.resolve())
+    except ValueError:
+        print('QUESTION_COVERAGE_FAILED: evidence file must be inside project root')
+        return 1
+    try:
+        e=json.loads(p.read_text(encoding='utf-8'))
+    except Exception as exc:
+        print(f'QUESTION_COVERAGE_FAILED: cannot read evidence: {exc}')
+        return 1
+    if e.get('step_id')!=args.step:
+        print(f'QUESTION_COVERAGE_FAILED: evidence.step_id must be {args.step}')
+        return 1
+    errors=validate_coverage(e,args.step,ROOT)
+    if errors:
+        print('QUESTION_COVERAGE_FAILED')
+        for error in errors: print(' - '+error)
+        return 1
+    print(f'QUESTION_COVERAGE_PASSED={args.step}')
+    return 0
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__); sub=ap.add_subparsers(dest='cmd',required=True)
     sub.add_parser('status')
@@ -868,14 +1048,17 @@ def main():
     p=sub.add_parser('request-review'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--summary',default=''); p.add_argument('--target',action='append',default=[]); p.add_argument('--evidence')
     p=sub.add_parser('approve'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--approver',required=True); p.add_argument('--approved-at',required=True); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
     p=sub.add_parser('check-methods'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
+    p=sub.add_parser('check-coverage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
-    p=sub.add_parser('reset-state'); p.add_argument('--reason',required=True); p.add_argument('--note')
+    p=sub.add_parser('skip-stage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--evidence')
+    p=sub.add_parser('reset-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--clean',action='store_true')
     p=sub.add_parser('next-change'); p.add_argument('--change-id',required=True); p.add_argument('--note')
+    p=sub.add_parser('abandon-change'); p.add_argument('--change-id',required=True); p.add_argument('--reason',required=True); p.add_argument('--note')
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'skip-stage':cmd_skip_stage,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'abandon-change':cmd_abandon_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods,'check-coverage':cmd_check_coverage}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())

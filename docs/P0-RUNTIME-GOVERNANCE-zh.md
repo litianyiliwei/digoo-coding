@@ -31,7 +31,7 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 - 无 pending approvals / blockers；
 - 所有必需输出真实存在且位于项目根目录内；
 - 至少一个门禁检查，所有自动化检查必须提供真实命令、`exit_code=0` 和仓库内日志文件；人工检查必须提供 reviewer 和证据文件；
-- 阶段要求人工批准时，证据中有 `approval.status=approved`、approver、approved_at；
+- 人工评审阶段由 `approve` 在 `approvals_history` 中记录 approver/approved_at/evidence 与评审哈希；evidence 中的 `approval` 块仅作描述；
 - 上游交接包存在且哈希未变化。
 
 ### UI 一致性门禁
@@ -56,7 +56,7 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 阶段完成不等于可进入下一阶段。每个阶段产物与检查完成后，必须先把流程冻结为待评审：
 
 ```bash
-python3 scripts/workflow.py request-review --step 02-requirements-analysis --summary "需求业务梳理送审"
+python3 scripts/workflow.py request-review --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json --summary "需求业务梳理送审"
 ```
 
 - `request-review` 写入 `pending_approvals` 且 **不推进** `current_step`；此后 `next-step.py` 与 `check-entry --step <下一阶段>` 均会阻断。
@@ -68,13 +68,13 @@ python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "
 ```
 
 - `approve` 校验审批证据文件真实存在，把审批记录写入 `approvals_history` 并清除该阶段 `pending_approvals`；随后才能执行 `transition`。
-- `transition` 对所有 `human_approval_required=true` 的阶段（02–10）要求存在对应的 `approvals_history` 记录；只写 evidence 中的审批或用 `handoff-create --approved` 都不能绕过。
+- `transition` 对所有人工评审阶段（01–10）要求存在未 superseded 的 `approvals_history` 记录；只写 evidence 中的审批或使用 `handoff-create` 都不能绕过。
 - `reopen` 会清除被回退阶段的审批记录，重跑后必须重新评审。
 - Claude Code 下 `.claude/settings.json` 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑 `workflow-state.json`；待评审期间同样拒绝。其他 Agent 应以 `pending_approvals` 与 `current_step` 为准自行停止。
 
 ### 审批解除与死锁边界
 
-- 当前阶段的 `pending_approvals` 不会阻塞该阶段自己的 `transition`。审批完成后，先运行 `approve` 写入 `approvals_history`，再在 evidence 中写 `approval.status=approved`、`approver`、`approved_at`，然后运行 `transition`；状态机会原子清除该阶段的待审批项。
+- 当前阶段的 `pending_approvals` 不会阻塞该阶段自己的 `transition`。审批完成后运行 `approve`（校验评审包中的产物哈希未变化并追加审批记录），再运行 `transition`（再次校验同一批哈希并原子清除该阶段待审批项）。evidence 的 `approval` 块不再要求写 `approved`。
 - 当前阶段的 `blocked_items` 可通过 evidence 的 `resolved_blockers` 解除：每项写 `step_id`、`resolution` 和已存在的仓库内证据路径；状态机会在成功转换后原子清除该阶段的阻断项。其他阶段的阻断项仍需先处理。
 - 其他阶段、其他 Change 的待审批项仍会阻止后续阶段进入。
 - 若当前阶段有待审批项但 evidence 未给出 `status=approved`，`transition` 会拒绝，状态不会推进；不存在“先推进再补审批”的路径。
@@ -91,6 +91,28 @@ python3 scripts/workflow.py reopen --step 07-detailed-design --reason "测试设
 - 追加 `reopen_history`，记录原因、被移除阶段与时间。
 - 重跑阶段后必须重新生成 evidence 与交接包；同一路径的旧 handoff manifest 会被新的 `transition` 覆盖。
 
+### 条件阶段跳过
+
+```bash
+python3 scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <id> --evidence workflow/evidence/06-figma-design-review-skip.json
+```
+
+- 只有 `"conditional": true` 的阶段可跳过（当前为无 UI Change 的 06）。
+- 跳过 evidence 必须设置 `skip: true`、理由，并包含真实的 `check-figma-audit.py --strict --no-ui` 通过检查及仓库内日志。
+- 命令把该阶段记入 `completed_steps` 与 `skipped_steps`，推进 current_step，并生成 `skipped: true`、无产物的跳过交接；下游入口接受该交接。
+- 有 UI 的 Change 不得使用 skip-stage；其 06 evidence 必须设置 `approval.required=true` 并要求已记录的用户 UI 评审。
+
+### 重置为未初始化
+
+```bash
+python3 scripts/workflow.py reset-state --reason "用户要求全新开始" --note "..."
+```
+
+- 将完整旧状态归档到 `workflow/evidence/state-reset-<timestamp>.json`。
+- 设置 `completed_steps=[]`、`current_step=01-project-bootstrap`，清空 active_change_id、pending/blocked、审批、transition 与 baseline 索引，并在 `reset_history` 记录归档指针。
+- 将所有现有 handoff 标记为 invalidated；旧 evidence 保留供审计。
+- 这是管理性重置，不是阶段转换，仅按用户明确指示使用。
+
 ### 多 Change 迭代
 
 ```bash
@@ -100,6 +122,8 @@ python3 scripts/workflow.py next-change --change-id change-b
 - 仅在当前 Change 的 05–10 全部完成、无 pending/blocker、且 `transition_history` 中存在该 Change 的 10 验收记录时可用。
 - 把 05–10 归档到 `completed_changes`，保留项目级 01–04，切换 `active_change_id`，并把 `current_step` 设回 05。
 - 第一个 Change 仍从 04 正常进入 05；不支持多个 Change 并发调度。
+- `abandon-change --change-id <id> --reason <text>` 可在未验收时放弃当前 Change：supersede 审批、失效发出的 handoff、从 `completed_steps` 移除 05–10、清空 `active_change_id`，并记录 `abandoned_changes`。Change 目录保留供审计，不做归档。
+- 所有会写状态的命令都会追加一行到 `workflow/state-events.jsonl`（`review_requested`、`approved`、`transition`、`reopen`、`skip`、`abandon_change`、`next_change`、`reset`、`migrate`、`baseline_index_synced`）。JSONL 为二级审计数据，`workflow-state.json` 仍是运行状态。
 
 ### 声明式输出完整性
 
@@ -166,11 +190,11 @@ workflow/handoffs/
 python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/07-detailed-design--08-implementation-orchestrator.json
 ```
 
-`handoff-create` 仅用于人工确认的恢复/重建；不可用它绕过失败门禁或审批。若状态已经提交但进程在生成 manifest 前中断，应使用原阶段的已批准 evidence 重新生成：`python3 scripts/workflow.py handoff-create --from-step <from> --to-step <to> --change-id <id> --evidence <original-stage-evidence.json>`。对于项目级阶段不传 `--change-id`；不得使用手工 `--file` 方式重建 15 Verifier 交接，因为必须保留独立验证器检查证据。
+`handoff-create` 仅用于人工确认的恢复/重建；必须提供原阶段的 `--evidence`，不再接受手工 `--file`；不得用它绕过失败门禁或审批。09 独立验证交接必须保留 Verifier 证据和 PASS 证明。
 
 ### 声明式可变产物
 
-- 若某产物同时被更晚阶段声明为输出（例如 `baseline-status.md` 由 01/03、`design.md` 由 05/07、`baseline-impact.md` 由 05/07、`lessons/decisions/assumptions` 由 02/10），交接 manifest 会写入 `mutable_by_design: true`。`traceability.csv` 由 07 初始化并合并，08–10 只读，不再声明为后续输出。
+- 若某产物同时被更晚阶段声明为输出（例如 `baseline-impact.md` 由 05/07、`figma-layout.csv` 由 06/07），交接 manifest 会写入 `mutable_by_design: true`。`design.md` 仅归 07 所有（05 只在 `proposal.md` 记录初始决策）。`baseline-status.md` 归 01 所有、由 03 更新，但属于 volatile，哈希不锁定。`traceability.csv` 由 07 初始化并合并，08–10 只读，不再声明为后续输出。
 - 下游核验对这类产物只要求文件仍存在，不比较原始哈希；未被后续阶段声明的产物仍严格比对 SHA-256。
 - 该标记由 `transition` 与 `handoff-create` 根据 `STEP-ARTIFACT-CONTRACTS.json` 自动生成，不允许手工声明。
 

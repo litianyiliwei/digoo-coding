@@ -35,7 +35,7 @@ Every AC has evidence or an explicit block; do not claim completion without acce
 - Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
 ## Recommended Checks
-`scripts/verify-before-completion.sh <change-id>`
+`scripts/check-acceptance.py <change-id>` (mandatory acceptance gate), `scripts/verify-before-completion.sh <change-id>`, and `python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase acceptance`.
 
 
 ## Actual Tool Invocation Requirements
@@ -43,7 +43,7 @@ Every AC has evidence or an explicit block; do not claim completion without acce
 - **Superpowers:** Use `verification-before-completion` to verify real test evidence, and use `requesting-code-review`/`receiving-code-review` when necessary. Stage evidence must write `methods` (at least 1 decision and a real evidence path) and run `python scripts/check-method-evidence.py --step 10-acceptance-audit --evidence <evidence.json>`. When `design/interface-catalog.csv` exists, verify row by row the interface_id's owner, tests, and real-device/simulator/double/manual evidence; if missing, archiving is not allowed. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, use `mode=equivalent` and write `reason`.
 - **OpenSpec:** Run `openspec status --change <id>` and `openspec validate <id> --strict`; only after manual approval and all gates passing may you run `openspec archive <id>`, without using `-y` to bypass confirmation. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** Update `workflow-state.json` only after artifacts are written to the specified paths and the gates pass; when there are pending approvals or verification failures, record the block and do not advance to the next stage.
+- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
 
 ## Baseline Write-Back Rules During Acceptance (Mandatory)
 
@@ -62,7 +62,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 - **Outputs for this stage:** openspec/changes/<change-id>/design/evidence/acceptance.md (including `## UI acceptance` PAGE-by-PAGE sign-off for UI Changes: Figma node, running system entry, differences/approval, acceptance method, reviewer); acceptance report and approval records; applicable project baseline documents/version registration/in-flight Change recheck; OpenSpec archive results and updated main specs (only after approval). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
 - **Downstream handoff:** Accepted and archived capability specs, acceptance evidence, and dependencies of subsequent Changes. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** Update `workflow-state.json` only after real artifacts are written to disk, gates pass, and required approvals are complete; drafts/artifacts pending review must not be recorded as completed.
+- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 
 
 ## Independent Verification Precondition Gate (P0)

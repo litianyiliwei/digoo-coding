@@ -58,7 +58,7 @@ The full Superpowers `brainstorming` process requires writing a standalone desig
 ### 07 Detailed Design
 
 - Change type: modifying existing feature code or new feature development; do not default.
-- If modifying existing feature code: require the code address (repository/path/branch/commit), actually explore files/classes/functions/data structures/tests/migrations; write them into `### Impact of Changes to Existing Code` in `design.md` (files/classes/functions/interfaces/tables/tests, modification strategy, compatibility, migration/rollback, risks, verification method); BLOCKED when the code is inaccessible.
+- If modifying existing feature code: require the code address (repository/path/branch/commit), actually explore files/classes/functions/data structures/tests/migrations; write them into `### Existing Code Change Impact` in `design.md` (files/classes/functions/interfaces/tables/tests, modification strategy, compatibility, migration/rollback, risks, verification method); BLOCKED when the code is inaccessible.
 - Third-party interfaces: cross-check with the 03 list; create a `THIRD_PARTY_API` row in `interface-catalog.csv` for each third-party interface, recording provider/protocol/authentication/input-output/errors/timeout retry idempotency/SLA/quota/sandbox/data sharing privacy/test_ids/owner; tests cover sandbox, simulator, or manual verification via `interface_ids`/`fakes_env` in `test-cases.csv`.
 
 ## Method Evidence

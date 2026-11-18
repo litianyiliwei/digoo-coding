@@ -26,6 +26,8 @@
 | `check-design-sections.py --change <id>` | `design.md` 五个统一章节及必需子章节，包括 `### 响应式与视口规则` / `### 页面几何与保真断言`；UI Change 必须具有填写了 `route`/`dom_selector` 的 `figma-layout.csv` | 详细设计不只是标题外壳，且运行时断言映射可执行 | 字段语义正确 |
 | `check-interface-catalog.py --change <id> [--strict] [--require-native]` | 跨边界接口目录：必需字段、HTTP_API ↔ OpenAPI operationId 双射、每接口 TEST 与追踪行；`--require-native` 要求存在 `NATIVE_BRIDGE` 行 | 接口清单结构闭合且测试/追踪已链接 | 契约与运行时行为正确 |
 | `check-method-evidence.py --step <id> --evidence <json>` | 根据契约 `method_policy` 校验阶段证据的 `methods` 块：skill/mode/questions/alternatives/decisions/artifact section/evidence | 方法参与已记录并引用真实产物 | 问题是否明智或决策是否正确 |
+| `check-question-coverage.py --step <id> --evidence <json>` | 根据 `question_coverage_policy`（02/03/05/07）校验阶段证据的 `question_coverage` 块：每个必答条目恰好一次，并有落点工件，或明确的 n/a/open/deferred 状态及所需字段 | 必答问题集已处理并落到真实工件 | 答案是否正确；方法证据仍独立 |
+| `test-question-coverage.py` | 问题覆盖检查器的正向/负向夹具 | 检查器回归能被捕获 | 真实项目答案正确 |
 | `test-interface-catalog.py` | 接口目录检查器的正向/负向夹具 | 检查器回归能被捕获 | 真实项目接口正确 |
 | `check-reference-research.py --strict` | 阶段 02 参考研究：研究问题、参考产品、带 URL/日期的真实来源、对比、结论/影响映射 | 研究记录结构完整 | 研究结论正确 |
 | `check-architecture-baseline.py --strict` | 阶段 03 既有系统与第三方基线：`现有系统二开约束` 记录代码访问，`第三方接口依赖清单` 与 `第三方接口与集成约定` 存在，第三方数据流存在，且 `LEGACY-*`/`EXT-*` 约束已登记 | 既有系统/第三方访谈结果写入架构基线并登记 | 约束本身在技术上正确 |
@@ -49,6 +51,7 @@
 | `workflow.py status` | 展示工作流状态 | 状态 JSON 可读取且阶段 ID 合法 | 业务产物真实完成 |
 | `workflow.py check-entry --step <id>` | 阶段进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff | 阶段满足进入条件 | 当前阶段产物质量正确 |
 | `workflow.py check-methods --step <id> --evidence <json>` | 校验 evidence 的 `methods` 块（02–10）；`transition` 也会自动调用 | 方法证据已记录且引用真实产物 | 问题质量与决策正确性 |
+| `workflow.py check-coverage --step <id> --evidence <json>` | 校验 evidence 的 `question_coverage` 块（02/03/05/07）；`request-review` 和 `transition` 也会自动调用 | 必答条目齐全、已落点或明确分类 | 答案质量与决策正确性 |
 | `workflow.py request-review --step <id> --summary <text>` | 阶段完成后登记待评审：写入 pending_approvals 且 current_step 不前进；next-step/check-entry 随即阻断 | 送审状态已记录 | 产物质量正确 |
 | `workflow.py approve --step <id> --approver <name> --approved-at <date> --evidence <file>` | 记录用户明确批准，写入 approvals_history 并清除该阶段待评审 | 用户审批已登记 | 审批身份由脚本认证 |
 | `workflow.py transition --step <id> --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进状态；人工审批阶段必须有 approvals_history 记录 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
@@ -57,7 +60,7 @@
 | `workflow.py sync-baseline-index` | 从 baseline-manifest.json 同步 workflow-state.json 的基线版本/状态索引 | 状态索引与机器权威 Manifest 一致 | 不冻结或修改基线本身 |
 | `workflow.py handoff-verify --manifest <json>` | 校验交接包文件 SHA-256 | 交接文件未变化 | 文件语义正确 |
 | `check-independent-verification.py` | 校验独立验证报告与结构化证据；UI Change 需要逐 PAGE 的 `layout_checks`（已断言元素、最大偏差/容差、缺失元素）以及独立运行 `check-figma-layout.py` | AC/tests/revision/read-only/findings 满足 PASS 规则；UI 几何已被独立重新测量 | 无法证明 Verifier Agent 身份确实独立 |
-| `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；15 必须保留独立验证 checker 证据 |
+| `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest；必须提供 `--evidence`，不再接受 `--file` | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；09 必须保留独立验证 checker 证据 |
 
 | `baseline-governance.py audit [--require-frozen]` | 校验机器 Manifest、域状态、文件/注册表 SHA-256、约束 ID/来源/审批；`--require-frozen` 用于功能阶段 | 基线元数据与文件完整性通过 | 不等于企业身份认证；需配合 CI/受保护分支 |
 | `baseline-governance.py init-binding --change-id <id>` | 从冻结基线生成 Change 约束绑定，覆盖当前全部 ACTIVE Constraint ID | 初始绑定完整生成 | 适用性、设计结论、证据和审批仍需人/Agent填写 |

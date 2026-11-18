@@ -1,6 +1,0 @@
-Command: python scripts/check-output-context.py --stage 04 --strict
-Result:
-OUTPUT_CONTEXT_WARN: no summary outputs present for this stage/change
-Output context passed: 0 summary file(s) within budget.
-Exit code: 0
-Note: The stage contract's proposal-roadmap output is not registered as a summary-budget file.

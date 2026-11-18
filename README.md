@@ -6,14 +6,15 @@ This repository is an AI R&D workflow toolkit built for **OpenSpec + Superpowers
 
 ## Current Repository State
 
-| Item | Value |
-|---|---|
-| Workflow state | Stage `01-project-bootstrap` not completed; current stage is `01-project-bootstrap` (project bootstrap & toolchain check) |
-| Active change | None |
-| Pending approvals / blockers | None |
-| Project baseline | `v0.1.0` DRAFT; none of the six baseline domains is frozen |
-| OpenSpec | No active changes and no main specs (`openspec/changes/` and `openspec/specs/` are empty skeletons) |
-| Business source code | None |
+Do not trust a static snapshot here; the workflow state is machine-managed and changes through `scripts/workflow.py`:
+
+```bash
+python scripts/workflow.py status        # current stage, approvals, reset/reopen history
+python scripts/next-step.py              # read-only next-stage suggestion
+openspec list --changes                  # active OpenSpec Changes
+```
+
+The baseline authority is `docs/architecture/baseline-manifest.json` (readable mirror: `docs/architecture/baseline-status.md`). The repository currently contains the AI R&D workflow toolkit and no business source code.
 
 To continue the process, tell the agent “下一步 / 继续 / 接着做” (next step / continue / keep going). It first loads the `workflow-orchestrator` Skill and then determines the only safe next stage from `workflow-state.json` and the actual artifacts on disk.
 
@@ -45,7 +46,7 @@ The stage DAG has a single authoritative definition in `docs/WORKFLOW-STAGES.jso
 | `docs/` | Process specifications (`PROCESS-MAP.md`, `TEMPLATE-POLICY.md`, `BASELINE-FEATURE-INTERACTION.md`, etc.) and project-level baseline skeletons |
 | `openspec/` | OpenSpec configuration and the Change/spec directories (currently empty skeletons) |
 | `workflow/` | Stage evidence under `evidence/` and SHA-256 handoff manifests under `handoffs/` |
-| `workflow-state.json` | Cross-stage state index; advanced only through `scripts/workflow.py transition`, never edited by hand |
+| `workflow-state.json` | Cross-stage state index; written only by `scripts/workflow.py` commands (`request-review`, `approve`, `transition`, `reopen`, `reset-state`), never edited by hand |
 | `AGENTS.md` | Repository-level agent conventions (process entry points, template policy, agent boundaries) |
 
 ## Quick Start
@@ -57,10 +58,11 @@ python scripts/next-step.py            # Read-only: print the next stage
 python scripts/workflow.py status      # Workflow state summary
 python scripts/workflow.py check-entry --step 01-project-bootstrap
 python scripts/check-package.py        # Toolkit self-check
+bash scripts/ci-check.sh               # Full repository CI checks
 bash scripts/check-required-files.sh   # Baseline file presence (non-strict)
 ```
 
-Before entering a stage, run `check-entry --step <id>` (a non-zero exit code means execution is forbidden). After finishing a stage, produce evidence as instructed and run `workflow.py transition`.
+Before entering a stage, run `check-entry --step <id>` (a non-zero exit code means execution is forbidden). After finishing a stage, run the checks, record evidence, and run `workflow.py request-review`; end the turn and wait for the user's explicit "review passed <step-id>", then run `approve` and `transition`.
 
 ## Core Rules
 
@@ -83,6 +85,11 @@ Before entering a stage, run `check-entry --step <id>` (a non-zero exit code mea
 - [docs/BASELINE-FEATURE-INTERACTION.md](docs/BASELINE-FEATURE-INTERACTION.md) — two-way governance between project baselines and feature Changes
 - [docs/TEMPLATE-POLICY.md](docs/TEMPLATE-POLICY.md) — output template governance
 - [docs/STEP-ARTIFACT-CONTRACTS.md](docs/STEP-ARTIFACT-CONTRACTS.md) — stage handoff contracts (authoritative list)
+- [docs/QUESTION-COVERAGE-CHECKLIST.md](docs/QUESTION-COVERAGE-CHECKLIST.md) — per-stage question coverage for 02/03/05/07 (required by stage evidence)
 - [scripts/README.md](scripts/README.md) — check script reference
 
 > Note: This README is the English main document. [README-zh.md](README-zh.md) is the Simplified Chinese version; both are maintained together, and the Chinese file follows this file when they diverge.
+
+## License
+
+Copyright (c) 2026 litianyiliwei. This project is licensed under the [MIT License](LICENSE).

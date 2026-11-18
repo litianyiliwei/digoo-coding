@@ -35,7 +35,16 @@ for skill in ids:
         missing_prompts.append(skill)
 if missing_prompts: errors.append("Skills missing paired Prompt: " + ", ".join(sorted(missing_prompts)))
 for p in prompt_paths:
-    if len(p.read_text(encoding="utf-8").strip())<100: errors.append(f"Prompt suspiciously short: {p.relative_to(ROOT)}")
+    text=p.read_text(encoding="utf-8")
+    if len(text.strip())<100: errors.append(f"Prompt suspiciously short: {p.relative_to(ROOT)}")
+    if p.name=='workflow-prompts.md': continue
+    lowered=text.lower()
+    if 'check-entry' not in text: errors.append(f"Prompt missing check-entry gate: {p.relative_to(ROOT)}")
+    if 'request-review' not in text: errors.append(f"Prompt missing request-review step: {p.relative_to(ROOT)}")
+    if 'approve' not in lowered: errors.append(f"Prompt missing approve step: {p.relative_to(ROOT)}")
+    if 'review passed' not in lowered: errors.append(f"Prompt missing canonical 'review passed' phrase: {p.relative_to(ROOT)}")
+    if 'update `workflow-state.json`' in lowered or 'read/update `workflow-state.json`' in lowered:
+        errors.append(f"Prompt instructs direct workflow-state update: {p.relative_to(ROOT)}")
 # Validate per-step input/output/handoff contracts.
 contract_check = subprocess.run([sys.executable, str(ROOT / "scripts/check-step-contracts.py")], capture_output=True, text=True)
 if contract_check.returncode:

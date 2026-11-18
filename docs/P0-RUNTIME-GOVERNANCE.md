@@ -31,8 +31,8 @@ The state machine advances only when all of the following conditions hold simult
 - no pending approvals / blockers;
 - all required outputs actually exist and are located inside the project root;
 - at least one gate check, where every automated check must supply a real command, `exit_code=0`, and an in-repository log file; manual checks must supply a reviewer and an evidence file;
-- when the stage requires human approval, the evidence contains `approval.status=approved`, approver, and approved_at;
-- the upstream handoff package exists and its hash is unchanged.
+- human-reviewed stages (01–10) have a non-superseded `approvals_history` record written by `approve`; the evidence `approval` block is descriptive;
+- the upstream handoff package exists and non-volatile artifact hashes are unchanged (volatile machine-managed files are existence-checked only).
 
 ### UI Consistency Gate
 
@@ -56,7 +56,7 @@ State files are written using a temporary file plus atomic replacement and an ex
 Stage completion does not equal permission to enter the next stage. After each stage's artifacts and checks are complete, the process must first be frozen as pending review:
 
 ```bash
-python3 scripts/workflow.py request-review --step 02-requirements-analysis --summary "Requirements business analysis submitted for review"
+python3 scripts/workflow.py request-review --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json --summary "Requirements business analysis submitted for review"
 ```
 
 - `request-review` writes `pending_approvals` and does **not** advance `current_step`; afterwards both `next-step.py` and `check-entry --step <next-stage>` will block.
@@ -93,6 +93,17 @@ python3 scripts/workflow.py reopen --step 07-detailed-design --reason "Test desi
 - Appends `reopen_history`, recording the reason, removed stages, superseded approvals, invalidated handoffs, and time.
 - After rerunning a stage, evidence and the handoff package must be regenerated; an old handoff manifest at the same path is overwritten by the new `transition`.
 
+### Conditional Stage Skip
+
+```bash
+python3 scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <id> --evidence workflow/evidence/06-figma-design-review-skip.json
+```
+
+- Only stages with `"conditional": true` may be skipped (currently 06 for no-UI Changes).
+- The skip evidence must set `skip: true`, a reason, and include a real passing `check-figma-audit.py --strict --no-ui` check with an in-repository log.
+- The command records the skipped stage in `completed_steps` + `skipped_steps`, advances the current step, and writes a skip handoff (`skipped: true`, no artifacts) that downstream entry accepts.
+- UI Changes must not use skip-stage; their 06 evidence sets `approval.required=true` and requires the recorded user UI review.
+
 ### Reset to Uninitialized
 
 ```bash
@@ -113,6 +124,8 @@ python3 scripts/workflow.py next-change --change-id change-b
 - Available only when the current Change's 05–10 are all complete, there are no pending/blocker items, and `transition_history` contains the acceptance record for that Change's 10.
 - Archives 05–10 into `completed_changes`, retains project-level 01–04, switches `active_change_id`, and sets `current_step` back to 05.
 - The first Change still enters 05 normally from 04; concurrent scheduling of multiple Changes is not supported.
+- `abandon-change --change-id <id> --reason <text>` closes an active Change **without** acceptance: it supersedes approvals, invalidates outgoing handoffs, removes 05–10 from `completed_steps`, clears `active_change_id` and records `abandoned_changes`. The Change directory is left for audit; it is not archived.
+- Every state-changing command appends an audit line to `workflow/state-events.jsonl` (`review_requested`, `approved`, `transition`, `reopen`, `skip`, `abandon_change`, `next_change`, `reset`, `migrate`, `baseline_index_synced`). The JSONL log is secondary audit data; `workflow-state.json` remains the operational state.
 
 ### Declarative Output Completeness
 
@@ -155,7 +168,7 @@ Start from `templates/workflow/stage-evidence.example.json`; the structure is de
   "checks": [
     {"name": "toolchain-check", "kind": "automated", "status": "passed", "command": "python3 scripts/check-package.py", "exit_code": 0, "log": "workflow/evidence/logs/toolchain-check.log"}
   ],
-  "approval": {"required": false, "status": "not-required"}
+  "approval": {"required": true, "status": "pending"}
 }
 ```
 
@@ -183,7 +196,7 @@ python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-
 
 ### Declarative Mutable Artifacts
 
-- If an artifact is also declared as an output by a later stage (for example, `baseline-status.md` by 01/03, `design.md` by 05/07, `baseline-impact.md` by 05/07, `lessons/decisions/assumptions` by 02/10), the handoff manifest records `mutable_by_design: true`. `traceability.csv` is initialized and merged by 07, is read-only in 08–10, and is no longer declared as a later output.
+- If an artifact is also declared as an output by a later stage (for example, `baseline-impact.md` by 05/07 or `figma-layout.csv` by 06/07), the handoff manifest records `mutable_by_design: true`. `design.md` is owned by 07 only (05 records initial decisions in `proposal.md`). `baseline-status.md` is owned by 01 and updated by 03, but is volatile, so its hash is never pinned. `traceability.csv` is initialized and merged by 07, is read-only in 08–10, and is no longer declared as a later output.
 - `handoff_policy.volatile_artifacts` in the contract additionally marks machine-managed or generated files (`workflow-state.json`, `AGENTS.md`, baseline status/manifest/registry, `BASELINE-INDEX.md`, `toolchain-report.md`). Handoffs record their existence but never their hash, so routine state, index and baseline refreshes do not invalidate an upstream approval.
 - Downstream verification only requires such artifacts to still exist and does not compare against the original hash; artifacts not declared by a later stage are still strictly compared by SHA-256.
 - This marker is generated automatically by `transition` and `handoff-create` according to `STEP-ARTIFACT-CONTRACTS.json` and may not be declared manually.

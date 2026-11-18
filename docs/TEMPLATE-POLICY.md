@@ -8,8 +8,8 @@ Not every AI reply requires a dedicated template. Templates are needed for forma
 
 | Level | Definition | Constraints | Examples |
 |---|---|---|---|
-| L1 Mandatory Template | Stable structure, downstream dependency, requires traceability or machine checking | Required fields/columns fixed; missing ones block; version-controlled | User stories/ACs, OpenSpec proposal/spec/design/tasks, page/event inventory, OpenAPI, API→IO mapping, unified detailed design (design.md), test design, traceability matrix, acceptance records |
-| L2 Recommended Template | Requires a consistent structure but allows analytical flexibility | Fixed sections; may be trimmed per project with N/A reasons noted | Requirements analysis, prototype audit, architecture baseline, technology selection, data flow, domain boundaries, Figma audit, proposal ordering, risk analysis |
+| L1 Mandatory Template | Stable structure, downstream dependency, requires traceability or machine checking | Required fields/columns fixed; missing ones block; version-controlled | User stories/ACs, OpenSpec proposal/spec/design/tasks, Figma audit/design code/layout assertions, OpenAPI, API→IO mapping, unified detailed design (design.md), test design, traceability matrix, acceptance records |
+| L2 Recommended Template | Requires a consistent structure but allows analytical flexibility | Fixed sections; may be trimmed per project with N/A reasons noted | Requirements analysis, baseline audit, architecture baseline, technology selection, data flow, domain boundaries, Figma audit, proposal ordering, risk analysis |
 | L3 Free-form | Temporary discussion, exploration, debugging, solution brainstorming | Templates not required; formal decisions must be written back | Ad-hoc chat, error troubleshooting process, alternative-solution discussion |
 
 ## 2. Division of Responsibilities Among Templates, Skills, Prompts, and Scripts

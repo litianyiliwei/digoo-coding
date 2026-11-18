@@ -15,9 +15,13 @@
 | 09 Independent Verification and Acceptance Evidence | `independent-verifier` | `prompts/09-independent-verification.md` | `openspec status --change <change-id>` + `openspec validate <change-id> --strict` + `scripts/check-independent-verification.py --report <report> --evidence <json>` (UI Changes verify, in layout_checks, the per-PAGE asserted element count/max deviation/tolerance/missing elements/verdict and independent re-run record); Stage 10 is entered only after PASS |
 | 10 Manual Acceptance, Archiving, and Baseline Write-back | `acceptance-audit` | `prompts/10-acceptance-audit.md` | `baseline-governance.py check-change --phase acceptance` + `scripts/check-acceptance.py <change-id>` + `verify-before-completion.sh` |
 
+> `00` (`workflow-orchestrator` + `prompts/00-next-step.md`) is the non-DAG orchestration entry: it verifies state, approvals and real artifacts, chooses exactly one safe next stage, and never advances state itself.
+> `06` is conditional: UI Changes run the full Figma review; no-UI Changes run `check-figma-audit --strict --no-ui` and then `workflow.py skip-stage`, producing a skip handoff instead of a human review.
+
 ## Method and Evidence Gates
 
 - Stage evidence for 02–10 must include a `methods` block; `python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` can validate it separately, and `workflow.py transition` automatically calls the same logic.
+- Stage evidence for 02/03/05/07 must also include a `question_coverage` block; `python scripts/check-question-coverage.py --step <step-id> --evidence <evidence.json>` validates every required item from `docs/QUESTION-COVERAGE-CHECKLIST.md`, and `workflow.py request-review` / `transition` call it automatically.
 - The `brainstorming` for 02/03/04/05/07 must record at least questions/alternatives/decisions; 03/07 require at least 4 questions and 2 alternatives. Without such records, the stage must not advance.
 - 03 must discuss "new system / secondary development based on an existing system / hybrid, code location, third-party interfaces": for secondary development, actually read the code and write it into the `Existing System Secondary-Development Constraints` section of `technology-decisions.md` and the `LEGACY-*` entries of `constraint-registry.json`; third-party interfaces are written into `Third-Party Interface Dependency List`, EXTERNAL data flows, and API conventions.
 - 07 must discuss "modification of existing feature code / new feature development, code location, third-party interfaces": when modifying existing features, actually read the code and write it into `### Existing Code Change Impact` in `design.md`; third-party interfaces are written into `THIRD_PARTY_API` rows of `interface-catalog.csv` and test/fakes evidence.
@@ -51,6 +55,7 @@ For formal artifact template levels and paths, refer to `docs/TEMPLATE-POLICY.md
 ## Conversational Continuation Flow
 
 - In an Agent with repository access and tool execution capability, use `prompts/00-next-step.md` or say "next step".
+- After a stage's artifacts and checks are ready, run `workflow.py request-review --evidence ...`, present the handoff report, and end the turn. Only after the user explicitly replies "review passed <step-id>" run `approve` and then `transition`.
 - `workflow-state.json` is only used for locating; the AI must check the real files, approval records, and OpenSpec CLI status.
 - Project baseline stages differ from feature Change stages: the requirements business analysis stage only reads existing OpenSpec specs; a Change is created only after the proposal is approved.
 - When there is a pending approval, a blocker, missing prerequisite artifacts, or a CLI validation failure, the process must not advance automatically.

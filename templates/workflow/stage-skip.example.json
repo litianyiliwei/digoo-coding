@@ -1,0 +1,17 @@
+{
+  "step_id": "06-figma-design-review",
+  "change_id": "replace-with-change-id",
+  "skip": true,
+  "reason": "Approved Change scope contains no user-facing UI.",
+  "conditional_reason": "No pages, visual components, or Figma assets are part of this Change.",
+  "checks": [
+    {
+      "name": "no-ui check",
+      "kind": "automated",
+      "status": "passed",
+      "command": "python scripts/check-figma-audit.py --change replace-with-change-id --strict --no-ui --reason \"Approved Change scope contains no user-facing UI.\"",
+      "exit_code": 0,
+      "log": "workflow/evidence/logs/06-no-ui.log"
+    }
+  ]
+}

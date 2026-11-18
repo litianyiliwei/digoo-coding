@@ -34,6 +34,34 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+TEXT_SUFFIXES = {".md", ".csv", ".json", ".yaml", ".yml", ".txt", ".sh", ".py", ".ts", ".js", ".vue", ".tsx", ".jsx", ".html"}
+
+
+def _digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def sha256_canonical(path: Path) -> str:
+    """Line-ending-insensitive hash for text baselines; raw hash for binaries."""
+    data = path.read_bytes()
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        data = data.replace(b"\r\n", b"\n")
+    return _digest(data)
+
+
+def digest_matches(stored: str, path: Path) -> bool:
+    """Accept a stored hash produced from LF, CRLF or the current checkout."""
+    if not stored:
+        return False
+    data = path.read_bytes()
+    candidates = {_digest(data)}
+    if path.suffix.lower() in TEXT_SUFFIXES:
+        lf = data.replace(b"\r\n", b"\n")
+        candidates.add(_digest(lf))
+        candidates.add(_digest(lf.replace(b"\n", b"\r\n")))
+    return stored in candidates
+
+
 def canonical_sha(value) -> str:
     raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
@@ -211,7 +239,7 @@ def validate_manifest(manifest, registry, require_frozen=False):
                 if digest:
                     if not HEX.match(str(digest)):
                         errors.append(f"{domain}: invalid SHA-256 for {rel}")
-                    elif cfg.get("status") == "FROZEN" and sha256(p) != digest:
+                    elif cfg.get("status") == "FROZEN" and not digest_matches(digest, p):
                         errors.append(f"{domain}: baseline file drift: {rel}")
                 elif require_frozen or cfg.get("status") == "FROZEN":
                     errors.append(f"{domain}: missing SHA-256 for frozen baseline file: {rel}")
@@ -233,7 +261,7 @@ def validate_manifest(manifest, registry, require_frozen=False):
     if reg_hash:
         if not HEX.match(str(reg_hash)):
             errors.append("constraint_registry.sha256 is not a valid SHA-256")
-        elif manifest.get("status") == "FROZEN" and sha256(REGISTRY) != reg_hash:
+        elif manifest.get("status") == "FROZEN" and not digest_matches(reg_hash, REGISTRY):
             errors.append("constraint registry drift: docs/architecture/constraint-registry.json")
     elif require_frozen or manifest.get("status") == "FROZEN":
         errors.append("frozen baseline requires constraint_registry.sha256")
@@ -511,12 +539,16 @@ def cmd_refresh_hashes(args):
     manifest, registry = read_inputs()
     if manifest.get("status") == "FROZEN":
         raise ValueError("refusing to refresh hashes while baseline is FROZEN; run open-amendment before editing frozen baseline files")
-    for cfg in manifest.get("domains", {}).values():
+    history = manifest.get("amendment_history") or []
+    open_domains = set(history[-1].get("domains", [])) if history and history[-1].get("status") == "OPEN" else set()
+    for domain, cfg in manifest.get("domains", {}).items():
+        if open_domains and domain not in open_domains:
+            continue
         for item in cfg.get("files", []):
             p = safe_file(item["path"])
             if not p.is_file(): raise ValueError(f"missing baseline file: {item['path']}")
-            item["sha256"] = sha256(p)
-    manifest.setdefault("constraint_registry", {})["sha256"] = sha256(REGISTRY)
+            item["sha256"] = sha256_canonical(p)
+    manifest.setdefault("constraint_registry", {})["sha256"] = sha256_canonical(REGISTRY)
     save_json(MANIFEST, manifest)
     print("BASELINE_HASHES_REFRESHED")
     return 0
