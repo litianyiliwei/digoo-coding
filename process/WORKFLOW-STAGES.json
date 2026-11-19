@@ -8,7 +8,8 @@
       "prompt": "prompts/01-project-bootstrap.md",
       "dependencies": [],
       "scope": "project",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "low"
     },
     {
       "id": "02-requirements-analysis",
@@ -19,7 +20,8 @@
         "01-project-bootstrap"
       ],
       "scope": "project",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "03-project-architecture-baseline",
@@ -30,7 +32,8 @@
         "02-requirements-analysis"
       ],
       "scope": "project",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "04-proposal-planning",
@@ -41,7 +44,8 @@
         "03-project-architecture-baseline"
       ],
       "scope": "project",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "low"
     },
     {
       "id": "05-feature-requirements",
@@ -52,7 +56,8 @@
         "04-proposal-planning"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "06-figma-design-review",
@@ -64,7 +69,8 @@
       ],
       "scope": "change",
       "conditional": true,
-      "human_approval_required": false
+      "human_approval_required": false,
+      "risk_level": "low"
     },
     {
       "id": "07-detailed-design",
@@ -75,7 +81,8 @@
         "06-figma-design-review"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "08-implementation-orchestrator",
@@ -86,7 +93,8 @@
         "07-detailed-design"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "09-independent-verification",
@@ -97,7 +105,8 @@
         "08-implementation-orchestrator"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     },
     {
       "id": "10-acceptance-audit",
@@ -108,7 +117,8 @@
         "09-independent-verification"
       ],
       "scope": "change",
-      "human_approval_required": true
+      "human_approval_required": true,
+      "risk_level": "high"
     }
   ]
 }

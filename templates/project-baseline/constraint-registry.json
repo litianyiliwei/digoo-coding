@@ -9,6 +9,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "MUST",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "跨模块调用必须经过显式模块契约",
       "rule": "模块间调用必须经过已声明的模块接口或集成契约，不得依赖对方未声明的内部实现。",
@@ -32,6 +33,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "PROHIBITED",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "禁止跨模块直接写入他方拥有的数据",
       "rule": "功能不得绕过数据所有者的模块契约，直接写入其他模块拥有的数据；批准的共享数据库例外必须显式登记。",
@@ -55,6 +57,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "MUST",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "公共 API 必须明确认证授权策略",
       "rule": "每个新增或修改的公共 API 必须声明认证、授权、匿名访问例外和权限失败语义。",
@@ -78,6 +81,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "MUST",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "公共 API 必须遵循统一错误契约",
       "rule": "新增或修改的公共 API 必须遵循项目批准的错误响应结构、错误码和可观测性约定。",
@@ -101,6 +105,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "MUST",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "前端请求必须通过统一请求层",
       "rule": "前端业务组件不得自行创建绕过项目统一请求层的网络客户端；特殊通道必须经批准登记。",
@@ -124,6 +129,7 @@
       "revision": "1.0",
       "status": "DRAFT",
       "level": "MUST",
+      "critical": false,
       "scope": "ALL_CHANGES",
       "title": "每个行为变更必须具有可追踪的验证证据",
       "rule": "每个行为变更必须把验收标准映射到测试或明确的人工验证证据；未执行的测试不得标记为通过。",
@@ -135,6 +141,30 @@
       "enforcement": {
         "type": "MANUAL",
         "validator": "",
+        "evidence_required": true
+      },
+      "owner": "",
+      "approved_by": "",
+      "approved_at": ""
+    },
+    {
+      "id": "QUALITY-STATIC-001",
+      "domain": "test_quality",
+      "revision": "1.0",
+      "status": "RETIRED",
+      "level": "MUST",
+      "critical": false,
+      "scope": "ALL_CHANGES",
+      "title": "Every Change must pass the frozen static analysis gates",
+      "rule": "Every Change's code must pass the frozen static analysis gates with zero blocking findings and no invalid Change-scoped waivers; verify each Change with `python scripts/check-static-analysis.py --change <change-id>`.",
+      "rationale": "Default template retires this constraint because static analysis is not adopted by default; set it to ACTIVE when the 03 decision adopts the gates, or leave RETIRED when it does not. It prevents lint, formatting, and type findings from entering the codebase and keeps verification evidence machine-sourced.",
+      "source": {
+        "file": "docs/architecture/test-strategy.md",
+        "section": "Static Analysis and Quality Gates"
+      },
+      "enforcement": {
+        "type": "AUTOMATED",
+        "validator": "scripts/check-static-analysis.py",
         "evidence_required": true
       },
       "owner": "",

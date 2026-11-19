@@ -2,7 +2,7 @@
 
 > Language: English | [简体中文](QUESTION-COVERAGE-CHECKLIST-zh.md)
 
-> Status: DRAFT (process aid; integrated into stage evidence checks for 02/03/05/07; not a formal artifact)
+> Status: RECOMMENDED (stage elicitation aid; not a hard gate; the evidence block is optional)
 > Change ID: N/A (process document)
 > Scope: 02 Requirements business analysis, 03 Overall project architecture design, 05 Proposal-level requirements analysis, 07 Detailed design/interface/test design
 > Related requirements/AC: N/A (process document)
@@ -11,24 +11,24 @@
 
 ## 1. Purpose and Use
 
-The current prompts are strong at artifact structure but uneven at elicitation. This checklist turns "what downstream stages need" into a per-stage question list. It does not replace the stage contracts or the method-evidence gate; it is a working aid for stage execution and review.
+The prompts are strong at artifact structure but uneven at elicitation. This checklist turns "what downstream stages need" into a per-stage question list. It is a working aid for stage execution and review, not a machine gate: stages decide which items apply and are not required to record a row for every item.
 
 Use it as follows:
 
-1. At stage start, copy the table for the current stage into the stage working notes.
-2. For every item, record one status: `ANSWERED`, `N/A`, `OPEN`, or `DEFERRED`.
-3. Write the answer into the declared artifact section; do not leave it only in chat. Unknown or unconfirmed items go to `docs/product/open-questions.md` with an owner and blocking condition.
-4. At stage end, attach the filled table to the handoff report and check the stage-exit rule in Section 4.
-5. At review, ask the downstream-consumption question: **can the next stage produce its declared artifacts without asking the user again?**
+1. At stage start, skim the table for the current stage and pick the questions that actually affect this project or Change.
+2. Use the suggested questions to prepare interviews; skip items that genuinely do not apply rather than producing "n/a" compliance rows.
+3. Write answers into the declared artifact section; unknown or unconfirmed items go to `docs/product/open-questions.md` with an owner and blocking condition.
+4. At stage end, apply the downstream-consumption question: **can the next stage produce its declared artifacts without asking the user again?**
+5. If it helps the stage record coverage, add an optional `question_coverage` block to the evidence; it is shape-checked but does not require a fixed item list.
 
-Status values:
+When a stage does record `question_coverage`, the status vocabulary is:
 
 | Status | Meaning | Required record |
 |---|---|---|
 | `ANSWERED` | The question has a real answer | Answer summary, source, landing point |
-| `N/A` | The item genuinely does not apply | Reason and approver |
-| `OPEN` | The answer is unknown or unconfirmed | Owner, blocking condition, target date |
-| `DEFERRED` | Deliberately postponed | Approver, target stage/Change |
+| `N/A` | The item genuinely does not apply | Reason |
+| `OPEN` | The answer is unknown or unconfirmed | Owner, blocking condition, open-question file |
+| `DEFERRED` | Deliberately postponed | Reason, approver, target stage/Change |
 
 ## 2. Current Coverage Snapshot
 
@@ -92,6 +92,7 @@ The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/pr
 | 03-T07-02 | Offline, degradation, push, deep links | What are the offline cache, sync-conflict, permission-denial/degradation, push/deep-link, hot-update, and app-store compliance rules? | `frontend-conventions.md`; `data-flows.md` | 05 offline AC; 06 interaction; 07 frontend/native design | [ ] |
 | 03-T08-01 | Reporting, BI, print, export, read model | Are reports/BI/printing/export/read models in scope, and what are their data sources, refresh frequency, permissions, and export formats? | `system-context.md`; `containers-and-deployment.md`; `api-conventions.md`; `data-flows.md` | 05 report AC; 06 print layout; 07 IO/export design | [ ] |
 | 03-T09-01 | NFR frozen as verifiable constraints | Are all NFRs quantified into verifiable constraints, each with an owner, verification method, and evidence path? | `constraint-registry.json`; `test-strategy.md` | 05 NFR AC; 07 NFR tests; 08/09 verification | [ ] |
+| 03-T09-02 | Static analysis adoption and toolchain | Does this project adopt static-analysis gates? If not, record the decision and reason. If yes, per selected language, which tools (lint/format/type/style) are chosen, with what version pinning, package/plugin list, config landing paths, blocking severities and zero-finding policy, and what waiver policy (Change-scoped file, approver, expiry)? Can a from-scratch repository run them offline (no package fetch)? | `technology-decisions.md` `## Static Analysis Toolchain`; `test-strategy.md` `## Static Analysis and Quality Gates`; `docs/architecture/quality-gates.json` (when adopted); `constraint-registry.json` `QUALITY-STATIC-001` (ACTIVE when adopted, RETIRED otherwise) | 05 applicable constraints; 07 config/waiver plan; 08 gates; 09 independent rerun; 10 acceptance | [ ] |
 | 03-T10-01 | Legacy migration and coexistence | What is the legacy data migration, dual-run, cutover, decommission, and rollback strategy, and what is the boundary between old and new systems? | `technology-decisions.md`; `containers-and-deployment.md`; `data-flows.md`; `constraint-registry.json` | 04 dependency; 05 migration AC; 07 backfill; 08 cutover | [ ] |
 | 03-T11-01 | Test strategy and test inputs | What are the test levels, contract/integration/E2E/performance/security/UAT strategy, and who provides environments, real devices, third-party sandboxes, and test data? | `test-strategy.md`; `docs/project/toolchain-report.md` | 05 verification; 07 test design; 08 execution | [ ] |
 | 03-T12-01 | Environments, release, observability, DR | What are the dev/test/staging/prod topology, network zones, domains/certificates/VPN, release/rollback/canary/feature flags, DB migration policy, logs/metrics/traces/alerts/SLO/on-call/runbook, and backup/DR? | `containers-and-deployment.md`; `test-strategy.md`; `constraint-registry.json` | 07 configs/release; 08 implementation; 10 acceptance environment | [ ] |
@@ -133,23 +134,24 @@ The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/pr
 | 07-T12-02 | Observability and SLO | Where do logs, metrics, traces, alerts, SLOs, and audit logs land, and what are the thresholds and owners? | `design.md` `### Shared Concerns`; `design/test-cases.csv` | 08 implementation; 09/10 evidence | [ ] |
 | 07-T15-01 | Test coverage and evidence | Does the test strategy cover every AC/page/operationId/IO/boundary with data, doubles, cleanup, and failure injection? | `design.md` `## Test Design`; `design/test-cases.csv`; `traceability.csv` | 08 execution; 09 verification | [ ] |
 | 07-T15-02 | Offline, sync, multi-platform, device | Where do offline cache, sync conflict, multi-platform differences, JS Bridge, and device capabilities land in components, events, and interfaces? | `design.md` `## Frontend Detailed Design`; `design/interface-catalog.csv`; `design/test-cases.csv` | 08 implementation; 09 device verification | [ ] |
+| 07-T15-03 | Static analysis config and waiver plan | When static analysis is adopted: which config files will 08 copy/pin into each stack root from the approved rule packs, do they match `quality-gates.json` (or is the deviation recorded), and which blocking findings need a Change-scoped waiver with approver and expiry inside `policy.waiver.max_days`? When not adopted, record `N/A + reason`. | `design.md` `### Static Analysis`; `design/static-waivers.json` (conditional) | 08 gates; 09 independent verification; 10 acceptance | [ ] |
 | 07-T13-01 | Design and execution owners | Who owns design, implementation, testing, and acceptance, and what are the deadlines/blocking conditions for open decisions? | `design.md` `### Key Decisions and Trade-offs`; `### Open Decisions` | 08/09/10 approvals | [ ] |
 | 07-T03-01 | Permission and audit implementation | How are permissions, data scope, masking, and audit implemented for every page, API, and IO? | `api/openapi.yaml`; frontend/backend sections; `design/test-cases.csv` | 08 implementation; 09 verification | [ ] |
 
-## 4. Stage-Exit Rules
+## 4. Recommended Stage-Exit Checks
 
-A stage may present its handoff only when:
+These are review aids, not a machine gate:
 
-1. Every checklist item for that stage is `ANSWERED`, `N/A`, `OPEN`, or `DEFERRED`.
+1. Items the stage chose to address have an answer or an explicit `N/A`/`OPEN`/`DEFERRED` status.
 2. Every `OPEN` item appears in `docs/product/open-questions.md` with an owner and blocking condition.
 3. Every `ANSWERED` item names a real landing point in a declared artifact.
 4. The stage review passes the downstream-consumption test: the next stage can produce its declared artifacts without asking the user for missing facts.
-5. Any item intentionally excluded from this stage is recorded as `DEFERRED` with an approver and target stage; it must not silently disappear.
+5. If an item was intentionally postponed, recording `DEFERRED` with an approver and target stage is recommended; skipping an inapplicable item needs no status row.
 
 ## 5. Evidence and Handoff
 
-- Stage evidence for 02/03/05/07 must include a `question_coverage` array. `python scripts/check-question-coverage.py --step <step-id> --evidence <json>` validates it, and `workflow.py request-review` / `transition` invoke the same check automatically.
-- Shape (one entry per required item; `landing` is one real artifact path, optionally with `#heading`):
+- `question_coverage` is optional in stage evidence for 02/03/05/07. If present, `python scripts/check-question-coverage.py --step <step-id> --evidence <json>` validates each entry's status and fields, rejects duplicate `item_id`s, and checks that `landing` and `open_question` paths exist. It does not require a fixed item list and allows additional item IDs; `workflow.py request-review` / `transition` re-check the same optional block automatically.
+- Shape example (entries need not cover the whole checklist; `landing` is one real artifact path, optionally with `#heading`):
 
 ```json
 "question_coverage": [
@@ -170,8 +172,7 @@ A stage may present its handoff only when:
   {
     "item_id": "02-T08-01",
     "status": "n/a",
-    "reason": "No reports or printed certificates in this release",
-    "approver": "product-owner"
+    "reason": "No reports or printed certificates in this release"
   },
   {
     "item_id": "03-T10-01",
@@ -179,15 +180,21 @@ A stage may present its handoff only when:
     "reason": "No legacy data to migrate in this release",
     "approver": "technical-lead",
     "target_step": "07-detailed-design"
+  },
+  {
+    "item_id": "CUSTOM-01",
+    "status": "answered",
+    "landing": "docs/product/open-questions.md#resolved"
   }
 ]
 ```
 
-- Attach the filled checklist to the stage handoff report as an appendix or summary table.
 - Do not claim an item is `answered` based on an assumption or an unread document. An answer without a source is `open`.
+- Attaching the checklist to the stage handoff report as an appendix or summary table is optional.
 
 ## 6. Maintenance
 
 - When a stage Prompt, Skill, template, or contract changes, update the affected checklist rows in the same change.
 - When a downstream stage discovers a missing input, add a row here and record the source stage; do not fix it only in the downstream artifact.
+- This checklist is guidance and does not change the hard gates; the optional `question_coverage` block's shape is validated by the checker.
 - This checklist does not change the current hard gates. Making it mandatory requires a separate change to the stage contracts, prompts, and validators, with the usual stage review and approval.

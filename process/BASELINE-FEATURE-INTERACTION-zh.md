@@ -22,7 +22,7 @@
 | 数据与领域基线 | `docs/architecture/logical-erd.md`、`domain-boundaries.md`、`data-flows.md` | 核心实体及关系、数据所有权、领域不变量、共享事务/一致性原则 |
 | 公共 API 基线 | `docs/architecture/api-conventions.md` | 认证授权、错误模型、版本、分页、幂等、兼容与公共响应约定 |
 | 前端工程基线 | `docs/architecture/frontend-conventions.md` | 路由、组件/设计系统、状态管理、请求层、错误和可访问性规范 |
-| 测试与质量基线 | `docs/architecture/test-strategy.md` | 测试分层、必须执行的质量门禁、测试环境和发布验证要求 |
+| 测试与质量基线 | `docs/architecture/test-strategy.md`、`docs/architecture/quality-gates.json`（采用时） | 测试分层、已采用的质量门禁（静态分析栈/工具/配置/严重度/豁免政策）、测试环境和发布验证要求 |
 | 基线治理元数据 | `docs/architecture/baseline-status.md` | 各基线域版本、生效状态、审批人、生效日期、在途修订和豁免 |
 
 OpenSpec `openspec/specs/**` 与上述设计/治理基线互补：OpenSpec 主规格描述系统已经承诺的、可观察的能力行为；项目基线文档描述跨功能复用的业务、架构、数据和工程约束。功能开始时两者都要检查，不能相互替代。
@@ -143,7 +143,7 @@ AI 可以分析、提出候选修改和生成文档，不可代替负责人批�
 
 - `docs/architecture/baseline-manifest.json`：总体/域版本、状态、审批、生效 revision、每个基线文件的 SHA-256。
 - `docs/architecture/constraint-registry.json`：稳定 Constraint ID、约束等级、适用范围、规则正文、来源章节、执行方式、负责人和审批状态。
-- `openspec/changes/<change-id>/design/baseline-binding.json`：当前 Change 对全部 ACTIVE 约束的逐条绑定、基线快照、设计证据、实现验证证据、例外审批和 rebase 结论。
+- `openspec/changes/<change-id>/design/baseline-binding.json`：当前 Change 按 manifest 的 `governance_profile` 绑定的约束（`standard` 绑定全部 ACTIVE，`lite` 只绑定 `critical: true`）、基线快照、设计证据、实现验证证据、例外审批和 rebase 结论。
 - `scripts/baseline-governance.py`：上述数据的唯一检查入口；`workflow.py` 在阶段进入/转换时调用它。
 
 ### 9.1 冻结条件
@@ -177,7 +177,7 @@ AI 可以分析、提出候选修改和生成文档，不可代替负责人批�
 python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 ```
 
-生成的 `baseline-binding.json` 必须覆盖当前注册表全部 ACTIVE 约束，禁止删除约束行。每条约束必须选择 `APPLICABLE` 或 `NOT_APPLICABLE`；N/A 必须写明理由。适用约束在设计阶段必须为 `COMPLIANT` 或 `EXCEPTION_APPROVED`，并关联真实设计证据文件。
+生成的 `baseline-binding.json` 必须覆盖 manifest `governance_profile` 要求的约束：`standard` 覆盖全部 ACTIVE，`lite` 只覆盖标记 `critical: true` 的约束。两种模式下基线快照、`baseline-impact.md`、rebase 复核与绑定批准仍然必填。禁止删除必需约束行。每条绑定约束必须选择 `APPLICABLE` 或 `NOT_APPLICABLE`；N/A 必须写明理由。适用约束在设计阶段必须为 `COMPLIANT` 或 `EXCEPTION_APPROVED`，并关联真实设计证据文件。
 
 实现阶段每条适用约束必须有 `implementation_verification.status=PASS` 和真实证据文件；确实只影响设计、不影响运行实现的约束，仍须显式写 `NOT_APPLICABLE` 和理由。`PENDING`、`NOT_RUN`、`SKIPPED` 不能视为通过。验收阶段还必须单独填写 `acceptance_verification`，以独立验收/复核证据再次确认约束遵守情况，不得直接复制实现阶段 PASS；N/A 同样必须说明理由。
 
@@ -212,3 +212,9 @@ python3 scripts/baseline-governance.py open-amendment \
 ### 9.5 约束与安全边界
 
 脚本验证的是仓库内 JSON、文件哈希、审批记录结构和证据存在性；不具备企业身份认证、电子签名或不可抵赖能力。必须把 `baseline-governance.py audit --require-frozen` 和适用 Change phase gate 接入 CI，并对基线文件/Manifest/Registry 设置 Git CODEOWNERS、受保护分支和必需审批。否则有权限直接修改脚本、状态 JSON 或绕过 CI 的 Agent/用户仍可能规避门禁。
+### 9.6 治理模式（standard / lite）
+
+- `docs/architecture/baseline-manifest.json` 通过 `governance_profile` 选择模式：`standard`（默认）或 `lite`。
+- `standard`：每个 Change 绑定全部 ACTIVE 约束，并在需求/设计/实现/验收阶段逐阶段门禁。
+- `lite`：只绑定并门禁标记 `critical: true` 的 ACTIVE 约束；其余 ACTIVE 约束仍保留在注册表中，但不要求逐 Change 行或逐阶段证据。两种模式下基线快照、`baseline-impact.md`、rebase 复核、绑定批准与审批证据仍然必填。
+- 冻结后切换模式属于基线修订；冻结前应把真正跨功能的 MUST 规则标记为 `critical`。

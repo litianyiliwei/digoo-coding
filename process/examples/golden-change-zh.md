@@ -101,7 +101,7 @@
 - 适用约束 ID、复用项、冲突与归属；
 - 结论：`COMPATIBLE` / `BLOCKED_PENDING_BASELINE_CHANGE` / `APPROVED_BASELINE_AMENDMENT`。
 
-`design/baseline-binding.json` 必须覆盖全部 ACTIVE 约束，逐条填写 `APPLICABLE` / `NOT_APPLICABLE` 与理由。
+`design/baseline-binding.json` 必须覆盖 manifest `governance_profile` 要求的约束（`standard` 全部 ACTIVE，`lite` 仅 `critical: true`），逐条填写 `APPLICABLE` / `NOT_APPLICABLE` 与理由。
 
 ## 9. 验收与回写
 

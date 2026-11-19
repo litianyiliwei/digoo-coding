@@ -9,37 +9,49 @@ from pathlib import Path
 import json, re, sys
 
 ROOT = Path(__file__).resolve().parents[1]
+GATES_REL = "docs/architecture/quality-gates.json"
+USAGE = "Usage: check-code-review.py --change <change-id> [--root <project-root>] [--strict]"
 args = sys.argv[1:]
 strict = "--strict" in args
 change = None
+root_arg = None
 if "--change" in args:
     idx = args.index("--change")
     if idx + 1 >= len(args):
-        print("Usage: check-code-review.py --change <change-id> [--strict]", file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         sys.exit(2)
     change = args[idx + 1]
     if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", change):
         print("Invalid change-id", file=sys.stderr)
         sys.exit(2)
     args = args[:idx] + args[idx + 2:]
+if "--root" in args:
+    idx = args.index("--root")
+    if idx + 1 >= len(args):
+        print(USAGE, file=sys.stderr)
+        sys.exit(2)
+    root_arg = args[idx + 1]
+    args = args[:idx] + args[idx + 2:]
 args = [a for a in args if a != "--strict"]
 if args or not change:
-    print("Usage: check-code-review.py --change <change-id> [--strict]", file=sys.stderr)
+    print(USAGE, file=sys.stderr)
     sys.exit(2)
 
-path = ROOT / "openspec/changes" / change / "design/evidence/code-review.md"
+root = Path(root_arg).resolve() if root_arg else ROOT
+
+path = root / "openspec/changes" / change / "design/evidence/code-review.md"
 if not path.is_file() or not path.stat().st_size:
-    print(f"ERROR: missing code-review evidence: {path.relative_to(ROOT)}")
+    print(f"ERROR: missing code-review evidence: openspec/changes/{change}/design/evidence/code-review.md")
     print("Stage 08 must record the code review in design/evidence/code-review.md.")
     sys.exit(1)
 
-base = ROOT / "openspec/changes" / change / "design"
+base = root / "openspec/changes" / change / "design"
 layout_check_path = base / "evidence/figma-layout-check.json"
 
 
 def resolve_artifact(raw):
     value = raw.strip().strip("`").strip().split("#", 1)[0]
-    candidates = [base / value, ROOT / value]
+    candidates = [base / value, root / value]
     if value.startswith("design/"):
         candidates.append(base / value[len("design/"):])
     return next((p for p in candidates if p.is_file()), None)
@@ -51,6 +63,37 @@ def ui_change():
         return False
     text = audit.read_text(encoding="utf-8")
     return not re.search(r"^- (?:设计来源状态|Design source status)[:：]\s*N/A\s*$", text, re.M)
+
+
+STATIC_EXIT_RE = re.compile(r"exit\s+0(?![0-9])", re.I)
+
+
+def static_table_cells(line):
+    """Return the trimmed cells of a Markdown table row, else an empty list."""
+    stripped = line.strip()
+    if not stripped.startswith("|"):
+        return []
+    return [cell.strip().strip("`").strip() for cell in stripped.strip("|").split("|")]
+
+
+def identifier_in_line(line, identifier):
+    """Match a stack/tool id as a whole table cell or on a word boundary.
+
+    Substring matching would let ``app-web`` satisfy the ``app`` gate and
+    ``lint-strict`` satisfy ``lint``; nested ids must never cross-satisfy.
+    """
+    cells = static_table_cells(line)
+    if cells:
+        return any(cell == identifier for cell in cells)
+    pattern = r"(?<![A-Za-z0-9_-])" + re.escape(identifier) + r"(?![A-Za-z0-9_-])"
+    return re.search(pattern, line) is not None
+
+
+def static_line_reports(line, stack_id, tool_id):
+    """True when one line reports the stack/tool gate with a literal ``exit 0``."""
+    return (STATIC_EXIT_RE.search(line) is not None
+            and identifier_in_line(line, stack_id)
+            and identifier_in_line(line, tool_id))
 
 
 def page_ids():
@@ -206,6 +249,88 @@ if ui_change():
                     errors.append(f"{pid}: max geometry delta {max_delta}px exceeds tolerance {tolerance}px")
                 if not page.get("element_count"):
                     errors.append(f"{pid}: figma-layout-check.json asserted zero elements")
+
+# Static-analysis evidence is mandatory once the project adopts quality gates.
+gates_path = root / GATES_REL
+if gates_path.is_file():
+    evidence_path = base / "evidence/static-analysis.json"
+    blocking = None
+    try:
+        gates_doc = json.loads(gates_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        errors.append(f"{GATES_REL} is unreadable: {exc}")
+    else:
+        stacks = gates_doc.get("stacks") if isinstance(gates_doc, dict) else None
+        if not isinstance(stacks, list):
+            errors.append(f"{GATES_REL} must contain a stacks list")
+        else:
+            blocking = set()
+            for stack in stacks:
+                if not isinstance(stack, dict) or not isinstance(stack.get("id"), str):
+                    continue
+                tools = stack.get("tools")
+                for tool in tools if isinstance(tools, list) else []:
+                    if (isinstance(tool, dict)
+                            and isinstance(tool.get("id"), str)
+                            and tool.get("mode") == "blocking"):
+                        blocking.add((stack["id"], tool["id"]))
+
+    if "## Static analysis" not in text:
+        errors.append(f"{GATES_REL} exists but code-review.md is missing the ## Static analysis section")
+        section = ""
+    else:
+        start_static = text.find("## Static analysis")
+        end_static = text.find("\n## ", start_static + len("## Static analysis"))
+        section = text[start_static:end_static if end_static >= 0 else len(text)]
+
+    if not evidence_path.is_file() or not evidence_path.stat().st_size:
+        errors.append("docs/architecture/quality-gates.json exists but "
+                      "design/evidence/static-analysis.json is missing or empty")
+    else:
+        try:
+            static_evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            errors.append(f"static-analysis.json is invalid JSON: {exc}")
+            static_evidence = None
+        if static_evidence is not None:
+            if static_evidence.get("verdict") != "PASS":
+                errors.append(
+                    f"static-analysis.json verdict is not PASS: "
+                    f"{static_evidence.get('verdict')!r}"
+                )
+            results = static_evidence.get("results")
+            if not isinstance(results, list) or not results:
+                errors.append("static-analysis.json results must be a non-empty list")
+                results = []
+            if blocking is not None:
+                section_lines = section.splitlines()
+                for stack_id, tool_id in sorted(blocking):
+                    matching = [
+                        result for result in results
+                        if isinstance(result, dict)
+                        and result.get("stack_id") == stack_id
+                        and result.get("tool") == tool_id
+                    ]
+                    if not matching:
+                        errors.append(
+                            f"static-analysis.json has no result for blocking gate "
+                            f"{stack_id}/{tool_id}"
+                        )
+                        continue
+                    for result in matching:
+                        if result.get("exit_code") != 0:
+                            errors.append(
+                                f"blocking gate {stack_id}/{tool_id}: evidence exit_code is "
+                                f"{result.get('exit_code')!r}, expected 0"
+                            )
+                    if not any(
+                        static_line_reports(line, stack_id, tool_id)
+                        for line in section_lines
+                    ):
+                        errors.append(
+                            f"## Static analysis must list a line with stack {stack_id!r}, "
+                            f"tool {tool_id!r}, and exit 0"
+                        )
 
 if errors:
     for e in errors:

@@ -186,6 +186,50 @@
           }
         }
       }
+    },
+    "static_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "stack_id",
+          "tool",
+          "command",
+          "exit_code",
+          "result",
+          "evidence"
+        ],
+        "properties": {
+          "stack_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tool": {
+            "type": "string",
+            "minLength": 1
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "result": {
+            "enum": [
+              "PASS",
+              "FAIL",
+              "NOT_RUN",
+              "PENDING",
+              "SKIPPED"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   }
 }

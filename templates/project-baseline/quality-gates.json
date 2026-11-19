@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "project": "PENDING",
+  "status": "DRAFT",
+  "policy": {
+    "blocking_severities": ["error"],
+    "require_clean_exit": true,
+    "waiver_file": "openspec/changes/<change-id>/design/static-waivers.json",
+    "waiver": {
+      "allowed": true,
+      "requires_approver": true,
+      "max_days": 90
+    },
+    "allow_network_install": false,
+    "command_timeout_seconds": 600
+  },
+  "stacks": [
+    {
+      "id": "frontend-web",
+      "language": "typescript",
+      "root": "frontend",
+      "tools": [
+        {
+          "id": "eslint",
+          "mode": "blocking",
+          "command": "npx --no-install eslint .",
+          "configs": ["eslint.config.js"]
+        },
+        {
+          "id": "prettier",
+          "mode": "advisory",
+          "command": "npx --no-install prettier --check .",
+          "configs": [".prettierrc.json"]
+        },
+        {
+          "id": "tsc",
+          "mode": "blocking",
+          "command": "npx --no-install tsc --noEmit",
+          "configs": ["tsconfig.json"]
+        }
+      ]
+    }
+  ]
+}

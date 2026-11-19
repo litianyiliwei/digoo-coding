@@ -14,8 +14,10 @@
   1. 生成 `workflow/evidence/<step-id>.json` 并运行该阶段全部检查脚本；
   2. 运行 `python scripts/workflow.py request-review --step <step-id> --evidence workflow/evidence/<step-id>.json --summary "<送审摘要>"`，生成固定产物哈希的评审包，并把流程冻结为“待评审”（`current_step` 不前进）；
   3. 按 `templates/workflow/step-handoff-report.md` 展示交接报告（产物路径、摘要、检查结果/退出码、待确认项、下一阶段输入）后**立即结束回合**，不得继续。
-- **只有用户明确回复“评审通过 <step-id>”后**，才可运行 `python scripts/workflow.py approve --step <step-id> --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再运行 `transition`。不得自行填写 approver/approved_at，不得把“产物完成”“检查通过”或 Agent 自己的判断当作批准。
+- **只有用户明确批准待评审阶段（任何无歧义的表述都算；沉默或检查通过不算）后**，才可运行 `python scripts/workflow.py approve --step <step-id> --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再运行 `transition`。不得自行填写 approver/approved_at，不得把“产物完成”“检查通过”或 Agent 自己的判断当作批准。
+- 默认 `approval_policy` 为 `standard`。risk-based 快车道需用户通过 `python scripts/workflow.py set-approval-policy --policy risk-based --reason "<原因>" --by "<用户>"` 主动开启；低风险阶段（01 初始化、04 路线图、06 Figma）门禁通过后可直接 transition，无需记录审批；高风险阶段仍保持审批要求。不得把该策略理解为整体放弃人工评审。
 - **08（实现）与 09（独立验证）同样必须等待用户评审**；09 由独立 Verifier 在独立上下文完成，Builder 不得在同一会话代跑验证并自动进入 10。
+- **静态分析门禁**：当 `docs/architecture/quality-gates.json` 存在时，08/09 门禁集合包含静态分析证据（08 为 `openspec/changes/<change-id>/design/evidence/static-analysis.json`，09 为 `static-analysis-independent.json`）；仅在该 gates 文件存在后门禁生效，不存在时无静态门禁。
 - **06 为条件阶段**：无 UI 的 Change 必须先运行 `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<理由>"`，再运行 `workflow.py skip-stage --step 06-figma-design-review --evidence workflow/evidence/06-figma-design-review-skip.json`；有 UI 的 Change 必须完成完整 Figma 评审，且 evidence 要设置 `approval.required=true`。
 - `pending_approvals` 非空时不得推进任何阶段；`workflow-state.json` 只能由 `workflow.py` 命令（`request-review`/`approve`/`transition`/`reopen`/`reset-state`/`migrate-state`）写入，`check-entry` 为只读命令；禁止直接编辑状态文件。
 - Claude Code 下由 `.claude/settings.json` 的 PreToolUse hook 拒绝写入当前阶段之后的阶段产物、已完成阶段中非 volatile 的产物、待评审期间当前阶段的声明产物，以及直接编辑 `workflow-state.json`。被拒绝时必须停止并说明，不得绕过（更换写入路径、禁用 hook 或改用其他工具规避均属违规）。Bash 驱动的写入不在该 hook 拦截范围内，属于已记录的信任边界。

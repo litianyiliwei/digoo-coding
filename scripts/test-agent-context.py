@@ -68,15 +68,15 @@ def main() -> int:
         (root / "openspec" / "changes" / "demo" / "design.md").write_text("# design\n", encoding="utf-8")
 
         ok = run(root)
-        if ok.returncode != 0 or "Lean inputs" not in ok.stdout or "Budget: 2/2 lean read groups" not in ok.stdout:
+        if ok.returncode != 0 or "Lean inputs" not in ok.stdout or "Budget (advisory): 2/2 lean read groups" not in ok.stdout:
             failures.append("lean bundle should pass within budget: " + ok.stdout + ok.stderr)
 
         (root / "process" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
             json.dumps(contract(1), ensure_ascii=False), encoding="utf-8"
         )
         over = run(root)
-        if over.returncode == 0 or "CONTEXT_BUDGET_EXCEEDED" not in over.stdout:
-            failures.append("lean bundle should fail over budget: " + over.stdout)
+        if over.returncode != 0 or "CONTEXT_BUDGET_WARNING" not in over.stdout:
+            failures.append("lean bundle should warn over the advisory budget but continue: " + over.stdout)
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -98,7 +98,7 @@ def main() -> int:
             json.dumps(stage02, ensure_ascii=False), encoding="utf-8"
         )
         optional = run(root, "02")
-        if (optional.returncode != 0 or "Budget: 3/8 lean read groups" not in optional.stdout
+        if (optional.returncode != 0 or "Budget (advisory): 3/8 lean read groups" not in optional.stdout
                 or "[OPTIONAL; absent]" not in optional.stdout):
             failures.append("Stage 02 should allow not-yet-created optional baseline files: " + optional.stdout + optional.stderr)
 

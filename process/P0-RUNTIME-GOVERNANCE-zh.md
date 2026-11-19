@@ -61,16 +61,26 @@ python3 scripts/workflow.py request-review --step 02-requirements-analysis --evi
 
 - `request-review` 写入 `pending_approvals` 且 **不推进** `current_step`；此后 `next-step.py` 与 `check-entry --step <下一阶段>` 均会阻断。
 - Agent 必须按 `templates/workflow/step-handoff-report.md` 展示交接报告并**立即结束回合**，不得在同一会话读取/执行下一阶段 Prompt/Skill 或创建下一阶段产物。
-- 只有用户明确回复“评审通过 <step-id>”后，才可记录审批：
+- 只有用户明确批准待评审阶段（任何无歧义的表述都算；沉默或检查通过不算）后，才可记录审批：
 
 ```bash
 python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at 2026-11-13 --evidence workflow/evidence/02-approval.md
 ```
 
 - `approve` 校验审批证据文件真实存在，把审批记录写入 `approvals_history` 并清除该阶段 `pending_approvals`；随后才能执行 `transition`。
-- `transition` 对所有人工评审阶段（01–10）要求存在未 superseded 的 `approvals_history` 记录；只写 evidence 中的审批或使用 `handoff-create` 都不能绕过。
+- `transition` 对当前策略要求审批的每个阶段要求存在未 superseded 的 `approvals_history` 记录（`standard` 为全部人工评审阶段；`risk-based` 仅高风险阶段）；只写 evidence 中的审批或使用 `handoff-create` 都不能绕过。
 - `reopen` 会清除被回退阶段的审批记录，重跑后必须重新评审。
 - Claude Code 下 `.claude/settings.json` 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑 `workflow-state.json`；待评审期间同样拒绝。其他 Agent 应以 `pending_approvals` 与 `current_step` 为准自行停止。
+
+### 基于风险的审批策略（可选）
+
+- 默认 `approval_policy` 为 `standard`：所有 `human_approval_required` 的阶段都需要记录用户审批。
+- 小型项目可由用户选择 `risk-based`：
+  `python3 scripts/workflow.py set-approval-policy --policy risk-based --reason "<原因>" --by "<用户>"`
+  存在待评审项时命令会拒绝，并把变更记入 `approval_policy_history`。
+- risk-based 模式下，`WORKFLOW-STAGES.json` 中 `risk_level: low` 的阶段（当前为 01 项目初始化、04 提案路线图、06 Figma）仍可运行 `request-review` 生成审计包，但不需要记录审批。`request-review` 会输出 `STATUS=RISK_BASED_FAST_TRACK`，门禁通过后可直接 `transition`。
+- 高风险阶段（02 需求、03 架构冻结、05 提案需求、07 详细设计、08 实现、09 独立验证、10 验收）保持标准审批要求。
+- 该策略是状态级设置，不是阶段产物。不得把 fast-track 理解成整体放弃人工评审：它只豁免特定低风险阶段。
 
 ### 审批解除与死锁边界
 
@@ -134,20 +144,20 @@ python3 scripts/workflow.py next-change --change-id change-b
 ### 方法证据门禁
 
 - 02–10 的 evidence 必须包含 `methods`；策略以 `process/STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy` 为准，缺失时使用 `scripts/method_evidence.py` 的内置默认策略。
-- 每条 method 记录 skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence。`brainstorming` 在 03/07 至少记录 4 个问题与 2 个备选，在 02/05 至少 3 个问题与 1 个备选；`writing-plans`、`test-driven-development`、`verification-before-completion` 至少记录 1 个决策和真实证据路径。
-- 03 的 `brainstorming` 问题/决策必须覆盖“新系统/现有系统/代码地址/第三方接口”；若二开，必须实际读取代码地址并在 `technology-decisions.md` 写“现有系统二开约束”，转换为 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
+- 每条 method 记录 skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence。校验器要求声明的必需方法技能、合法 `mode`、真实仓内证据路径，以及策略设置 `requires_artifact` 时文件与标题都存在的 `artifact_section`；它刻意不校验问题/备选/决策的最少数量，也不做主题关键词匹配——思考是否足够深由阶段评审和下游消费判定，而不是数字符串。
+- 03 的访谈必须确定系统来源（新系统/现有系统/混合），并覆盖代码地址与第三方接口；若二开，必须实际读取代码地址并在 `technology-decisions.md` 写“现有系统二开约束”，转换为 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。这些是产物层面的实质要求，不是 methods 块的关键词检查。
 - 03 结束前运行 `python scripts/check-architecture-baseline.py --strict`；缺少“现有系统二开约束”“第三方接口依赖清单”、代码访问记录、第三方数据流或 `LEGACY-*`/`EXT-*` 约束时不得冻结基线。
-- 07 的 `brainstorming` 问题/决策必须覆盖“现有功能/新功能/代码地址/第三方接口”；修改现有功能时 `design.md` 的 `### 现有代码变更影响` 必须登记文件/类/函数/接口/表/测试、修改策略、兼容性、迁移/回滚、风险；第三方接口必须进入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行并有 test/fakes 证据。
+- 07 修改现有功能时 `design.md` 的 `### 现有代码变更影响` 必须登记文件/类/函数/接口/表/测试、修改策略、兼容性、迁移/回滚、风险；第三方接口必须进入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行并有 test/fakes 证据。
 - `mode=equivalent` 只在技能确实不可用时使用，必须写 `reason`，并在 `docs/project/toolchain-report.md` 记录缺失；不能把“可用”当作“已使用”。
-- 02 的 `internet-research` 必须至少记录 3 个研究问题、2 个对比/备选、1 个决策，结果写入 `docs/product/reference-research.md`；`python scripts/check-reference-research.py --strict` 还会校验至少 3 条真实来源 URL、访问日期、参考产品状态与影响映射。无联网能力时标记 BLOCKED，不能用 `equivalent` 绕过。
+- 02 的 `internet-research` 结果必须写入 `docs/product/reference-research.md` 并通过 `python scripts/check-reference-research.py --strict`（校验真实来源 URL、访问日期、参考产品状态与影响映射）。无联网能力时标记 BLOCKED，不能用 `equivalent` 绕过。methods 块只记录调研参与，不设问题数量配额。
 - 单独校验：`python scripts/check-method-evidence.py --step <step-id> --evidence <path>`；`workflow.py transition` 会自动调用同一逻辑。
 - 交接报告第 4 节必须展示关键问题、备选、决策、未决项、产物落点与证据路径。
 
 ### 输入/输出上下文预算
 
-- 契约 `inputs` 是完整审计/溯源集；默认读取以 `input_policy.stage_profiles.lean` 为准（每阶段 ≤8 个读取组、约 ≤16000 字符）。`agent-context.py` 默认打印精简/按需清单，`--full` 才打印完整审计输入。
+- 契约 `inputs` 是完整审计/溯源集；默认读取以 `input_policy.stage_profiles.lean` 为准（建议值：每阶段约 8 个读取组、约 16000 字符）。`agent-context.py` 默认打印精简/按需清单，`--full` 才打印完整审计输入。超出建议值的读取允许在记录原因后继续，只产生 warning，不判失败。
 - 读序：`BASELINE-BRIEF` → 当前 Change 产物 → 按命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE 定向读取 → 完整基线/架构/ADR/完整 specs 仅在必要时按需读取并记录原因。
-- 输出采用引用式输出，不复制输入全文；摘要/证据文件的行数上限见 `output_policy.summary_budgets`。阶段结束可运行 `python scripts/check-output-context.py --stage <id> [--change <change-id>]`；超预算先检查是否复制了上游，必要时拆分 Change 或链接上游文件。
+- 输出采用引用式输出，不复制输入全文；摘要/证据文件的行数预算是 `output_policy.summary_budgets` 中的建议值。阶段结束可运行 `python scripts/check-output-context.py --stage <id> [--change <change-id>]`；超预算默认只报警告，`--strict` 才是主动选择强制。
 - 完整规则见 `process/INPUT-OUTPUT-POLICY.md`。
 
 ### Evidence JSON 示例
@@ -225,7 +235,7 @@ python3 scripts/check-independent-verification.py \
 
 ## 5. 项目基线治理引擎
 
-状态机还会调用 `scripts/baseline-governance.py`，确保“阶段可以进入”之外，阶段内产物也继承当前有效项目基线。机器权威文件为 `docs/architecture/baseline-manifest.json` 与 `constraint-registry.json`；每个 Change 在 `design/baseline-binding.json` 逐条绑定 ACTIVE Constraint ID。
+状态机还会调用 `scripts/baseline-governance.py`，确保“阶段可以进入”之外，阶段内产物也继承当前有效项目基线。机器权威文件为 `docs/architecture/baseline-manifest.json` 与 `constraint-registry.json`；每个 Change 在 `design/baseline-binding.json` 按 manifest 的 `governance_profile` 绑定约束（`standard` 绑定全部 ACTIVE，`lite` 只绑定 `critical: true`）。
 
 首次冻结顺序、BCR 修订、版本升级、Change 约束适用性/例外、设计/实现/验收独立证据以及在途 Change rebase 详见 `process/BASELINE-FEATURE-INTERACTION-zh.md` 第 9 节。核心命令：
 

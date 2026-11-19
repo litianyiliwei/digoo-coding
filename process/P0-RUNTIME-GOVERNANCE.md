@@ -61,16 +61,26 @@ python3 scripts/workflow.py request-review --step 02-requirements-analysis --evi
 
 - `request-review` writes `pending_approvals` and does **not** advance `current_step`; afterwards both `next-step.py` and `check-entry --step <next-stage>` will block.
 - The Agent must present the handoff report according to `templates/workflow/step-handoff-report.md` and **end the turn immediately**; it must not, in the same session, read or execute the next stage's Prompt/Skill or create next-stage artifacts.
-- Only after the user explicitly replies "Review passed <step-id>" may the approval be recorded:
+- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may the approval be recorded:
 
 ```bash
 python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "<user>" --approved-at 2026-11-13 --evidence workflow/evidence/02-approval.md
 ```
 
 - `approve` validates that the approval evidence file actually exists, writes the approval record into `approvals_history`, and clears that stage's `pending_approvals`; only then can `transition` be executed.
-- `transition` requires a corresponding `approvals_history` record for all human-reviewed stages (01–10); merely writing the approval in the evidence or using `handoff-create` cannot bypass this.
+- `transition` requires a corresponding `approvals_history` record for every stage that needs approval under the current policy (all human-reviewed stages in `standard`; high-risk stages only in `risk-based`); merely writing the approval in the evidence or using `handoff-create` cannot bypass this.
 - `reopen` clears the approval records of the reverted stages; after rerunning, review must be performed again.
 - Under Claude Code, the PreToolUse hook in `.claude/settings.json` rejects writes to artifacts of stages after the current stage (shared artifacts excepted) and direct edits to `workflow-state.json`; it rejects them equally while review is pending. Other Agents should stop on their own based on `pending_approvals` and `current_step`.
+
+### Risk-Based Approval Policy (Opt-in)
+
+- The default `approval_policy` is `standard`: every stage with `human_approval_required` needs a recorded user approval.
+- For small projects the user may opt into `risk-based`:
+  `python3 scripts/workflow.py set-approval-policy --policy risk-based --reason "<why>" --by "<user>"`
+  The command refuses while reviews are pending and records the change in `approval_policy_history`.
+- In risk-based mode, stages with `risk_level: low` in `WORKFLOW-STAGES.json` (currently 01 project bootstrap, 04 proposal roadmap, 06 Figma) may run `request-review` to produce the audit packet, but the stage does not require a recorded approval. `request-review` prints `STATUS=RISK_BASED_FAST_TRACK`, and `transition` may proceed after the gates pass.
+- High-risk stages (02 requirements, 03 architecture freeze, 05 proposal requirements, 07 detailed design, 08 implementation, 09 independent verification, 10 acceptance) keep the standard approval requirement.
+- The policy is a state-level setting, not a stage artifact. Never infer approval from a fast-track policy: it exempts specific low-risk stages, not human review as a whole.
 
 ### Clearing Approvals and Deadlock Boundaries
 
@@ -136,20 +146,20 @@ python3 scripts/workflow.py next-change --change-id change-b
 ### Method Evidence Gate
 
 - Evidence for 02–10 must contain `methods`; the policy follows `method_policy` in `process/STEP-ARTIFACT-CONTRACTS.json`, and when it is absent the built-in default policy of `scripts/method_evidence.py` applies.
-- Each method record contains skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence. `brainstorming` records at least 4 questions and 2 alternatives in 03/07, and at least 3 questions and 1 alternative in 02/05; `writing-plans`, `test-driven-development`, and `verification-before-completion` record at least 1 decision and a real evidence path.
-- In 03, the `brainstorming` questions/decisions must cover "new system/existing system/code address/third-party interfaces"; in the case of secondary development of an existing system, the code address must actually be read and "Existing System Secondary-Development Constraints" written in `technology-decisions.md`, converted into `LEGACY-*` in `constraint-registry.json`; third-party interfaces are written into the "Third-Party Interface Dependency List", EXTERNAL data flows, and API conventions.
+- Each method record contains skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence. The checker requires the declared method skills, a valid mode, a real in-repository evidence path, and—when the policy sets `requires_artifact`—an `artifact_section` whose file and heading exist. It deliberately enforces no minimum counts on questions/alternatives/decisions and no topic keyword matching; the depth of the thinking is judged by stage review and downstream consumption, not by counting strings.
+- In 03, the interview must establish the system origin (new system / existing system / hybrid) and cover code address and third-party interfaces; for secondary development, the code address must actually be read and "Existing System Secondary-Development Constraints" written in `technology-decisions.md`, converted into `LEGACY-*` in `constraint-registry.json`; third-party interfaces are written into the "Third-Party Interface Dependency List", EXTERNAL data flows, and API conventions. These are substantive artifact requirements, not methods-block keyword checks.
 - Run `python scripts/check-architecture-baseline.py --strict` before the end of 03; the baseline must not be frozen when "Existing System Secondary-Development Constraints", "Third-Party Interface Dependency List", code access records, third-party data flows, or `LEGACY-*`/`EXT-*` constraints are missing.
-- In 07, the `brainstorming` questions/decisions must cover "existing functionality/new functionality/code address/third-party interfaces"; when modifying existing functionality, `### Existing Code Change Impact` in `design.md` must register files/classes/functions/interfaces/tables/tests, modification strategy, compatibility, migration/rollback, and risks; third-party interfaces must enter `interface-catalog.csv` as `THIRD_PARTY_API` rows with test/fakes evidence.
+- In 07, when modifying existing functionality, `### Existing Code Change Impact` in `design.md` must register files/classes/functions/interfaces/tables/tests, modification strategy, compatibility, migration/rollback, and risks; third-party interfaces must enter `interface-catalog.csv` as `THIRD_PARTY_API` rows with test/fakes evidence.
 - `mode=equivalent` may be used only when the skill is truly unavailable, must record a `reason`, and must record the absence in `docs/project/toolchain-report.md`; "available" must not be treated as "used".
-- 02's `internet-research` must record at least 3 research questions, 2 comparisons/alternatives, and 1 decision, with results written into `docs/product/reference-research.md`; `python scripts/check-reference-research.py --strict` additionally validates at least 3 real source URLs, access dates, `Reference product status`, and impact mapping. When there is no network access, mark BLOCKED and do not bypass it with `equivalent`.
+- 02's `internet-research` results must be written into `docs/product/reference-research.md` and pass `python scripts/check-reference-research.py --strict`, which validates real source URLs, access dates, `Reference product status`, and impact mapping. When there is no network access, mark BLOCKED and do not bypass it with `equivalent`. The methods block records the research participation; it does not have a question-count quota.
 - Standalone validation: `python scripts/check-method-evidence.py --step <step-id> --evidence <path>`; `workflow.py transition` invokes the same logic automatically.
 - Section 4 of the handoff report must present key questions, alternatives, decisions, open items, artifact locations, and evidence paths.
 
 ### Input/Output Context Budget
 
-- The contract `inputs` is the full audit/traceability set; default reads follow `input_policy.stage_profiles.lean` (≤8 read groups per stage, about ≤16000 characters). `agent-context.py` prints the lean/on-demand list by default; only `--full` prints the complete audit inputs.
+- The contract `inputs` is the full audit/traceability set; default reads follow `input_policy.stage_profiles.lean` (an advisory guideline of about 8 read groups and about 16000 characters per stage). `agent-context.py` prints the lean/on-demand list by default; only `--full` prints the complete audit inputs. Over-guideline reads are allowed with a recorded reason and produce a warning, not a failure.
 - Reading order: `BASELINE-BRIEF` → current Change artifacts → targeted reads by matched FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE → full baseline/architecture/ADR/complete specs only when necessary, on demand, with the reason recorded.
-- Outputs use reference-style output and do not copy input text in full; line limits for summary/evidence files are defined in `output_policy.summary_budgets`. At the end of a stage you may run `python scripts/check-output-context.py --stage <id> [--change <change-id>]`; if over budget, first check whether upstream content was copied, and if necessary split the Change or link upstream files.
+- Outputs use reference-style output and do not copy input text in full; line budgets for summary/evidence files are advisory values in `output_policy.summary_budgets`. At the end of a stage you may run `python scripts/check-output-context.py --stage <id> [--change <change-id>]`; over-budget files produce warnings by default, and `--strict` opts into enforcement.
 - Full rules are in `process/INPUT-OUTPUT-POLICY.md`.
 
 ### Evidence JSON Example
@@ -228,7 +238,7 @@ It passes only when Verdict=PASS, every AC has evidence, all tests were actually
 
 ## 5. Project Baseline Governance Engine
 
-The state machine also invokes `scripts/baseline-governance.py` to ensure that, beyond "the stage can be entered", in-stage artifacts also inherit the currently effective project baseline. The machine-authoritative files are `docs/architecture/baseline-manifest.json` and `constraint-registry.json`; each Change binds every ACTIVE Constraint ID in `design/baseline-binding.json`.
+The state machine also invokes `scripts/baseline-governance.py` to ensure that, beyond "the stage can be entered", in-stage artifacts also inherit the currently effective project baseline. The machine-authoritative files are `docs/architecture/baseline-manifest.json` and `constraint-registry.json`; each Change binds the constraints required by the manifest `governance_profile` in `design/baseline-binding.json` (all ACTIVE in `standard`, only `critical: true` in `lite`).
 
 For first freeze ordering, BCR amendments, version upgrades, Change constraint applicability/exceptions, independent design/implementation/acceptance evidence, and in-flight Change rebase, see Section 9 of `process/BASELINE-FEATURE-INTERACTION.md`. Core commands:
 

@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() { echo "Usage: $0 <change-id> [--openapi <file>] [--test-dir <dir>]... [--skip-tests]"; }
+usage() { echo "Usage: $0 <change-id> [--openapi <file>] [--test-dir <dir>]... [--skip-tests] [--skip-static]"; }
 if [[ $# -lt 1 ]]; then usage >&2; exit 2; fi
 CHANGE_ID="$1"; shift
-OPENAPI=""; SKIP_TESTS=0; TEST_DIRS=()
+OPENAPI=""; SKIP_TESTS=0; SKIP_STATIC=0; TEST_DIRS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --openapi) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; OPENAPI="$2"; shift 2 ;;
     --test-dir) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; TEST_DIRS+=("$2"); shift 2 ;;
     --skip-tests) SKIP_TESTS=1; shift ;;
+    --skip-static) SKIP_STATIC=1; shift ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -41,10 +42,23 @@ else
   echo "WARNING: tests explicitly skipped by --skip-tests. Do not treat this run as full verification."
 fi
 
+if (( SKIP_STATIC )); then
+  echo "WARNING: static analysis explicitly skipped"
+elif [[ -f "$ROOT/docs/architecture/quality-gates.json" ]]; then
+  python scripts/run-quality-gates.py "$CHANGE_ID" \
+    --output "openspec/changes/$CHANGE_ID/design/evidence/static-analysis.json" \
+    --root "$ROOT" --identity "${STATIC_IDENTITY:-AGENT}"
+  python scripts/check-static-analysis.py --change "$CHANGE_ID" --root "$ROOT" --strict
+fi
+
 echo "Git status (inspect; this script never commits or archives):"
 git status --short
-if (( SKIP_TESTS )); then
+if (( SKIP_TESTS && SKIP_STATIC )); then
+  echo "Partial verification completed; NOT a full completion gate because tests and static analysis were skipped."
+elif (( SKIP_TESTS )); then
   echo "Partial verification completed; NOT a full completion gate because tests were skipped."
+elif (( SKIP_STATIC )); then
+  echo "Partial verification completed; NOT a full completion gate because static analysis was skipped."
 else
   echo "Configured verification commands completed. Human/code review and product acceptance still required."
 fi

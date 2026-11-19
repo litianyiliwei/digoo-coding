@@ -19,15 +19,15 @@
 
 | 层级 | 内容 | 读取规则 |
 |---|---|---|
-| 0 常驻 | 存在时读取 `docs/product/BASELINE-BRIEF.md`（≤1 页）；相关时读取 `baseline-status.md` | 简报存在时先读；阶段 02 可能在简报生成前启动，应从用户提供的目标开始并在本阶段生成简报；不重复读完整基线 |
+| 0 常驻 | 存在时读取 `docs/product/BASELINE-BRIEF.md`（约 1 页）；相关时读取 `baseline-status.md` | 简报存在时先读；阶段 02 可能在简报生成前启动，应从用户提供的目标开始并在本阶段生成简报；不重复读完整基线 |
 | 1 当前 Change | `proposal.md`、`specs/<capability>/spec.md`、`user-stories.md`、`tasks.md`、`design.md`、`baseline-impact.md`、`baseline-binding.json` | Change 阶段必读 |
 | 2 定向 | 本 Change 命中的 `FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE` 行或章节；设计域命中的架构章节 | 按 ID 读相关行/节，不读整份文件 |
 | 3 按需 | 完整 `docs/product/*`、完整 `docs/architecture/*`、`docs/adr/*`、`reference-research.md`、完整 specs | 只有 0–2 层无法回答时才读；交接报告记录触发原因 |
 
-## 3. 默认预算
+## 3. 建议性默认预算
 
-- 默认精简集 **≤8 个读取组**、约 **≤16000 字符**（每组尽量只指向一个文件/章节；组内多文件按 ID 定向）（契约中的 `max_lean_files` / `max_lean_chars`）。
-- 超过预算时：先拆分 Change、缩小范围，或在交接报告第 1 节记录“为什么必须多读哪些文件”。
+- 默认精简集是约 **8 个读取组**、约 **16000 字符** 的建议值（每组尽量只指向一个文件/章节；组内多文件按 ID 定向）（契约中的 `max_lean_files` / `max_lean_chars`）。这些数字是建议，不是门禁。
+- 超过建议值时：缩小范围，或在交接报告第 1 节记录“为什么必须多读哪些文件”。不要为了凑数字而跳过阶段真正需要的文件。
 - 不允许把整包基线、整包架构文档或全部 ADR 作为默认上下文。
 
 ## 4. 每阶段怎么读
@@ -55,10 +55,11 @@ python scripts/agent-context.py --stage 07 --change <change-id>
 - 证据文件（`code-review.md`、`independent-verification-report.md`、`acceptance.md`）引用 JSON/日志/报告路径，不复述全部测试输出。
 - 表格只保留决策项、契约项、证据项；模板固定字段不重复展开。
 
-摘要文件的建议行数上限见契约 `output_policy.summary_budgets`（例如 `BASELINE-BRIEF.md` ≤60 行、`design.md` ≤400 行、`acceptance.md` ≤120 行）。超过上限时先检查是否复制了输入；必要时拆分 Change 或链接上游文件。
+摘要文件的建议行数见契约 `output_policy.summary_budgets`（例如 `BASELINE-BRIEF.md` 约 60 行、`design.md` 约 400 行、`acceptance.md` 约 120 行）。`check-output-context.py` 默认把超预算报告为 warning；`--strict` 是项目主动选择强制时的开关。文件超出建议值时，先检查是否复制了输入；如果内容确实必要，保留并记录原因。
 
 ## 6. 与门禁的关系
 
-- `check-step-contracts.py` 校验每个 02–10 阶段都有 `input_policy.stage_profiles`，且 `lean` 条数不超过 `max_files`。
+- `check-step-contracts.py` 校验每个 02–10 阶段都有 `input_policy.stage_profiles`；`max_files` 是建议值，`lean` 可以在记录原因后超出。`agent-context.py` 超建议值时打印 warning 并继续。
+- `check-output-context.py` 默认对超预算的摘要文件报警告；`--strict` 才作为失败处理。
 - `workflow.py transition` 的 evidence 仍按完整 `inputs` 审计，不会因为精简读取而放过缺失的正式输入。
 - 交接报告第 1 节必须列出实际读取的文件/章节；未读的按需文件不得声称已审查。

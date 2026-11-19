@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a stage evidence file's question-coverage block against the policy."""
+"""Validate an optional stage evidence file's question-coverage block."""
 from __future__ import annotations
 
 import argparse

@@ -103,6 +103,72 @@ class BaselineGovernanceTests(unittest.TestCase):
     def save_binding(self):
         self.binding_path.write_text(json.dumps(self.binding, indent=2), encoding="utf-8")
 
+    def _apply_profile(self, profile, critical_ids, extra_constraints=()):
+        self.manifest["governance_profile"] = profile
+        for c in self.registry["constraints"]:
+            c["critical"] = c["id"] in critical_ids
+        self.registry["constraints"].extend(extra_constraints)
+        self.registry_path.write_text(json.dumps(self.registry, indent=2), encoding="utf-8")
+        self.manifest["constraint_registry"]["sha256"] = bg.sha256(self.registry_path)
+        self.manifest_path.write_text(json.dumps(self.manifest, indent=2), encoding="utf-8")
+        binding = bg.make_binding("demo-feature", self.manifest, self.registry)
+        binding["approval"] = {"status": "APPROVED", "reviewer": "Product Owner",
+                               "reviewed_at": "2026-11-03", "evidence": self.evidence_rel}
+        for entry in binding["constraints"]:
+            entry.update({
+                "applicability": "APPLICABLE", "decision": "COMPLIANT",
+                "rationale": "The feature follows the approved constraint.",
+                "design_evidence": [self.design_rel],
+                "implementation_verification": {"status": "PASS", "method": "Automated check and review", "evidence": [self.impl_rel], "reason": ""},
+                "acceptance_verification": {"status": "PASS", "method": "Independent acceptance review", "evidence": [self.acceptance_rel], "reason": ""},
+                "exception": None,
+            })
+        self.binding = binding
+        self.save_binding()
+        return binding
+
+    def _extra_api_constraint(self):
+        return {
+            "id": "API-ERROR-001", "domain": "api", "revision": "1.0",
+            "status": "ACTIVE", "level": "MUST", "critical": False, "scope": "ALL_CHANGES",
+            "title": "Shared error envelope", "rule": "Use the shared error envelope.",
+            "rationale": "Keep error contracts consistent.",
+            "source": {"file": self.domain_files["api"], "section": "API 基线"},
+            "enforcement": {"type": "MANUAL", "validator": "", "evidence_required": True},
+            "owner": "API Owner", "approved_by": "Tech Lead", "approved_at": "2026-11-03",
+        }
+
+    def test_lite_profile_binds_only_critical_constraints(self):
+        binding = self._apply_profile("lite", {"ARCH-BOUNDARY-001"}, [self._extra_api_constraint()])
+        self.assertEqual("lite", binding["governance_profile"])
+        self.assertEqual(["ARCH-BOUNDARY-001"], [e["constraint_id"] for e in binding["constraints"]])
+        for phase in ("requirement", "design", "implementation", "acceptance"):
+            with self.subTest(phase=phase):
+                self.assertEqual([], bg.check_change("demo-feature", phase))
+
+    def test_lite_profile_still_requires_critical_constraint_binding(self):
+        self._apply_profile("lite", {"ARCH-BOUNDARY-001"})
+        self.binding["constraints"] = []
+        self.save_binding()
+        errors = bg.check_change("demo-feature", "requirement")
+        self.assertTrue(any("not bound" in x for x in errors), errors)
+
+    def test_standard_profile_still_requires_every_active_constraint(self):
+        binding = self._apply_profile("standard", set(), [self._extra_api_constraint()])
+        self.assertEqual(
+            {"ARCH-BOUNDARY-001", "API-ERROR-001"},
+            {e["constraint_id"] for e in binding["constraints"]},
+        )
+        self.binding["constraints"] = [e for e in self.binding["constraints"] if e["constraint_id"] == "ARCH-BOUNDARY-001"]
+        self.save_binding()
+        errors = bg.check_change("demo-feature", "requirement")
+        self.assertTrue(any("API-ERROR-001" in x and "not bound" in x for x in errors), errors)
+
+    def test_invalid_governance_profile_fails(self):
+        self.manifest["governance_profile"] = "fast"
+        errors = bg.validate_manifest(self.manifest, self.registry, require_frozen=True)
+        self.assertTrue(any("governance_profile" in x for x in errors), errors)
+
     def test_frozen_manifest_and_registry_pass(self):
         manifest, registry = bg.read_inputs()
         self.assertEqual([], bg.validate_manifest(manifest, registry, require_frozen=True))

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Checkstyle starter for Java. Target: JDK 17+, Checkstyle 10.x.
+  Blocking policy: severity=error, so any violation fails the gate.
+  Change-scoped suppressions are recorded in static-waivers.json, not in this file.
+-->
+<module name="Checker">
+  <property name="charset" value="UTF-8"/>
+  <property name="severity" value="error"/>
+  <property name="fileExtensions" value="java"/>
+
+  <module name="NewlineAtEndOfFile"/>
+  <module name="FileTabCharacter">
+    <property name="eachLine" value="true"/>
+  </module>
+  <module name="LineLength">
+    <property name="max" value="120"/>
+    <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+  </module>
+  <!-- Common rules 1 and 3: no TODO/FIXME and no debug prints in production code. -->
+  <module name="RegexpSingleline">
+    <property name="format" value="TODO|FIXME|HACK"/>
+    <property name="message" value="No TODO/FIXME/HACK markers in production paths."/>
+  </module>
+  <module name="RegexpSingleline">
+    <property name="format" value="System\s*\.\s*(out|err)\s*\.\s*print"/>
+    <property name="message" value="No debug prints; use the project logging layer."/>
+  </module>
+
+  <module name="TreeWalker">
+    <!-- Imports and naming. -->
+    <module name="AvoidStarImport"/>
+    <module name="UnusedImports"/>
+    <module name="RedundantImport"/>
+    <module name="CustomImportOrder">
+      <property name="customImportOrderRules"
+                value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>
+      <property name="sortImportsInGroupAlphabetically" value="true"/>
+    </module>
+    <module name="TypeName"/>
+    <module name="MethodName"/>
+    <module name="ParameterName"/>
+    <module name="LocalVariableName"/>
+    <module name="MemberName"/>
+    <module name="ConstantName"/>
+
+    <!-- Blocks and statements. -->
+    <module name="NeedBraces"/>
+    <module name="LeftCurly"/>
+    <module name="RightCurly"/>
+    <module name="WhitespaceAround"/>
+    <module name="OneStatementPerLine"/>
+    <module name="EmptyLineSeparator"/>
+
+    <!-- Javadoc policy: public types and public methods carry documentation. -->
+    <module name="MissingJavadocType">
+      <property name="scope" value="public"/>
+    </module>
+    <module name="MissingJavadocMethod">
+      <property name="scope" value="public"/>
+      <property name="allowMissingPropertyJavadoc" value="true"/>
+    </module>
+    <module name="SummaryJavadoc"/>
+
+    <!-- Complexity thresholds (stricter than Checkstyle defaults). -->
+    <module name="CyclomaticComplexity">
+      <property name="max" value="10"/>
+    </module>
+    <module name="NPathComplexity">
+      <property name="max" value="200"/>
+    </module>
+    <module name="MethodLength">
+      <property name="max" value="60"/>
+    </module>
+    <module name="FileLength">
+      <property name="max" value="1000"/>
+    </module>
+
+    <module name="MagicNumber">
+      <property name="ignoreNumbers" value="-1, 0, 1, 2"/>
+    </module>
+  </module>
+</module>

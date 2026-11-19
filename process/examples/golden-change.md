@@ -101,7 +101,7 @@ The only UI artifact of Stage 06 (Figma-only) is `design/figma-audit.md`: genera
 - Applicable constraint IDs, reuse items, conflicts, and ownership;
 - Conclusion: `COMPATIBLE` / `BLOCKED_PENDING_BASELINE_CHANGE` / `APPROVED_BASELINE_AMENDMENT`.
 
-`design/baseline-binding.json` must cover all ACTIVE constraints, filling in `APPLICABLE` / `NOT_APPLICABLE` and the reason for each.
+`design/baseline-binding.json` must cover the constraints required by the manifest governance profile (all ACTIVE in `standard`, `critical: true` only in `lite`), filling in `APPLICABLE` / `NOT_APPLICABLE` and the reason for each.
 
 ## 9. Acceptance and Write-back
 

@@ -4,7 +4,8 @@
 The stage DAG is read from process/WORKFLOW-STAGES.json (the single source of
 truth); this script never mutates state. After finishing a stage, run the stage
 checks, record evidence and call request-review; approve and transition only
-after the user explicitly replies "review passed <step-id>". Do not edit
+after the user explicitly approves the pending stage (any unambiguous wording
+counts). Do not edit
 workflow-state.json.
 """
 import json, sys
@@ -58,7 +59,7 @@ def main():
             print("HANDOFF_REPORT=templates/workflow/step-handoff-report.md")
         print("NOTE=Verify actual files, approvals and OpenSpec status before executing; this script only reads state.")
         print(f"NOTE=After finishing the stage, run the stage checks, record evidence and run: python scripts/workflow.py request-review --step {sid} --evidence workflow/evidence/{sid}.json --summary \"<review summary>\"")
-        print(f"NOTE=End the turn after request-review. Only after the user replies \"review passed {sid}\" run approve and then transition.")
+        print(f"NOTE=End the turn after request-review. Only after the user explicitly approves {sid} (any unambiguous wording counts) run approve and then transition.")
         return 0
     print("ALL_STEPS_MARKED_COMPLETE")
     print("Verify final acceptance and archived OpenSpec state manually; no state was changed.")

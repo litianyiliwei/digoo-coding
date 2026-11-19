@@ -43,7 +43,7 @@ Specs describe WHAT and do not carry implementation details such as class names/
 
 ## Actual Tool Invocation Requirements
 
-- **Superpowers:** The stage-scoped mode of `brainstorming` checks the completeness of options, requirement boundaries, and multi-platform scenarios; write conclusions into `design/user-stories.md`, the spec's Scenario, or `proposal.md`, not a separate design document or `design.md`; do not start coding. Stage evidence must write `methods` (at least 3 questions, 1 alternative, 1 decision) and run `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
+- **Superpowers:** The stage-scoped mode of `brainstorming` checks the completeness of options, requirement boundaries, and multi-platform scenarios; write conclusions into `design/user-stories.md`, the spec's Scenario, or `proposal.md`, not a separate design document or `design.md`; do not start coding. Stage evidence must write `methods` (brainstorming with a real evidence path and landing section) and run `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
 - **OpenSpec:** Actually execute `openspec status --change <id>`, `openspec instructions <artifact> --change <id> --json`, `openspec validate <id> --strict`. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
 - **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
 - **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
@@ -54,6 +54,7 @@ Specs describe WHAT and do not carry implementation details such as class names/
 - You must create `openspec/changes/<change-id>/design/baseline-impact.md` according to `templates/change-assets/design/baseline-impact.md`, recording baseline domain versions, actually read files/sections/IDs, constraints, reuse items, conflicts, and ownership classification.
 - Explain baseline impact in `proposal.md`. If changes to architecture, data ownership, common contracts, or global quality gates are prerequisites for the feature to exist, mark `BLOCKED_PENDING_BASELINE_CHANGE`; complete baseline amendment approval first, and do not design/code first and add paperwork later.
 - A single feature's behavior, API, pages, physical table migrations, and local IO stay in the Change; only cross-feature shared rules/common contracts/core domain models/system-level constraints warrant a baseline amendment.
+- When the frozen test_quality baseline contains `QUALITY-STATIC-001`, `design/baseline-impact.md` and `design/baseline-binding.json` must list it among the applicable constraints, marked APPLICABLE (or NOT_APPLICABLE with a specific reason); it binds this Change's 08/09 static-analysis gates, and every applied waiver must be Change-scoped (`design/static-waivers.json`).
 - For detailed determination rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## Input/Output/Handoff Contract (Mandatory)
@@ -71,20 +72,20 @@ Before and after executing this Skill, you must comply with `process/STEP-ARTIFA
 
 - Before starting requirements refinement, `python3 scripts/baseline-governance.py audit --require-frozen` must pass.
 - After the Change auxiliary assets are created, `design/baseline-binding.json` must exist; if `new-change-assets.sh` is used it is generated automatically from the frozen registry, or you may run `python3 scripts/baseline-governance.py init-binding --change-id <id>`.
-- Do not delete/merge/rewrite machine-generated constraint IDs; fill in APPLICABLE or NOT_APPLICABLE and a specific reason for each ACTIVE constraint.
+- Do not delete/merge/rewrite machine-generated constraint IDs; fill in APPLICABLE or NOT_APPLICABLE and a specific reason for each bound constraint (all ACTIVE in the standard profile, critical only in the lite profile).
 - After the stage 05 manual approval binding, run `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement`; the handoff may occur only when this gate and the Markdown `baseline-impact.md` both pass.
 
-## Question Coverage (Mandatory)
+## Question Coverage (Recommended)
 
-- Before review, fill the 05 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
-- `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
-- Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
-- Run `python scripts/check-question-coverage.py --step 05-feature-requirements --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.
+- Skim the 05 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and use the questions that apply; there is no requirement to fill every item or record a row per item.
+- Open questions must be recorded in `docs/product/open-questions.md` with an owner and blocking condition; do not leave them only in chat.
+- If the stage records coverage in evidence, `question_coverage` is optional: `answered` needs a real `landing` path; `open` needs `owner`/`blocking`/`open_question`; `n/a` needs a `reason`; `deferred` needs `reason`/`approver`/`target_step`. Unknown item IDs are allowed.
+- Optional validation: `python scripts/check-question-coverage.py --step 05-feature-requirements --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check the same optional block automatically.
 
 ## Stage Boundaries and Review Stop (Mandatory)
 
 - Before starting, run `python scripts/workflow.py check-entry --step 05-feature-requirements [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
 - Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 05-feature-requirements --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly replies "Review passed 05-feature-requirements" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 05-feature-requirements --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 05-feature-requirements --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
 - When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
 - Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

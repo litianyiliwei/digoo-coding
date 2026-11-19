@@ -69,7 +69,7 @@ The stage evidence for 02-10 must include a `methods` block recording skill/mode
 python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>
 ```
 
-`workflow.py transition` automatically invokes the same validation; Section 4 of the handoff report must show key questions, alternatives, decisions, open items, and artifact locations. Without `methods` or with insufficient content, the stage must not advance.
+`workflow.py transition` automatically invokes the same validation; Section 4 of the handoff report must show key questions, alternatives, decisions, open items, and artifact locations. Without `methods`, without the required method skills, without a real evidence path, or without the required artifact landing section, the stage must not advance. Question/alternative/decision counts are not enforced.
 
 
 

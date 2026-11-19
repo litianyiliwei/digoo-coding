@@ -69,7 +69,7 @@ Superpowers `brainstorming` 的完整流程要求写独立设计文档并单独�
 python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>
 ```
 
-`workflow.py transition` 会自动调用同一校验；交接报告第 4 节必须展示关键问题、备选、决策、未决项与产物落点。没有 `methods` 或内容不足时，阶段不得推进。
+`workflow.py transition` 会自动调用同一校验；交接报告第 4 节必须展示关键问题、备选、决策、未决项与产物落点。没有 `methods`、缺少必需方法技能、缺少真实证据路径或缺少要求的产物落点章节时，阶段不得推进；问题/备选/决策数量不做强制。
 
 
 

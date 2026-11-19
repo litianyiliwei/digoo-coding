@@ -58,4 +58,4 @@ done
 
 if (( ran == 0 )); then echo "ERROR: no test commands ran." >&2; exit 2; fi
 if (( failed )); then echo "One or more test commands failed." >&2; exit 1; fi
-echo "All $ran requested project test commands passed. Note: this runs the detected default test command only, not lint/build/contract tests unless configured in that command."
+echo "All $ran requested project test commands passed. Note: tests only; lint and static analysis are run by scripts/run-quality-gates.py."

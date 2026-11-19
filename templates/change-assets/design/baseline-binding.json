@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
   "change_id": "REPLACE_WITH_CHANGE_ID",
+  "governance_profile": "standard",
   "created_at": "",
   "baseline_snapshot": {
     "overall_version": "",

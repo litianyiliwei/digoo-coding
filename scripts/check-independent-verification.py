@@ -10,8 +10,11 @@ from pathlib import Path
 p = argparse.ArgumentParser()
 p.add_argument("--report", required=True)
 p.add_argument("--evidence", required=True)
+p.add_argument("--root", default=str(Path(__file__).resolve().parents[1]),
+               help="Project root (defaults to this repository)")
 a = p.parse_args()
-root = Path(__file__).resolve().parents[1]
+root = Path(a.root).resolve()
+GATES_REL = "docs/architecture/quality-gates.json"
 
 
 def resolve(raw):
@@ -19,6 +22,26 @@ def resolve(raw):
     x = (root / x).resolve() if not x.is_absolute() else x.resolve()
     x.relative_to(root.resolve())
     return x
+
+
+def blocking_gate_pairs(gates_doc):
+    """Return the blocking ``(stack_id, tool_id)`` set, or None if malformed."""
+    if not isinstance(gates_doc, dict):
+        return None
+    stacks = gates_doc.get("stacks")
+    if not isinstance(stacks, list):
+        return None
+    blocking = set()
+    for stack in stacks:
+        if not isinstance(stack, dict) or not isinstance(stack.get("id"), str):
+            continue
+        tools = stack.get("tools")
+        for tool in tools if isinstance(tools, list) else []:
+            if (isinstance(tool, dict)
+                    and isinstance(tool.get("id"), str)
+                    and tool.get("mode") == "blocking"):
+                blocking.add((stack["id"], tool["id"]))
+    return blocking
 
 
 try:
@@ -92,6 +115,103 @@ try:
     ):
         if zh not in md and en not in md:
             errors.append(f"Markdown report missing section: {zh} / {en}")
+
+    # Static-analysis integration: once the project adopts quality gates, the
+    # independent verification must cover every blocking stack/tool with its
+    # own independent evidence file.
+    gates_path = root / GATES_REL
+    if gates_path.is_file():
+        try:
+            gates_doc = json.loads(gates_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            errors.append(f"cannot read {GATES_REL}: {exc}")
+            gates_doc = None
+        blocking = blocking_gate_pairs(gates_doc) if gates_doc is not None else None
+        if gates_doc is not None and blocking is None:
+            errors.append(f"{GATES_REL} does not define a valid blocking stack/tool set")
+        if blocking is not None:
+            checks = d.get("static_checks")
+            if not isinstance(checks, list) or not checks:
+                errors.append(
+                    "quality-gates.json exists but evidence lacks a non-empty "
+                    "static_checks block"
+                )
+                checks = []
+            reported = set()
+            for index, check in enumerate(checks):
+                label = f"static_checks[{index}]"
+                if not isinstance(check, dict):
+                    errors.append(f"{label} must be an object")
+                    continue
+                stack_id = check.get("stack_id")
+                tool_id = check.get("tool")
+                if (isinstance(stack_id, str) and stack_id.strip()
+                        and isinstance(tool_id, str) and tool_id.strip()):
+                    reported.add((stack_id, tool_id))
+                else:
+                    errors.append(f"{label}: stack_id and tool must be non-empty strings")
+                if check.get("result") != "PASS":
+                    errors.append(
+                        f"{label}: result must be PASS, found {check.get('result')!r}"
+                    )
+                if check.get("exit_code") != 0:
+                    errors.append(
+                        f"{label}: exit_code must be 0, found {check.get('exit_code')!r}"
+                    )
+                command = check.get("command")
+                if not isinstance(command, str) or not command.strip():
+                    errors.append(f"{label}: command must be a non-empty string")
+                raw_evidence = check.get("evidence")
+                if not isinstance(raw_evidence, str) or not raw_evidence.strip():
+                    errors.append(f"{label}: evidence must be a non-empty path")
+                    continue
+                try:
+                    nested_path = resolve(raw_evidence)
+                except ValueError:
+                    errors.append(
+                        f"{label}: evidence escapes the project root: {raw_evidence}"
+                    )
+                    continue
+                if not nested_path.is_file():
+                    errors.append(f"{label}: evidence file does not exist: {raw_evidence}")
+                    continue
+                try:
+                    nested = json.loads(nested_path.read_text(encoding="utf-8"))
+                except (OSError, ValueError) as exc:
+                    errors.append(f"{label}: evidence is not readable JSON: {exc}")
+                    continue
+                if nested.get("independent") is not True:
+                    errors.append(f"{label}: evidence must have independent: true")
+                if nested.get("verdict") != "PASS":
+                    errors.append(
+                        f"{label}: evidence verdict must be PASS, found "
+                        f"{nested.get('verdict')!r}"
+                    )
+                verifier = nested.get("verifier_identity")
+                builder = nested.get("builder_identity")
+                if not (isinstance(verifier, str) and verifier.strip()):
+                    errors.append(f"{label}: evidence verifier_identity must be non-empty")
+                if not (isinstance(builder, str) and builder.strip()):
+                    errors.append(f"{label}: evidence builder_identity must be non-empty")
+                if (isinstance(verifier, str) and verifier.strip()
+                        and isinstance(builder, str) and builder.strip()
+                        and verifier.strip() == builder.strip()):
+                    errors.append(
+                        f"{label}: evidence verifier_identity and builder_identity "
+                        "must be distinct"
+                    )
+            missing = sorted(blocking - reported)
+            extra = sorted(reported - blocking)
+            if missing:
+                errors.append(
+                    "static_checks missing blocking gate(s): "
+                    + ", ".join(f"{stack}/{tool}" for stack, tool in missing)
+                )
+            if extra:
+                errors.append(
+                    "static_checks reference non-blocking gate(s): "
+                    + ", ".join(f"{stack}/{tool}" for stack, tool in extra)
+                )
 
     # UI-bearing Changes require per-PAGE independent runtime geometry evidence.
     base = root / "openspec" / "changes" / str(change) / "design"

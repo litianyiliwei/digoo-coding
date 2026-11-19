@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Check summary-output line budgets from output_policy.summary_budgets.
+"""Check advisory summary-output line budgets from output_policy.summary_budgets.
 
-This is an output-context gate, not a content-quality gate. It prevents a stage
-from silently turning a summary/evidence file into a copy of the upstream
-baseline. Missing files are allowed because a stage may not have run yet.
+Budgets are advisory by default: an over-budget file produces a warning and the
+command exits 0. Use --strict to opt into enforcement (exit 1). This is a
+context-hygiene signal, not a content-quality gate. It prevents a stage from
+silently turning a summary/evidence file into a copy of the upstream baseline.
+Missing files are allowed because a stage may not have run yet.
 """
 from __future__ import annotations
 
@@ -29,7 +31,18 @@ def main() -> int:
     ap.add_argument("--strict", action="store_true")
     args = ap.parse_args()
     root = Path(args.root).resolve()
-    contract = json.loads((root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))
+    contract_doc = None
+    for rel in ("process/STEP-ARTIFACT-CONTRACTS.json", "docs/STEP-ARTIFACT-CONTRACTS.json"):
+        candidate = root / rel
+        try:
+            contract_doc = json.loads(candidate.read_text(encoding="utf-8"))
+            break
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    if contract_doc is None:
+        print("OUTPUT_CONTEXT_FAILED: STEP-ARTIFACT-CONTRACTS.json not found under process/ or docs/")
+        return 1
+    contract = contract_doc
     budgets = (contract.get("output_policy") or {}).get("summary_budgets") or {}
     if not budgets:
         print("OUTPUT_CONTEXT_FAILED: output_policy.summary_budgets is missing")
@@ -46,7 +59,7 @@ def main() -> int:
             if args.change:
                 path = path.replace("<change-id>", args.change)
             declared.append(path)
-    errors: list[str] = []
+    warnings: list[str] = []
     checked: list[str] = []
     if not declared:
         print(f"Output context check: stage {args.stage} declares no file outputs; nothing to check")
@@ -72,17 +85,20 @@ def main() -> int:
         if isinstance(stage_chars, int):
             max_chars = stage_chars
         if isinstance(max_lines, int) and lines > max_lines:
-            errors.append(f"{rel}: {lines} lines exceeds budget {max_lines}; reference upstream instead of copying")
+            warnings.append(f"{rel}: {lines} lines exceeds advisory budget {max_lines}; reference upstream instead of copying")
         if isinstance(max_chars, int) and chars > max_chars:
-            errors.append(f"{rel}: {chars} chars exceeds budget {max_chars}; reference upstream instead of copying")
+            warnings.append(f"{rel}: {chars} chars exceeds advisory budget {max_chars}; reference upstream instead of copying")
     if args.strict and not checked:
         print("OUTPUT_CONTEXT_WARN: no summary outputs present for this stage/change")
-    for error in errors:
-        print("ERROR:", error)
-    if errors:
-        print(f"Output context check failed: {len(errors)} error(s).")
+    for warning in warnings:
+        print("WARN:", warning)
+    if warnings and args.strict:
+        print(f"Output context check failed (--strict): {len(warnings)} over-budget error(s).")
         return 1
-    print(f"Output context passed: {len(checked)} summary file(s) within budget.")
+    if warnings:
+        print(f"Output context advisory: {len(warnings)} over-budget warning(s); budgets are not a gate.")
+    else:
+        print(f"Output context passed: {len(checked)} summary file(s) within advisory budget.")
     return 0
 
 

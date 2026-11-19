@@ -4,11 +4,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# check-package.py already runs the step-contract, output-consumption,
+# output-template-matrix and stage-io-overview checks; do not repeat them here.
 python scripts/check-package.py
 bash scripts/test-scripts.sh
-python scripts/check-step-contracts.py
-python scripts/check-output-consumption.py
-python scripts/check-output-template-matrix.py
 python scripts/gen-manifest.py --check
 python scripts/check-layout.py --mode auto
 if [[ -f toolkit-lock.json ]]; then
@@ -23,6 +22,12 @@ if [[ -f docs/architecture/baseline-manifest.json ]]; then
   python scripts/check-architecture-baseline.py --strict
 else
   echo "SKIP_PROJECT_BASELINE_CHECKS=not-initialized"
+fi
+
+if [[ -f docs/architecture/quality-gates.json ]]; then
+  python scripts/check-quality-gates.py --root . --strict --require-materialized
+else
+  echo "SKIP_STATIC_GATES=not-adopted"
 fi
 
 echo "CI_CHECKS_PASSED"

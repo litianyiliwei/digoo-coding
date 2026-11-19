@@ -9,9 +9,8 @@
 工具包仓库通过以下命令校验：
 
 ```bash
-python scripts/check-package.py        # 工具包自检
-bash scripts/test-scripts.sh           # 脚本回归测试
-bash scripts/ci-check.sh               # 仓库全量 CI 检查
+bash scripts/ci-check.sh               # 仓库全量 CI 检查（包自检、回归、清单、布局）
+python scripts/check-layout.py --mode toolkit  # 更严格的工具包专用布局检查
 ```
 
 项目工作流命令（`scripts/workflow.py`、`scripts/next-step.py`、`openspec list`）与工作流状态（`workflow-state.json`）位于各业务项目仓库，不在本仓库。在项目仓库中继续研发时，对 Agent 说“下一步 / 继续 / 接着做”，它会加载 `workflow-orchestrator` Skill，依据项目的 `workflow-state.json` 与真实产物判定唯一安全的下一阶段。
@@ -54,12 +53,11 @@ bash scripts/ci-check.sh               # 仓库全量 CI 检查
 Windows 环境若无 `python3` 命令，请使用 `python`；`.sh` 脚本会自动探测。
 
 ```bash
-python scripts/check-package.py        # 工具包自检
-bash scripts/test-scripts.sh           # 脚本回归测试
-bash scripts/ci-check.sh               # 仓库全量 CI 检查
+bash scripts/ci-check.sh               # 仓库全量 CI 检查（包自检、回归、清单、布局）
+python scripts/check-layout.py --mode toolkit  # 更严格的工具包专用布局检查
 ```
 
-阶段门禁（`check-entry --step <id>`、`workflow.py request-review`、`approve`、`transition`）在业务项目仓库中运行：进入某阶段前先运行 `check-entry`（非 0 退出码表示禁止执行）；完成后运行检查、生成证据并执行 `request-review`，结束回合等待用户明确回复“评审通过 <step-id>”，再运行 `approve` 与 `transition`。
+阶段门禁（`check-entry --step <id>`、`workflow.py request-review`、`approve`、`transition`）在业务项目仓库中运行：进入某阶段前先运行 `check-entry`（非 0 退出码表示禁止执行）；完成后运行检查、生成证据并执行 `request-review`，结束回合等待用户明确批准待评审阶段（任何无歧义的表述都算），再运行 `approve` 与 `transition`。
 
 ## 核心规则
 
@@ -88,7 +86,7 @@ bash scripts/ci-check.sh               # 仓库全量 CI 检查
 - [process/STEP-ARTIFACT-CONTRACTS-zh.md](process/STEP-ARTIFACT-CONTRACTS-zh.md) — 阶段交接契约（权威清单）
 - [process/TOOLKIT-UPGRADE-zh.md](process/TOOLKIT-UPGRADE-zh.md) — 工具包接入项目仓库与升级指南
 - [process/TOOLKIT-CHANGELOG.md](process/TOOLKIT-CHANGELOG.md) — 发布说明
-- [process/QUESTION-COVERAGE-CHECKLIST-zh.md](process/QUESTION-COVERAGE-CHECKLIST-zh.md) — 02/03/05/07 逐阶段问题覆盖清单（阶段证据必填）
+- [process/QUESTION-COVERAGE-CHECKLIST-zh.md](process/QUESTION-COVERAGE-CHECKLIST-zh.md) — 02/03/05/07 的建议提问清单（可选证据块，不是硬门禁）
 - [scripts/README-zh.md](scripts/README-zh.md) — 检查脚本说明
 
 > 说明：本文件是 [README.md](README.md) 的简体中文版本，两者同步维护；如有差异以 `README.md` 为准。

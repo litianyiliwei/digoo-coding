@@ -22,7 +22,7 @@
 | Data and domain baseline | `docs/architecture/logical-erd.md`, `domain-boundaries.md`, `data-flows.md` | Core entities and relationships, data ownership, domain invariants, shared transaction/consistency principles |
 | Public API baseline | `docs/architecture/api-conventions.md` | Authentication and authorization, error model, versioning, pagination, idempotency, compatibility, and public response conventions |
 | Frontend engineering baseline | `docs/architecture/frontend-conventions.md` | Routing, components/design system, state management, request layer, error and accessibility specifications |
-| Test and quality baseline | `docs/architecture/test-strategy.md` | Test layering, mandatory quality gates, test environments, and release verification requirements |
+| Test and quality baseline | `docs/architecture/test-strategy.md`, `docs/architecture/quality-gates.json` (when adopted) | Test layering, adopted quality gates (static analysis stack/tool/config/severity/waiver policy), test environments, and release verification requirements |
 | Baseline governance metadata | `docs/architecture/baseline-status.md` | Versions, effective status, approvers, effective dates, in-flight amendments, and waivers for each baseline domain |
 
 OpenSpec `openspec/specs/**` and the design/governance baselines above are complementary: the OpenSpec main specs describe committed, externally observable capability behavior of the system; the project baseline documents describe business, architecture, data, and engineering constraints reused across features. Both must be checked at the start of a feature, and neither can replace the other.
@@ -143,7 +143,7 @@ This project no longer uses the textual status in `baseline-status.md` as the so
 
 - `docs/architecture/baseline-manifest.json`: overall/domain versions, status, approvals, effective revision, and the SHA-256 of each baseline file.
 - `docs/architecture/constraint-registry.json`: stable Constraint IDs, constraint levels, scope, rule text, source sections, enforcement method, owner, and approval status.
-- `openspec/changes/<change-id>/design/baseline-binding.json`: the current Change's binding of every ACTIVE constraint, baseline snapshot, design evidence, implementation verification evidence, exception approvals, and rebase conclusions.
+- `openspec/changes/<change-id>/design/baseline-binding.json`: the current Change's binding of the constraints required by the manifest `governance_profile` (all ACTIVE constraints in `standard`, only `critical: true` constraints in `lite`), baseline snapshot, design evidence, implementation verification evidence, exception approvals, and rebase conclusions.
 - `scripts/baseline-governance.py`: the sole check entry point for the above data; `workflow.py` invokes it on stage entry/transition.
 
 ### 9.1 Freeze Conditions
@@ -177,7 +177,7 @@ Run the following when creating Change auxiliary assets:
 python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 ```
 
-The generated `baseline-binding.json` must cover all ACTIVE constraints in the current registry, and deleting constraint rows is prohibited. Each constraint must be selected as `APPLICABLE` or `NOT_APPLICABLE`; N/A must state the reason. Applicable constraints must be `COMPLIANT` or `EXCEPTION_APPROVED` at the design stage and be linked to real design evidence files.
+The generated `baseline-binding.json` must cover the constraints required by the manifest `governance_profile`: every ACTIVE constraint in `standard`, or only constraints marked `critical: true` in `lite`. In both profiles the baseline snapshot, `baseline-impact.md`, rebase reviews, and binding approval remain mandatory. Deleting required constraint rows is prohibited. Each bound constraint must be selected as `APPLICABLE` or `NOT_APPLICABLE`; N/A must state the reason. Applicable constraints must be `COMPLIANT` or `EXCEPTION_APPROVED` at the design stage and be linked to real design evidence files.
 
 At the implementation stage, every applicable constraint must have `implementation_verification.status=PASS` and a real evidence file; constraints that genuinely only affect design and not runtime implementation must still explicitly be written as `NOT_APPLICABLE` with a reason. `PENDING`, `NOT_RUN`, and `SKIPPED` cannot be regarded as passing. The acceptance stage must additionally fill in `acceptance_verification` separately, reconfirming constraint compliance with independent acceptance/review evidence, and must not directly copy the PASS from the implementation stage; N/A likewise must state a reason.
 
@@ -212,3 +212,9 @@ Every affected domain of an in-flight Change must fill in `rebase_reviews`: curr
 ### 9.5 Constraints and Safety Boundaries
 
 The scripts verify in-repository JSON, file hashes, approval record structure, and evidence existence; they do not provide enterprise identity authentication, electronic signatures, or non-repudiation. `baseline-governance.py audit --require-frozen` and the applicable Change phase gates must be wired into CI, and Git CODEOWNERS, protected branches, and required approvals must be set for baseline files/Manifest/Registry. Otherwise, an Agent/user with permission to directly modify scripts or state JSON or to bypass CI may still evade the gates.
+### 9.6 Governance Profiles (standard / lite)
+
+- `docs/architecture/baseline-manifest.json` selects the profile with `governance_profile`: `standard` (default) or `lite`.
+- `standard`: every ACTIVE constraint is bound in each Change and gated at requirement/design/implementation/acceptance.
+- `lite`: only ACTIVE constraints marked `critical: true` are bound and gated; other ACTIVE constraints remain frozen in the registry but do not require per-Change rows or per-phase evidence. The baseline snapshot, `baseline-impact.md`, rebase reviews, binding approval, and approval evidence remain mandatory in both profiles.
+- Changing the profile after freeze is a baseline amendment; mark the constraints that are truly cross-feature MUST rules as `critical` before freezing.

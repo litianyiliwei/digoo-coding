@@ -18,7 +18,7 @@
 | Data and Domain | `docs/architecture/logical-erd.md`, `domain-boundaries.md`, `data-flows.md` | v0.1.0 | DRAFT / FROZEN | | | |
 | Public API | `docs/architecture/api-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
 | Frontend Engineering | `docs/architecture/frontend-conventions.md` | v0.1.0 | DRAFT / FROZEN | | | |
-| Test and Quality | `docs/architecture/test-strategy.md` | v0.1.0 | DRAFT / FROZEN | | | |
+| Test and Quality | `docs/architecture/test-strategy.md`, `docs/architecture/quality-gates.json` (when adopted) | v0.1.0 | DRAFT / FROZEN | | | |
 
 ## 2. Effective Rules
 

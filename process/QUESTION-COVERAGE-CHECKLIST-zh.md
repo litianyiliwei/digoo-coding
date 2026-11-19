@@ -2,7 +2,7 @@
 
 > Language: [English](QUESTION-COVERAGE-CHECKLIST.md) | 简体中文
 
-> 状态：DRAFT（过程辅助文件；已接入 02/03/05/07 的阶段证据检查；不是正式工件）
+> 状态：RECOMMENDED（阶段提问辅助；不是硬门禁；证据块可选）
 > Change ID：N/A（过程文档）
 > 适用范围：02 需求业务分析、03 项目总体架构设计、05 提案级需求分析、07 详细设计/接口/测试设计
 > 关联需求/AC：N/A（过程文档）
@@ -11,24 +11,24 @@
 
 ## 1. 用途与用法
 
-现有 Prompt 在“工件结构”上很强，但在“问询覆盖”上并不均衡。本清单把“下游阶段需要什么”转成按阶段的问题列表。它不替代阶段契约，也不替代方法证据门禁，只作为阶段执行和评审的工作清单。
+本清单把“下游阶段需要什么”转成按阶段的问题列表。它是阶段执行和评审的工作清单，不是机器门禁：阶段自行判断哪些条目适用，不要求逐项记录。
 
 用法：
 
-1. 阶段开始时，把当前阶段对应的表格复制到阶段工作笔记。
-2. 每一项只允许四种状态：`已答`、`不适用`、`待确认`、`延后`。
-3. 答案必须写进声明的工件章节；不能只留在对话里。未知或未确认项写入 `docs/product/open-questions.md`，并写 owner 和阻塞条件。
-4. 阶段结束时，把填好的表格附在交接报告里，并检查第 4 节的阶段退出规则。
-5. 评审时问“下游消费问题”：**下一阶段能不能在不追问用户的情况下完成它声明的工件？**
+1. 阶段开始时浏览当前阶段的表格，挑选真正影响本项目/Change 的问题。
+2. 用建议问句准备访谈；确实不适用的条目直接跳过，不必生产“不适用”合规行。
+3. 答案写入声明的工件章节；未知或未确认项写入 `docs/product/open-questions.md`，并写 owner 和阻塞条件。
+4. 阶段结束时检查下游消费问题：**下一阶段能不能在不追问用户的情况下完成它声明的工件？**
+5. 如需记录覆盖情况，可以在证据中加入可选的 `question_coverage` 块；它做形状校验，不要求固定条目列表。
 
-状态定义：
+当阶段记录 `question_coverage` 时，使用以下状态词表：
 
 | 状态 | 含义 | 必须记录 |
 |---|---|---|
 | `已答` | 有真实答案 | 答案摘要、来源、落点 |
-| `不适用` | 确实不适用 | 原因和批准人 |
-| `待确认` | 答案未知或未确认 | owner、阻塞条件、目标日期 |
-| `延后` | 有意推迟 | 批准人、目标阶段/Change |
+| `不适用` | 确实不适用 | 原因 |
+| `待确认` | 答案未知或未确认 | owner、阻塞条件、开放问题文件 |
+| `延后` | 有意推迟 | 原因、批准人、目标阶段/Change |
 
 ## 2. 当前覆盖快照
 
@@ -92,6 +92,7 @@
 | 03-T07-02 | 离线、降级、推送、深链 | 离线缓存、同步冲突、权限拒绝/降级、推送/深链、热更新和应用商店合规规则是什么？ | `frontend-conventions.md`；`data-flows.md` | 05 离线 AC；06 交互；07 前端/原生设计 | [ ] |
 | 03-T08-01 | 报表、BI、打印、导出、读模型 | 报表/BI/打印/导出/读模型是否在本期，数据来源、刷新频率、权限和导出格式是什么？ | `system-context.md`；`containers-and-deployment.md`；`api-conventions.md`；`data-flows.md` | 05 报表 AC；06 打印布局；07 IO/导出设计 | [ ] |
 | 03-T09-01 | NFR 冻结为可验证约束 | 所有 NFR 是否量化为可验证约束，每项是否有 owner、验证方法和证据路径？ | `constraint-registry.json`；`test-strategy.md` | 05 NFR AC；07 NFR 测试；08/09 验证 | [ ] |
+| 03-T09-02 | 静态分析采用决策与工具链 | 本项目是否采用静态分析门禁？不采用时记录决策与原因。采用时，每个选定语言选用哪些静态分析工具（lint/format/type/style），版本如何锁定，插件/包清单、配置落点、blocking 严重度与零问题策略是什么，豁免政策（Change 级文件、审批人、过期）是什么？从零仓库能否离线运行（不拉取依赖包）？ | `technology-decisions.md` `## Static Analysis Toolchain`；`test-strategy.md` `## Static Analysis and Quality Gates`；`docs/architecture/quality-gates.json`（采用时）；`constraint-registry.json` `QUALITY-STATIC-001`（采用时 ACTIVE，否则 RETIRED） | 05 适用约束；07 配置/豁免计划；08 门禁；09 独立重跑；10 验收 | [ ] |
 | 03-T10-01 | 旧系统迁移与共存 | 旧数据迁移、双跑、割接、停旧和回滚策略是什么，新旧系统边界和共存期是什么？ | `technology-decisions.md`；`containers-and-deployment.md`；`data-flows.md`；`constraint-registry.json` | 04 依赖；05 迁移 AC；07 backfill；08 割接 | [ ] |
 | 03-T11-01 | 测试策略与测试输入 | 测试层级、契约/集成/E2E/性能/安全/UAT 策略是什么，谁提供环境、真实设备、第三方沙箱和测试数据？ | `test-strategy.md`；`docs/project/toolchain-report.md` | 05 验证；07 测试设计；08 执行 | [ ] |
 | 03-T12-01 | 环境、发布、可观测性、灾备 | dev/test/staging/prod 拓扑、网络分区、域名/证书/VPN、发布/回滚/灰度/开关、DB 迁移策略、日志/指标/追踪/告警/SLO/值班/runbook、备份/灾备是什么？ | `containers-and-deployment.md`；`test-strategy.md`；`constraint-registry.json` | 07 配置/发布；08 实现；10 验收环境 | [ ] |
@@ -133,23 +134,24 @@
 | 07-T12-02 | 可观测性与 SLO | 日志、指标、追踪、告警、SLO 和审计日志落在哪里，阈值和 owner 是什么？ | `design.md` `### Shared Concerns`；`design/test-cases.csv` | 08 实现；09/10 证据 | [ ] |
 | 07-T15-01 | 测试覆盖与证据 | 测试策略是否覆盖每个 AC/页面/operationId/IO/边界，并包含数据、替身、清理和失败注入？ | `design.md` `## Test Design`；`design/test-cases.csv`；`traceability.csv` | 08 执行；09 验证 | [ ] |
 | 07-T15-02 | 离线、同步、多端、设备 | 离线缓存、同步冲突、多端差异、JS Bridge 和设备能力落在哪些组件、事件和接口？ | `design.md` `## Frontend Detailed Design`；`design/interface-catalog.csv`；`design/test-cases.csv` | 08 实现；09 设备验证 | [ ] |
+| 07-T15-03 | 静态分析配置与豁免计划 | 采用静态分析时：08 将从已批准规则包复制/固定哪些配置文件到各栈根目录，是否与 `quality-gates.json` 一致（不一致时记录偏差），哪些 blocking 问题需要 Change 级豁免，且审批人与过期时间在 `policy.waiver.max_days` 之内？未采用时记录 `N/A + reason`。 | `design.md` `### Static Analysis`；`design/static-waivers.json`（条件适用） | 08 门禁；09 独立验证；10 验收 | [ ] |
 | 07-T13-01 | 设计与执行负责人 | 设计、实现、测试、验收的 owner 是谁，未决决策的截止/阻塞条件是什么？ | `design.md` `### Key Decisions and Trade-offs`；`### Open Decisions` | 08/09/10 审批 | [ ] |
 | 07-T03-01 | 权限与审计实现 | 每个页面、接口、IO 的权限、数据范围、脱敏和审计如何实现？ | `api/openapi.yaml`；前端/后端子节；`design/test-cases.csv` | 08 实现；09 验证 | [ ] |
 
-## 4. 阶段退出规则
+## 4. 建议的阶段退出检查
 
-阶段只有在以下条件都满足时才能提交交接：
+以下是评审辅助，不是机器门禁：
 
-1. 该阶段的每个清单项都是 `已答`、`不适用`、`待确认` 或 `延后`。
+1. 阶段选择处理的条目有答案，或明确标为 `不适用`/`待确认`/`延后`。
 2. 每个 `待确认` 项都出现在 `docs/product/open-questions.md`，并有 owner 和阻塞条件。
 3. 每个 `已答` 项都指向声明工件里的真实落点。
 4. 阶段评审通过“下游消费测试”：下一阶段能不再追问用户缺失事实就完成它声明的工件。
-5. 有意不放在本阶段处理的项必须记为 `延后`，写明批准人和目标阶段，不能静默消失。
+5. 有意推迟的项建议记录为 `延后`，写明批准人和目标阶段；确实不适用的条目无需状态行。
 
 ## 5. 证据与交接
 
-- 02/03/05/07 的阶段证据必须包含 `question_coverage` 数组。`python scripts/check-question-coverage.py --step <step-id> --evidence <json>` 负责校验，`workflow.py request-review` / `transition` 会自动调用同一检查。
-- 形状（每个必答条目一条；`landing` 是一个真实工件路径，可带 `#heading`）：
+- 02/03/05/07 的 `question_coverage` 是可选块。若提供，`python scripts/check-question-coverage.py --step <step-id> --evidence <json>` 会校验每条的状态与字段、拒绝重复 `item_id`，并检查 `landing` / `open_question` 路径存在；不要求固定条目列表，允许额外 item_id，`workflow.py request-review` / `transition` 会自动复核同一个可选块。
+- 形状示例（不必覆盖整个清单；`landing` 是一个真实工件路径，可带 `#heading`）：
 
 ```json
 "question_coverage": [
@@ -170,8 +172,7 @@
   {
     "item_id": "02-T08-01",
     "status": "n/a",
-    "reason": "本期没有报表或打印凭证",
-    "approver": "产品负责人"
+    "reason": "本期没有报表或打印凭证"
   },
   {
     "item_id": "03-T10-01",
@@ -179,15 +180,20 @@
     "reason": "本期没有旧数据迁移",
     "approver": "技术负责人",
     "target_step": "07-detailed-design"
+  },
+  {
+    "item_id": "CUSTOM-01",
+    "status": "answered",
+    "landing": "docs/product/open-questions.md#已解决"
   }
 ]
 ```
 
-- 填好的清单作为附录或摘要表附在阶段交接报告里。
 - 不能基于假设或未读文档把项标成 `answered`。没有来源的答案就是 `open`。
+- 把清单作为附录或摘要表附在阶段交接报告里是可选的。
 
 ## 6. 维护
 
 - 阶段 Prompt、Skill、模板或契约变化时，在同一次变更里更新对应清单行。
 - 下游阶段发现缺少输入时，在本清单新增一行并记录来源阶段；不要只在 downstream 工件里修补。
-- 本清单不改变现行硬门禁。要把它变成强制项，需要单独变更阶段契约、Prompt 和校验器，并走正常的阶段评审与批准。
+- 本清单是建议，不改变硬门禁；可选的 `question_coverage` 块形状由校验器检查。

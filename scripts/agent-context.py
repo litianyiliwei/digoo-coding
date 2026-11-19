@@ -135,10 +135,9 @@ def main():
                         print(f'  - `{token}` [MISSING]')
                 elif exists is True:
                     print(f'  - `{token}` [OK]')
-        print(f'- Budget: {len(lean)}/{max_files} lean read groups; when exceeded, split the Change first or narrow the scope.')
+        print(f'- Budget (advisory): {len(lean)}/{max_files} lean read groups; if exceeded, narrow the scope or record why the extra reads are needed.')
         if len(lean) > max_files:
-            print(f'CONTEXT_BUDGET_EXCEEDED: lean {len(lean)} > max_files {max_files}')
-            sys.exit(1)
+            print(f'CONTEXT_BUDGET_WARNING: lean {len(lean)} > advisory max_files {max_files}; over-budget is advisory, not a gate.')
         print('')
         print('## 1. On-demand inputs (read only after a trigger; not counted in the default budget)')
         for item in profile.get('on_demand') or []:

@@ -35,9 +35,12 @@ L1 强制模板包含（仅在矩阵中的适用条件成立时强制；不适�
 - 需求：业务流程（节点表）、业务数据对象目录、RD 矩阵、提案级用户故事/验收标准、业务规则和未决问题。
 - OpenSpec：proposal、delta specs、design、tasks。
 - 设计：Figma 设计与评审产物（单文件 `design/figma-audit.md`：token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、资产清单、MCP 读取记录、UI 评审 APPROVED；`design/figma-code/`：设计代码（get_design_context 落盘）；`design/figma-layout.csv`：运行态断言映射；`design/figma-assets/README.md`：仅真实图片/SVG 资产清单；**不使用截图**；涉及 UI 时必填，07/08 默认离线消费，仅在版本变化/歧义时按页重读）、OpenAPI、统一详细设计（design.md 五节）、测试用例矩阵（test-cases.csv）、API→IO 映射、IO 目录、需求追踪矩阵。
+- 质量门禁（项目在 03 采用静态分析时）：`docs/architecture/quality-gates.json`（机器可读的静态分析栈根目录、工具命令、配置路径、严重度与豁免政策；校验器 `scripts/check-quality-gates.py --strict`；批准来自冻结的 test_quality 基线域）与条件适用的 `templates/change-assets/design/static-waivers.example.json` Change 级豁免结构（文件+规则范围、审批人、过期时间；由 `scripts/check-static-analysis.py` 按 `policy.waiver.allowed` 与 `policy.waiver.max_days` 强制；绝不放入冻结门禁文件）。未采用时记录 `N/A + reason`，并让门禁文件不进入基线。
 - 验证：自动化检查结果、代码审查记录、人工验收矩阵、归档清单。
 
 L2 推荐模板包含：系统上下文、技术选型/ADR、部署与模块边界、数据流、逻辑 ERD、领域边界、API 约定、前端规范、测试策略、提案路线图和基线审计报告。
+
+L3 自由表达包括工具包随附的 `templates/static-analysis/` 规则包：在 03 选定、08 复制/固定到项目中的 lint/format/type/style 起始配置。它们只是默认值、不是规范；从不在工具包内执行，执行时以冻结的 `quality-gates.json` 为准。
 
 ## 5. 项目基线与功能 Change 的交互
 

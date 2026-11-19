@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "change_id": "PENDING",
+  "waivers": [
+    {
+      "id": "WAIVER-001",
+      "stack": "PENDING",
+      "tool": "PENDING",
+      "file": "PENDING",
+      "rule": "PENDING",
+      "reason": "PENDING — why the finding cannot be fixed within this Change; owner and blocking condition.",
+      "owner": "PENDING",
+      "approved_by": "PENDING",
+      "approved_at": "YYYY-MM-DD",
+      "expires_at": "YYYY-MM-DD"
+    }
+  ]
+}

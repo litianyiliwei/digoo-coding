@@ -20,6 +20,25 @@ LEVELS = {"MUST", "SHOULD", "MAY", "PROHIBITED"}
 HEX = re.compile(r"^[0-9a-f]{64}$")
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
 CHANGE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+GOVERNANCE_PROFILES = {"standard", "lite"}
+
+
+def governance_profile(manifest):
+    """Return the manifest's governance profile; standard is the default."""
+    return str(manifest.get("governance_profile") or "standard").strip().lower()
+
+
+def bound_constraints(registry, profile):
+    """Return the ACTIVE constraints a profile binds.
+
+    standard binds every ACTIVE constraint; lite binds only those explicitly
+    marked ``critical: true`` while still freezing and snapshotting the full
+    baseline.
+    """
+    active = [c for c in registry.get("constraints", []) if c.get("status") == "ACTIVE"]
+    if profile == "lite":
+        return [c for c in active if c.get("critical") is True]
+    return active
 
 
 def now():
@@ -150,6 +169,8 @@ def validate_registry(manifest, registry, require_frozen=False):
             errors.append(f"{cid}: status must be one of {sorted(CONSTRAINT_STATUSES)}")
         if c.get("level") not in LEVELS:
             errors.append(f"{cid}: level must be one of {sorted(LEVELS)}")
+        if "critical" in c and not isinstance(c.get("critical"), bool):
+            errors.append(f"{cid}: critical must be true or false when present")
         for key in ("title", "rule", "rationale", "scope"):
             if not str(c.get(key, "")).strip():
                 errors.append(f"{cid}: {key} is required")
@@ -205,6 +226,9 @@ def validate_manifest(manifest, registry, require_frozen=False):
         errors.append("baseline manifest overall_version must be semantic x.y.z")
     if manifest.get("status") not in STATUSES:
         errors.append(f"baseline manifest status must be one of {sorted(STATUSES)}")
+    profile = manifest.get("governance_profile")
+    if profile is not None and str(profile).strip().lower() not in GOVERNANCE_PROFILES:
+        errors.append(f"baseline manifest governance_profile must be one of {sorted(GOVERNANCE_PROFILES)}")
     domains = manifest.get("domains") or {}
     missing_domains = set(DOMAINS) - set(domains)
     extra_domains = set(domains) - set(DOMAINS)
@@ -299,10 +323,9 @@ def binding_path(change_id):
 
 
 def make_binding(change_id, manifest, registry):
+    profile = governance_profile(manifest)
     entries = []
-    for c in registry.get("constraints", []):
-        if c.get("status") != "ACTIVE":
-            continue
+    for c in bound_constraints(registry, profile):
         entries.append({
             "constraint_id": c["id"],
             "domain": c["domain"],
@@ -318,6 +341,7 @@ def make_binding(change_id, manifest, registry):
     return {
         "schema_version": "1.0",
         "change_id": change_id,
+        "governance_profile": profile,
         "created_at": now(),
         "baseline_snapshot": {
             "overall_version": manifest.get("overall_version", ""),
@@ -403,7 +427,11 @@ def check_change(change_id, phase):
                         errors.append(f"{domain}: rebase review evidence is missing")
                 except Exception as exc:
                     errors.append(f"{domain}: invalid rebase review evidence: {exc}")
-    active = {c["id"]: c for c in registry.get("constraints", []) if c.get("status") == "ACTIVE"}
+    profile = governance_profile(manifest)
+    if binding.get("governance_profile") and str(binding.get("governance_profile")).strip().lower() != profile:
+        errors.append("baseline binding governance_profile differs from the current manifest; refresh-binding after an approved profile change")
+    active_all = {c["id"]: c for c in registry.get("constraints", []) if c.get("status") == "ACTIVE"}
+    active = {cid: c for cid, c in active_all.items() if profile == "standard" or c.get("critical") is True}
     entries = binding.get("constraints")
     if not isinstance(entries, list):
         return errors + ["baseline binding constraints must be an array"]
@@ -415,9 +443,9 @@ def check_change(change_id, phase):
         entry_map[cid] = e
     for cid in sorted(set(active) - set(entry_map)):
         errors.append(f"active project constraint not bound by Change: {cid}")
-    for cid in sorted(set(entry_map) - set(active)):
+    for cid in sorted(set(entry_map) - set(active_all)):
         errors.append(f"binding references non-active/unknown constraint: {cid}")
-    for cid, c in active.items():
+    for cid, c in active_all.items():
         e = entry_map.get(cid)
         if not e:
             continue
@@ -668,6 +696,7 @@ def cmd_init_binding(args):
     binding = make_binding(args.change_id, manifest, registry)
     save_json(p, binding)
     print(f"BASELINE_BINDING_CREATED={p.relative_to(ROOT)}")
+    print(f"GOVERNANCE_PROFILE={binding.get('governance_profile', 'standard')}")
     print(f"BOUND_CONSTRAINTS={len(binding['constraints'])}")
     return 0
 

@@ -35,9 +35,12 @@ L1 mandatory templates include (mandatory only when the applicability conditions
 - Requirements: business flows (node table), business data object catalog, RD matrix, proposal-level user stories/acceptance criteria, business rules, and open issues.
 - OpenSpec: proposal, delta specs, design, tasks.
 - Design: Figma design and review artifacts (single file `design/figma-audit.md`: token actual values, text styles, per-PAGE block specifications, design code, assertion scope, state coverage and decisions, asset inventory, MCP read records, UI review APPROVED; `design/figma-code/`: design code (get_design_context output written to disk); `design/figma-layout.csv`: runtime assertion mapping; `design/figma-assets/README.md`: real image/SVG asset inventory only; **screenshots not used**; mandatory when UI is involved, with 07/08 consuming them offline by default and re-reading page by page only on version change/ambiguity), OpenAPI, unified detailed design (five sections of design.md), test case matrix (test-cases.csv), API→IO mapping, IO catalog, requirements traceability matrix.
+- Quality gates (when the project adopts static analysis at 03): `docs/architecture/quality-gates.json` (machine-readable static analysis stack roots, tool commands, config paths, severity and waiver policy; validator `scripts/check-quality-gates.py --strict`; approval comes from the frozen test_quality baseline domain) and the conditional `templates/change-assets/design/static-waivers.example.json` Change-scoped waiver shape (file+rule scope, approver, expiry; enforced by `scripts/check-static-analysis.py` against `policy.waiver.allowed` and `policy.waiver.max_days`; never placed in the frozen gates file). When not adopted, record `N/A + reason` and keep the gates file out of the baseline.
 - Verification: automated check results, code review records, manual acceptance matrix, archive checklist.
 
 L2 recommended templates include: system context, technology selection/ADRs, deployment and module boundaries, data flow, logical ERD, domain boundaries, API conventions, frontend conventions, test strategy, proposal roadmap, and baseline audit reports.
+
+L3 free-form includes the toolkit-shipped `templates/static-analysis/` rule packs: starter lint/format/type/style configurations selected at 03 and copied/pinned into the project at 08. They are defaults, not normative; they are never executed inside the toolkit, and the frozen `quality-gates.json` wins for execution.
 
 ## 5. Interaction Between Project Baseline and Feature Changes
 

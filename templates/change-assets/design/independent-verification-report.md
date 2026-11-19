@@ -28,6 +28,14 @@
 | Command | Exit code | Result | Log/report path |
 |---|---:|---|---|
 
+## Static Analysis Checks (when quality-gates.json exists)
+
+> Independently re-run by the verifier: `python scripts/run-quality-gates.py <change-id> --independent --identity <verifier> --builder-identity <builder> --output openspec/changes/<change-id>/design/evidence/static-analysis-independent.json`. This table must match the `static_checks` array in `independent-verification.json` and the independent evidence file; any missing/failed/`NOT_RUN` gate, drift, or expired waiver forces Verdict FAIL/BLOCKED. When `docs/architecture/quality-gates.json` does not exist, write `- Static analysis: N/A (quality gates not adopted)` and delete the data row.
+
+| Stack | Tool | Command (from independent evidence) | Exit code | Result | Evidence |
+|---|---|---|---:|---|---|
+| frontend-web | eslint | `npx --no-install eslint --max-warnings 0 .` | 0 | PASS | `design/evidence/static-analysis-independent.json` |
+
 ## 4. Contract and Engineering Constraint Checks
 
 - API → IO mapping:

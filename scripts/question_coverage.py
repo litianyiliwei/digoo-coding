@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
-"""Validate a stage evidence file's question-coverage block.
+"""Validate an optional stage evidence ``question_coverage`` block.
 
-The policy lives in ``process/STEP-ARTIFACT-CONTRACTS.json`` under
-``question_coverage_policy``. If that key is absent, a conservative built-in
-policy for stages 02/03/05/07 is used so older packages still get a useful
-check.
+``process/QUESTION-COVERAGE-CHECKLIST.md`` is a recommended elicitation aid,
+not a machine gate. An evidence file may omit the block entirely, and the block
+does not have to cover a fixed item list.
 
-Each required checklist item must appear exactly once in the evidence's
-``question_coverage`` array. The status decides which fields are mandatory:
+If the block is present, each entry must have a valid status and the fields
+that status requires:
 
 - ``answered``: ``landing`` must point to an existing artifact (optionally with
   ``#heading``); this is the evidence that the answer reached the artifact.
@@ -16,7 +15,8 @@ Each required checklist item must appear exactly once in the evidence's
 - ``n/a``: ``reason`` is required.
 - ``deferred``: ``reason``, ``approver`` and ``target_step`` are required.
 
-The checker proves structure and provenance, not that the answer is correct.
+Unknown item IDs are allowed, so a stage may record additional questions.
+The checker proves structure and provenance, not that the answers are correct.
 """
 from __future__ import annotations
 
@@ -27,38 +27,7 @@ from typing import Any
 
 DEFAULT_POLICY: dict[str, Any] = {
     "checklist": "process/QUESTION-COVERAGE-CHECKLIST.md",
-    "stages": {
-        "02-requirements-analysis": {
-            "required_items": [
-                "02-T01-01", "02-T02-01", "02-T03-01", "02-T04-01", "02-T04-02",
-                "02-T05-01", "02-T06-01", "02-T07-01", "02-T07-02", "02-T08-01",
-                "02-T09-01", "02-T10-01", "02-T11-01", "02-T13-01", "02-T14-01",
-                "02-T15-01",
-            ]
-        },
-        "03-project-architecture-baseline": {
-            "required_items": [
-                "03-T01-01", "03-T02-01", "03-T02-02", "03-T03-01", "03-T04-01",
-                "03-T05-01", "03-T06-01", "03-T07-01", "03-T07-02", "03-T08-01",
-                "03-T09-01", "03-T10-01", "03-T11-01", "03-T12-01", "03-T13-01",
-                "03-T14-01",
-            ]
-        },
-        "05-feature-requirements": {
-            "required_items": [
-                "05-T01-01", "05-T03-01", "05-T04-01", "05-T05-01", "05-T06-01",
-                "05-T07-01", "05-T08-01", "05-T09-01", "05-T10-01", "05-T11-01",
-                "05-T14-01", "05-T15-01", "05-T13-01",
-            ]
-        },
-        "07-detailed-design": {
-            "required_items": [
-                "07-T01-01", "07-T04-01", "07-T05-01", "07-T06-01", "07-T07-01",
-                "07-T08-01", "07-T09-01", "07-T10-01", "07-T11-01", "07-T12-01",
-                "07-T12-02", "07-T15-01", "07-T15-02", "07-T13-01", "07-T03-01",
-            ]
-        },
-    },
+    "checklist_zh": "process/QUESTION-COVERAGE-CHECKLIST-zh.md",
 }
 
 STATUS_ALIASES = {
@@ -81,15 +50,20 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def load_policy(root: Path) -> dict[str, Any]:
-    """Read question_coverage_policy from the contract, falling back to the default."""
-    contract = root / "docs" / "STEP-ARTIFACT-CONTRACTS.json"
-    try:
-        data = json.loads(contract.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return DEFAULT_POLICY
-    policy = data.get("question_coverage_policy")
-    if isinstance(policy, dict) and isinstance(policy.get("stages"), dict):
-        if policy["stages"]:
+    """Read question_coverage_policy from the stage contract, falling back to the default.
+
+    The toolkit installs the contract under ``process/``; older package layouts
+    may keep a copy under ``docs/``. Prefer the installed location so the JSON
+    policy is actually authoritative.
+    """
+    for rel in ("process/STEP-ARTIFACT-CONTRACTS.json", "docs/STEP-ARTIFACT-CONTRACTS.json"):
+        contract = root / rel
+        try:
+            data = json.loads(contract.read_text(encoding="utf-8"))
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+        policy = data.get("question_coverage_policy")
+        if isinstance(policy, dict) and policy:
             return policy
     return DEFAULT_POLICY
 
@@ -172,26 +146,22 @@ def _validate_entry(entry: dict[str, Any], root: Path, change_id: str | None) ->
 
 
 def validate_coverage(evidence: dict[str, Any], step_id: str, root: Path) -> list[str]:
-    """Return question-coverage errors; an empty list means the stage passed."""
-    policy = load_policy(root)
-    rule = policy.get("stages", {}).get(step_id)
-    if not rule:
-        return []
+    """Return optional question-coverage errors; an empty list means the stage passed.
 
-    required = [str(x).strip() for x in (rule.get("required_items") or []) if str(x).strip()]
-    if not required:
-        return [f"{step_id}: question_coverage policy has no required_items"]
-
+    A stage may omit ``question_coverage`` entirely. When present, entries are
+    shape-checked by status; no fixed item list is required.
+    """
     entries = evidence.get("question_coverage")
     if entries is None:
-        return [f"{step_id}: evidence.question_coverage is required (one entry per required item)"]
-    if not isinstance(entries, list) or not entries:
-        return [f"{step_id}: evidence.question_coverage must be a non-empty array"]
+        return []
+    if not isinstance(entries, list):
+        return [f"{step_id}: evidence.question_coverage must be an array when present"]
+    if not entries:
+        return []
 
     change_id = evidence.get("change_id") or None
     errors: list[str] = []
     seen: dict[str, dict[str, Any]] = {}
-    required_set = set(required)
 
     for index, entry in enumerate(entries, 1):
         if not isinstance(entry, dict):
@@ -205,16 +175,6 @@ def validate_coverage(evidence: dict[str, Any], step_id: str, root: Path) -> lis
             errors.append(f"duplicate item_id: {item_id}")
             continue
         seen[item_id] = entry
-        if item_id not in required_set:
-            errors.append(f"unknown item_id for {step_id}: {item_id}")
         errors.extend(_validate_entry(entry, root, change_id))
 
-    missing = [item for item in required if item not in seen]
-    if missing:
-        errors.append(f"{step_id}: missing required items: {', '.join(missing)}")
-
     return list(dict.fromkeys(errors))
-
-
-def policy_for(step_id: str, root: Path) -> dict[str, Any] | None:
-    return load_policy(root).get("stages", {}).get(step_id)

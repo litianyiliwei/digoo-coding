@@ -62,7 +62,7 @@ Do not split subdirectories per page/per state, do not generate scattered token/
 
 ## Quality and Safety Boundaries
 
-- PAGE IDs are stable and unique; the page set matches the Figma review deliverable; every PAGE is fully covered in `PAGEs and Nodes` and `PAGE Key Specifications`.
+- PAGE IDs are stable and unique; the page set matches the Figma review deliverable; every PAGE is fully covered in `PAGEs and Nodes` and `PAGE Key Specifications`. The auditor accepts the section headings in English or Chinese; keep the required anchors so downstream checks can locate the content.
 - Tokens must record actual values; variable names/counts alone are not a specification; every PAGE has at least 3 block-level geometry/layout rows.
 - Every PAGE must have target-framework design code (Vue stack `figma-code/PAGE-00N.vue`, React stack `PAGE-00N.tsx`/`.jsx`), and `## Design Code` must state the target framework, extension, and selection rationale; `figma-layout.csv` must cover the key blocks and primary actions of every PAGE, with geometry/text/font values coming from Figma; structural differences are written into `## Differences and Pending Confirmation`.
 - States must include default; for states without a Figma frame, the 07 decision, approver, and rationale must be written, and you must not claim they have been reproduced.
@@ -109,6 +109,6 @@ Before and after executing this Skill, you must comply with `process/STEP-ARTIFA
 
 - Before starting, run `python scripts/workflow.py check-entry --step 06-figma-design-review [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
 - Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly replies "Review passed 06-figma-design-review" (the workflow requires explicit user approval) may you run `python scripts/workflow.py approve --step 06-figma-design-review --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
+- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 06-figma-design-review --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
 - When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
 - Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.

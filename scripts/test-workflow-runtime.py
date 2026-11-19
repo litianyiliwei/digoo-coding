@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Regression tests for workflow state machine and SHA-256 handoff guards."""
-import importlib.util, json, tempfile, unittest
+import importlib.util, json, subprocess, sys, tempfile, unittest
 from pathlib import Path
-from question_coverage import DEFAULT_POLICY
 
 SCRIPT=Path(__file__).with_name('workflow.py')
 spec=importlib.util.spec_from_file_location('workflow_runtime',SCRIPT)
@@ -236,7 +235,6 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'methods':[self._method_entry()],
-                  'question_coverage':self._coverage('05-feature-requirements'),
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self._write_evidence('handoff-recovery-evidence.json',evidence)
@@ -250,28 +248,88 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'methods':[self._method_entry()],
-                  'question_coverage':self._coverage('05-feature-requirements'),
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self.root/'feature-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'Human approval required'):
             w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
 
-    def test_question_coverage_required_for_stage_05(self):
-        self._write_method_artifact()
+    def test_question_coverage_is_optional_for_stage_05(self):
+        # QUESTION-COVERAGE-CHECKLIST.md is an elicitation aid, not a gate:
+        # omitting the block entirely is valid.
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
                   'methods':[self._method_entry()],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
-        ep=self._write_evidence('no-coverage-evidence.json',evidence)
-        with self.assertRaisesRegex(ValueError,'Question coverage failed'):
-            w.parse_evidence(str(ep),'05-feature-requirements','sample-change')
+        errors=w.validate_coverage(evidence,'05-feature-requirements',self.root)
+        self.assertEqual([],errors)
+
+    def _write_policy_state(self, current, completed, policy):
+        state={'project_name':'test','active_change_id':'','completed_steps':completed,
+               'current_step':current,'pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],'approvals_history':[],'approval_policy':policy}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        return state
+
+    def test_risk_based_policy_fast_tracks_low_risk_stage(self):
+        self._write_policy_state('01-project-bootstrap',[],'risk-based')
+        args=type('Args',(),{'step':'01-project-bootstrap','change_id':None,'summary':'ready',
+                             'target':[],'evidence':'review-evidence.json'})()
+        self.assertEqual(0,w.cmd_request_review(args))
+        state=w.load_state()
+        self.assertEqual([],state['pending_approvals'])
+        self.assertEqual('01-project-bootstrap',state['current_step'])
+
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created','required':True}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python3 check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'pending'}}
+        ep=self._write_evidence('risk-based-01-evidence.json',evidence)
+        self.assertEqual(0,self._transition('01-project-bootstrap',ep))
+        self.assertEqual('02-requirements-analysis',w.load_state()['current_step'])
+
+    def test_risk_based_policy_still_requires_high_risk_stage_approval(self):
+        self._write_method_artifact()
+        self._write_policy_state('05-feature-requirements',['04-proposal-planning'],'risk-based')
+        state=w.load_state(); state['active_change_id']='sample-change'; w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
+                  'outputs':[{'path':'out.md','status':'verified'}],
+                  'methods':[self._method_entry()],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':False,'status':'not-required'}}
+        ep=self._write_evidence('risk-based-05-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'Human approval required'):
+            self._transition('05-feature-requirements',ep)
+
+    def test_standard_policy_still_requires_low_risk_stage_approval(self):
+        self._write_policy_state('01-project-bootstrap',[],'standard')
+        evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'out.md','status':'created','required':True}],
+                  'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python3 check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':False,'status':'not-required'}}
+        ep=self._write_evidence('standard-01-evidence.json',evidence)
+        with self.assertRaisesRegex(ValueError,'Human approval required'):
+            self._transition('01-project-bootstrap',ep)
+
+    def test_set_approval_policy_requires_no_pending_review(self):
+        args=type('Args',(),{'policy':'risk-based','reason':'single-team project','by':'owner'})()
+        self.assertEqual(0,w.cmd_set_approval_policy(args))
+        self.assertEqual('risk-based',w.load_state()['approval_policy'])
+        state=w.load_state()
+        state['pending_approvals']=[{'step_id':'01-project-bootstrap','artifact':'out.md'}]
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'reviews are pending'):
+            w.cmd_set_approval_policy(args)
 
     def test_check_coverage_subcommand_accepts_valid_coverage(self):
         evidence={'step_id':'05-feature-requirements','change_id':None,
-                  'question_coverage':self._coverage('05-feature-requirements')}
+                  'question_coverage':[{'item_id':'CUSTOM-01','status':'n/a','reason':'fixture'}]}
         ep=self._write_evidence('coverage-command-evidence.json',evidence)
+        args=type('Args',(),{'step':'05-feature-requirements','evidence':str(ep)})()
+        self.assertEqual(0,w.cmd_check_coverage(args))
+
+    def test_check_coverage_subcommand_accepts_omitted_block(self):
+        evidence={'step_id':'05-feature-requirements','change_id':None}
+        ep=self._write_evidence('no-coverage-command-evidence.json',evidence)
         args=type('Args',(),{'step':'05-feature-requirements','evidence':str(ep)})()
         self.assertEqual(0,w.cmd_check_coverage(args))
 
@@ -392,8 +450,8 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertEqual(0,self._transition('01-project-bootstrap',ep))
 
     def _coverage(self, step):
-        items=DEFAULT_POLICY['stages'][step]['required_items']
-        return [{'item_id':item,'status':'n/a','reason':'runtime fixture: not applicable'} for item in items]
+        # Question coverage is optional; an empty block is valid evidence.
+        return []
 
     def _method_entry(self, **overrides):
         entry={'skill':'brainstorming','mode':'stage-scoped','summary':'test methods',
@@ -440,12 +498,31 @@ class WorkflowRuntimeTests(unittest.TestCase):
         errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
         self.assertTrue(any('heading' in e for e in errors),errors)
 
-    def test_method_evidence_requires_minimum_alternatives(self):
+    def test_method_evidence_no_longer_requires_question_counts(self):
         self._write_method_artifact()
         evidence={'step_id':'03-project-architecture-baseline',
-                  'methods':[self._method_entry(alternatives=['only-one'])]}
+                  'methods':[self._method_entry(questions=[],alternatives=[],decisions=[])]}
         errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
-        self.assertTrue(any('alternatives' in e for e in errors),errors)
+        self.assertEqual([],errors)
+
+    def test_method_evidence_no_longer_requires_topic_keywords(self):
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'methods':[self._method_entry(questions=['客户端形态？','跨端方案？','设备协议？','离线同步？'])]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertEqual([],errors)
+
+    def test_method_policy_prefers_process_contract_over_docs(self):
+        process=(self.root/'process/STEP-ARTIFACT-CONTRACTS.json')
+        docs=(self.root/'docs/STEP-ARTIFACT-CONTRACTS.json')
+        process.write_text(json.dumps({'method_policy':{'03-project-architecture-baseline':{
+            'required':[{'skill':'custom-skill','requires_artifact':True}]}}}),encoding='utf-8')
+        docs.write_text(json.dumps({'method_policy':{'03-project-architecture-baseline':{
+            'required':[{'skill':'brainstorming','requires_artifact':True}]}}}),encoding='utf-8')
+        self._write_method_artifact()
+        evidence={'step_id':'03-project-architecture-baseline','methods':[self._method_entry()]}
+        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
+        self.assertTrue(any('custom-skill' in e for e in errors),errors)
 
     def test_stage_02_requires_internet_research(self):
         self._write_method_artifact()
@@ -473,13 +550,6 @@ class WorkflowRuntimeTests(unittest.TestCase):
         evidence={'step_id':'02-requirements-analysis','methods':[entry,research]}
         errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
         self.assertEqual([],errors)
-
-    def test_method_evidence_requires_declared_topics(self):
-        self._write_method_artifact()
-        evidence={'step_id':'03-project-architecture-baseline',
-                  'methods':[self._method_entry(questions=['客户端形态？','跨端方案？','设备协议？','离线同步？'])]}
-        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
-        self.assertTrue(any('required topic' in e for e in errors),errors)
 
     def test_conditional_stage_skip_creates_skip_handoff(self):
         state={'project_name':'test','active_change_id':'sample-change',
@@ -639,6 +709,159 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertEqual('sample-change',state['abandoned_changes'][0]['change_id'])
         self.assertTrue(json.loads((handoff_dir/'07-detailed-design--08-implementation-orchestrator.json').read_text(encoding='utf-8')).get('invalidated_at'))
         self.assertTrue((self.root/'workflow/state-events.jsonl').is_file())
+
+    def test_static_evidence_gate_blocks_bad_evidence(self):
+        scripts=Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory(dir=scripts) as tmp:
+            root=Path(tmp)
+            gates={'schema_version':'1.0','project':'test-project','status':'DRAFT',
+                   'policy':{'blocking_severities':['error'],'require_clean_exit':True,
+                             'waiver_file':'openspec/changes/<change-id>/design/static-waivers.json',
+                             'waiver':{'allowed':True,'requires_approver':True,'max_days':90},
+                             'allow_network_install':False},
+                   'stacks':[{'id':'app','language':'python','root':'app','tools':[
+                       {'id':'lint','mode':'blocking',
+                        'command':f'"{sys.executable}" -c "import sys; sys.exit(0)"',
+                        'configs':['eslint.config.js']}]}]}
+            (root/'docs/architecture').mkdir(parents=True)
+            (root/'docs/architecture/quality-gates.json').write_text(json.dumps(gates),encoding='utf-8')
+            (root/'app').mkdir()
+            (root/'app/eslint.config.js').write_text('export default [];\n',encoding='utf-8')
+            (root/'openspec/changes/demo-change').mkdir(parents=True)
+            evidence_rel='openspec/changes/demo-change/design/evidence/static-analysis.json'
+            runner=scripts/'run-quality-gates.py'
+            proc=subprocess.run([sys.executable,str(runner),'demo-change','--root',str(root),
+                                 '--output',evidence_rel,'--identity','AGENT','--source-revision','test-rev'],
+                                capture_output=True,text=True,encoding='utf-8')
+            self.assertEqual(0,proc.returncode,proc.stdout+proc.stderr)
+            original=w.ROOT
+            w.ROOT=root
+            try:
+                self.assertIsNone(w.static_evidence_gate('08-implementation-orchestrator','demo-change'))
+                evidence_path=root/evidence_rel
+                bad=json.loads(evidence_path.read_text(encoding='utf-8'))
+                bad['verdict']='FAIL'
+                evidence_path.write_text(json.dumps(bad),encoding='utf-8')
+                with self.assertRaisesRegex(ValueError,'Static analysis evidence'):
+                    w.static_evidence_gate('08-implementation-orchestrator','demo-change')
+            finally:
+                w.ROOT=original
+
+    def _write_static_fixture(self, change_id='demo-change'):
+        """Materialize a minimal adopted static-analysis gate in self.root."""
+        gates={'schema_version':'1.0','project':'test-project','status':'DRAFT',
+               'policy':{'blocking_severities':['error'],'require_clean_exit':True,
+                         'waiver_file':'openspec/changes/<change-id>/design/static-waivers.json',
+                         'waiver':{'allowed':True,'requires_approver':True,'max_days':90},
+                         'allow_network_install':False},
+               'stacks':[{'id':'app','language':'python','root':'app','tools':[
+                   {'id':'lint','mode':'blocking',
+                    'command':f'"{sys.executable}" -c "import sys; sys.exit(0)"',
+                    'configs':['eslint.config.js']}]}]}
+        (self.root/'docs/architecture').mkdir(parents=True,exist_ok=True)
+        (self.root/'docs/architecture/quality-gates.json').write_text(json.dumps(gates),encoding='utf-8')
+        (self.root/'app').mkdir(exist_ok=True)
+        (self.root/'app/eslint.config.js').write_text('export default [];\n',encoding='utf-8')
+        (self.root/'openspec/changes'/change_id).mkdir(parents=True,exist_ok=True)
+        return f'openspec/changes/{change_id}/design/evidence/static-analysis.json'
+
+    def _run_static_runner(self, change_id, output_rel, *extra):
+        runner=Path(__file__).resolve().with_name('run-quality-gates.py')
+        return subprocess.run([sys.executable,str(runner),change_id,'--root',str(self.root),
+                               '--output',output_rel,'--source-revision','test-rev',*extra],
+                              capture_output=True,text=True,encoding='utf-8')
+
+    def _write_change_state(self, step, change_id, completed):
+        state={'project_name':'test','active_change_id':change_id,'completed_steps':completed,
+               'current_step':step,'pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],
+               'approvals_history':[{'step_id':step,'change_id':change_id,'approver':'Owner',
+                                     'approved_at':'2026-11-19','evidence':'check.log','targets':[]}]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+
+    def _stage_evidence(self, step, change_id, name):
+        evidence={'step_id':step,'change_id':change_id,
+                  'outputs':[{'path':'out.md','status':'created','required':True}],
+                  'methods':[
+                      {'skill':'test-driven-development','mode':'stage-scoped',
+                       'summary':'tdd implement','questions':[],'alternatives':[],
+                       'decisions':[],'open_questions':[],'artifact_section':'',
+                       'evidence':'check.log'},
+                      {'skill':'verification-before-completion','mode':'stage-scoped',
+                       'summary':'verify before completion','questions':[],'alternatives':[],
+                       'decisions':[],'open_questions':[],'artifact_section':'',
+                       'evidence':'check.log'}],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed',
+                             'command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'approved','approver':'Owner',
+                              'approved_at':'2026-11-19'}}
+        return self._write_evidence(name,evidence)
+
+    def test_transition_08_enforces_strict_static_evidence(self):
+        change='demo-change'
+        evidence_rel=self._write_static_fixture(change)
+        self.assertEqual(0,self._run_static_runner(change,evidence_rel,'--identity','builder').returncode)
+        original_check,original_gate=w.check_entry,w.run_baseline_gate
+        w.check_entry=lambda *a,**k: []
+        w.run_baseline_gate=lambda args,label: ''
+        try:
+            self._write_change_state('08-implementation-orchestrator',change,
+                                     ['01-project-bootstrap','02-requirements-analysis',
+                                      '03-project-architecture-baseline','04-proposal-planning',
+                                      '05-feature-requirements','06-figma-design-review',
+                                      '07-detailed-design'])
+            evidence_path=self.root/evidence_rel
+            bad=json.loads(evidence_path.read_text(encoding='utf-8'))
+            bad['builder_identity']=''
+            evidence_path.write_text(json.dumps(bad),encoding='utf-8')
+            ep=self._stage_evidence('08-implementation-orchestrator',change,'strict-08-evidence.json')
+            args=type('Args',(),{'step':'08-implementation-orchestrator','evidence':str(ep),'change_id':None})()
+            with self.assertRaisesRegex(ValueError,'builder_identity'):
+                w.cmd_transition(args)
+            self.assertEqual(0,self._run_static_runner(change,evidence_rel,'--identity','builder').returncode)
+            self.assertEqual(0,w.cmd_transition(args))
+            self.assertEqual('09-independent-verification',w.load_state()['current_step'])
+        finally:
+            w.check_entry,w.run_baseline_gate=original_check,original_gate
+
+    def test_transition_08_without_gates_file_skips_static_checker(self):
+        calls=[]
+        original_check,original_gate,original_static=w.check_entry,w.run_baseline_gate,w.static_evidence_gate
+        w.check_entry=lambda *a,**k: []
+        w.run_baseline_gate=lambda args,label: ''
+
+        def unexpected(*args,**kwargs):
+            calls.append(args)
+            raise AssertionError('static checker must stay dormant without quality-gates.json')
+        w.static_evidence_gate=unexpected
+        try:
+            self._write_change_state('08-implementation-orchestrator','demo-change',
+                                     ['07-detailed-design'])
+            ep=self._stage_evidence('08-implementation-orchestrator','demo-change',
+                                    'dormant-08-evidence.json')
+            args=type('Args',(),{'step':'08-implementation-orchestrator','evidence':str(ep),'change_id':None})()
+            self.assertEqual(0,w.cmd_transition(args))
+        finally:
+            w.check_entry,w.run_baseline_gate,w.static_evidence_gate=original_check,original_gate,original_static
+        self.assertEqual([],calls)
+
+    def test_static_evidence_gate_09_requires_independent_evidence(self):
+        change='demo-change'
+        builder_rel=self._write_static_fixture(change)
+        self.assertEqual(0,self._run_static_runner(change,builder_rel,'--identity','builder').returncode)
+        original=w.ROOT
+        w.ROOT=self.root
+        try:
+            with self.assertRaisesRegex(ValueError,'Static analysis evidence'):
+                w.static_evidence_gate('09-independent-verification',change)
+            indep_rel=f'openspec/changes/{change}/design/evidence/static-analysis-independent.json'
+            proc=self._run_static_runner(change,indep_rel,
+                                         '--independent','--identity','verifier',
+                                         '--builder-identity','builder')
+            self.assertEqual(0,proc.returncode,proc.stdout+proc.stderr)
+            self.assertIsNone(w.static_evidence_gate('09-independent-verification',change))
+        finally:
+            w.ROOT=original
 
     def test_transition_appends_state_event_log(self):
         (self.root/'docs').mkdir(exist_ok=True)

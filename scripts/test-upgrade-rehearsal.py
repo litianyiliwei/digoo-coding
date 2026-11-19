@@ -7,21 +7,31 @@ stub regeneration/check scripts so apply exercises its full post-upgrade path.
 import hashlib
 import importlib.util
 import json
+import subprocess
 import tempfile
 from pathlib import Path
 
 SCRIPT = Path(__file__).with_name("toolkit-sync.py")
+QUALITY_GATES_SCRIPT = Path(__file__).with_name("check-quality-gates.py")
+QUALITY_GATES_MODULE = Path(__file__).with_name("quality_gates.py")
 MANIFEST_REL = "process/TOOLKIT-MANIFEST.json"
 
 STUB_REPORT = """from pathlib import Path
 Path("process/STAGE-IO-OVERVIEW.md").write_text("generated\\n", encoding="utf-8")
 """
 STUB_LAYOUT = "raise SystemExit(0)\n"
+# Mirrors ci-check.sh's real static-gate block so the rehearsal proves the
+# dormant path: a project without quality-gates.json prints the skip message.
 REAL_CI = """#!/usr/bin/env bash
 set -euo pipefail
 if [[ ! -f toolkit-lock.json ]]; then python scripts/gen-manifest.py --check; fi
 python scripts/check-layout.py --mode auto
 if [[ -f toolkit-lock.json ]]; then python scripts/toolkit-sync.py verify --require-lock; fi
+if [[ -f docs/architecture/quality-gates.json ]]; then
+  python scripts/check-quality-gates.py --root . --strict --require-materialized
+else
+  echo SKIP_STATIC_GATES=not-adopted
+fi
 echo CI_CHECKS_PASSED
 """
 
@@ -78,6 +88,8 @@ V1_FILES = {
     "scripts/toolkit-sync.py": SCRIPT.read_bytes(),
     "scripts/stage-io-report.py": STUB_REPORT.encode(),
     "scripts/check-layout.py": STUB_LAYOUT.encode(),
+    "scripts/check-quality-gates.py": QUALITY_GATES_SCRIPT.read_bytes(),
+    "scripts/quality_gates.py": QUALITY_GATES_MODULE.read_bytes(),
     "scripts/ci-check.sh": REAL_CI.encode(),
 }
 V2_FILES = {
@@ -87,6 +99,8 @@ V2_FILES = {
     "scripts/toolkit-sync.py": SCRIPT.read_bytes(),
     "scripts/stage-io-report.py": STUB_REPORT.encode(),
     "scripts/check-layout.py": STUB_LAYOUT.encode(),
+    "scripts/check-quality-gates.py": QUALITY_GATES_SCRIPT.read_bytes(),
+    "scripts/quality_gates.py": QUALITY_GATES_MODULE.read_bytes(),
     "scripts/ci-check.sh": REAL_CI.encode(),
 }
 
@@ -122,6 +136,13 @@ def main() -> int:
         assert json.loads((project / "toolkit-lock.json").read_text())["version"] == "2.1.0"
         assert (project / "process/STAGE-IO-OVERVIEW.md").read_text(encoding="utf-8") == "generated\n"
         print("STEP apply: upgraded, outputs untouched, derived file regenerated")
+
+        ci = subprocess.run(["bash", "scripts/ci-check.sh"], cwd=str(project),
+                            capture_output=True, text=True, encoding="utf-8")
+        assert ci.returncode == 0, ci.stdout + ci.stderr
+        assert "SKIP_STATIC_GATES=not-adopted" in ci.stdout, ci.stdout
+        assert "CI_CHECKS_PASSED" in ci.stdout, ci.stdout
+        print("STEP ci: upgraded project without quality-gates.json keeps CI green (dormant static gates)")
 
         (project / "prompts/02.md").write_text("# local fork\n", encoding="utf-8")
         assert sync.apply(project, sync.open_source(str(toolkit), None, root / "work4"), "v2.1.0") == 2

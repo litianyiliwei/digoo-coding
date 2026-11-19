@@ -134,11 +134,11 @@ for r in contracts:
     ]
     if profile:
         lines += [
-            "**Lean inputs (default reads, within budget)**",
+            "**Lean inputs (default reads, advisory budget)**",
             "",
             bullets(profile.get("lean", [])),
             "",
-            f"> Budget: {len(profile.get('lean', []))}/{profile.get('max_files', 'N/A')} items; when exceeded, split the Change first or narrow the scope.",
+            f"> Budget (advisory): {len(profile.get('lean', []))}/{profile.get('max_files', 'N/A')} items; when exceeded, narrow the scope or record why the extra reads are needed.",
             "",
             "**On-demand inputs (read after a trigger; not counted in the default budget)**",
             "",

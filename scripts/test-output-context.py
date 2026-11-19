@@ -24,6 +24,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / "docs").mkdir(parents=True)
+        (root / "process").mkdir(parents=True)
         contract = {
             "output_policy": {
                 "summary_budgets": {
@@ -37,7 +38,7 @@ def main() -> int:
                 {"step": "07", "outputs": ["openspec/changes/<change-id>/design.md"]},
             ],
         }
-        (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
+        (root / "process" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
             json.dumps(contract, ensure_ascii=False), encoding="utf-8"
         )
         (root / "docs" / "product").mkdir(parents=True)
@@ -49,19 +50,28 @@ def main() -> int:
 
         brief.write_text("# brief\n" + "\n".join(f"- item {i}" for i in range(70)) + "\n", encoding="utf-8")
         over = run(root, "02")
-        if over.returncode == 0 or "exceeds budget" not in over.stdout:
-            failures.append("oversized summary should fail: " + over.stdout)
+        if over.returncode != 0 or "exceeds advisory budget" not in over.stdout or "advisory" not in over.stdout:
+            failures.append("oversized summary should warn by default: " + over.stdout)
+        over_strict = run(root, "02", "--strict")
+        if over_strict.returncode == 0 or "failed (--strict)" not in over_strict.stdout:
+            failures.append("oversized summary should fail under --strict: " + over_strict.stdout)
 
         design = root / "openspec" / "changes" / "demo" / "design.md"
         design.parent.mkdir(parents=True)
         design.write_text("## design\n" + "\n".join(f"- line {i}" for i in range(500)) + "\n", encoding="utf-8")
         design_over = run(root, "07", "--change", "demo")
-        if design_over.returncode == 0 or "exceeds budget" not in design_over.stdout:
-            failures.append("oversized design.md should fail: " + design_over.stdout)
+        if design_over.returncode != 0 or "exceeds advisory budget" not in design_over.stdout:
+            failures.append("oversized design.md should warn by default: " + design_over.stdout)
+        design_strict = run(root, "07", "--change", "demo", "--strict")
+        if design_strict.returncode == 0 or "failed (--strict)" not in design_strict.stdout:
+            failures.append("oversized design.md should fail under --strict: " + design_strict.stdout)
 
         stage_over = run(root, "05", "--change", "demo")
-        if stage_over.returncode == 0 or "exceeds budget" not in stage_over.stdout:
-            failures.append("stage 05 design.md stage override should fail: " + stage_over.stdout)
+        if stage_over.returncode != 0 or "exceeds advisory budget" not in stage_over.stdout:
+            failures.append("stage 05 design.md stage override should warn by default: " + stage_over.stdout)
+        stage_strict = run(root, "05", "--change", "demo", "--strict")
+        if stage_strict.returncode == 0 or "failed (--strict)" not in stage_strict.stdout:
+            failures.append("stage 05 design.md stage override should fail under --strict: " + stage_strict.stdout)
 
     if failures:
         for failure in failures:

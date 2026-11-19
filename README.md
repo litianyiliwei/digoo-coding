@@ -9,12 +9,11 @@ This repository is the source repository of the AI R&D workflow toolkit built fo
 The toolkit repository is validated with:
 
 ```bash
-python scripts/check-package.py        # Toolkit self-check
-bash scripts/test-scripts.sh           # Script regression suites
-bash scripts/ci-check.sh               # Full repository CI checks
+bash scripts/ci-check.sh               # Full CI checks (package, regressions, manifest, layout)
+python scripts/check-layout.py --mode toolkit  # Stricter toolkit-only layout check
 ```
 
-Project workflow commands (`scripts/workflow.py`, `scripts/next-step.py`, `openspec list`) and the workflow state (`workflow-state.json`) live in each business project repository, not here. To continue a project's process there, tell the agent “下一步 / 继续 / 接着做”; it loads the `workflow-orchestrator` Skill and derives the next stage from the project's `workflow-state.json` and artifacts.
+Project workflow commands (`scripts/workflow.py`, `scripts/next-step.py`, `openspec list`) and the workflow state (`workflow-state.json`) live in each business project repository, not here. To continue a project's process there, tell the agent “next step / continue / keep going”; it loads the `workflow-orchestrator` Skill and derives the next stage from the project's `workflow-state.json` and artifacts.
 
 ## Stage Overview
 
@@ -54,12 +53,11 @@ A business project repository additionally contains `docs/product|architecture|a
 If `python3` is unavailable on Windows, use `python` instead; the `.sh` scripts detect both automatically.
 
 ```bash
-python scripts/check-package.py        # Toolkit self-check
-bash scripts/test-scripts.sh           # Script regression suites
-bash scripts/ci-check.sh               # Full repository CI checks
+bash scripts/ci-check.sh               # Full CI checks (package, regressions, manifest, layout)
+python scripts/check-layout.py --mode toolkit  # Stricter toolkit-only layout check
 ```
 
-Stage gates (`check-entry --step <id>`, `workflow.py request-review`, `approve`, `transition`) run inside a business project repository: before entering a stage run `check-entry` (a non-zero exit code means execution is forbidden); after finishing a stage run the checks, record evidence, and run `request-review`; end the turn and wait for the user's explicit "review passed <step-id>", then run `approve` and `transition`.
+Stage gates (`check-entry --step <id>`, `workflow.py request-review`, `approve`, `transition`) run inside a business project repository: before entering a stage run `check-entry` (a non-zero exit code means execution is forbidden); after finishing a stage run the checks, record evidence, and run `request-review`; end the turn and wait for the user's explicit approval of the pending stage (any unambiguous wording counts), then run `approve` and `transition`.
 
 ## Core Rules
 
@@ -86,7 +84,7 @@ The rules below govern work inside a business project repository; the toolkit re
 - [process/STEP-ARTIFACT-CONTRACTS.md](process/STEP-ARTIFACT-CONTRACTS.md) — stage handoff contracts (authoritative list)
 - [process/TOOLKIT-UPGRADE.md](process/TOOLKIT-UPGRADE.md) — adopting the toolkit into a project repository and upgrading it
 - [process/TOOLKIT-CHANGELOG.md](process/TOOLKIT-CHANGELOG.md) — release notes
-- [process/QUESTION-COVERAGE-CHECKLIST.md](process/QUESTION-COVERAGE-CHECKLIST.md) — per-stage question coverage for 02/03/05/07 (required by stage evidence)
+- [process/QUESTION-COVERAGE-CHECKLIST.md](process/QUESTION-COVERAGE-CHECKLIST.md) — recommended per-stage elicitation checklist for 02/03/05/07 (optional evidence block; not a hard gate)
 - [scripts/README.md](scripts/README.md) — check script reference
 
 > Note: This README is the English main document. [README-zh.md](README-zh.md) is the Simplified Chinese version; both are maintained together, and the Chinese file follows this file when they diverge.

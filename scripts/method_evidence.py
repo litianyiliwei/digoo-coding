@@ -2,103 +2,95 @@
 """Validate stage method evidence (OpenSpec/Superpowers participation).
 
 The policy lives in process/STEP-ARTIFACT-CONTRACTS.json under ``method_policy``.
-If that key is absent, a conservative built-in policy is used so old packages
-still get a useful check.
+If that key is absent, a built-in policy is used so old packages still get a
+useful check.
 
 Each stage evidence JSON carries a ``methods`` array. A method entry records the
 skill used, the mode, the questions asked, alternatives compared, decisions
 made, open questions, the artifact section where the result was written, and a
-real evidence path. The validator is intentionally conservative: it proves that
-the evidence exists and has the required shape, not that a human agreed with it.
+real evidence path. The validator proves participation, mode, evidence, and
+landing; it deliberately does not impose minimum counts on questions,
+alternatives, or decisions, nor keyword-match the topics discussed. Those
+counts measure form rather than substance, and stage review plus the
+downstream-consumption test judge whether the method was actually used well.
 """
 from __future__ import annotations
 
 import json
-import re
 from pathlib import Path
 from typing import Any
 
 DEFAULT_POLICY: dict[str, dict[str, Any]] = {
     "02-requirements-analysis": {
         "required": [
-            {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": True},
-            {"skill": "internet-research", "min_questions": 3, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": True},
+            {"skill": "brainstorming", "requires_artifact": True},
+            {"skill": "internet-research", "requires_artifact": True},
         ]
     },
     "03-project-architecture-baseline": {
         "required": [
-            {"skill": "brainstorming", "min_questions": 4, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": True,
-             "required_topics": ["新系统", "现有系统", "代码地址", "第三方接口"]}
+            {"skill": "brainstorming", "requires_artifact": True}
         ]
     },
     "04-proposal-planning": {
         "required": [
-            {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True}
         ]
     },
     "05-feature-requirements": {
         "required": [
-            {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True}
         ]
     },
     "06-figma-design-review": {
         "optional": True,
         "required": [
-            {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True}
         ],
     },
     "07-detailed-design": {
         "required": [
-            {"skill": "brainstorming", "min_questions": 4, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": True,
-             "required_topics": ["现有功能", "新功能", "代码地址", "第三方接口"]},
-            {"skill": "writing-plans", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": True},
+            {"skill": "brainstorming", "requires_artifact": True},
+            {"skill": "writing-plans", "requires_artifact": True},
         ]
     },
     "08-implementation-orchestrator": {
         "required": [
-            {"skill": "test-driven-development", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": False},
-            {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": False},
+            {"skill": "test-driven-development", "requires_artifact": False},
+            {"skill": "verification-before-completion", "requires_artifact": False},
         ]
     },
     "09-independent-verification": {
         "required": [
-            {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": False}
+            {"skill": "verification-before-completion", "requires_artifact": False}
         ]
     },
     "10-acceptance-audit": {
         "required": [
-            {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": False}
+            {"skill": "verification-before-completion", "requires_artifact": False}
         ]
     },
 }
 
 VALID_MODES = {"full", "stage-scoped", "equivalent"}
 
-TOPIC_GROUPS = [
-    ("新系统", "new system"),
-    ("现有系统", "existing system"),
-    ("代码地址", "code address", "code location"),
-    ("第三方接口", "third-party interfaces"),
-    ("现有功能", "existing feature", "existing functionality"),
-    ("新功能", "new feature", "new functionality"),
-]
-TOPIC_ALIASES = {}
-for _group in TOPIC_GROUPS:
-    for _term in _group:
-        TOPIC_ALIASES.setdefault(_term, set()).update(_group)
-TOPIC_ALIASES = {k: sorted(v) for k, v in TOPIC_ALIASES.items()}
-
 
 def load_policy(root: Path) -> dict[str, dict[str, Any]]:
-    """Read method_policy from the contract, falling back to DEFAULT_POLICY."""
-    contract = root / "docs" / "STEP-ARTIFACT-CONTRACTS.json"
-    try:
-        data = json.loads(contract.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return DEFAULT_POLICY
-    policy = data.get("method_policy")
-    if isinstance(policy, dict) and policy:
-        return policy
+    """Read method_policy from the stage contract, falling back to DEFAULT_POLICY.
+
+    The toolkit installs the contract under ``process/``; older package layouts
+    may keep a copy under ``docs/``. Prefer the installed location so the JSON
+    policy is actually authoritative.
+    """
+    for rel in ("process/STEP-ARTIFACT-CONTRACTS.json", "docs/STEP-ARTIFACT-CONTRACTS.json"):
+        contract = root / rel
+        try:
+            data = json.loads(contract.read_text(encoding="utf-8"))
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+        policy = data.get("method_policy")
+        if isinstance(policy, dict) and policy:
+            return policy
     return DEFAULT_POLICY
 
 
@@ -123,12 +115,6 @@ def _resolve(rel: str, change_id: str | None) -> str:
     return str(rel)
 
 
-def _as_list(value: Any) -> list[str]:
-    if isinstance(value, list):
-        return [str(x) for x in value if str(x).strip()]
-    return []
-
-
 def _heading_matches(path: Path, heading: str) -> bool:
     if not heading:
         return False
@@ -149,22 +135,6 @@ def _validate_entry(entry: Any, root: Path, change_id: str | None, required: dic
         errors.append(f"method entry {skill or '<unknown>'}: mode must be one of {sorted(VALID_MODES)}")
     if mode == "equivalent" and not str(entry.get("reason") or "").strip():
         errors.append(f"method entry {skill or '<unknown>'}: equivalent mode requires reason")
-
-    questions = _as_list(entry.get("questions"))
-    alternatives = _as_list(entry.get("alternatives"))
-    decisions = _as_list(entry.get("decisions"))
-    if required:
-        if len(questions) < int(required.get("min_questions", 0)):
-            errors.append(f"{skill}: needs at least {required.get('min_questions', 0)} recorded questions")
-        if len(alternatives) < int(required.get("min_alternatives", 0)):
-            errors.append(f"{skill}: needs at least {required.get('min_alternatives', 0)} recorded alternatives")
-        if len(decisions) < int(required.get("min_decisions", 0)):
-            errors.append(f"{skill}: needs at least {required.get('min_decisions', 0)} recorded decisions")
-        topics = [str(t) for t in (required.get("required_topics") or []) if str(t).strip()]
-        searchable = " ".join(questions + alternatives + decisions + [str(entry.get("summary") or "")])
-        for topic in topics:
-            if not any(alias.lower() in searchable.lower() for alias in TOPIC_ALIASES.get(topic, [topic])):
-                errors.append(f"{skill}: missing required topic '{topic}' in questions/alternatives/decisions/summary")
 
     artifact_section = _resolve(str(entry.get("artifact_section") or ""), change_id)
     evidence = _resolve(str(entry.get("evidence") or ""), change_id)

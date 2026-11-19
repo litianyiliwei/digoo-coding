@@ -17,6 +17,17 @@
 | Superpowers | | | | | |
 | Agent Skills | | | | | |
 
+## Static Analysis Toolchain
+
+> Probe only: never install tools during stage 01. Missing tools are gaps with an owner, not silent passes. Selection and pinning happen at 03; this table records what is actually present for the interview.
+
+| Language | Tool | Installed | Version | Probe command (no install) | Result/Exit code | Notes |
+|---|---|---|---|---|---|---|
+| PENDING | PENDING | YES / NO | PENDING | PENDING | PENDING | PENDING |
+
+- Static analysis config present: PENDING — `docs/architecture/quality-gates.json` and declared config files (YES / NO + owner when NO).
+- Rule-pack availability: PENDING — which `templates/static-analysis/` packs the project expects to copy at 08.
+
 ## Repository Conventions and Directory Inventory
 
 - Existing AGENTS.md:

@@ -20,217 +20,217 @@
     {
       "path": ".claude/skills/acceptance-audit/SKILL.md",
       "install": ".claude/skills/acceptance-audit/SKILL.md",
-      "sha256": "07a3b23023dc1cf44e85890e2a378792939e0519d33aca766eb06c6fb1fc94f0",
+      "sha256": "76329877ad2abbae2698622af8a0a2d22db95fd932d608b0fcc182a5a90b5100",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/detailed-design/SKILL.md",
       "install": ".claude/skills/detailed-design/SKILL.md",
-      "sha256": "1bbdffbc4ec35e3eceefc96c925c9e5f6dc288b27dd354c8fdbdc3da4eb3c82f",
+      "sha256": "82751348fb612860bf9ec6f657a5d44d2376cd7b984e9f28e497a220b1aedecc",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/feature-requirements/SKILL.md",
       "install": ".claude/skills/feature-requirements/SKILL.md",
-      "sha256": "cd12c79e9635986bc8c190e439065f483e2177ee8ee518c3d0f8978d9e70b3ce",
+      "sha256": "4b5c35787e6364b9d2809c6cf28dbe66545fc87ed4ab4208100f7f166b699bd9",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/figma-design-review/SKILL.md",
       "install": ".claude/skills/figma-design-review/SKILL.md",
-      "sha256": "34fd210bd1eec7693f27cae0eac52e4b32f0a44ef10dd1d08693415ef277e27f",
+      "sha256": "116eb463c19a17c25a698d39db246eba7d5fbe02c84c234cb4a96862f84eb984",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/implementation-orchestrator/SKILL.md",
       "install": ".claude/skills/implementation-orchestrator/SKILL.md",
-      "sha256": "083fe36e25ab3a1d68f1dac0551a81b4dc8e970a3f5012ba0cbaa37bc829381b",
+      "sha256": "24c7af3ce3dfdf3bd03261675cbaa8b7c484a7d80e13816abf4f4dc5f4bfdfb5",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/independent-verifier/SKILL.md",
       "install": ".claude/skills/independent-verifier/SKILL.md",
-      "sha256": "f47fe2231c080644f32499e04b93d5db7c5e39c2a6864b3d94d8c82fda859836",
+      "sha256": "a73c21a4db86a2be8319a7b23e486591b65455ad6a48b6ec9e2612f61726ee21",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/project-architecture-baseline/SKILL.md",
       "install": ".claude/skills/project-architecture-baseline/SKILL.md",
-      "sha256": "5276c07e211e31f700f38c49137d9f7096792fb2451df994684546e2090b2f5d",
+      "sha256": "f9754fd79406992c82e5d0b07e5ff90b1b9372f45aae50a167cf1e821c8e8dbd",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/project-bootstrap/SKILL.md",
       "install": ".claude/skills/project-bootstrap/SKILL.md",
-      "sha256": "0987f2ee273f380adad52454294193650ecd747c1674181f701fd6a544b003f4",
+      "sha256": "c254aa86f2bca73b9d8cc1132daa2ac37e930cda8f15ab876653cebbf42695ae",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/proposal-planning/SKILL.md",
       "install": ".claude/skills/proposal-planning/SKILL.md",
-      "sha256": "177d80ed80933d9718dbddbfeabac7b9256a19b703e1941d219bb58aea9bcf6c",
+      "sha256": "06cdc02b2f5a095ba734c3e99cfbeec042fc444564f584e9871a8895fa44b140",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/requirements-analysis/SKILL.md",
       "install": ".claude/skills/requirements-analysis/SKILL.md",
-      "sha256": "364ab72746cae31d06eb6ece599a33a6b91f2ca2fc83526be70a6171e0ec591f",
+      "sha256": "5f09ffdd1a95b745cc2646691c7f30195e32b64d5c16f3210bd4095dca4cbf70",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": ".claude/skills/workflow-orchestrator/SKILL.md",
       "install": ".claude/skills/workflow-orchestrator/SKILL.md",
-      "sha256": "47538c462ad661a31522924ee1e191417a021f31198a7bab623c208d38210f25",
+      "sha256": "27b5a038745dc3f228fb6f999d8cd95a5dcc001cd380a37a55ab5d72e2e62808",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/BASELINE-FEATURE-INTERACTION-zh.md",
       "install": "process/BASELINE-FEATURE-INTERACTION-zh.md",
-      "sha256": "4c4af2a0687591e123d02746a93715be03dfea71deb3de81afb03194dccd6e28",
+      "sha256": "78809823347367c0410e33a8d594e163cf286ca17d9161c3ea786ce3ca15dc01",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/BASELINE-FEATURE-INTERACTION.md",
       "install": "process/BASELINE-FEATURE-INTERACTION.md",
-      "sha256": "e8dcb771f6106f99642f911dcae8f6787a16c9c8ca2ee738542de5ec280fa20d",
+      "sha256": "fb57af4743924e77bb026488df27d1f2ab5681eaf7ee17fbdc1db20093762ef3",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/INPUT-OUTPUT-POLICY-zh.md",
       "install": "process/INPUT-OUTPUT-POLICY-zh.md",
-      "sha256": "cb39d89181865c42fff9d7b12a170c5722699a281f040ece58b8aacfcdff31a9",
+      "sha256": "65167004b906af8fae8e1f75f69a428110fe158a8527dc422475f8e2bc0ffffd",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/INPUT-OUTPUT-POLICY.md",
       "install": "process/INPUT-OUTPUT-POLICY.md",
-      "sha256": "de991d48ee819ab3f84d5b48b9a1c98eaa5df8a47ded24572d5ab542796212e6",
+      "sha256": "1b03967259a76f248a901a10d6cf18782b8a68a8ed6efb39660d481dd0676008",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/OUTPUT-TEMPLATE-MATRIX.csv",
       "install": "process/OUTPUT-TEMPLATE-MATRIX.csv",
-      "sha256": "f4c1971872c0ef13fbc873973410aec7c6eafda80d2ecb5529325973b394e226",
+      "sha256": "c2a22445acb1672dfbeb6f1585c30fa2e840a1d99c09c872f3b07977a7a650b5",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/P0-RUNTIME-GOVERNANCE-zh.md",
       "install": "process/P0-RUNTIME-GOVERNANCE-zh.md",
-      "sha256": "4237bb4f3522f340763ad7214192f4d5f3cf399b109958f7dea603e783f4f75d",
+      "sha256": "1f01a3bf3c8e545e4e7004dbb486e1bba1c8143f7533b1a0434cef1a33e704dc",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/P0-RUNTIME-GOVERNANCE.md",
       "install": "process/P0-RUNTIME-GOVERNANCE.md",
-      "sha256": "625672cb58c1ed48043ad5358948ab2c5901d6d3576d45f19b9529966485a61a",
+      "sha256": "b733c8919fd938e71b29d396f869bd0e8cb5e905ad113ad66532b766d6ee0617",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/PROCESS-MAP-zh.md",
       "install": "process/PROCESS-MAP-zh.md",
-      "sha256": "657e9e56b04a55273d81f85150b1623d15937eaf08648b6ba9077508ec2278d3",
+      "sha256": "23f264e676002fcaf70293f240889a811519123cca57aa8ad52ffd6c1d7572b0",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/PROCESS-MAP.md",
       "install": "process/PROCESS-MAP.md",
-      "sha256": "e1d32747334e4c7fd2b22bbf9ed95a72627af65f7dcf6260f9c6b84940542c27",
+      "sha256": "f886ea0ed8a6b0acdc27164c31db8e2ccc455c8ee3a24b4151899b312a30d318",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/QUESTION-COVERAGE-CHECKLIST-zh.md",
       "install": "process/QUESTION-COVERAGE-CHECKLIST-zh.md",
-      "sha256": "10b1ba7c782699de3ab810e9d171cfb1d1f30d4a8a2b574641bddb9cd947777e",
+      "sha256": "40f3e09850a39f2eb26a009d693d68f512fe5a0c3804f0a0a1494498c219b702",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/QUESTION-COVERAGE-CHECKLIST.md",
       "install": "process/QUESTION-COVERAGE-CHECKLIST.md",
-      "sha256": "71e49c0afe3ce7336765d13a9486ed3fdf36d2f6861e8680fd4b9ab595fa37ac",
+      "sha256": "0efbdf9dc7e927f6f00e150ea46d180f92d35d970a5b2a8af8c31ec41ab97c07",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/STAGE-IO-OVERVIEW-zh.md",
       "install": "process/STAGE-IO-OVERVIEW-zh.md",
-      "sha256": "a2b5d8532a344347361e32060f21a18a12e56e270d985bb1dccb1aeb493414a2",
+      "sha256": "06582d198de2fe49bf6dd67ba4bc23f2155e9c49dddfffc2360fd9099ccd8ff0",
       "class": "generated",
       "vendor": true
     },
     {
       "path": "process/STAGE-IO-OVERVIEW.md",
       "install": "process/STAGE-IO-OVERVIEW.md",
-      "sha256": "8a1bf5d132fd88ec85c26dfe3ad18595b41a5a851fb77bbbe0e6408277425238",
+      "sha256": "4a74986549b4b1c7c0f599768bcb0c09f777d7d01cd41036dc13a289e60269a0",
       "class": "generated",
       "vendor": true
     },
     {
       "path": "process/STEP-ARTIFACT-CONTRACTS-zh.md",
       "install": "process/STEP-ARTIFACT-CONTRACTS-zh.md",
-      "sha256": "137bf180e7d0ff1d4270bc3491027b96dda6fd78eb4c67b46ced333a0781f3ad",
+      "sha256": "8f3a599384f3c071b10d9a40a9913dfc44420551e7abaafa157a729f924385ba",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/STEP-ARTIFACT-CONTRACTS.json",
       "install": "process/STEP-ARTIFACT-CONTRACTS.json",
-      "sha256": "714b41ee863f8ca26a20296ab339a11d81d9a78a1fa4e3d044b9931ea54d846c",
+      "sha256": "5b8d4b44f7c97775f810f2a771882728cb4eb85173dfde1f5f2cf3e66fd4d410",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/STEP-ARTIFACT-CONTRACTS.md",
       "install": "process/STEP-ARTIFACT-CONTRACTS.md",
-      "sha256": "23df276ebfbd19bbf6e98e051d2953c610c64a3e485c87723d2e53a62c8d696e",
+      "sha256": "b95369e4c2e0185bf7247f214666b2ef56628bd2e5d25d40dce47d44461bc202",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/SUPERPOWERS-MAPPING-zh.md",
       "install": "process/SUPERPOWERS-MAPPING-zh.md",
-      "sha256": "a6780030952e1d636028a1483bffeee432f136f7b26be5b1ab3840886b4baeaa",
+      "sha256": "ee7138528f319b7b5e36a4cf3e4ba497c164f4cc1fce5814f39f9aed48b66a7b",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/SUPERPOWERS-MAPPING.md",
       "install": "process/SUPERPOWERS-MAPPING.md",
-      "sha256": "c177222609040f3fb1637c21e939ac8ca6d2ec1b92c27deb5d0872f84da4636f",
+      "sha256": "8162d3da8a07d5bedb71dda70c033166f7c87faab21f96068cd9634d9ff289c0",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TEMPLATE-POLICY-zh.md",
       "install": "process/TEMPLATE-POLICY-zh.md",
-      "sha256": "4376e41c2f3be743c1597afd32e0e47c2420f2bb9141bf8aca0125df430c5eb7",
+      "sha256": "4dba8335907732aa2e58d8a69cc0e96131a62a020058b35509390ff3befbcaf4",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TEMPLATE-POLICY.md",
       "install": "process/TEMPLATE-POLICY.md",
-      "sha256": "23304ed9f2ecd43e349ebcaa9c3231a7cd9346d6622ec3c26218d85743dd6c8d",
+      "sha256": "c475f6f8c92323b1cdf03bb334442ac7dc8263894f49fa5b38a7b34f59aebe98",
       "class": "toolkit",
       "vendor": true
     },
@@ -244,133 +244,133 @@
     {
       "path": "process/TOOLKIT-UPGRADE-zh.md",
       "install": "process/TOOLKIT-UPGRADE-zh.md",
-      "sha256": "909eee9896e201c592077b10c52e1b5ab193275aa63c689bda5fe8c3682420d4",
+      "sha256": "83301c8455d87532006d7ac0be97c592815bc667ba43e8a966c943f33e026e18",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TOOLKIT-UPGRADE.md",
       "install": "process/TOOLKIT-UPGRADE.md",
-      "sha256": "f4f493c0ee32a6f7909c5a6a4ef909bcdac3a558e2157cc1b2a3eefe932e2729",
+      "sha256": "333a7533753762ad0e7209eac96a9aeb1dec9f21b80072d41511654a49705dd1",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/WORKFLOW-STAGES.json",
       "install": "process/WORKFLOW-STAGES.json",
-      "sha256": "d45b28e51a4fe56eeb00c98424b9aa598b793353b45293c65f6f6a34b9e1bab5",
+      "sha256": "fe3face83018b6fbd1d0b910cd6a3e36934ef36c1cd4248319dd802dd9cabb92",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/00-next-step.md",
       "install": "prompts/00-next-step.md",
-      "sha256": "c40508c5b669d85f238cf65fe89cacb6a6a3115cdf20ee688af7809fee815882",
+      "sha256": "2fd0ea53c1bb495da5762a241fd7604e7a5bae1ad65de94a69c51f221419201a",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/01-project-bootstrap.md",
       "install": "prompts/01-project-bootstrap.md",
-      "sha256": "b45c0497fa6c90c9344b4ab67b4d946e5d9f319c0b6a11ff40c277ace48e3b66",
+      "sha256": "c309d6449913fe5246224d3129db57f3a244f83ad3fb271b0d22ef58a0be3f28",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/02-requirements-analysis.md",
       "install": "prompts/02-requirements-analysis.md",
-      "sha256": "939b7b7c2bd27030155d675e1ee9a859fcc4d49434c7e9b721548fbd6d90a765",
+      "sha256": "40ad2416c5c0a40088475835a03f3d3a2f7d0aff62139865f11de986fe5d42be",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/03-project-architecture-baseline.md",
       "install": "prompts/03-project-architecture-baseline.md",
-      "sha256": "0dc957e5f37ee63c2073f0ae89b5ce1f9cffd3aa0fd58319d80115638e922e6b",
+      "sha256": "0e4f070b918307fc6de988078a6c864703b0487915218b099c1bd25611b7f843",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/04-proposal-planning.md",
       "install": "prompts/04-proposal-planning.md",
-      "sha256": "c4d01ba7e2a593d8a9d8ed53a35e45866e2467dd3bacb398b1152a15df6fce05",
+      "sha256": "854b1617273af980a16c67467bed3c1e990b2c96374f02617199269316ae300e",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/05-feature-requirements.md",
       "install": "prompts/05-feature-requirements.md",
-      "sha256": "01666a064a5d39dfbbeba8f38551d2414df7999d4101bf5b3be5873bda9cd2b0",
+      "sha256": "c35efd0b7aaa5b292fd31f9666230198836ba6fb98f3f142227a127722bee465",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/06-figma-design-review.md",
       "install": "prompts/06-figma-design-review.md",
-      "sha256": "fd067013ea58a027432838b40ea145f698f67d3409c80c5f9990e6cb03fa3c0a",
+      "sha256": "971319b9c87d544145692c7a8e5bf50df4c762e5b290a5e7458bd026c8089735",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/07-detailed-design.md",
       "install": "prompts/07-detailed-design.md",
-      "sha256": "fb5f3bc473c0fa43fbad96283f515f189442118cf6522b9b51f46bd406a34171",
+      "sha256": "b51de0b027cacd37639c7d140c6140a3c0e932577a797f3b32b7c8f0d75f7f3d",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/08-implementation-orchestrator.md",
       "install": "prompts/08-implementation-orchestrator.md",
-      "sha256": "7bd9ad9f7c04f43852bf53775206f02db937dd2fb2ad19d52861c7776d56ddb6",
+      "sha256": "12573a38d45cab5b9e324dce618ec4dcdb791cb099d3c04a3292a8e0e01fb010",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/09-independent-verification.md",
       "install": "prompts/09-independent-verification.md",
-      "sha256": "55cd2314ae794738c558fcaf4f300e8166e7b2d07a1ad7f7c6aceb8d8185621c",
+      "sha256": "50c70a3fdc8ea87e7012c07615267e6e65c5e71890b1b45628351b9cedb708dd",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/10-acceptance-audit.md",
       "install": "prompts/10-acceptance-audit.md",
-      "sha256": "3a1693e0c93eff608fd750a477b512e9f067c3aa766ffc31255c3549ab1fd79e",
+      "sha256": "2cfd435c995fbba4cf22698d32948400efe975ad1c080486fae9200dc0f0497d",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "prompts/workflow-prompts.md",
       "install": "prompts/workflow-prompts.md",
-      "sha256": "45c5cf4b69ef15aae5efdf2ff691768ba89bd4262565b242d9b44799bb5d39c5",
+      "sha256": "c3006e2bed0ea34f936386c64caacd694766e382d5c38c94bb33a7a73e7f2a80",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/README-zh.md",
       "install": "scripts/README-zh.md",
-      "sha256": "c768155fb66671fc5bd66a6c2f38ac559f4b1f80e621248929b9bd3c5e696e29",
+      "sha256": "263d9c543752697db730316b8d14d0d7c9c9cde93f88b104fefc6313c7e8b5ce",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/README.md",
       "install": "scripts/README.md",
-      "sha256": "1e50b249e73e42140b574f3456d97944a41b6935cc7bfd18b0f4abd22cf62bec",
+      "sha256": "0fcc06abe0fe15deb2deb3c4f57b6adcc94d86e05110961953d5dc937000a39e",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/agent-context.py",
       "install": "scripts/agent-context.py",
-      "sha256": "0a0ffb3b2f93e593b12ba1bcee02d21bf5565aebc5d06a80bd1eaf71df440234",
+      "sha256": "29c1eada6bcf78d6cd9dbf989f2c36dccb800816429521a867d20a5798cc62b5",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/baseline-governance.py",
       "install": "scripts/baseline-governance.py",
-      "sha256": "26bddbdb62e0c3b104b1187af8b2b6d31b7770b14c1518472566b8dd6d2a00d6",
+      "sha256": "507d26b8317bd601a6159cb1ec558d479f46ae1674ad7d6defa03d64df46d4f3",
       "class": "toolkit",
       "vendor": true
     },
@@ -403,13 +403,6 @@
       "vendor": true
     },
     {
-      "path": "scripts/check-baseline-governance.py",
-      "install": "scripts/check-baseline-governance.py",
-      "sha256": "fa10572acfe6dbb22fcbbabc80a509a9a982d9d3ad9aeceb08a0afa60d8845ba",
-      "class": "toolkit",
-      "vendor": true
-    },
-    {
       "path": "scripts/check-baseline-impact.py",
       "install": "scripts/check-baseline-impact.py",
       "sha256": "6122b87152c1cc78d94a3c3fdf2a00d5d1e91cb03d0713088b0d7f340afea1b1",
@@ -426,7 +419,7 @@
     {
       "path": "scripts/check-code-review.py",
       "install": "scripts/check-code-review.py",
-      "sha256": "59281b30cf8bf67eff7540ad8e21426edcaaa642cd8df23ad75249eea0872b57",
+      "sha256": "54227ba07c073ddddeb3bb7e42fb17f16f0b3ba5f4a6238a3b4bc228f530d688",
       "class": "toolkit",
       "vendor": true
     },
@@ -468,7 +461,7 @@
     {
       "path": "scripts/check-independent-verification.py",
       "install": "scripts/check-independent-verification.py",
-      "sha256": "52b6eaac4088460ec5c7d1f3c6e7204735ac1bd5b13531182023ab899022e4ed",
+      "sha256": "67dae6ec3652eb6bc96845d167a1b58a38b02ab2af10e3fd9dacdbc8048dc992",
       "class": "toolkit",
       "vendor": true
     },
@@ -476,13 +469,6 @@
       "path": "scripts/check-interface-catalog.py",
       "install": "scripts/check-interface-catalog.py",
       "sha256": "ed543eb27ded80ec870f014530dde3ea3d7d6dccd6bd0c68facb7ec47f5776ad",
-      "class": "toolkit",
-      "vendor": true
-    },
-    {
-      "path": "scripts/check-inventory.py",
-      "install": "scripts/check-inventory.py",
-      "sha256": "67c2146a8a57aa82882cc9e82f14c0853f2dc3a1467fee25c1d25c0c89973ca2",
       "class": "toolkit",
       "vendor": true
     },
@@ -510,7 +496,7 @@
     {
       "path": "scripts/check-output-context.py",
       "install": "scripts/check-output-context.py",
-      "sha256": "a5b12fb1fc09f98f49ab15a138d705348977f43de73de332866828db38caa2da",
+      "sha256": "ab6bfa4e860e837958c01a862d140e0429cd0abfcd3448d49d63c4e1c4471f6d",
       "class": "toolkit",
       "vendor": true
     },
@@ -524,14 +510,21 @@
     {
       "path": "scripts/check-package.py",
       "install": "scripts/check-package.py",
-      "sha256": "a7f8daad12532993ce29f6d5751c37e59e4f0b03bb08d4b41e3249b65ca8066b",
+      "sha256": "1db6360d98e1340d1db7f1c1785704969db81a59c5a59c98503132f3e7b3822b",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "scripts/check-quality-gates.py",
+      "install": "scripts/check-quality-gates.py",
+      "sha256": "ced45468dbe3a2ad7b337e37ca912d932b74b5c69c61a5e1792f98687bd2955f",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/check-question-coverage.py",
       "install": "scripts/check-question-coverage.py",
-      "sha256": "01167bf1e57793f867c9e17c65b5efd97520ebc77b3f7f82e72fc43ecf92150c",
+      "sha256": "386bf81225318edb3aa75f4e0e1287cd2ef03f8332e0172b8beb24bd19cca7b4",
       "class": "toolkit",
       "vendor": true
     },
@@ -564,9 +557,16 @@
       "vendor": true
     },
     {
+      "path": "scripts/check-static-analysis.py",
+      "install": "scripts/check-static-analysis.py",
+      "sha256": "d8574a0e7bb1e3d851184454fba974477c4d3d4465858cf5dfb7c59a37a07fc8",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "scripts/check-step-contracts.py",
       "install": "scripts/check-step-contracts.py",
-      "sha256": "5b1e2a944c28a0f042b2547f6d978535c1f40ad1c7deb2c952469914941c2b0b",
+      "sha256": "11363f90e73e2ec32a65c072b3fe92c29940f8abb761091340b406544dcb2918",
       "class": "toolkit",
       "vendor": true
     },
@@ -587,7 +587,7 @@
     {
       "path": "scripts/ci-check.sh",
       "install": "scripts/ci-check.sh",
-      "sha256": "f11de2a5a053abc8b4ab34c09b4de15bfed820d4aac67ed1a27037acbb4b0a21",
+      "sha256": "3d0e23d65ae81ccabe4aa72cb691251c8d5cf65b5a96f1f3ebf091d92b9206af",
       "class": "toolkit",
       "vendor": true
     },
@@ -606,23 +606,9 @@
       "vendor": true
     },
     {
-      "path": "scripts/legacy/README.md",
-      "install": "scripts/legacy/README.md",
-      "sha256": "43cbaa3ce64e4043772929de69233789b1b8bd0b352f32e855c21a37789c5190",
-      "class": "toolkit",
-      "vendor": true
-    },
-    {
-      "path": "scripts/legacy/build-figma-handoff.py",
-      "install": "scripts/legacy/build-figma-handoff.py",
-      "sha256": "a4310c236b237502fb74a68a6f7eadf9ee3a4ef91134522284f897d41556531a",
-      "class": "toolkit",
-      "vendor": true
-    },
-    {
       "path": "scripts/method_evidence.py",
       "install": "scripts/method_evidence.py",
-      "sha256": "15f37169a69e9bd024b887913dc138a660e95cde7fb261faf4e161b031de080c",
+      "sha256": "056405198a6fd3ddf5c0b0872a45f1204af7f42f1d076ea1e4acd2e28ef45c42",
       "class": "toolkit",
       "vendor": true
     },
@@ -636,35 +622,49 @@
     {
       "path": "scripts/next-step.py",
       "install": "scripts/next-step.py",
-      "sha256": "239657c67066271e089bc4699f4bc9b3a28d843db1e28c23451f2ede02d6b8cd",
+      "sha256": "679dad807c1f3fbcb3623a2fa01bb0c37c898f5d87942d948f4bb5238131ee43",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "scripts/quality_gates.py",
+      "install": "scripts/quality_gates.py",
+      "sha256": "5cf9835237cdd404295ce095707e6913c5c54f5ee3c3f3eb7c96821caed61d28",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/question_coverage.py",
       "install": "scripts/question_coverage.py",
-      "sha256": "fd8eaf36ec95110b83c1a967c441c6bc3225c894b92694e9a93254869d6a8265",
+      "sha256": "03dae54485ce0d682e15576f6d5867a78e7e21144b8c2a1e2af2edcad0673dc9",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "scripts/run-quality-gates.py",
+      "install": "scripts/run-quality-gates.py",
+      "sha256": "7aefdb3d15fe00316684f45d7578152e0a34c80ceeb5200b780d675c00f9ebee",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/stage-io-report.py",
       "install": "scripts/stage-io-report.py",
-      "sha256": "95fd9076bfb80db2abee2d876e72640c073b1545b1bf0ede70c27ae58f35ed40",
+      "sha256": "758aaeada9560b258d19550466444ecfcaf6850583bdc1bd90b8c8702e2d1e94",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/test-agent-context.py",
       "install": "scripts/test-agent-context.py",
-      "sha256": "d8b3a94740e09f2f037bcc83ee5036e031dfb1a3a8d974b7938b3a3f794705fa",
+      "sha256": "bb41c96c5095de050990cae665cb8a0ccbc559e66fed4b9c5ff6b3a6b42c18da",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/test-all.sh",
       "install": "scripts/test-all.sh",
-      "sha256": "b735da2ca3439178e13aaa627bde63e7db66a79de0906af6af976176d927576b",
+      "sha256": "93e35594cf57ce9ed4ce0d7f7db0e640c9f442a432a83189e61f6a95fba31a78",
       "class": "toolkit",
       "vendor": true
     },
@@ -685,7 +685,7 @@
     {
       "path": "scripts/test-baseline-governance.py",
       "install": "scripts/test-baseline-governance.py",
-      "sha256": "63a1b0e1d9f05f97fe30bdc17dbe6611c2e8583127a8f9eb194916eb18e3aa80",
+      "sha256": "ed9b5688013692318d7ad88456e5c4efc16b757aab9aca6c3e3427cbf3dab7e6",
       "class": "toolkit",
       "vendor": true
     },
@@ -711,6 +711,13 @@
       "vendor": true
     },
     {
+      "path": "scripts/test-code-review-static.py",
+      "install": "scripts/test-code-review-static.py",
+      "sha256": "512f9c97cc26fc90aa2424ed0033431462c7a2af0aacffe5c73f9ecbe541d03a",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "scripts/test-gen-manifest.py",
       "install": "scripts/test-gen-manifest.py",
       "sha256": "14ac11677a2a0e3b6b1bce6f6c9201e85d427746e61a34532021e163d641c720",
@@ -720,7 +727,7 @@
     {
       "path": "scripts/test-independent-verification.py",
       "install": "scripts/test-independent-verification.py",
-      "sha256": "01f640ada45debfa7b20676d0541530b92e5e6f17ceb9cf00e64b20a23df39fe",
+      "sha256": "64dda14cdff51cc8823a98aa294b91045f8d3e79daf96e545a651b4aeee2602c",
       "class": "toolkit",
       "vendor": true
     },
@@ -734,7 +741,7 @@
     {
       "path": "scripts/test-output-context.py",
       "install": "scripts/test-output-context.py",
-      "sha256": "e65f280a2aa68784296c755ea69ed99ff33a0b6892def6d250a2be97fdef4d04",
+      "sha256": "9bd7e6c00107cf4d375ceb264a24121799f40219e8925bff761cb38a15b20482",
       "class": "toolkit",
       "vendor": true
     },
@@ -746,9 +753,16 @@
       "vendor": true
     },
     {
+      "path": "scripts/test-quality-gates.py",
+      "install": "scripts/test-quality-gates.py",
+      "sha256": "79d97ce7291775ee5178cb5c072bf5ae04b4e615de30e442e46ecd15b9f09d72",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "scripts/test-question-coverage.py",
       "install": "scripts/test-question-coverage.py",
-      "sha256": "7f24d31be17bdef8fcf227936af4d758dc611b18824b251f66f8fc2bdc182226",
+      "sha256": "981bdafab3af58d4c94ba6463be30c824e55775a38b3a8a9fd182547e6786198",
       "class": "toolkit",
       "vendor": true
     },
@@ -774,6 +788,13 @@
       "vendor": true
     },
     {
+      "path": "scripts/test-static-analysis.py",
+      "install": "scripts/test-static-analysis.py",
+      "sha256": "acf7da40551bbc32985baada5e799386b75e8a7f6ab3c6d4f52e1d2d6bec94cf",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "scripts/test-toolkit-sync.py",
       "install": "scripts/test-toolkit-sync.py",
       "sha256": "78b8a00c0c2478f51ef8466a22bb0ec446f1bac54415a022d150dde4bb8409e5",
@@ -783,14 +804,14 @@
     {
       "path": "scripts/test-upgrade-rehearsal.py",
       "install": "scripts/test-upgrade-rehearsal.py",
-      "sha256": "59fb94c7bb097f30e9bcea1649d5099b63b9cf2a3983fcf2604c4812770c3c3b",
+      "sha256": "655d40677036a979223f79a97a8c5b5976360ff7796e69ae0b6b99fe222dda5f",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/test-workflow-runtime.py",
       "install": "scripts/test-workflow-runtime.py",
-      "sha256": "d012c78f05a76d261321d0a7ced72431e06eb078a51cef9a11323ac1faa9dbfc",
+      "sha256": "be86724c4f7bb073c4160ab5c97da574638e833ab9a20591199407e9a6fe5126",
       "class": "toolkit",
       "vendor": true
     },
@@ -811,14 +832,14 @@
     {
       "path": "scripts/verify-before-completion.sh",
       "install": "scripts/verify-before-completion.sh",
-      "sha256": "0ffbf882a3f3af705da9e19040a50f92393ae3ec0a151bb6ff65c23fbbf21556",
+      "sha256": "02bb6c247fb50307fd42bc7fcded2946240e4ea3df6b7a2e9ad1f8208c68e55a",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/workflow.py",
       "install": "scripts/workflow.py",
-      "sha256": "7d8a334f2e631e0605d398baebf0a1bbfec8f10988c9edcf6d30b4de680d9367",
+      "sha256": "48b0ad666edc2a166b4ca6c0965b14114514947b7ee53ebbcefaab4156a9f89a",
       "class": "toolkit",
       "vendor": true
     },
@@ -839,7 +860,7 @@
     {
       "path": "templates/change-assets/design/baseline-binding.json",
       "install": "templates/change-assets/design/baseline-binding.json",
-      "sha256": "fae258213c04d3ad87b6727bda6ee3d44bac8138031f1c48646ebcc799615c98",
+      "sha256": "cf297da7435a77c403a367669bd91085056a6084812e227aa8654a13136f5ef6",
       "class": "toolkit",
       "vendor": true
     },
@@ -881,14 +902,14 @@
     {
       "path": "templates/change-assets/design/independent-verification-report.md",
       "install": "templates/change-assets/design/independent-verification-report.md",
-      "sha256": "c517432a4cba8bd8cb6cd08ccb8fb50b35568823f6fd7afa359b23343cef3549",
+      "sha256": "07b8f0027d99b6773b9ce011b3ba62649510853e6dc0a47ee7ae633e29bd6190",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/change-assets/design/independent-verification.schema.json",
       "install": "templates/change-assets/design/independent-verification.schema.json",
-      "sha256": "bbcf387fdc74db78cf4f52e6d30a8376244a9cc4290b0352a72634dac97f976e",
+      "sha256": "1f6f949275c7a6702740ca054b12c25d62e86113f431db6c8a94d51b18bed91a",
       "class": "toolkit",
       "vendor": true
     },
@@ -903,6 +924,13 @@
       "path": "templates/change-assets/design/io-catalog.csv",
       "install": "templates/change-assets/design/io-catalog.csv",
       "sha256": "bade73c0178ac453f8b1b4c9ac7f80d31e7b580b1a6f11f7f1b857b97c74ad46",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/change-assets/design/static-waivers.example.json",
+      "install": "templates/change-assets/design/static-waivers.example.json",
+      "sha256": "97fd9edc9a317636b14bd827db6d4887821c737c1158227486713a7f670754a1",
       "class": "toolkit",
       "vendor": true
     },
@@ -923,14 +951,14 @@
     {
       "path": "templates/change-assets/evidence/acceptance.md",
       "install": "templates/change-assets/evidence/acceptance.md",
-      "sha256": "d0bcf830f39e241b8f893321cd77571a506b744bd6b40a5dcf0526bd9184c7b2",
+      "sha256": "5d76d7f6e7d161a21a97fa2f23949ce8234fd1d4ccee8102ab83ebe8420df94e",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/change-assets/evidence/code-review.md",
       "install": "templates/change-assets/evidence/code-review.md",
-      "sha256": "17b93ca03204729e65b8c2d089d92b3f45f9d8d19c6a6e78e3dda46137c1611e",
+      "sha256": "9c53429bf9d460f97a9c520c88cca2a818c8f092be418ca568eb01963379c790",
       "class": "toolkit",
       "vendor": true
     },
@@ -1091,21 +1119,21 @@
     {
       "path": "templates/project-baseline/baseline-manifest.json",
       "install": "templates/project-baseline/baseline-manifest.json",
-      "sha256": "8dca444b0fbb78af6703428dc2578fb3e142b2a96805c847b470800a8ea2b1a2",
+      "sha256": "b8f298594acf439e5b1f67358beed0a04f1b3b4c13cc35577c01e018f69bf741",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/project-baseline/baseline-status.md",
       "install": "templates/project-baseline/baseline-status.md",
-      "sha256": "c52384e4f1aa99aa8609ea9645c1a91a22381f889f0833482173aa80fcd182bb",
+      "sha256": "511091d7a8514bdd45f5ec393806d09bc7b7e424d7b3b1119c24403c298d4573",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/project-baseline/constraint-registry.json",
       "install": "templates/project-baseline/constraint-registry.json",
-      "sha256": "c2f102e2d6af5ae42dfcfdeb2168d99efff39e8761b26a4db6bff780f9ba7774",
+      "sha256": "0bc4ad724249d8f0c3e1d98e3cdb4773feaf648a903447bf8a333e355ffd1f2b",
       "class": "toolkit",
       "vendor": true
     },
@@ -1145,6 +1173,13 @@
       "vendor": true
     },
     {
+      "path": "templates/project-baseline/quality-gates.json",
+      "install": "templates/project-baseline/quality-gates.json",
+      "sha256": "e6b6d9b32e916dfc158955a5cb8f01b46f976db95300986d735e5d7496fb07d3",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "templates/project-baseline/system-context.md",
       "install": "templates/project-baseline/system-context.md",
       "sha256": "4da3b610dbb8e0f70294ed26e0ec04c229f37f70c320ee16bae1f79f6c2e625f",
@@ -1154,28 +1189,28 @@
     {
       "path": "templates/project-baseline/technology-decisions.md",
       "install": "templates/project-baseline/technology-decisions.md",
-      "sha256": "7fcf2e04a61a63138f29d6d7d87f38923f5e0559aefa36c7d65e1d1543a7f0fa",
+      "sha256": "5608431c7415ae6129d875d34602c363b3c68b7308a106cd2fd16664350e8662",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/project-baseline/test-strategy.md",
       "install": "templates/project-baseline/test-strategy.md",
-      "sha256": "bc7d2358a173056b8c79ae619e6680209b8d087f74542b451823d404fae51362",
+      "sha256": "36a01ef2bac091675f5d5eea1cf6fa9b53db72e4f41d8243d011df69315c3c1a",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/project-baseline/toolchain-report.md",
       "install": "templates/project-baseline/toolchain-report.md",
-      "sha256": "bfa7442ff5fd20bb38ff4abd39af8f01fdb54621b24b8f55cec7df1ac17396d9",
+      "sha256": "2c24abb70a1dc05430fda58118006496dbdb5a81c3cb2b31551191192685f09d",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/project-setup/gitignore-block.txt",
       "install": "templates/project-setup/gitignore-block.txt",
-      "sha256": "534a3aa269ffcfc53287411f7e334f12b569fb0b3368ac41395c206bf3d590e0",
+      "sha256": "88181d6e086e90b48148e9da27cba36c86472574a46b358312d1c22accf90dec",
       "class": "toolkit",
       "vendor": true
     },
@@ -1194,16 +1229,128 @@
       "vendor": true
     },
     {
+      "path": "templates/static-analysis/README.md",
+      "install": "templates/static-analysis/README.md",
+      "sha256": "0dc2945aeba6e5b3c45c5bc94eb61cdb9bc37f2623385c6e9eee40042291e96b",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/common-rules.md",
+      "install": "templates/static-analysis/common-rules.md",
+      "sha256": "2f7b1d924040850a9ffe5a056b0bd06b7e8cae8861037b107e42454d6e911f6d",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/go/.golangci.yml",
+      "install": "templates/static-analysis/go/.golangci.yml",
+      "sha256": "b66c844c9ec6fd3aa4e8522b60f951ea8c56507e19e9e13a46486eb4c11cdf58",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/go/README.md",
+      "install": "templates/static-analysis/go/README.md",
+      "sha256": "108563384d8863bb77d4a4864d919f5177380b7fea05d1d574981f9f101c23bd",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/java/README.md",
+      "install": "templates/static-analysis/java/README.md",
+      "sha256": "2bcfdc8e79a4d7e057dddaad74a5ad7b5e0307f8da081a25e73b67938c93efc7",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/java/checkstyle.xml",
+      "install": "templates/static-analysis/java/checkstyle.xml",
+      "sha256": "afe23afca29ae7f76af5803db02c08669320684a3aa6466a34d3574c2506fbae",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/python/README.md",
+      "install": "templates/static-analysis/python/README.md",
+      "sha256": "87b5e989d41781939de89c49bb568023e5a82f70169d6885210c2985c599e31d",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/python/ruff.toml",
+      "install": "templates/static-analysis/python/ruff.toml",
+      "sha256": "94f20ebf1457c1394453b8c6e20409d27f0624498e85aad2f82c58aff8d8ccc0",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/shell/README.md",
+      "install": "templates/static-analysis/shell/README.md",
+      "sha256": "a9bd5889dcac069668c2a2455849d4f7245109a906920efc45ebe0e86d1328a9",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/shell/shellcheckrc",
+      "install": "templates/static-analysis/shell/shellcheckrc",
+      "sha256": "2f51c58ae889a97c2e43a58194bfc32e25b24b6a8624ff9e2359d28ff8164521",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/sql/.sqlfluff",
+      "install": "templates/static-analysis/sql/.sqlfluff",
+      "sha256": "caba9a72f241ba71e2be8be82a1c04e304da60d12ebe91628dbb269619b98c61",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/sql/README.md",
+      "install": "templates/static-analysis/sql/README.md",
+      "sha256": "c15f9a83b0d93cab8184d82cdd5e4a9e58ec46a39f69f94c46e665ae8b7e2e12",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/typescript/.prettierrc.json",
+      "install": "templates/static-analysis/typescript/.prettierrc.json",
+      "sha256": "e9c1d61b03f4f337e20a591920de496ae7f2c3cc4b8cdaf9cb8e1c7c2c07acfc",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/typescript/eslint.config.js",
+      "install": "templates/static-analysis/typescript/eslint.config.js",
+      "sha256": "504d513d35ef794edcc40bb93d240f278e99477057ecae47d4b0e04a6dea2579",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/typescript/packages.md",
+      "install": "templates/static-analysis/typescript/packages.md",
+      "sha256": "5049e5a8853c854054756c2453fc5b63854e49bd861326755f735ee7c52c4590",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
+      "path": "templates/static-analysis/typescript/tsconfig.strict.json",
+      "install": "templates/static-analysis/typescript/tsconfig.strict.json",
+      "sha256": "f28bec42f786da83900b92e7467e5f9bd0ea29c97ea2c01f76b4cc8d16fca900",
+      "class": "toolkit",
+      "vendor": true
+    },
+    {
       "path": "templates/workflow/agents-managed-zh.md",
       "install": "templates/workflow/agents-managed-zh.md",
-      "sha256": "b858dd6b36b8a696e1d01147b0c156f50d98551c5cfba6c955e5f63d1404dbed",
+      "sha256": "94599503fc8668889afa4e864f880fa76d1df070cf00b8bd8f449a96e96a36db",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/workflow/agents-managed.md",
       "install": "templates/workflow/agents-managed.md",
-      "sha256": "8e840516df73f3728dfbe2f8b9940f5f3abc524c16d5cfb809daee1c81ed138a",
+      "sha256": "a76135fe346da686b5d1344e832217cc826d006a3e3df8a883b960b0df5f16aa",
       "class": "toolkit",
       "vendor": true
     },
@@ -1217,7 +1364,7 @@
     {
       "path": "templates/workflow/stage-evidence.schema.json",
       "install": "templates/workflow/stage-evidence.schema.json",
-      "sha256": "a1def7126c886713acf2da5f4c43285b6716847ff6f27ccd7db7143ffa3b005f",
+      "sha256": "632c84fb399a6edd979cfdcc7ae209d1fa9ba6ec3dd225c492a77cdba06d94ff",
       "class": "toolkit",
       "vendor": true
     },

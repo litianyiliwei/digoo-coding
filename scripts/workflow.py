@@ -35,7 +35,9 @@ def relpath(p:Path):
 def load_state():
     if not STATE.exists(): raise ValueError(f'Missing {STATE.relative_to(ROOT)}')
     data=json.loads(STATE.read_text(encoding='utf-8'))
-    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[],'skipped_steps':[],'skip_history':[],'abandoned_changes':[]}.items(): data.setdefault(k,v)
+    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[],'skipped_steps':[],'skip_history':[],'abandoned_changes':[],'approval_policy':'standard','approval_policy_history':[]}.items(): data.setdefault(k,v)
+    if str(data.get('approval_policy')).strip().lower() not in ('standard','risk-based'):
+        raise ValueError(f"Unknown approval_policy: {data.get('approval_policy')}")
     if data.get('current_step') not in BY_ID and data.get('current_step')!='ALL_STEPS_COMPLETE': raise ValueError(f"Unknown current_step: {data.get('current_step')}")
     unknown=set(data['completed_steps'])-set(BY_ID)
     if unknown: raise ValueError('Unknown completed steps: '+', '.join(sorted(unknown)))
@@ -54,6 +56,15 @@ def approval_record(state,step_id,change_id=None):
         if change_id is not None and (item.get('change_id') or '')!=change_id: continue
         return item
     return None
+
+def stage_requires_human_approval(stage,state=None):
+    """Return whether a stage needs a recorded user approval under the current policy."""
+    if not stage.get('human_approval_required'):
+        return False
+    policy=str((state or {}).get('approval_policy') or 'standard').strip().lower()
+    if policy=='risk-based' and stage.get('risk_level','high')=='low':
+        return False
+    return True
 
 def contract_doc():
     path=ROOT/CONTRACT_FILE
@@ -177,6 +188,22 @@ def run_baseline_impact_gate(change_id):
         detail=(result.stdout+'\n'+result.stderr).strip()
         raise ValueError('Implementation baseline-impact gate failed'+(': '+detail if detail else ''))
     return result.stdout.strip()
+
+def static_evidence_gate(step_id, change_id):
+    """Fail closed unless the Change has passing static-analysis evidence."""
+    if not change_id:
+        raise ValueError('Static analysis evidence gate requires an active Change id')
+    checker=Path(__file__).resolve().parent/'check-static-analysis.py'
+    command=[sys.executable,str(checker),'--change',str(change_id),'--root',str(ROOT)]
+    # The authoritative 08 command is ``check-static-analysis.py --change <id> --strict``.
+    if step_id=='08-implementation-orchestrator':
+        command.append('--strict')
+    if step_id=='09-independent-verification':
+        command.append('--expect-independent')
+    result=subprocess.run(command,capture_output=True,text=True)
+    if result.returncode:
+        detail=(result.stdout+'\n'+result.stderr).strip()
+        raise ValueError(f'Static analysis evidence gate failed for {change_id} (exit={result.returncode}): {detail}')
 
 def baseline_phase_for_entry(step_id):
     # Stage 05 creates the initial baseline binding as one of its declared
@@ -463,6 +490,19 @@ def cmd_request_review(args):
             'evidence':ev_rel,'targets':targets,'checks':checks}
     packet_path=ROOT/'workflow/evidence'/f'{sid}-review.json'
     atomic_json(packet_path,packet)
+    if not stage_requires_human_approval(stage,s):
+        s['pending_approvals']=[x for x in (s.get('pending_approvals') or []) if item_step(x)!=sid]
+        s['last_updated']=now()
+        atomic_json(STATE,s)
+        append_event('review_requested',step_id=sid,change_id=cid,review_packet=relpath(packet_path))
+        append_event('risk_based_fast_track',step_id=sid,change_id=cid)
+        print(f'REVIEW_REQUESTED={sid}')
+        print('CURRENT_STEP='+s['current_step'])
+        if targets: print('REVIEW_TARGETS='+'; '.join(t['path'] for t in targets))
+        print('REVIEW_PACKET='+relpath(packet_path))
+        print('STATUS=RISK_BASED_FAST_TRACK')
+        print('NEXT_ACTION=Run transition after the gates; this low-risk stage needs no user approval under risk-based policy.')
+        return 0
     entry={'step_id':sid,'change_id':cid,'requested_at':now(),
            'summary':args.summary or '','evidence':ev_rel,'targets':targets,
            'checks':checks,'review_packet':relpath(packet_path)}
@@ -629,7 +669,8 @@ def cmd_transition(args):
     cid=e.get('change_id') or args.change_id or s.get('active_change_id') or None
     approval=e.get('approval',{}) if isinstance(e.get('approval'),dict) else {}
     rec=approval_record(s,sid,cid if stage['scope']=='change' else None)
-    if stage.get('human_approval_required') or own_pending or approval.get('required') is True:
+    low_fast=str(s.get('approval_policy') or 'standard').strip().lower()=='risk-based' and stage.get('risk_level','high')=='low'
+    if stage_requires_human_approval(stage,s) or own_pending or (approval.get('required') is True and not low_fast):
         if not rec:
             raise ValueError(f'Human approval required: run request-review, wait for the user, then run workflow.py approve --step {sid} before transition')
         verify_review_targets(rec)
@@ -658,6 +699,10 @@ def cmd_transition(args):
     missing=missing_declared_outputs(e,sid,cid)
     if missing:
         raise ValueError('Evidence omits declared stage outputs (mark N/A with waiver_reason when not applicable): '+', '.join(missing))
+    if sid in ('08-implementation-orchestrator','09-independent-verification'):
+        gates_path=ROOT/'docs/architecture/quality-gates.json'
+        if gates_path.exists():
+            static_evidence_gate(sid,cid)
     if sid=='03-project-architecture-baseline':
         run_baseline_gate(['audit','--require-frozen'],label='Baseline freeze gate')
         artifact_paths={a['path'] for a in artifacts}
@@ -719,7 +764,7 @@ def cmd_handoff_create(args):
         cid=None
     evidence_data,artifacts=parse_evidence(args.evidence,args.from_step,cid,require_approval=False)
     approval=evidence_data.get('approval',{}) if isinstance(evidence_data.get('approval'),dict) else {}
-    if stage.get('human_approval_required'):
+    if stage_requires_human_approval(stage,state):
         rec=approval_record(state,args.from_step,cid if stage['scope']=='change' else None)
         if not rec:
             raise ValueError(f'{args.from_step} requires a recorded user approval; run request-review/approve first')
@@ -869,6 +914,8 @@ def cmd_reset_state(args):
         }]),
         'baseline':{},
         'approvals_history':[],
+        'approval_policy':'standard',
+        'approval_policy_history':[],
         'last_transition':None,
     }
     atomic_json(STATE,fresh)
@@ -1054,6 +1101,24 @@ def cmd_check_coverage(args):
     print(f'QUESTION_COVERAGE_PASSED={args.step}')
     return 0
 
+def cmd_set_approval_policy(args):
+    s=load_state()
+    policy=str(args.policy).strip().lower()
+    if policy not in ('standard','risk-based'):
+        raise ValueError(f'Unknown approval policy: {args.policy}')
+    if s.get('pending_approvals'):
+        raise ValueError('Cannot change approval_policy while reviews are pending; approve or clear them first')
+    old=str(s.get('approval_policy') or 'standard')
+    s['approval_policy']=policy
+    s.setdefault('approval_policy_history',[]).append({
+        'from':old,'to':policy,'reason':args.reason,'by':getattr(args,'by','') or '','at':now()})
+    s['last_updated']=now()
+    atomic_json(STATE,s)
+    append_event('approval_policy_set',old=old,new=policy,reason=args.reason)
+    print(f'APPROVAL_POLICY={policy}')
+    print(f'PREVIOUS_APPROVAL_POLICY={old}')
+    return 0
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__); sub=ap.add_subparsers(dest='cmd',required=True)
     sub.add_parser('status')
@@ -1065,6 +1130,7 @@ def main():
     p=sub.add_parser('approve'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--approver',required=True); p.add_argument('--approved-at',required=True); p.add_argument('--evidence',required=True); p.add_argument('--change-id')
     p=sub.add_parser('check-methods'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('check-coverage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
+    p=sub.add_parser('set-approval-policy'); p.add_argument('--policy',required=True,choices=('standard','risk-based')); p.add_argument('--reason',required=True); p.add_argument('--by')
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
     p=sub.add_parser('recover-state'); p.add_argument('--backup',required=True); p.add_argument('--reason',default='')
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
@@ -1075,7 +1141,7 @@ def main():
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'recover-state':cmd_recover_state,'reopen':cmd_reopen,'skip-stage':cmd_skip_stage,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'abandon-change':cmd_abandon_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods,'check-coverage':cmd_check_coverage}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'set-approval-policy':cmd_set_approval_policy,'migrate-state':cmd_migrate_state,'recover-state':cmd_recover_state,'reopen':cmd_reopen,'skip-stage':cmd_skip_stage,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'abandon-change':cmd_abandon_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods,'check-coverage':cmd_check_coverage}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())

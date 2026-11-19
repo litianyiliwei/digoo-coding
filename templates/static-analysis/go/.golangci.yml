@@ -1,0 +1,45 @@
+# golangci-lint configuration — Go starter pack.
+# Target: Go 1.22+, golangci-lint v1.64.x (v1 schema).
+# If the project pins golangci-lint v2, run `golangci-lint migrate` and commit
+# the migrated file; v2 uses a different configuration schema.
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  disable-all: true
+  enable:
+    - staticcheck
+    - govet
+    - errcheck
+    - ineffassign
+    - unused
+    - gosimple
+    - revive
+
+linters-settings:
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+  revive:
+    rules:
+      - name: exported
+      - name: package-comments
+      - name: indent-error-flow
+      - name: errorf
+      - name: range
+      - name: superfluous-else
+  staticcheck:
+    checks: ["all"]
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck

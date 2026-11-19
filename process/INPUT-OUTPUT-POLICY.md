@@ -19,16 +19,16 @@ Now "the complete input set for auditing" and "the default lean reading set" are
 
 | Layer | Content | Reading Rule |
 |---|---|---|
-| 0 Resident | `docs/product/BASELINE-BRIEF.md` when present (≤1 page); `baseline-status.md` when relevant | Read the brief first when it exists; Stage 02 may run before it exists and creates it from user-provided goals. Do not repeatedly read the full baseline |
+| 0 Resident | `docs/product/BASELINE-BRIEF.md` when present (about one page); `baseline-status.md` when relevant | Read the brief first when it exists; Stage 02 may run before it exists and creates it from user-provided goals. Do not repeatedly read the full baseline |
 | 1 Current Change | `proposal.md`, `specs/<capability>/spec.md`, `user-stories.md`, `tasks.md`, `design.md`, `baseline-impact.md`, `baseline-binding.json` | Mandatory reading in Change stages |
 | 2 Targeted | The `FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE` rows or sections hit by this Change; architecture sections hit by the design domain | Read the relevant rows/sections by ID, not the whole file |
 | 3 On Demand | Complete `docs/product/*`, complete `docs/architecture/*`, `docs/adr/*`, `reference-research.md`, complete specs | Read only when Layers 0-2 cannot answer; the handoff report records the trigger reason |
 
-## 3. Default Budget
+## 3. Advisory Default Budget
 
-- The default lean set is **≤8 reading groups** and about **≤16000 characters** (each group should point to only one file/section where possible; multiple files within a group are targeted by ID) (`max_lean_files` / `max_lean_chars` in the contract).
-- When the budget is exceeded: first split the Change, narrow the scope, or record in Section 1 of the handoff report "why which extra files must be read."
-- It is not allowed to use the full baseline package, the full architecture documents, or all ADRs as default context.
+- The default lean set is a guideline of about **8 reading groups** and about **16000 characters** (each group should point to only one file/section where possible; multiple files within a group are targeted by ID) (`max_lean_files` / `max_lean_chars` in the contract). These numbers are advisory, not gates.
+- If the guideline is exceeded, narrow the scope or record in Section 1 of the handoff report "why which extra files must be read." Do not skip a file the stage actually needs just to stay under the number.
+- Do not use the full baseline package, the full architecture documents, or all ADRs as default context.
 
 ## 4. How to Read in Each Stage
 
@@ -57,10 +57,11 @@ The output principle is **reference-style output**: do not copy the full input t
 - Evidence files (`code-review.md`, `independent-verification-report.md`, `acceptance.md`) reference JSON/log/report paths and do not restate all test output.
 - Tables retain only decision items, contract items, and evidence items; fixed template fields are not expanded repeatedly.
 
-The recommended line limits for summary files are in the contract's `output_policy.summary_budgets` (for example, `BASELINE-BRIEF.md` ≤60 lines, `design.md` ≤400 lines, `acceptance.md` ≤120 lines). When the limit is exceeded, first check whether inputs were copied; if necessary, split the Change or link to upstream files.
+The advisory line limits for summary files are in the contract's `output_policy.summary_budgets` (for example, `BASELINE-BRIEF.md` around 60 lines, `design.md` around 400 lines, `acceptance.md` around 120 lines). `check-output-context.py` reports over-budget files as warnings by default; `--strict` is an opt-in for projects that want enforcement. When a file is over the guideline, first check whether inputs were copied; if the content is genuinely needed, keep it and record why.
 
 ## 6. Relationship with Gates
 
-- `check-step-contracts.py` verifies that every stage 02-10 has `input_policy.stage_profiles`, and that the number of `lean` entries does not exceed `max_files`.
+- `check-step-contracts.py` verifies that every stage 02-10 has `input_policy.stage_profiles`; `max_files` is an advisory guideline and `lean` may exceed it with recorded reasons. `agent-context.py` prints a warning when the guideline is exceeded and continues.
+- `check-output-context.py` warns on over-budget summary files by default; `--strict` opts into failing the command.
 - The evidence of `workflow.py transition` is still audited against the complete `inputs`; lean reading will not let missing formal inputs pass.
 - Section 1 of the handoff report must list the files/sections actually read; on-demand files that were not read must not be claimed as reviewed.

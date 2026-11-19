@@ -24,6 +24,20 @@
 
 PENDING — domain → selected option → reason → ADR ID (when one exists).
 
+## Static Analysis Toolchain
+
+> 03 adoption decision (also recorded in `## Interview Record`): ask the user/technical lead whether static-analysis gates are adopted. If **not adopted**, write `N/A + reason` here and in `test-strategy.md`, do not create `docs/architecture/quality-gates.json`, keep it out of the `test_quality` file list, and leave `QUALITY-STATIC-001` RETIRED. If **adopted**, per selected language choose tools, pin versions, list packages/plugins, decide config landing paths, severity policy, and waiver policy. Installation is an explicitly authorized task at 08, never automatic. The machine-readable result is `docs/architecture/quality-gates.json`; starter configs live in `templates/static-analysis/`. Every selected language must have at least one blocking stack unless `test-strategy.md` records `N/A + reason`.
+
+- Adoption decision: PENDING — adopted / not adopted, reason, confirmer, date.
+
+| Language | Chosen tools | Version/pinning | Package/plugin list | Config landing paths | Severity and waiver policy | Rejected alternatives |
+|---|---|---|---|---|---|---|
+| PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING |
+
+- Selected pack(s): PENDING — `templates/static-analysis/<language>/` copied to which stack root at 08.
+- Deviations from the shipped rule pack: PENDING — rule/path change, reason, and where it is recorded (`quality-gates.json` wins for execution).
+- Confirmation: PENDING — owner/approver and date of the selection decision.
+
 ## Third-Party Interface Dependencies
 
 | Dependency | Version | License | Upgrade Policy | Risk |

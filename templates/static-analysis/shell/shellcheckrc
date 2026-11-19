@@ -1,0 +1,9 @@
+# ShellCheck configuration — Shell starter pack.
+# Target: ShellCheck 0.10.x+.
+# Install as `.shellcheckrc` in the stack root; ShellCheck reads it from the
+# current directory. Do not add blanket `disable=` lines: every inline
+# suppression must map to a Change-scoped waiver.
+
+enable=all
+external-sources=true
+source-path=SCRIPTDIR

@@ -33,147 +33,62 @@
   "method_policy": {
     "02-requirements-analysis": {
       "required": [
-        {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true},
-        {"skill": "internet-research", "min_questions": 3, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true},
+        {"skill": "internet-research", "requires_artifact": true}
       ]
     },
     "03-project-architecture-baseline": {
       "required": [
-        {
-          "skill": "brainstorming",
-          "min_questions": 4,
-          "min_alternatives": 2,
-          "min_decisions": 1,
-          "requires_artifact": true,
-          "required_topics": ["new system", "existing system", "code location", "third-party interfaces"]
-        }
+        {"skill": "brainstorming", "requires_artifact": true}
       ]
     },
     "04-proposal-planning": {
       "required": [
-        {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true}
       ]
     },
     "05-feature-requirements": {
       "required": [
-        {"skill": "brainstorming", "min_questions": 3, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true}
       ]
     },
     "06-figma-design-review": {
       "optional": true,
       "required": [
-        {"skill": "brainstorming", "min_questions": 2, "min_alternatives": 1, "min_decisions": 1, "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true}
       ]
     },
     "07-detailed-design": {
       "required": [
-        {"skill": "brainstorming", "min_questions": 4, "min_alternatives": 2, "min_decisions": 1, "requires_artifact": true, "required_topics": ["existing functionality", "new functionality", "code location", "third-party interfaces"]},
-        {"skill": "writing-plans", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true},
+        {"skill": "writing-plans", "requires_artifact": true}
       ]
     },
     "08-implementation-orchestrator": {
       "required": [
-        {"skill": "test-driven-development", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false},
-        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+        {"skill": "test-driven-development", "requires_artifact": false},
+        {"skill": "verification-before-completion", "requires_artifact": false}
       ]
     },
     "09-independent-verification": {
       "required": [
-        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+        {"skill": "verification-before-completion", "requires_artifact": false}
       ]
     },
     "10-acceptance-audit": {
       "required": [
-        {"skill": "verification-before-completion", "min_questions": 0, "min_alternatives": 0, "min_decisions": 1, "requires_artifact": false}
+        {"skill": "verification-before-completion", "requires_artifact": false}
       ]
     }
   },
   "question_coverage_policy": {
     "checklist": "process/QUESTION-COVERAGE-CHECKLIST.md",
-    "checklist_zh": "process/QUESTION-COVERAGE-CHECKLIST-zh.md",
-    "stages": {
-      "02-requirements-analysis": {
-        "required_items": [
-          "02-T01-01",
-          "02-T02-01",
-          "02-T03-01",
-          "02-T04-01",
-          "02-T04-02",
-          "02-T05-01",
-          "02-T06-01",
-          "02-T07-01",
-          "02-T07-02",
-          "02-T08-01",
-          "02-T09-01",
-          "02-T10-01",
-          "02-T11-01",
-          "02-T13-01",
-          "02-T14-01",
-          "02-T15-01"
-        ]
-      },
-      "03-project-architecture-baseline": {
-        "required_items": [
-          "03-T01-01",
-          "03-T02-01",
-          "03-T02-02",
-          "03-T03-01",
-          "03-T04-01",
-          "03-T05-01",
-          "03-T06-01",
-          "03-T07-01",
-          "03-T07-02",
-          "03-T08-01",
-          "03-T09-01",
-          "03-T10-01",
-          "03-T11-01",
-          "03-T12-01",
-          "03-T13-01",
-          "03-T14-01"
-        ]
-      },
-      "05-feature-requirements": {
-        "required_items": [
-          "05-T01-01",
-          "05-T03-01",
-          "05-T04-01",
-          "05-T05-01",
-          "05-T06-01",
-          "05-T07-01",
-          "05-T08-01",
-          "05-T09-01",
-          "05-T10-01",
-          "05-T11-01",
-          "05-T14-01",
-          "05-T15-01",
-          "05-T13-01"
-        ]
-      },
-      "07-detailed-design": {
-        "required_items": [
-          "07-T01-01",
-          "07-T04-01",
-          "07-T05-01",
-          "07-T06-01",
-          "07-T07-01",
-          "07-T08-01",
-          "07-T09-01",
-          "07-T10-01",
-          "07-T11-01",
-          "07-T12-01",
-          "07-T12-02",
-          "07-T15-01",
-          "07-T15-02",
-          "07-T13-01",
-          "07-T03-01"
-        ]
-      }
-    }
+    "checklist_zh": "process/QUESTION-COVERAGE-CHECKLIST-zh.md"
   },
   "input_policy": {
     "principle": "Read the small entry point first, then read by ID on demand; complete product/architecture baselines, ADRs, and complete specs are read only when necessary; never load everything into context by default.",
     "read_order": [
-      "0. Resident: docs/product/BASELINE-BRIEF.md (when present; Stage 02 creates it if absent; ≤1 page)",
+      "0. Resident: docs/product/BASELINE-BRIEF.md (when present; Stage 02 creates it if absent; about one page)",
       "1. Stage 02: user-provided project materials and existing baseline records; Change stages: current proposal/specs/user-stories/tasks/design/baseline-impact/baseline-binding",
       "2. Targeted: read only the FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE/API/IO/INTERFACE rows or sections matched by this Change",
       "3. On demand: complete product/architecture baselines, ADRs, reference-research, complete specs; record the trigger reason"
@@ -181,7 +96,7 @@
     "budget": {
       "max_lean_files": 8,
       "max_lean_chars": 16000,
-      "note": "When over budget, first split the Change, narrow the scope, or record the reason and files read in the handoff report; never stuff the entire baseline into context."
+      "note": "Advisory guideline: when exceeded, narrow the scope or record in the handoff report why the extra reads are needed; never stuff the entire baseline into context. It is not a gate."
     },
     "rules": [
       "Stage 02 is project-level discovery and may run before BASELINE-BRIEF exists; use the user goal as the source and create the brief in this stage. Later stages read the brief first and current Change artifacts next.",
@@ -214,7 +129,7 @@
       },
       "03": {
         "lean": [
-          "docs/product/BASELINE-BRIEF.md (read first, ≤1 page)",
+          "docs/product/BASELINE-BRIEF.md (read first, about one page)",
           "docs/product/reference-research.md (technology selection/third-party decisions)",
           "docs/product/open-questions.md (relevant items only)",
           "docs/project/toolchain-report.md (toolchain/test commands)",
@@ -343,10 +258,11 @@
       "openspec/changes/<change-id>/design/evidence/independent-verification-report.md": {"max_lines": 150},
       "openspec/changes/<change-id>/design/evidence/acceptance.md": {"max_lines": 120}
     },
+    "summary_budgets_note": "Advisory line/char budgets: scripts/check-output-context.py reports over-budget files as warnings by default; --strict opts into enforcement.",
     "stage_focus": {
       "02": "requirements-analysis contains only goals/roles/process conclusions and deviations; details go in workflows/data-objects/rd-matrix/business-rules.",
       "03": "Each architecture file covers its own domain; technology-decisions contains only decisions/interviews; do not copy the complete product baseline.",
-      "05": "proposal.md contains proposal-level initial design decisions (≤1 page); do not create design.md; interface/frontend/backend/test details are deferred to 07.",
+      "05": "proposal.md contains proposal-level initial design decisions (about one page); do not create design.md; interface/frontend/backend/test details are deferred to 07.",
       "07": "design.md references figma-audit/interface-catalog/test-cases/traceability; do not copy the full Figma spec or the entire baseline.",
       "10": "acceptance.md references the independent-verification report/JSON and test-cases; contains only sign-off conclusions and deviations."
     }
@@ -424,7 +340,7 @@
         "docs/product/glossary.md",
         "docs/product/acceptance-policy.md",
         "docs/product/open-questions.md",
-        "docs/product/BASELINE-BRIEF.md (one-page baseline entry point, ≤1 page; resident context for stages 03–05)",
+        "docs/product/BASELINE-BRIEF.md (one-page baseline entry point, about one page; resident context for stages 03–05)",
         "docs/product/role-permission-matrix.csv (role / capability / data scope / access level)",
         "docs/product/change-sizing.md (Change slicing budget and definition of done)",
         "docs/product/decisions.md (DEC decision log)",
@@ -470,6 +386,7 @@
         "docs/architecture/api-conventions.md",
         "docs/architecture/frontend-conventions.md",
         "docs/architecture/test-strategy.md",
+        "docs/architecture/quality-gates.json (conditionally applicable: when the project adopts static analysis; machine-readable stack roots, tool commands, config paths, severity and waiver policy; structure only at 03 because a from-scratch repository may not have stack directories yet; approval comes from the frozen test_quality baseline domain, not from the file; omit the file, mark the evidence output n/a, and record the adoption decision when not adopted)",
         "docs/adr/README.md",
         "docs/architecture/baseline-manifest.json (machine-authoritative versions/freeze status/domain file SHA-256)",
         "docs/architecture/constraint-registry.json (stable constraint IDs and approval status)",
@@ -479,7 +396,7 @@
         "frozen project architecture baseline, data flows, logical ERD, shared contracts/test strategy, ACTIVE constraint catalog, audit report, and approval records"
       ],
       "approval": "product/architecture/technical leads jointly confirm system boundaries, data flows, and shared contracts, and approve the baseline freeze",
-      "gate": "scripts/check-required-files.sh --strict; cross-document consistency audit (system boundaries/data flows/ERD/shared contracts/glossary); python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence> (must cover new system/existing system/code location/third-party interfaces); python scripts/check-architecture-baseline.py --strict (existing system extension constraints/third-party interface dependency list/LEGACY-*/EXT-*); docs/architecture/technology-decisions.md must contain existing system extension constraints and third-party interface dependency list; scripts/baseline-governance.py audit --require-frozen (end-of-stage freeze audit)"
+      "gate": "scripts/check-required-files.sh --strict; cross-document consistency audit (system boundaries/data flows/ERD/shared contracts/glossary); python scripts/check-quality-gates.py --root . --strict (when quality-gates.json exists: structure/selection, not materialized at 03; when the file is absent it reports QUALITY_GATES_NOT_ADOPTED and passes); python scripts/check-method-evidence.py --step 03-project-architecture-baseline --evidence <evidence> (required method skills, a real evidence path, and a landing section); python scripts/check-architecture-baseline.py --strict (existing system extension constraints/third-party interface dependency list/LEGACY-*/EXT-*); docs/architecture/technology-decisions.md must contain existing system extension constraints and third-party interface dependency list; scripts/baseline-governance.py audit --require-frozen (end-of-stage freeze audit, which is also the approval of the gates file when adopted)"
     },
     {
       "step": "04",
@@ -526,12 +443,13 @@
       "scope": "single feature Change",
       "inputs": [
         "docs/product/proposal-roadmap.md (the row for the current Change and its dependencies), current Change scope",
-        "docs/product/BASELINE-BRIEF.md (read first, ≤1 page), change-sizing.md (slicing budget and DoD), role-permission-matrix.csv, decisions.md, assumptions.md, lessons.md, id-conventions.md",
+        "docs/product/BASELINE-BRIEF.md (read first, about one page), change-sizing.md (slicing budget and DoD), role-permission-matrix.csv, decisions.md, assumptions.md, lessons.md, id-conventions.md",
         "docs/product/reference-research.md (reference product and internet research conclusions; used for proposal scope and scenario completeness)",
         "docs/architecture/baseline-status.md and related architecture/data/shared contract/test baselines",
         "docs/product/requirements-analysis.md, workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, glossary.md, acceptance-policy.md (related FLOW/BR/AC and RD matrix; AC aligned with acceptance policy)",
         "openspec/specs/** (read-only)",
         "docs/architecture/baseline-manifest.json and docs/architecture/constraint-registry.json (machine-authoritative sources)",
+        "docs/architecture/quality-gates.json (when adopted; applicable static analysis gates referenced from the Change baseline impact list)",
         "docs/product/open-questions.md (read-only; proposal requirements must not decide on the user's behalf)"
       ],
       "outputs": [
@@ -540,7 +458,7 @@
         "openspec/changes/<change-id>/tasks.md (initial tasks; 08 updates checkboxes)",
         "openspec/changes/<change-id>/design/user-stories.md (user stories and AC; AC is the sole anchor for testing and verification)",
         "openspec/changes/<change-id>/design/baseline-impact.md (based on the baseline-impact template; 07 updates the design review conclusions)",
-        "openspec/changes/<change-id>/design/baseline-binding.json (generated automatically from the current frozen baseline, binding each ACTIVE Constraint ID; 07 writes design evidence)"
+        "openspec/changes/<change-id>/design/baseline-binding.json (generated automatically from the current frozen baseline, binding the constraints required by the manifest governance profile: all ACTIVE in standard, critical only in lite; 07 writes design evidence)"
       ],
       "next_inputs": [
         "approved proposal-level US/AC, scenarios and business rules, scope boundaries, requirement traceability IDs, baseline snapshot, and constraint bindings",
@@ -610,6 +528,7 @@
         "the Figma review file (authority for visuals/components/variables) and section 9 of docs/architecture/frontend-conventions.md (visual conventions); do not maintain design-tokens.json; actual token values are in figma-audit.md",
         "docs/product/workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, acceptance-policy.md, role-permission-matrix.csv, id-conventions.md, open-questions.md (related FLOW/NODE/DO/BR, acceptance criteria, permissions, and ID conventions; open-questions is read-only)",
         "docs/architecture/system-context.md, domain-boundaries.md, containers-and-deployment.md, data-flows.md, logical-erd.md, technology-decisions.md, api-conventions.md, frontend-conventions.md, test-strategy.md, docs/adr/README.md and docs/adr/* (read on demand by design domain); docs/product/BASELINE-BRIEF.md (read first)",
+        "docs/architecture/quality-gates.json (when adopted; frozen static analysis gates and waiver policy to plan against)",
         "openspec/changes/<change-id>/design/baseline-impact.md",
         "docs/architecture/baseline-status.md (current version)",
         "openspec/changes/<change-id>/design/baseline-binding.json (each constraint, design evidence, and exception approval)"
@@ -624,13 +543,14 @@
         "openspec/changes/<change-id>/design/api-io-mapping.csv (applicable conditionally: when there is an API)",
         "openspec/changes/<change-id>/design/io-catalog.csv (applicable conditionally: when there is an API)",
         "openspec/changes/<change-id>/design/interface-catalog.csv (cross-boundary interface catalog: HTTP/native bridge/device/third-party/async/file; applicable conditionally: when there are cross-boundary interfaces)",
+        "openspec/changes/<change-id>/design/static-waivers.json (applicable conditionally: when static analysis waivers are needed; Change-scoped file+rule waivers with reason/owner/approver/approval date/expiry; never stored in the frozen gates file; omit the file or keep an empty list when none are needed)",
         "openspec/changes/<change-id>/traceability.csv (merges API and test mappings; the sole traceability aggregate file)"
       ],
       "next_inputs": [
         "unified design decisions, interface contracts, frontend/backend implementation constraints, test case matrix, figma-layout.csv assertion mapping, and the sole traceability matrix"
       ],
       "approval": "technical lead confirms design scope, interfaces, and test approach",
-      "gate": "scripts/check-change.sh <change-id>; scripts/check-design-assets.sh <change-id> --strict --lint-api (also validates figma-audit when UI is involved); scripts/check-design-sections.py --change <change-id> (including ### existing code change impact, figma-layout.csv route/dom_selector completion, and responsive rules); scripts/check-test-cases.py --change <change-id> --strict; scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict; when there is an API: scripts/check-api-traceability.py --change <change-id>; when there are cross-boundary interfaces: scripts/check-interface-catalog.py --change <change-id> --strict; python scripts/check-method-evidence.py --step 07-detailed-design --evidence <evidence> (must cover existing functionality/new functionality/code location/third-party interfaces); python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
+      "gate": "scripts/check-change.sh <change-id>; scripts/check-design-assets.sh <change-id> --strict --lint-api (also validates figma-audit when UI is involved); scripts/check-design-sections.py --change <change-id> (including ### existing code change impact, figma-layout.csv route/dom_selector completion, and responsive rules); scripts/check-test-cases.py --change <change-id> --strict; scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict; when there is an API: scripts/check-api-traceability.py --change <change-id>; when there are cross-boundary interfaces: scripts/check-interface-catalog.py --change <change-id> --strict; python scripts/check-method-evidence.py --step 07-detailed-design --evidence <evidence> (required method skills, real evidence paths, and landing sections); python3 scripts/baseline-governance.py check-change --change-id <id> --phase design",
       "baseline_interaction": {
         "read": [
           "current Change's design/baseline-impact.md",
@@ -656,6 +576,7 @@
         "openspec/changes/<change-id>/design/test-cases.csv (implement and run tests by TEST ID)",
         "openspec/changes/<change-id>/design/figma-audit.md (when UI is involved, read the target framework/transcoding notes, actual token values/PAGE specs/state decisions; 06 freezes the PAGE list), design/figma-code/ (target-framework design code transcoded in 06 according to the overall technology selection), and design/figma-layout.csv (assertion mapping)",
         "openspec/changes/<change-id>/traceability.csv",
+        "docs/architecture/quality-gates.json (when adopted; frozen static analysis gates) and openspec/changes/<change-id>/design/static-waivers.json (when present; Change-scoped waivers applied by the runner and checker)",
         "docs/architecture/system-context.md, domain-boundaries.md, logical-erd.md, data-flows.md, technology-decisions.md, api-conventions.md, frontend-conventions.md, test-strategy.md, docs/adr/README.md (implementation constraints); docs/product/open-questions.md (read-only; implementation must not close unresolved questions unilaterally)",
         "openspec/changes/<change-id>/design/baseline-impact.md (approved baseline snapshot)",
         "docs/architecture/baseline-status.md (current version)",
@@ -664,7 +585,9 @@
       "outputs": [
         "actual source code/migrations/configuration",
         "automated test code and run results",
-        "openspec/changes/<change-id>/design/evidence/code-review.md (when UI is involved, includes a ## UI fidelity per-PAGE numeric table: Figma node/asserted element count/max deviation/layout evidence/deviations/conclusion/approver; numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation and approval)",
+        "openspec/changes/<change-id>/design/evidence/code-review.md (when UI is involved, includes a ## UI fidelity per-PAGE numeric table: Figma node/asserted element count/max deviation/layout evidence/deviations/conclusion/approver; numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation and approval; when quality gates are adopted, includes a ## Static analysis table copied verbatim from static-analysis.json: per stack/tool command, config path @ SHA-256, result, literal exit 0, and applied waivers with approver)",
+        "openspec/changes/<change-id>/design/evidence/static-analysis.json (when quality gates are adopted; produced by scripts/run-quality-gates.py: per blocking stack/tool command, cwd, exit code, config SHA-256, gates SHA-256, source revision, applied waivers, verdict)",
+        "openspec/changes/<change-id>/design/evidence/static-analysis-logs/ (when quality gates are adopted; one captured log per blocking stack/tool; the log filename derives from the sanitized stack root plus the tool id)",
         "openspec/changes/<change-id>/design/evidence/figma-layout-check.json (per-element expected/actual/delta evidence from scripts/check-figma-layout.py)",
         "openspec/changes/<change-id>/tasks.md (checkbox status updated by implementation; MUTABLE by 08)",
         "openspec/changes/<change-id>/design/evidence/implementation-diff.json (commit/diff SHA-256 and changed paths at the verified revision)",
@@ -672,10 +595,11 @@
         "conditionally applicable: baseline change request/ADR draft (when conflicts are found; do not update the frozen baseline without approval)"
       ],
       "next_inputs": [
-        "code diff, test report, review conclusion, unresolved issues, figma-layout-check.json, and token check results"
+        "code diff, test report, review conclusion, unresolved issues, figma-layout-check.json, and token check results",
+        "when quality gates are adopted: openspec/changes/<change-id>/design/evidence/static-analysis.json, openspec/changes/<change-id>/design/evidence/static-analysis-logs/, and the ## Static analysis section in design/evidence/code-review.md"
       ],
       "approval": "code review blockers closed; merging is approved separately according to project permissions",
-      "gate": "TDD; scripts/test-all.sh; scripts/verify-before-completion.sh; scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900; scripts/check-design-tokens.py --change <change-id> --tokens <token.css>; scripts/check-code-review.py --change <change-id> --strict (UI Change ## UI fidelity numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation); baseline-governance.py check-change --phase implementation",
+      "gate": "TDD; scripts/test-all.sh; scripts/verify-before-completion.sh; when docs/architecture/quality-gates.json exists: python scripts/check-quality-gates.py --root . --strict --require-materialized; python scripts/run-quality-gates.py <change-id> --output openspec/changes/<change-id>/design/evidence/static-analysis.json --identity <builder>; python scripts/check-static-analysis.py --change <change-id> --strict (the authoritative 08 static-analysis transition command); scripts/check-figma-layout.py --change <change-id> --base-url <url> --viewport 1440x900; scripts/check-design-tokens.py --change <change-id> --tokens <token.css>; scripts/check-code-review.py --change <change-id> --strict (UI Change ## UI fidelity numbers are taken directly from figma-layout-check.json; only deviation/UI-DERIVED PAGEs require manual explanation; ## Static analysis rows are copied from static-analysis.json when gates are adopted); baseline-governance.py check-change --phase implementation",
       "baseline_interaction": {
         "read": [
           "approved design/baseline-impact.md",
@@ -702,6 +626,8 @@
         "openspec/changes/<change-id>/design/test-cases.csv (test cases and execution result verification)",
         "openspec/changes/<change-id>/design/evidence/code-review.md, Builder test and verification evidence; docs/product/open-questions.md (read-only; verification must not close unresolved questions unilaterally)",
         "openspec/changes/<change-id>/traceability.csv (traceability matrix)",
+        "docs/architecture/quality-gates.json and openspec/changes/<change-id>/design/static-waivers.json (when adopted; frozen gates and Change-scoped waivers independently re-checked)",
+        "openspec/changes/<change-id>/design/evidence/static-analysis.json (when quality gates are adopted; 08 builder evidence and builder identity; 09 independently re-runs the gates)",
         "approved baseline snapshot and baseline-impact.md",
         "openspec/changes/<change-id>/design/baseline-binding.json (approved constraint bindings)",
         "docs/architecture/baseline-status.md (current version)",
@@ -711,17 +637,19 @@
       ],
       "outputs": [
         "openspec/changes/<change-id>/design/evidence/independent-verification-report.md",
-        "openspec/changes/<change-id>/design/evidence/independent-verification.json"
+        "openspec/changes/<change-id>/design/evidence/independent-verification.json",
+        "openspec/changes/<change-id>/design/evidence/static-analysis-independent.json (when quality gates are adopted; independent rerun evidence with distinct verifier and builder identities; produced by scripts/run-quality-gates.py --independent)"
       ],
       "next_inputs": [
-        "independent verification report and JSON evidence",
+        "independent verification report and JSON evidence (including static_checks when quality gates are adopted)",
+        "static-analysis-independent.json when quality gates are adopted",
         "per-AC verification results",
         "test commands and exit codes",
         "layout_checks (per-PAGE asserted element count/max deviation/tolerance/missing elements/result/evidence)",
         "findings and items not executed"
       ],
       "approval": "independent verification PASS; the Verifier must not be the same execution context as the Builder for this change; failures/blockers return to the implementation stage",
-      "gate": "scripts/check-independent-verification.py; all applicable AC PASS, test exit codes 0, revision stable, read-only, no BLOCKER/CRITICAL; when UI is involved, all layout_checks PASS and test_runs include an independent rerun of check-figma-layout.py exit 0 and check-design-tokens.py exit 0; manual visual spot checks only on deviation/UI-DERIVED/unasserted PAGEs; baseline-governance.py check-change --phase implementation"
+      "gate": "scripts/check-independent-verification.py; all applicable AC PASS, test exit codes 0, revision stable, read-only, no BLOCKER/CRITICAL; when docs/architecture/quality-gates.json exists: python scripts/run-quality-gates.py <change-id> --independent --identity <verifier> --builder-identity <08 builder> --output openspec/changes/<change-id>/design/evidence/static-analysis-independent.json; python scripts/check-static-analysis.py --change <change-id> --expect-independent (all static_checks PASS, no gates drift, no expired/invalid waivers); when UI is involved, all layout_checks PASS and test_runs include an independent rerun of check-figma-layout.py exit 0 and check-design-tokens.py exit 0; manual visual spot checks only on deviation/UI-DERIVED/unasserted PAGEs; baseline-governance.py check-change --phase implementation"
     },
     {
       "step": "10",
@@ -736,6 +664,8 @@
         "openspec/changes/<change-id>/design.md (design basis)",
         "openspec/changes/<change-id>/design/evidence/code-review.md",
         "openspec/changes/<change-id>/design/evidence/implementation-diff.json (verified revision fingerprint)",
+        "docs/architecture/quality-gates.json and openspec/changes/<change-id>/design/static-waivers.json (when adopted; gates file and Change-scoped waivers checked for expiry/validity)",
+        "openspec/changes/<change-id>/design/evidence/static-analysis.json and openspec/changes/<change-id>/design/evidence/static-analysis-independent.json (when quality gates are adopted; acceptance reconciles ## Static analysis with these evidence files and rejects a non-PASS verdict, gates drift, or expired/invalid waivers)",
         "openspec/changes/<change-id>/design/figma-audit.md (when UI is involved, verify the target framework/transcoding notes, actual token values/PAGE specs/state consistency with the Figma review file), design/figma-code/ (target-framework design code transcoded in 06 according to the overall technology selection), design/figma-layout.csv (assertion mapping), and design/evidence/figma-layout-check.json (must PASS)",
         "openspec/changes/<change-id>/design/test-cases.csv (acceptance test coverage evidence)",
         "openspec/changes/<change-id>/design/interface-catalog.csv (cross-boundary interface acceptance evidence)",
@@ -750,7 +680,7 @@
         "docs/adr/README.md and docs/adr/* (read approved architecture decisions on demand)"
       ],
       "outputs": [
-        "openspec/changes/<change-id>/design/evidence/acceptance.md (when UI is involved, includes ## UI acceptance per-PAGE sign-off: Figma node/running system entry/deviation approval/acceptance method (machine evidence/side-by-side check)/reviewer)",
+        "openspec/changes/<change-id>/design/evidence/acceptance.md (when UI is involved, includes ## UI acceptance per-PAGE sign-off: Figma node/running system entry/deviation approval/acceptance method (machine evidence/side-by-side check)/reviewer; when quality gates are adopted, includes ## Static analysis reconciled from static-analysis.json and static-analysis-independent.json: per stack/tool command, result, literal exit 0, and every applied waiver with approver)",
         "shared mutable write-back: lessons/decisions/assumptions registries (owned by Stage 02; Stage 10 appends/updates them without re-declaring them as outputs)",
         "acceptance report and approval records",
         "OpenSpec archive results and updated main specs (only after approval)"
@@ -759,7 +689,7 @@
         "accepted and archived capability specs, acceptance evidence, and dependencies of subsequent Changes"
       ],
       "approval": "archive only after explicit approval by the product owner; do not bypass with -y",
-      "gate": "scripts/check-acceptance.py (UI Changes validate ## UI acceptance per-PAGE running entry/sign-off and figma-layout-check.json PASS; PAGEs with no deviations may be signed off in bulk from machine evidence; deviation/UI-DERIVED PAGEs are checked side by side); verify-before-completion.sh; actually run openspec validate/archive; stage 09 independent verification must PASS and the revision must be unchanged; baseline-governance.py check-change --phase acceptance",
+      "gate": "scripts/check-acceptance.py (UI Changes validate ## UI acceptance per-PAGE running entry/sign-off and figma-layout-check.json PASS; PAGEs with no deviations may be signed off in bulk from machine evidence; deviation/UI-DERIVED PAGEs are checked side by side); when docs/architecture/quality-gates.json exists: verify-before-completion.sh (static gates run by default) and static-analysis evidence reconciled in ## Static analysis; non-PASS verdict, gates drift, or expired/invalid waivers block acceptance; actually run openspec validate/archive; stage 09 independent verification must PASS and the revision must be unchanged; baseline-governance.py check-change --phase acceptance",
       "baseline_interaction": {
         "read": [
           "design/baseline-impact.md",
@@ -1128,6 +1058,18 @@
     },
     {
       "step": "03",
+      "artifact": "docs/architecture/quality-gates.json",
+      "consumed_by": [
+        "05",
+        "07",
+        "08",
+        "09",
+        "10"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "03",
       "artifact": "docs/adr/README.md",
       "consumed_by": [
         "07",
@@ -1319,6 +1261,16 @@
     },
     {
       "step": "07",
+      "artifact": "openspec/changes/<change-id>/design/static-waivers.json",
+      "consumed_by": [
+        "08",
+        "09",
+        "10"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "07",
       "artifact": "openspec/changes/<change-id>/traceability.csv",
       "consumed_by": [
         "08",
@@ -1347,6 +1299,14 @@
     {
       "step": "09",
       "artifact": "openspec/changes/<change-id>/design/evidence/independent-verification.json",
+      "consumed_by": [
+        "10"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "09",
+      "artifact": "openspec/changes/<change-id>/design/evidence/static-analysis-independent.json",
       "consumed_by": [
         "10"
       ],
@@ -1412,6 +1372,21 @@
         "10"
       ],
       "evidence_only": false
+    },
+    {
+      "step": "08",
+      "artifact": "openspec/changes/<change-id>/design/evidence/static-analysis.json",
+      "consumed_by": [
+        "09",
+        "10"
+      ],
+      "evidence_only": false
+    },
+    {
+      "step": "08",
+      "artifact": "openspec/changes/<change-id>/design/evidence/static-analysis-logs/",
+      "consumed_by": [],
+      "evidence_only": true
     },
     {
       "step": "08",
