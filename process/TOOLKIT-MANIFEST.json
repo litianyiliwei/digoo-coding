@@ -1,5 +1,5 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "state_schema": "1.0",
   "migrations": [],
   "files": [
@@ -237,7 +237,7 @@
     {
       "path": "process/TOOLKIT-CHANGELOG.md",
       "install": "process/TOOLKIT-CHANGELOG.md",
-      "sha256": "3a41912873f787d2de0826e9fbebd56f427856f5155bfe2202d044864c744109",
+      "sha256": "176bdb7a7d4a3ec37a2e1422ec74f8325daa7594d1d98a21ab490821d233ef9a",
       "class": "toolkit",
       "vendor": true
     },
