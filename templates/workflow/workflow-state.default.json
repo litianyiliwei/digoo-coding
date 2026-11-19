@@ -1,0 +1,23 @@
+{
+  "project_name": "PENDING",
+  "active_change_id": "",
+  "completed_steps": [],
+  "current_step": "01-project-bootstrap",
+  "skipped_steps": [],
+  "skip_history": [],
+  "abandoned_changes": [],
+  "pending_approvals": [],
+  "blocked_items": [],
+  "last_completed_outputs": [],
+  "notes": "Created by toolkit-sync init; managed by scripts/workflow.py.",
+  "state_schema_version": "1.0",
+  "transition_history": [],
+  "topology_migrations": [],
+  "completed_substeps": [],
+  "current_substep": "",
+  "reopen_history": [],
+  "reset_history": [],
+  "baseline": {},
+  "approvals_history": [],
+  "last_transition": null
+}

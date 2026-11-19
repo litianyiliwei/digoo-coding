@@ -30,7 +30,7 @@ Execution steps:
 6. If MCP is unavailable or the real design cannot be read, block; do not substitute screenshots, hand-written HTML, or fabrication. PAGE IDs are frozen by 06, and 07–10 must not add or rename PAGES.
 7. When done, run `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`; the exit code must be 0. Fail if the target framework, node CSV, assertion mapping, token actual values, visible TEXT coverage, or UI review is missing.
 
-Formal artifacts must follow the templates specified in docs/TEMPLATE-POLICY.md and docs/OUTPUT-TEMPLATE-MATRIX.csv; do not delete template fields, write PENDING for unknown items and explain why.
+Formal artifacts must follow the templates specified in process/TEMPLATE-POLICY.md and process/OUTPUT-TEMPLATE-MATRIX.csv; do not delete template fields, write PENDING for unknown items and explain why.
 Baseline interaction requirements: first read BASELINE-BRIEF.md, then read the relevant baselines according to page/frontend impact; pages, elements, and events must not bypass approved constraints. When a conflict is found, record the constraint ID and submit an exception/BCR; do not modify baseline-binding.json on your own. When done, run python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement.
 ```
 
@@ -53,7 +53,7 @@ Context: first run `python scripts/agent-context.py --stage <id> --change <chang
 
 ## Mandatory Deliverable Handoff
 
-Before execution, read the `skill="figma-design-review"` record in `docs/STEP-ARTIFACT-CONTRACTS.md` and `docs/STEP-ARTIFACT-CONTRACTS.json`.
+Before execution, read the `skill="figma-design-review"` record in `process/STEP-ARTIFACT-CONTRACTS.md` and `process/STEP-ARTIFACT-CONTRACTS.json`.
 
 - Input verification: approved proposal/specs/design/user-stories; project business flows/data objects/RD matrix/business rules/role permissions/ID conventions (workflows, data-objects, rd-matrix, business-rules, role-permission-matrix, id-conventions); `docs/product/open-questions.md` (read-only); `docs/architecture/technology-decisions.md` (target frontend framework/component library) and Sections 1 and 9 of frontend-conventions; `docs/architecture/baseline-status.md`; `design/baseline-impact.md` and `design/baseline-binding.json`; actual Figma MCP accessibility (mandatory when UI is involved). Report item by item whether each file exists, its version, and approval status; pause if not satisfied.
 - Must output: `openspec/changes/<change-id>/design/figma-audit.md` (the only UI contract: Figma file/version + target framework/transcoding notes + token actual values + text styles + PAGEs and nodes + block specifications per PAGE + design code + assertion scope + state coverage/decisions + UI review APPROVED; when there is no UI, N/A + reason), `design/figma-code/README.md` and target framework design code `PAGE-001.vue … PAGE-00N.vue` (for the React stack, `.tsx`/`.jsx`), `design/figma-layout.csv` (condensed assertion table; `route`/`dom_selector` may be filled in by 07); when there are real image/SVG assets, attach `design/figma-assets/README.md`. No longer output reference screenshots, `prototype.pen`, `PAGE-*.html`, `prototype.md`, `manifest.json`, `design-tokens.json`, scattered token/contract JSON, or the `traceability.csv` initialized by 06.

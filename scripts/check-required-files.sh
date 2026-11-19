@@ -38,8 +38,8 @@ required=(
   "docs/architecture/baseline-manifest.json"
   "docs/architecture/constraint-registry.json"
   "docs/project/baseline-audit-report.md"
-  "docs/TEMPLATE-POLICY.md"
-  "docs/OUTPUT-TEMPLATE-MATRIX.csv"
+  "process/TEMPLATE-POLICY.md"
+  "process/OUTPUT-TEMPLATE-MATRIX.csv"
 )
 missing=0
 placeholders=0

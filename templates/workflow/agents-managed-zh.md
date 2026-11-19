@@ -1,0 +1,64 @@
+> 托管块 — 由 `scripts/toolkit-sync.py` 安装与更新；不要编辑 `toolkit:begin` / `toolkit:end` 标记内部。项目专属约定写在块外。
+
+## 流程入口
+
+- 当用户说"下一步/继续/接着做"时，先加载 `workflow-orchestrator` Skill（或 `prompts/00-next-step.md`），依据 `workflow-state.json` 与真实产物判定唯一安全的下一阶段。
+- 每阶段开始前读取 `process/STEP-ARTIFACT-CONTRACTS-zh.md` 与 `process/STEP-ARTIFACT-CONTRACTS.json` 中对应 Skill 的契约记录。
+- 阶段结束使用 `templates/workflow/step-handoff-report.md` 展示交接报告；产物必须落盘到契约指定路径，不得只在聊天中输出。
+
+## 阶段边界与评审停等（强制）
+
+- **阶段完成 ≠ 可进入下一阶段。** 产物写完、检查通过只代表“可送审”，不代表已批准。未获用户明确批准前，禁止读取或执行下一阶段 Prompt/Skill、禁止创建下一阶段产物、禁止调用下一阶段工具。
+- **开始任何阶段前** 必须运行 `python scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`；退出码非 0 时立即停止并报告阻断原因，不得绕过。
+- **每个阶段结束流程（顺序不可变）：**
+  1. 生成 `workflow/evidence/<step-id>.json` 并运行该阶段全部检查脚本；
+  2. 运行 `python scripts/workflow.py request-review --step <step-id> --evidence workflow/evidence/<step-id>.json --summary "<送审摘要>"`，生成固定产物哈希的评审包，并把流程冻结为“待评审”（`current_step` 不前进）；
+  3. 按 `templates/workflow/step-handoff-report.md` 展示交接报告（产物路径、摘要、检查结果/退出码、待确认项、下一阶段输入）后**立即结束回合**，不得继续。
+- **只有用户明确回复“评审通过 <step-id>”后**，才可运行 `python scripts/workflow.py approve --step <step-id> --approver "<用户>" --approved-at <YYYY-MM-DD> --evidence <审批记录>`，再运行 `transition`。不得自行填写 approver/approved_at，不得把“产物完成”“检查通过”或 Agent 自己的判断当作批准。
+- **08（实现）与 09（独立验证）同样必须等待用户评审**；09 由独立 Verifier 在独立上下文完成，Builder 不得在同一会话代跑验证并自动进入 10。
+- **06 为条件阶段**：无 UI 的 Change 必须先运行 `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<理由>"`，再运行 `workflow.py skip-stage --step 06-figma-design-review --evidence workflow/evidence/06-figma-design-review-skip.json`；有 UI 的 Change 必须完成完整 Figma 评审，且 evidence 要设置 `approval.required=true`。
+- `pending_approvals` 非空时不得推进任何阶段；`workflow-state.json` 只能由 `workflow.py` 命令（`request-review`/`approve`/`transition`/`reopen`/`reset-state`/`migrate-state`）写入，`check-entry` 为只读命令；禁止直接编辑状态文件。
+- Claude Code 下由 `.claude/settings.json` 的 PreToolUse hook 拒绝写入当前阶段之后的阶段产物、已完成阶段中非 volatile 的产物、待评审期间当前阶段的声明产物，以及直接编辑 `workflow-state.json`。被拒绝时必须停止并说明，不得绕过（更换写入路径、禁用 hook 或改用其他工具规避均属违规）。Bash 驱动的写入不在该 hook 拦截范围内，属于已记录的信任边界。
+- 交接只对已批准的决策/验收产物做哈希。机器管理或生成的文件（`workflow-state.json`、`AGENTS.md`、baseline status/manifest/registry、`BASELINE-INDEX.md`、`toolchain-report.md`）为 volatile：handoff 只验证存在，不校验哈希。契约未声明的额外 evidence 输出仅用于审计，不得使已评审交接失效。
+
+## 模板与产物规则
+
+- 正式产物遵循 `process/TEMPLATE-POLICY-zh.md` 与 `process/OUTPUT-TEMPLATE-MATRIX.csv` 指定模板；不得删除模板字段；未知项写 `PENDING` 并说明原因与责任人/阻塞条件；不适用项写 `N/A` 并写理由。
+- 阶段 02/03/04/05/07/10 开始前先读 `docs/product/BASELINE-BRIEF.md`、`change-sizing.md`、`id-conventions.md`；详细基线按 Change 影响面加载，不整包塞入上下文。基线产物缺失或 `check-requirements.py` 未通过时不得进入下游阶段。
+- 项目级基线放 `docs/product/`、`docs/architecture/`、`docs/adr/`；单个功能内容放 `openspec/changes/<change-id>/`。
+- 每份 Markdown 正式产物开头注明：Change ID（若适用）、状态、来源基线、关联需求/AC ID、生成日期或版本。
+- UI 相关 Change 的界面阶段（06）为 Figma-only：
+  - 以已批准的提案需求/AC、产品流程、`docs/architecture/frontend-conventions.md` 第 9 节与 `docs/architecture/technology-decisions.md`（总体技术选型）为输入，通过 Figma MCP AI 生成真实 Figma 设计；用户必须在真实 Figma 评审稿上完成 UI 评审。
+  - **框架对齐转码（强制）**：06 必须在调用 `get_design_context` 前加载官方 `figma-design-to-code` Skill，并先按总体技术选型确定目标框架；返回的参考实现必须转码为目标框架设计代码：技术选型为 Vue 时输出 Vue SFC（`.vue`，使用该端组件库（Web 为 Element Plus，移动端为 uni-app）与项目 token），为 React 时输出 React（`.tsx`/`.jsx`，使用项目组件库与 token）。`openspec/changes/<change-id>/design/figma-code/README.md` 必须记录目标框架、扩展名、组件/样式/token 替换与偏差；禁止把 React/Tailwind 原始参考实现直接当作交付代码，08 只在此基础上补业务逻辑，不重写样式/布局/文案。
+  - 设计完成后必须通过 Figma MCP 实际读取真实文件/节点/组件/变量，并把 token **实际值**（颜色 hex、字号/行高、间距/圆角/阴影）、文字样式、每 PAGE 区块规格、状态覆盖与决策、设计代码（含目标框架与转码说明）、断言范围、MCP 读取记录、UI 评审 APPROVED 落盘到唯一单文件 `openspec/changes/<change-id>/design/figma-audit.md`；同时导出 `openspec/changes/<change-id>/design/figma-code/`（目标框架设计代码）与 `openspec/changes/<change-id>/design/figma-layout.csv`（运行态断言映射）。**截图不是契约、资产或门禁证据**：`get_design_context` 返回的渲染只能即时用作视觉对照，不得保存、登记或入库；真实图片/SVG 资产放 `openspec/changes/<change-id>/design/figma-assets/`，由 README 登记文件/来源 node/sha256/尺寸，无资产写“无”。Figma MCP 不可用或读不到真实设计时阶段阻断；不得用截图或臆造替代。
+  - 06 一次性完整导出；07/08 默认离线消费 `figma-audit.md`、`figma-code/` 与 `figma-layout.csv`，仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。07 必须在 design.md 建 token → CSS 变量/Element Plus 主题/字体映射，填满 `figma-layout.csv` 的 `route`/`dom_selector` 并定义 `### 响应式与视口规则`；08 必须直接以目标框架设计代码为页面骨架（只补业务逻辑/路由/API/状态），落地全局 token 层与字体，运行 `check-figma-layout.py`（Figma 节点几何 vs 1440×900 运行态 DOM，元素缺失/超差即 FAIL）与 `check-design-tokens.py`，生成 `openspec/changes/<change-id>/design/evidence/figma-layout-check.json`。**UI 验证以机器证据为主**：`code-review.md` 的 `## UI fidelity` 逐 PAGE 数值直接从 JSON 抄录，只有存在差异/`UI-DERIVED` 的 PAGE 才需要人工说明与审批人；09 在 `independent-verification.json` 的 `layout_checks` 独立重跑并核验（缺失、超差或未批准差异不得 PASS），人工抽查仅限差异/`UI-DERIVED` PAGE；10 在 `acceptance.md` 的 `## UI acceptance` 逐 PAGE 签收，无差异且机器 PASS 的 PAGE 可按机器证据批量签收，仅差异/`UI-DERIVED` PAGE 需并排核对。**全流程不保存截图；截图不是 UI 证据。** 缺失这些 UI 数值证据不得推进对应阶段或归档。
+  - PAGE ID 与页面集合在 06 冻结；不得新增或重命名 PAGE。Figma 未定义的弹窗/抽屉/状态必须新增 Figma 画板，或以 `UI-DERIVED` 记录视觉规格、审批人与理由。
+  - 不再使用 pen.dev、`prototype.pen`、`PAGE-*.html`、`prototype.md`、`manifest.json`、`design/design-tokens.json` 或分散的 token/contract JSON。
+- 测试用例矩阵放 `openspec/changes/<change-id>/design/test-cases.csv`，TEST ID 必须回链 AC/PAGE/BLOCK/API/IO，并写入唯一 `traceability.csv`；不得只把测试写在 design.md 叙述里。
+
+## OpenSpec 约定
+
+- 配置见 `openspec/config.yaml`（schema: spec-driven）；标准 artifact 为 `proposal.md`、`specs/<capability>/spec.md`、`design.md`、`tasks.md`。
+- `tasks.md` 必须使用 `- [ ]` / `- [x]` 复选框。
+- specs 只写外部可观察行为；类名/框架/实现步骤放 design.md。
+- 每个 OpenAPI `operationId` 必须在 `design/api-io-mapping.csv` 映射到至少一个真实 IO，IO 契约写在 `design/io-catalog.csv`。
+- 归档（openspec archive）前必须人工批准，不得用 `-y` 绕过。
+
+## 检查脚本
+
+- 包自检：`python scripts/check-package.py`
+- 下一阶段建议（只读）：`python scripts/next-step.py`
+- 基线文件检查：`bash scripts/check-required-files.sh`
+- 各阶段校验命令见 `scripts/README-zh.md`；脚本 fail-closed，不可伪造通过结果。
+
+## 语言与风格
+
+- 仓库文档、Prompt、Skill 与模板以英文为主；流程文档的简体中文译本使用同路径加 `-zh.md`。
+- 正式项目产物与 Agent 回复按用户习惯的语言输出；代码、API 字段和标识符遵循仓库已有规范（当前 PENDING，待首个功能实现时确定）。
+
+## Agent 行为边界
+
+- 不自动安装依赖、不提交代码、不改 CI、不归档、不发布，不替业务/设计/架构负责人批准未决规则。
+- 不覆盖既有文件；覆盖/修改既有 AGENTS.md 或配置前需用户批准。
+- Superpowers 技能名会随版本演进，实施时先确认真实安装与可用性，缺失时如实报告。
+- 外部工具（Figma MCP）以实际可访问能力为准，不得把不可读取的链接/字段当作已审查。

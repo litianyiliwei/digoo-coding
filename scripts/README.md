@@ -2,13 +2,16 @@
 
 > Language: English | [简体中文](README-zh.md)
 
-Most scripts resolve the project root from their own location; file arguments to `validate-openapi.sh` may be absolute or relative to the current directory/project root. After copying, place scripts under the project root `scripts/` folder. Check scripts accept both the canonical English artifact section names/status markers and their Chinese equivalents, so artifacts may follow the user's language while templates stay English-first.
+Most scripts resolve the project root from their own location; file arguments to `validate-openapi.sh` may be absolute or relative to the current directory/project root. After copying, place scripts under the project root `scripts/` folder. Check scripts accept both the canonical English artifact section names/status markers and their Chinese equivalents, so artifacts may follow the user's language while templates stay English-first. Project-state commands (`workflow.py`, `next-step.py`, `baseline-governance.py`, and the project checks) run inside a business project repository that vendors this toolkit; the toolkit repository itself carries no project state.
 
 | Script | Purpose | Success means | Does not mean |
 |---|---|---|---|
 | `check-output-template-matrix.py` | Validates that registered L1/L2 template paths exist | Template registry references real files | Template content is complete/correct |
 | `agent-context.py --stage <id> [--change <change-id>] [--full]` | Prints the lean default read set (`input_policy.stage_profiles`), the on-demand list, and (with `--full`) the full audit inputs | Default context stays within the declared read-group budget | The agent actually reads every required file |
 | `stage-io-report.py [--check\|--out <path>]` | Generates/verifies the derived stage input/output overview, including lean/on-demand profiles | Overview matches the authoritative contracts | Each stage's real context is small |
+| `gen-manifest.py --write\|--check` | Generates/verifies `process/TOOLKIT-MANIFEST.json` (the vendored set + hashes) | Manifest matches the toolkit tree | That the release was tagged |
+| `check-layout.py --mode toolkit\|project\|auto` | Enforces working-tree ownership (toolkit vs project paths, managed blocks) | Tree layout follows the two-repository model | That project content is correct |
+| `toolkit-sync.py init\|verify\|plan\|apply\|repair` | Installs and upgrades a vendored toolkit inside a project repository; verifies hashes, managed blocks and third-party files | Project pin matches the toolkit release and only toolkit paths changed | That project business work is correct |
 | `check-api-io-mapping.py <openapi> <mapping.csv> <catalog.csv> [--strict]` | Every OpenAPI operationId maps to one or more concrete IO IDs; catalog contracts are complete in strict mode; intentional no-API change must declare `x-api-scope: none` | Design has correct business behavior or safe transaction semantics |
 | `test-api-io-mapping.sh` | Temporary positive/negative fixtures verify API→IO checker behavior, including explicit no-API scope | Basic checker regressions are caught | Real project API/IO design is correct |
 | `check-acceptance.py <id>` | Acceptance result, evidence, reviewer and AC rows; UI Changes also require per-PAGE live system entry + Figma node + `figma-layout-check.json` PASS | Evidence sheet has no pending fields and includes accepted AC rows; UI acceptance is signed against the running system and Figma file (no screenshots) | Business acceptance is actually justified |

@@ -10,7 +10,7 @@ Load this Skill when the workflow enters "project overall architecture design". 
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Approved `docs/product/requirements-analysis.md`, `workflows.md`, `data-objects.csv`, `rd-matrix.csv`, `business-rules.md`, `glossary.md`, `acceptance-policy.md`, `open-questions.md` (read-only); `BASELINE-BRIEF.md`, `role-permission-matrix.csv`, `change-sizing.md`, `decisions.md`, `assumptions.md`, `id-conventions.md`, `BASELINE-INDEX.md` (standing baselines; read the brief first); existing repository structure/technical constraints; non-functional requirements; technology selection preferences explicitly stated by the user/technical lead (this stage must ask explicitly and must not default or decide unilaterally).
 
 ## Execution Flow
@@ -47,7 +47,7 @@ Descriptions of the same boundary in diagrams and text are consistent; choices h
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="project-architecture-baseline"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="project-architecture-baseline"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Approved docs/product/requirements-analysis.md, workflows.md, data-objects.csv, rd-matrix.csv, business-rules.md, glossary.md, acceptance-policy.md, open-questions.md (read-only); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, id-conventions.md, BASELINE-INDEX.md (standing baselines); existing repository structure/technical constraints; non-functional requirements; user/technical lead technology selection preferences. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** docs/architecture/system-context.md; domain-boundaries.md; containers-and-deployment.md; data-flows.md; logical-erd.md; technology-decisions.md; api-conventions.md; frontend-conventions.md; test-strategy.md; docs/adr/README.md; baseline-status.md; baseline-manifest.json; constraint-registry.json; docs/project/baseline-audit-report.md. Generate according to templates and write to disk.
@@ -71,7 +71,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 
 ## Question Coverage (Mandatory)
 
-- Before review, fill the 03 section of `docs/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
+- Before review, fill the 03 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
 - `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
 - Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
 - Run `python scripts/check-question-coverage.py --step 03-project-architecture-baseline --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.

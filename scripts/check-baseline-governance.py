@@ -6,7 +6,7 @@ import json, sys
 ROOT = Path(__file__).resolve().parents[1]
 errors = []
 required_files = [
-    'docs/BASELINE-FEATURE-INTERACTION.md',
+    'process/BASELINE-FEATURE-INTERACTION.md',
     'templates/change-assets/design/baseline-impact.md',
     'templates/project-baseline/baseline-status.md',
     'templates/project-baseline/baseline-change-request.md',
@@ -16,7 +16,7 @@ for rel in required_files:
     if not (ROOT / rel).is_file():
         errors.append(f'missing required baseline governance file: {rel}')
 
-contracts_path = ROOT / 'docs/STEP-ARTIFACT-CONTRACTS.json'
+contracts_path = ROOT / 'process/STEP-ARTIFACT-CONTRACTS.json'
 contracts = json.loads(contracts_path.read_text(encoding='utf-8'))
 if 'baseline_feature_interaction' not in contracts:
     errors.append('STEP-ARTIFACT-CONTRACTS.json missing baseline_feature_interaction policy')
@@ -45,7 +45,7 @@ state = json.loads((ROOT/'workflow-state.json').read_text(encoding='utf-8'))
 if not isinstance(state.get('baseline'), dict) or 'domains' not in state['baseline']:
     errors.append('workflow-state.json missing baseline domain/version index')
 
-matrix = (ROOT/'docs/OUTPUT-TEMPLATE-MATRIX.csv').read_text(encoding='utf-8-sig')
+matrix = (ROOT/'process/OUTPUT-TEMPLATE-MATRIX.csv').read_text(encoding='utf-8-sig')
 for rel in ('templates/change-assets/design/baseline-impact.md',
             'templates/project-baseline/baseline-status.md',
             'templates/project-baseline/baseline-change-request.md'):

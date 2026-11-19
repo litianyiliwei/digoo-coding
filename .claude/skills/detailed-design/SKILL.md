@@ -10,7 +10,7 @@ Load this Skill when the workflow enters stage 07 "Detailed Design, Interface, a
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Approved proposal/specs/user-stories (initial design decisions are in `proposal.md`; this stage creates `design.md` as its single writer); this stage initializes `traceability.csv`; when UI is involved, you must read `design/figma-audit.md` (target framework/transcoding notes, actual token values, text styles, PAGE specifications, state decisions), `design/figma-code/` (target-framework design code transcoded in 06 according to the overall technology selection), and `design/figma-layout.csv` (assertion mapping), and verify file versions; also read `docs/architecture/technology-decisions.md` to confirm the target framework matches the 06 transcoding; the Figma review deliverable is the visual and structural authority; visual conventions come from section 9 of the frozen `docs/architecture/frontend-conventions.md`; project business flows/data objects/RD matrix/business rules/acceptance policy; project architecture baselines read as needed by design domain; the current Change's `design/baseline-impact.md` and `design/baseline-binding.json`. Consume the export package offline by default, and only reread Figma page by page in batches when the version changes or a page is ambiguous. **Do not use reference screenshots or implementation screenshots.**
 
 ## Methods and Tools (Mandatory)
@@ -51,7 +51,7 @@ Approved proposal/specs/user-stories (initial design decisions are in `proposal.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="detailed-design"` in `docs/STEP-ARTIFACT-CONTRACTS.json`.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="detailed-design"` in `process/STEP-ARTIFACT-CONTRACTS.json`.
 
 - **Inputs for this stage:** Approved proposal/specs/user-stories (initial design decisions are in `proposal.md`; this stage creates `design.md`); when UI is involved, the `figma-audit.md` that must be read (target framework/transcoding notes, actual token values, text styles, PAGE specifications, state decisions), `design/figma-code/` (target-framework design code), and `design/figma-layout.csv` (assertion mapping), with file versions verified; `docs/architecture/technology-decisions.md` (confirm the target framework matches 06 transcoding); the Figma review deliverable is the visual and structural authority, and visual conventions come from section 9 of `docs/architecture/frontend-conventions.md`; project business flows/data objects/RD matrix/business rules/acceptance policy; role permission matrix, ID conventions, and open questions (role-permission-matrix, id-conventions, open-questions; open-questions is read-only); `docs/product/BASELINE-BRIEF.md` and architecture baselines read on demand; `design/baseline-impact.md`, `baseline-status.md`, `baseline-binding.json`. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** `design.md` (unified design five sections, including `### Responsive and Viewport Rules` and `### Page Geometry and Fidelity Assertions`); `design/figma-layout.csv` (`route`/`dom_selector` filled in every row); `design/test-cases.csv` (TEST matrix); `api/openapi.yaml` (when applicable); `design/api-io-mapping.csv`, `design/io-catalog.csv` (when applicable); `traceability.csv` (merged page/API/test mapping); `design/baseline-impact.md` (07 updates the design recheck conclusion); `design/baseline-binding.json` (07 writes design evidence).
@@ -65,7 +65,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 
 ## Question Coverage (Mandatory)
 
-- Before review, fill the 07 section of `docs/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
+- Before review, fill the 07 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
 - `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
 - Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
 - Run `python scripts/check-question-coverage.py --step 07-detailed-design --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.

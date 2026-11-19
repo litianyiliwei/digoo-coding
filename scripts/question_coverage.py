@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate a stage evidence file's question-coverage block.
 
-The policy lives in ``docs/STEP-ARTIFACT-CONTRACTS.json`` under
+The policy lives in ``process/STEP-ARTIFACT-CONTRACTS.json`` under
 ``question_coverage_policy``. If that key is absent, a conservative built-in
 policy for stages 02/03/05/07 is used so older packages still get a useful
 check.
@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 DEFAULT_POLICY: dict[str, Any] = {
-    "checklist": "docs/QUESTION-COVERAGE-CHECKLIST.md",
+    "checklist": "process/QUESTION-COVERAGE-CHECKLIST.md",
     "stages": {
         "02-requirements-analysis": {
             "required_items": [

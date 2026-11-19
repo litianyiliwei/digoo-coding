@@ -10,7 +10,7 @@ Load this Skill when the workflow enters "manual acceptance, archiving, and base
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Stage 09's independent verification PASS report and JSON evidence (mandatory); implementation branch, ACs, `design/user-stories.md`, `docs/product/acceptance-policy.md`, test/build reports, Figma/prototype audit, OpenAPI, `design/baseline-impact.md`, current `baseline-status.md`, and approved baseline amendment evidence.
 
 ## Execution Flow
@@ -52,11 +52,11 @@ Every AC has evidence or an explicit block; do not claim completion without acce
 - When write-back is needed, update the corresponding product/architecture/data/common contract/test baselines and the version, approver, effective date, and associated Change/ADR in `docs/architecture/baseline-status.md`; run the baseline audit.
 - OpenSpec archive updates the behavioral main specs; it does not mean every Change must modify the project design baseline. The two types of updates are judged and recorded separately.
 - After the baseline update, list affected in-flight Changes and require rechecking; silently changing their existing baseline snapshots is prohibited.
-- For detailed rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
+- For detailed rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="acceptance-audit"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="acceptance-audit"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Implemented code and test evidence; approved ACs/specs/traceability matrix; openspec/changes/<change-id>/design/user-stories.md (proposal-level US/ACs), design/test-cases.csv (TEST coverage), and, when UI is involved, design/figma-audit.md (target framework/transcoding notes, actual token values/PAGE specifications/states), design/figma-code/ (target-framework design code), design/figma-layout.csv (assertion mapping), design/evidence/figma-layout-check.json (08 measured results), and the UI fidelity in code-review.md; docs/product/acceptance-policy.md, docs/product/open-questions.md (read-only); code review records; `design/baseline-impact.md` and current `baseline-status.md`; approved baseline amendment requests/ADRs (if any); running acceptance environment entry (URL/route). Verify existence, version, and approval status item by item; stop and report when missing or unapproved. **Do not use screenshots.**
 - **Outputs for this stage:** openspec/changes/<change-id>/design/evidence/acceptance.md (including `## UI acceptance` PAGE-by-PAGE sign-off for UI Changes: Figma node, running system entry, differences/approval, acceptance method, reviewer); acceptance report and approval records; applicable project baseline documents/version registration/in-flight Change recheck; OpenSpec archive results and updated main specs (only after approval). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.

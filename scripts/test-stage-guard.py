@@ -35,10 +35,10 @@ def run_case(root: Path, current: str, completed: list[str], path: str, pending:
 
 def make_root() -> Path:
     root = Path(tempfile.mkdtemp())
-    docs = root / "docs"
-    docs.mkdir()
-    shutil.copy(ROOT / "docs/WORKFLOW-STAGES.json", docs / "WORKFLOW-STAGES.json")
-    shutil.copy(ROOT / "docs/STEP-ARTIFACT-CONTRACTS.json", docs / "STEP-ARTIFACT-CONTRACTS.json")
+    process = root / "process"
+    process.mkdir()
+    shutil.copy(ROOT / "process/WORKFLOW-STAGES.json", process / "WORKFLOW-STAGES.json")
+    shutil.copy(ROOT / "process/STEP-ARTIFACT-CONTRACTS.json", process / "STEP-ARTIFACT-CONTRACTS.json")
     return root
 
 

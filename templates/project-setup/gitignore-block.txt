@@ -1,0 +1,12 @@
+# toolkit:begin
+__pycache__/
+*.py[cod]
+*.pyo
+*.lock
+*.tmp
+.claude/settings.local.json
+workflow/state-backups/
+_trash/
+.DS_Store
+Thumbs.db
+# toolkit:end

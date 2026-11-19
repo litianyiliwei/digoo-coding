@@ -2,13 +2,16 @@
 
 > 语言：简体中文 ｜ [English](README.md)
 
-大多数脚本会根据自身位置解析项目根目录；`validate-openapi.sh` 的文件参数可以是绝对路径，也可以是相对于当前目录/项目根目录的路径。复制后，请把脚本放到项目根目录的 `scripts/` 文件夹下。检查脚本在匹配产物章节名/状态标记时同时接受英文规范名与中文对照名，因此产物可跟随用户语言，而模板保持英文优先。
+大多数脚本会根据自身位置解析项目根目录；`validate-openapi.sh` 的文件参数可以是绝对路径，也可以是相对于当前目录/项目根目录的路径。复制后，请把脚本放到项目根目录的 `scripts/` 文件夹下。检查脚本在匹配产物章节名/状态标记时同时接受英文规范名与中文对照名，因此产物可跟随用户语言，而模板保持英文优先。项目状态类命令（`workflow.py`、`next-step.py`、`baseline-governance.py` 与项目检查）在引入本工具包的业务项目仓库中运行；工具包仓库自身不携带任何项目状态。
 
 | 脚本 | 用途 | 通过意味着 | 不意味着 |
 |---|---|---|---|
 | `check-output-template-matrix.py` | 校验已登记的 L1/L2 模板路径是否存在 | 模板登记引用的是真实文件 | 模板内容完整且正确 |
 | `agent-context.py --stage <id> [--change <change-id>] [--full]` | 打印精简的默认读取集（`input_policy.stage_profiles`）、按需清单，以及（带 `--full` 时）完整的审计输入 | 默认上下文保持在声明的读取组预算内 | Agent 确实读取了每个必需文件 |
 | `stage-io-report.py [--check\|--out <path>]` | 生成/校验派生的阶段输入/输出概览，包括精简/按需画像 | 概览与权威契约一致 | 每个阶段的真实上下文都很小 |
+| `gen-manifest.py --write\|--check` | 生成/校验 `process/TOOLKIT-MANIFEST.json`（vendored 集合与哈希） | 清单与工具包目录树一致 | 发布已打标签 |
+| `check-layout.py --mode toolkit\|project\|auto` | 强制工作树所有权（工具包路径 vs 项目路径、托管块） | 目录布局符合双仓库模型 | 项目内容正确 |
+| `toolkit-sync.py init\|verify\|plan\|apply\|repair` | 在项目仓库内安装/升级 vendored 工具包；校验哈希、托管块与第三方文件 | 项目锁定版本与工具包发布一致，且只改动了工具包路径 | 项目业务工作正确 |
 | `check-api-io-mapping.py <openapi> <mapping.csv> <catalog.csv> [--strict]` | 每个 OpenAPI operationId 映射到一个或多个具体 IO ID；严格模式下 catalog 契约完整；有意无 API 的变更必须声明 `x-api-scope: none` | 设计具有正确的业务行为或安全的事务语义 |
 | `test-api-io-mapping.sh` | 临时正向/负向夹具验证 API→IO 检查器行为，包括显式无 API 范围 | 基本检查器回归能被捕获 | 真实项目 API/IO 设计正确 |
 | `check-acceptance.py <id>` | 验收结果、证据、评审人和 AC 行；UI Change 还需要逐 PAGE 的真实系统入口 + Figma 节点 + `figma-layout-check.json` PASS | 证据表没有待填字段并包含已接受的 AC 行；UI 验收针对运行中的系统和 Figma 文件签署（不含截图） | 业务验收确实合理 |

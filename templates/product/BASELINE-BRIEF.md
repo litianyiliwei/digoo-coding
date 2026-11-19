@@ -69,7 +69,7 @@ See `open-questions.md` and `assumptions.md` for the full list.
 3. The FLOW node tables hit by this Change and the related RD rows.
 4. `decisions.md`, `assumptions.md`, `open-questions.md`.
 5. Read the full `workflows.md`, the complete `data-objects.csv`, and `lessons.md` only when needed.
-6. Read the architecture/data/public-contract baseline according to the impact surface in `docs/BASELINE-FEATURE-INTERACTION.md`.
+6. Read the architecture/data/public-contract baseline according to the impact surface in `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## 9. Baseline Status and Versions
 

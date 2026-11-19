@@ -10,7 +10,7 @@ Load this Skill when the workflow enters "proposal-level requirements analysis".
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Change ID, approved roadmap, project requirements business analysis (FLOW/NODE/DO/RD/BR/acceptance policy), `BASELINE-BRIEF.md`/`change-sizing.md`/`role-permission-matrix.csv`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md` (standing baselines), open-questions (read-only), frozen baseline, relevant openspec/specs.
 
 ## Execution Flow
@@ -54,11 +54,11 @@ Specs describe WHAT and do not carry implementation details such as class names/
 - You must create `openspec/changes/<change-id>/design/baseline-impact.md` according to `templates/change-assets/design/baseline-impact.md`, recording baseline domain versions, actually read files/sections/IDs, constraints, reuse items, conflicts, and ownership classification.
 - Explain baseline impact in `proposal.md`. If changes to architecture, data ownership, common contracts, or global quality gates are prerequisites for the feature to exist, mark `BLOCKED_PENDING_BASELINE_CHANGE`; complete baseline amendment approval first, and do not design/code first and add paperwork later.
 - A single feature's behavior, API, pages, physical table migrations, and local IO stay in the Change; only cross-feature shared rules/common contracts/core domain models/system-level constraints warrant a baseline amendment.
-- For detailed determination rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
+- For detailed determination rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="feature-requirements"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="feature-requirements"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Approved roadmap/current Change scope; project requirements business analysis (workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy) and frozen baseline; docs/product/BASELINE-BRIEF.md, change-sizing.md, role-permission-matrix.csv, decisions.md, assumptions.md, lessons.md, id-conventions.md (standing baselines); docs/product/acceptance-policy.md (project-level acceptance criteria; ACs align with the acceptance policy); associated FLOW/NODE/DO/BR IDs; existing OpenSpec specs; docs/product/open-questions.md (read-only). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** openspec/changes/<change-id>/proposal.md (including proposal-level initial design decisions); openspec/changes/<change-id>/specs/<capability>/spec.md (when applicable); openspec/changes/<change-id>/tasks.md (initial tasks); openspec/changes/<change-id>/design/user-stories.md (US/AC); openspec/changes/<change-id>/design/baseline-impact.md (mandatory for every Change); openspec/changes/<change-id>/design/baseline-binding.json. Do not create `design.md` here; Stage 07 is its single writer. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
@@ -76,7 +76,7 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 
 ## Question Coverage (Mandatory)
 
-- Before review, fill the 05 section of `docs/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
+- Before review, fill the 05 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and record the result in the stage evidence's `question_coverage` array, one entry per required item.
 - `answered` requires a real `landing` artifact path (optionally `#heading`); `open` requires `owner`, `blocking`, and `open_question`; `n/a` requires `reason`; `deferred` requires `reason`, `approver`, and `target_step`.
 - Open items must also be recorded in `docs/product/open-questions.md`; do not leave them only in chat.
 - Run `python scripts/check-question-coverage.py --step 05-feature-requirements --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check it automatically.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate stage method evidence (OpenSpec/Superpowers participation).
 
-The policy lives in docs/STEP-ARTIFACT-CONTRACTS.json under ``method_policy``.
+The policy lives in process/STEP-ARTIFACT-CONTRACTS.json under ``method_policy``.
 If that key is absent, a conservative built-in policy is used so old packages
 still get a useful check.
 

@@ -1,0 +1,27 @@
+# toolkit:begin
+schema: spec-driven
+rules:
+  proposal:
+    - First read openspec/config.yaml, relevant specs, and existing Changes; reuse existing capability paths.
+    - State Why, What Changes, Capabilities, Impact, non-goals, and related requirement IDs.
+    - "For pure refactors/tooling/documentation changes with no behavioral spec change, explicitly use skip_specs: true per the current OpenSpec convention; never fabricate requirements."
+  specs:
+    - Each capability uses specs/<capability-path>/spec.md and follows the OpenSpec Delta Spec syntax.
+    - Each Requirement contains at least one testable Scenario covering the normal path and necessary exception/permission boundaries.
+    - Write only externally observable behavior; concrete classes, frameworks, database mappers, and implementation steps belong in design.md.
+  design:
+    - Explain the reused project-level baseline and what this Change adds/changes.
+    - If the technology selection, domain boundaries, or public API conventions change, record the pending ADR/baseline amendment first.
+    - API, frontend, backend, and test designs must share stable IDs and avoid duplicating interface contracts.
+  tasks:
+    - Every task must use a Markdown checkbox, e.g. - [ ] 1.1 Implement a behavior.
+    - Keep tasks small and verifiable, each with its corresponding test/check; do not write all tasks as plain bullets.
+operations:
+  apply:
+    guidance:
+      - Read the approved specs, design, tasks, and project conventions before implementing.
+      - Follow the available Superpowers TDD, systematic debugging, code review, and verification-before-completion skills; first confirm the skills are actually installed.
+      - After each task, update its checkbox and report the commands actually run and their results.
+# toolkit:end
+context: |
+  PENDING — written by the project at Stage 01 (goals, language, identifiers).

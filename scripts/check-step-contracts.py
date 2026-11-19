@@ -4,8 +4,8 @@ from pathlib import Path
 import json, re, sys
 from method_evidence import TOPIC_ALIASES
 ROOT=Path(__file__).resolve().parents[1]
-data=json.loads((ROOT/'docs/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
-stages=json.loads((ROOT/'docs/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
+data=json.loads((ROOT/'process/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
+stages=json.loads((ROOT/'process/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
 SKILLS_DIR=ROOT/'.claude/skills' if (ROOT/'.claude/skills').is_dir() else ROOT/'.agents/skills'
 errors=[]
 seen=set()
@@ -21,7 +21,7 @@ for row in data.get('steps',[]):
     elif '## 输入/输出/交接契约（强制）' not in skill.read_text(encoding='utf-8') and '## Input/Output/Handoff Contract' not in skill.read_text(encoding='utf-8'): errors.append(f'Skill missing handoff contract section: {sid}')
     if not prompt.is_file(): errors.append(f'missing Prompt: {row.get("prompt")}')
     elif '## 强制交付物交接' not in prompt.read_text(encoding='utf-8') and '## Mandatory Deliverable Handoff' not in prompt.read_text(encoding='utf-8'): errors.append(f'Prompt missing handoff contract section: {row.get("prompt")}')
-# Cross-check contract rows against the authoritative stage DAG (docs/WORKFLOW-STAGES.json).
+# Cross-check contract rows against the authoritative stage DAG (process/WORKFLOW-STAGES.json).
 # workflow-orchestrator is the "next step" entry point, intentionally not a DAG stage.
 ORCHESTRATOR_SKILLS={'workflow-orchestrator'}
 dag_skills={s['skill'] for s in stages}
@@ -116,11 +116,11 @@ for key, rule in coverage_stages.items():
     skill_text=skill_file.read_text(encoding='utf-8') if skill_file.is_file() else ''
     prompt_text=prompt_file.read_text(encoding='utf-8') if prompt_file.is_file() else ''
     if 'QUESTION-COVERAGE-CHECKLIST' not in skill_text:
-        errors.append(f'question_coverage_policy {key}: Skill {sid} does not reference docs/QUESTION-COVERAGE-CHECKLIST.md')
+        errors.append(f'question_coverage_policy {key}: Skill {sid} does not reference process/QUESTION-COVERAGE-CHECKLIST.md')
     if 'check-question-coverage.py' not in skill_text:
         errors.append(f'question_coverage_policy {key}: Skill {sid} does not reference scripts/check-question-coverage.py')
     if 'QUESTION-COVERAGE-CHECKLIST' not in prompt_text:
-        errors.append(f'question_coverage_policy {key}: Prompt {row.get("prompt")} does not reference docs/QUESTION-COVERAGE-CHECKLIST.md')
+        errors.append(f'question_coverage_policy {key}: Prompt {row.get("prompt")} does not reference process/QUESTION-COVERAGE-CHECKLIST.md')
     if 'check-question-coverage.py' not in prompt_text:
         errors.append(f'question_coverage_policy {key}: Prompt {row.get("prompt")} does not reference scripts/check-question-coverage.py')
 # Validate lean-context policies: every requirements/design/Change stage has a

@@ -10,8 +10,8 @@ from question_coverage import validate_coverage
 
 ROOT=Path(__file__).resolve().parents[1]
 STATE=ROOT/'workflow-state.json'
-STAGES_FILE=ROOT/'docs/WORKFLOW-STAGES.json'
-CONTRACT_FILE='docs/STEP-ARTIFACT-CONTRACTS.json'
+STAGES_FILE=ROOT/'process/WORKFLOW-STAGES.json'
+CONTRACT_FILE='process/STEP-ARTIFACT-CONTRACTS.json'
 MANIFEST_FILE='docs/architecture/baseline-manifest.json'
 CONSTRAINT_FILE='docs/architecture/constraint-registry.json'
 BASELINE_STATUS_FILE='docs/architecture/baseline-status.md'
@@ -731,6 +731,22 @@ def cmd_handoff_create(args):
     atomic_json(mp,{'version':'1.0','from_step':args.from_step,'to_step':args.to_step,'change_id':cid,'created_at':now(),'baseline_version':evidence_data.get('baseline_version',''),'approval':approval,'checks':evidence_data.get('checks',[]),'artifacts':artifacts})
     print(f'HANDOFF_CREATED={relpath(mp)}'); return 0
 
+def cmd_recover_state(args):
+    # Explicit recovery utility: restore a state backup written by
+    # toolkit-sync apply (workflow/state-backups/) and record the event.
+    backup=Path(args.backup)
+    if not backup.is_file(): raise ValueError(f'backup not found: {backup}')
+    try: data=json.loads(backup.read_text(encoding='utf-8'))
+    except Exception as exc: raise ValueError(f'backup unreadable: {exc}')
+    if not isinstance(data,dict): raise ValueError('backup is not a JSON object')
+    for k,v in {'state_schema_version':'1.0','completed_steps':[],'pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],'active_change_id':'','transition_history':[],'approvals_history':[],'reopen_history':[],'reset_history':[],'topology_migrations':[],'completed_substeps':[],'current_substep':'','change_history':[],'skipped_steps':[],'skip_history':[],'abandoned_changes':[]}.items(): data.setdefault(k,v)
+    if data.get('current_step') not in BY_ID and data.get('current_step')!='ALL_STEPS_COMPLETE': raise ValueError(f"Unknown current_step: {data.get('current_step')}")
+    unknown=set(data.get('completed_steps',[]))-set(BY_ID)
+    if unknown: raise ValueError('Unknown completed steps: '+', '.join(sorted(unknown)))
+    atomic_json(STATE,data)
+    append_event('recover',reason=getattr(args,'reason','') or '',backup=str(backup))
+    print('RECOVERED=workflow-state.json'); return 0
+
 def cmd_migrate_state(args):
     if not args.reason or not args.reason.strip():
         raise ValueError('migrate-state requires --reason')
@@ -1050,6 +1066,7 @@ def main():
     p=sub.add_parser('check-methods'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('check-coverage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--evidence',required=True)
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER)
+    p=sub.add_parser('recover-state'); p.add_argument('--backup',required=True); p.add_argument('--reason',default='')
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note')
     p=sub.add_parser('skip-stage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--evidence')
     p=sub.add_parser('reset-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--clean',action='store_true')
@@ -1058,7 +1075,7 @@ def main():
     sub.add_parser('sync-baseline-index')
     args=ap.parse_args()
     try:
-        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'reopen':cmd_reopen,'skip-stage':cmd_skip_stage,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'abandon-change':cmd_abandon_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods,'check-coverage':cmd_check_coverage}[args.cmd](args)
+        return {'status':cmd_status,'check-entry':cmd_check_entry,'handoff-verify':cmd_handoff_verify,'handoff-create':cmd_handoff_create,'transition':cmd_transition,'request-review':cmd_request_review,'approve':cmd_approve,'migrate-state':cmd_migrate_state,'recover-state':cmd_recover_state,'reopen':cmd_reopen,'skip-stage':cmd_skip_stage,'reset-state':cmd_reset_state,'next-change':cmd_next_change,'abandon-change':cmd_abandon_change,'sync-baseline-index':cmd_sync_baseline_index,'check-methods':cmd_check_methods,'check-coverage':cmd_check_coverage}[args.cmd](args)
     except Exception as exc:
         print(f'ERROR: {exc}',file=sys.stderr); return 2
 if __name__=='__main__': raise SystemExit(main())

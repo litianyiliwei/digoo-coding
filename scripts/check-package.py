@@ -136,7 +136,7 @@ if hooks_dir.is_dir():
 print(f"Skills: {len(skill_paths)}; prompts: {len(prompt_paths)}")
 # Expected counts derive from the contract registry: one Skill per contract step,
 # plus the contract prompts and the standalone workflow-prompts.md overview.
-expected_steps = len(json.loads((ROOT / "docs/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))["steps"])
+expected_steps = len(json.loads((ROOT / "process/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))["steps"])
 if len(skill_paths) < expected_steps: errors.append(f"Expected at least {expected_steps} Skills (one per contract step); found {len(skill_paths)}")
 if len(prompt_paths) != expected_steps + 1: errors.append(f"Expected {expected_steps + 1} Prompts (contract prompts + workflow-prompts.md); found {len(prompt_paths)}")
 if errors:

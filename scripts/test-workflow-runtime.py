@@ -15,6 +15,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         w.ROOT=self.root; w.STATE=self.root/'workflow-state.json'
         (self.root/'workflow').mkdir()
         (self.root/'docs').mkdir()
+        (self.root/'process').mkdir()
         state={'project_name':'test','active_change_id':'','completed_steps':[],'current_step':'01-project-bootstrap','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[],
                'approvals_history':[{'step_id':'01-project-bootstrap','change_id':'','approver':'用户','approved_at':'2026-11-13','evidence':'check.log','targets':[]}]}
         w.STATE.write_text(json.dumps(state),encoding='utf-8')
@@ -25,6 +26,15 @@ class WorkflowRuntimeTests(unittest.TestCase):
                          'approval':{'required':False,'status':'not-required'}}
         (self.root/'review-evidence.json').write_text(json.dumps(review_evidence),encoding='utf-8')
     def tearDown(self): self.tmp.cleanup()
+
+    def test_recover_state_restores_backup_and_logs(self):
+        backup = self.root / "backup.json"
+        backup.write_bytes(self.root.joinpath("workflow-state.json").read_bytes())
+        self.root.joinpath("workflow-state.json").write_text("{ broken", encoding="utf-8")
+        args = type("Args", (), {"backup": str(backup), "reason": "test"})()
+        self.assertEqual(0, w.cmd_recover_state(args))
+        state = w.load_state()
+        self.assertEqual("01-project-bootstrap", state["current_step"])
     def test_first_transition_creates_hash_handoff_and_advances(self):
         state=w.load_state()
         self.assertEqual([],w.check_entry('01-project-bootstrap',state))
@@ -354,7 +364,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
 
     def test_declared_downstream_output_is_mutable_in_handoff(self):
         contract={'steps':[{'step':'01','outputs':['docs/out.md']},{'step':'05','outputs':['docs/out.md']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         (self.root/'docs/out.md').write_text('v1',encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/out.md','status':'created'}],
                   'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
@@ -369,7 +379,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
 
     def test_transition_requires_all_declared_outputs_or_explicit_na_waiver(self):
         contract={'steps':[{'step':'01','outputs':['docs/a.md','docs/b.md']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         (self.root/'docs/a.md').write_text('a',encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/a.md','status':'created'}],
                   'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
@@ -500,7 +510,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs').mkdir(exist_ok=True)
         (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
         contract={'steps':[{'step':'01','outputs':['docs/out.md','workflow-state.json']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[
             {'path':'docs/out.md','status':'created','required':True},
             {'path':'workflow-state.json','status':'updated'}],
@@ -520,7 +530,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs').mkdir(exist_ok=True)
         (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
         contract={'steps':[{'step':'01','outputs':['docs/out.md','workflow-state.json']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[
             {'path':'docs/out.md','status':'created','required':True},
             {'path':'workflow-state.json','status':'updated'}],
@@ -541,7 +551,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs').mkdir(exist_ok=True)
         (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
         contract={'steps':[{'step':'01','outputs':['docs/out.md']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[
             {'path':'docs/out.md','status':'created','required':True},
             {'path':'workflow-state.json','status':'updated'}],
@@ -634,7 +644,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         (self.root/'docs').mkdir(exist_ok=True)
         (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
         contract={'steps':[{'step':'01','outputs':['docs/out.md']}]}
-        (self.root/'docs/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
         evidence={'step_id':'01-project-bootstrap','outputs':[{'path':'docs/out.md','status':'created','required':True}],
                   'checks':[{'name':'lint','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'status':'not-required'}}

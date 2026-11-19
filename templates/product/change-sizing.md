@@ -44,7 +44,7 @@ The budget is not a hard number; when exceeded, the reason and approver must be 
 
 - Behavior, pages, APIs, table migrations, IO, and tests unique to the current feature stay in the Change.
 - Rules, public contracts, core models, and quality gate changes shared across features must be elevated to baseline changes and approved before design.
-- See `docs/BASELINE-FEATURE-INTERACTION.md` for detailed determination.
+- See `process/BASELINE-FEATURE-INTERACTION.md` for detailed determination.
 
 ## 6. Usage
 

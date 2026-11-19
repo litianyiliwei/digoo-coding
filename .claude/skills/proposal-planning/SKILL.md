@@ -10,7 +10,7 @@ Load this Skill when the workflow enters "proposal decomposition, dependency ord
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Reviewed and frozen project overall architecture baseline, business flows/nodes/RD matrix, business rules, acceptance policy, open-questions, `BASELINE-BRIEF.md`/`change-sizing.md`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md` (standing baselines), stage 03 baseline audit report, risks, dependencies, and product priorities.
 
 ## Execution Flow
@@ -51,11 +51,11 @@ Each Change has independent acceptance conditions; no cyclic dependencies; do no
 - In `docs/product/proposal-roadmap.md`, add for each candidate Change the columns "applicable baseline domains, baseline constraints to reuse, potential baseline conflicts/amendments, approval preconditions".
 - Initially classify changes as `CHANGE_ONLY`, `BASELINE_CHANGE_REQUIRED`, `BASELINE_UPDATE_AFTER_ACCEPTANCE`, or `N/A`. Do not automatically escalate to a baseline change just because a feature uses a new component/new field/new API.
 - If the baseline status is not FROZEN, or there are pending amendments or conflicts, explicitly list them as risks/blocks; do not treat DRAFT/PENDING rules as approved constraints.
-- For detailed rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
+- For detailed rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="proposal-planning"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="proposal-planning"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Frozen project baseline; project requirements analysis, workflows, data objects, RD matrix, business rules, and acceptance policy (US/ACs are produced in Stage 05, not consumed here); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, lessons.md, id-conventions.md (baseline standing layer and lessons write-back); known technical debt and dependencies. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** docs/product/proposal-roadmap.md; scope/dependency/value description for each candidate Change. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.

@@ -16,7 +16,7 @@ Prompt files are in `prompts/` and correspond one-to-one to `.claude/skills/<ski
 | 09 Independent Verification and Acceptance Evidence | `prompts/09-independent-verification.md` | `independent-verifier` |
 | 10 Manual Acceptance, Archiving, and Baseline Write-Back | `prompts/10-acceptance-audit.md` | `acceptance-audit` |
 
-Inputs, outputs, approval points, and gates are governed by `docs/STEP-ARTIFACT-CONTRACTS.json`; for the stage overview see `docs/STAGE-IO-OVERVIEW.md`.
+Inputs, outputs, approval points, and gates are governed by `process/STEP-ARTIFACT-CONTRACTS.json`; for the stage overview see `process/STAGE-IO-OVERVIEW.md`.
 
 ## Stage Boundary and Review Stop (Global)
 

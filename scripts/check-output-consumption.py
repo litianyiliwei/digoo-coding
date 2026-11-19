@@ -11,8 +11,8 @@ import json, os, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = json.loads((ROOT / 'docs/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
-STAGES = json.loads((ROOT / 'docs/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
+CONTRACTS = json.loads((ROOT / 'process/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
+STAGES = json.loads((ROOT / 'process/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
 ROWS = CONTRACTS['steps']
 ORDER = [r['step'] for r in ROWS]
 DAG_IDS = {s['id'] for s in STAGES}
@@ -41,7 +41,7 @@ def input_tokens(text):
 errors = []
 records = CONTRACTS.get('output_consumption', [])
 if not records:
-    errors.append('Missing output_consumption map in docs/STEP-ARTIFACT-CONTRACTS.json')
+    errors.append('Missing output_consumption map in process/STEP-ARTIFACT-CONTRACTS.json')
 
 by_key = {}
 for rec in records:

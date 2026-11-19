@@ -22,7 +22,7 @@ Load this Skill when the workflow enters stage 06 "Figma Design and Review". Han
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 
 Approved proposal-level requirements and ACs (proposal/specs/design/user-stories); project business flows, data objects, RD matrix, business rules (workflows/data-objects/rd-matrix/business-rules); `docs/product/open-questions.md` (read-only; do not make unauthorized decisions during generation); `docs/architecture/technology-decisions.md` (overall technology selection, determining the target frontend framework/component library) and sections 1 and 9 of `docs/architecture/frontend-conventions.md` (engineering and visual conventions); `docs/architecture/baseline-status.md`; the current Change's `design/baseline-impact.md` and `design/baseline-binding.json`; actual Figma MCP accessibility (mandatory when UI is involved).
 
@@ -91,7 +91,7 @@ Do not split subdirectories per page/per state, do not generate scattered token/
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="figma-design-review"` in `docs/STEP-ARTIFACT-CONTRACTS.json`.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="figma-design-review"` in `process/STEP-ARTIFACT-CONTRACTS.json`.
 
 - **Inputs for this stage:** Approved proposal/specs/design/user-stories; project business flows/data objects/RD matrix/business rules/role permissions/ID conventions (workflows, data-objects, rd-matrix, business-rules, role-permission-matrix, id-conventions); `docs/product/open-questions.md` (read-only); `docs/architecture/technology-decisions.md` (target frontend framework/component library) and sections 1 and 9 of frontend-conventions; `docs/architecture/baseline-status.md`; `design/baseline-impact.md` and `design/baseline-binding.json`; actual Figma MCP capability (mandatory when UI is involved). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** `openspec/changes/<change-id>/design/figma-audit.md` (sole UI contract: target framework/transcoding notes, actual token values, text styles, PAGE specifications, state decisions, design code, assertion scope, UI review), `design/figma-code/README.md` and target-framework design code `PAGE-001.vue … PAGE-00N.vue` (React stack `.tsx`/`.jsx`), `design/figma-layout.csv` (compact assertion table: expected geometry/text/font/selectors; `route`/`dom_selector` may be filled by 07); when real images/SVGs exist, append `design/figma-assets/README.md`; do not save reference screenshots (N/A + reason when there is no UI).

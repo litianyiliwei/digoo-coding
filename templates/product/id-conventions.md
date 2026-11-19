@@ -2,7 +2,7 @@
 
 - Change ID: N/A (project-level)
 - Status: DRAFT
-- Source baseline: docs/TEMPLATE-POLICY.md, stage templates
+- Source baseline: process/TEMPLATE-POLICY.md, stage templates
 - Related requirements/AC: All stable IDs
 - Generated date/version: PENDING
 

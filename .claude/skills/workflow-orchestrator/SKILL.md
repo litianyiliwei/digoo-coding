@@ -8,10 +8,10 @@ description: When the user says "next step/continue/carry on" (下一步/继续/
 ## Trigger Conditions
 Use when the user says "next step", "continue", "carry on", "continue the R&D workflow" (下一步/继续/接着做), or asks to resume the previous workflow.
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 
 ## Must Follow
-1. First read `workflow-state.json`, `docs/PROCESS-MAP.md`, `docs/OUTPUT-TEMPLATE-MATRIX.csv`, then check the real files corresponding to the current stage. The state file is only a clue and must not replace file validation.
+1. First read `workflow-state.json`, `process/PROCESS-MAP.md`, `process/OUTPUT-TEMPLATE-MATRIX.csv`, then check the real files corresponding to the current stage. The state file is only a clue and must not replace file validation.
 2. Check which Skills the current Agent can discover. If Superpowers' `using-superpowers` exists, first load it in the way supported by the host Agent; then load the relevant Superpowers Skills according to the task. Do not invent invocation syntax or claim to have executed a skill that is not installed.
 3. If OpenSpec is initialized, execute `openspec list --changes` and `openspec list --specs`; for active Changes execute `openspec status --change <id>`. Before creating or editing OpenSpec artifacts, use `openspec instructions <artifact> --change <id> --json` according to the actual CLI version to obtain guidance.
 4. If there are pending approvals, blocking items, missing required artifacts from the previous step, validation failures, or key questions awaiting user confirmation, stop automatic advancement and explicitly raise the items that need user decisions.
@@ -30,13 +30,13 @@ The three are complementary; mentioning a name cannot replace actual loading or 
 
 ## Baseline Interaction Hints (Mandatory)
 
-- When selecting feature-level stages, in addition to checking ordinary inputs, you must read `docs/BASELINE-FEATURE-INTERACTION.md` and the current `docs/architecture/baseline-status.md`. Stage 05 creates baseline-impact; stages 06–07 recheck; stage 08 does not directly modify the frozen baseline; stage 10 writes back according to approval results.
+- When selecting feature-level stages, in addition to checking ordinary inputs, you must read `process/BASELINE-FEATURE-INTERACTION.md` and the current `docs/architecture/baseline-status.md`. Stage 05 creates baseline-impact; stages 06–07 recheck; stage 08 does not directly modify the frozen baseline; stage 10 writes back according to approval results.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="workflow-orchestrator"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="workflow-orchestrator"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **Inputs for this stage:** workflow-state.json; docs/PROCESS-MAP.md; docs/STEP-ARTIFACT-CONTRACTS.json; docs/OUTPUT-TEMPLATE-MATRIX.csv; real artifacts and approval records; current OpenSpec CLI status (if initialized). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Inputs for this stage:** workflow-state.json; process/PROCESS-MAP.md; process/STEP-ARTIFACT-CONTRACTS.json; process/OUTPUT-TEMPLATE-MATRIX.csv; real artifacts and approval records; current OpenSpec CLI status (if initialized). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** next-stage determination report (displayed in conversation; not required to be written to disk); workflow-state.json (updated by transition only when the real state changes).
 - **Downstream handoff:** all files in the selected stage's Input Contract. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
@@ -45,11 +45,11 @@ Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-
 
 ## P0 Runtime Guard (Mandatory)
 
-- The stage DAG reads `docs/WORKFLOW-STAGES.json`; do not infer/rewrite dependencies yourself.
+- The stage DAG reads `process/WORKFLOW-STAGES.json`; do not infer/rewrite dependencies yourself.
 - Before execution, run `python3 scripts/workflow.py check-entry --step <step-id> [--change-id <id>]`; a non-zero exit code means execution is prohibited.
 - After the stage completes, run the stage checks, generate evidence conforming to `workflow/evidence/<step-id>.json`, run `python scripts/workflow.py request-review --step <step-id> --evidence <path>`, present the handoff report, and end the turn. Only after the user replies "review passed <step-id>" run `approve` and then `transition`. Direct editing of `completed_steps/current_step` is prohibited.
 - transition generates a SHA-256 handoff; the next stage must verify all upstream manifests. When file hashes change, return to the upstream for re-review and do not silently refresh.
-- After stage 08, the independent `independent-verifier` must be run, and only PASS may enter stage 10. For details, see `docs/P0-RUNTIME-GOVERNANCE.md`.
+- After stage 08, the independent `independent-verifier` must be run, and only PASS may enter stage 10. For details, see `process/P0-RUNTIME-GOVERNANCE.md`.
 
 ## Stage Boundaries and Review Stop (Mandatory)
 

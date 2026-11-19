@@ -10,7 +10,7 @@ Load this Skill when the workflow enters "implementation, TDD, verification, and
 
 ## Input
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `docs/INPUT-OUTPUT-POLICY.md`).
+Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
 Approved OpenSpec artifacts, detailed design, tasks, repository conventions, and available Superpowers.
 
 ## Execution Flow
@@ -55,11 +55,11 @@ Do not replace tests with code generation; do not report unexecuted checks as pa
 - If a baseline is found to be inapplicable, conflicting, or missing during implementation, first record evidence in the current Change and pause affected tasks; do not directly edit the frozen baseline or bypass rules in code.
 - Create/update the baseline change request and ADR, and update the baseline version after approval by the corresponding owner; then refresh the current Change's baseline snapshot, detailed design, tasks, and verification. Independent, unaffected tasks may continue after owner confirmation.
 - Feature-local behavior/endpoints/table migrations/IO/implementation details remain in the Change, and must not be automatically promoted to the global baseline just because development is complete.
-- For detailed rules, see `docs/BASELINE-FEATURE-INTERACTION.md`.
+- For detailed rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
 
 ## Input/Output/Handoff Contract (Mandatory)
 
-Before and after executing this Skill, you must comply with `docs/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="implementation-orchestrator"` in `docs/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
+Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="implementation-orchestrator"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
 - **Inputs for this stage:** Approved design/baseline-impact.md and current baseline-status.md; approved tasks.md/design.md; design.md (including frontend/backend/test design sections), design/test-cases.csv, OpenAPI, IO contracts, and traceability.csv; when UI is involved, `design/figma-audit.md` (target framework/transcoding notes, actual token values, PAGE specifications, state decisions), `design/figma-code/` (target-framework design code), `design/figma-layout.csv` (assertion mapping), and the project token file; `docs/architecture/technology-decisions.md` (target framework consistency); project-level engineering conventions/test strategy; docs/product/open-questions.md (read-only). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
 - **Outputs for this stage:** Actual source code/migrations/configuration; baseline change requests/ADR drafts when applicable (do not update the frozen baseline without approval); automated test code and run results; openspec/changes/<change-id>/design/evidence/code-review.md (including the `## UI fidelity` numeric table when UI is involved, with values taken directly from `figma-layout-check.json`; only PAGEs with differences/`UI-DERIVED` need manual explanation and approval); `design/evidence/figma-layout-check.json`; implementation/verification evidence. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.

@@ -9,6 +9,11 @@ bash scripts/test-scripts.sh
 python scripts/check-step-contracts.py
 python scripts/check-output-consumption.py
 python scripts/check-output-template-matrix.py
+python scripts/gen-manifest.py --check
+python scripts/check-layout.py --mode auto
+if [[ -f toolkit-lock.json ]]; then
+  python scripts/toolkit-sync.py verify --require-lock
+fi
 
 if [[ -f docs/architecture/baseline-manifest.json ]]; then
   bash scripts/check-required-files.sh --strict

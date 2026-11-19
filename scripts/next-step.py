@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Print the next workflow stage from the authoritative DAG. Read-only.
 
-The stage DAG is read from docs/WORKFLOW-STAGES.json (the single source of
+The stage DAG is read from process/WORKFLOW-STAGES.json (the single source of
 truth); this script never mutates state. After finishing a stage, run the stage
 checks, record evidence and call request-review; approve and transition only
 after the user explicitly replies "review passed <step-id>". Do not edit
@@ -12,8 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STATE = ROOT / "workflow-state.json"
-STAGES = json.loads((ROOT / "docs/WORKFLOW-STAGES.json").read_text(encoding="utf-8"))["stages"]
-CONTRACTS = json.loads((ROOT / "docs/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))
+STAGES = json.loads((ROOT / "process/WORKFLOW-STAGES.json").read_text(encoding="utf-8"))["stages"]
+CONTRACTS = json.loads((ROOT / "process/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))
 CONTRACT_BY_SKILL = {row["skill"]: row for row in CONTRACTS["steps"]}
 SKILLS_DIR = ROOT / ".claude/skills" if (ROOT / ".claude/skills").is_dir() else ROOT / ".agents/skills"
 

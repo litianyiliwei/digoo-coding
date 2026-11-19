@@ -4,9 +4,9 @@ from pathlib import Path
 import hashlib, json, re, sys
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ROOT / "docs/STEP-ARTIFACT-CONTRACTS.json"
-DAG = ROOT / "docs/WORKFLOW-STAGES.json"
-TARGET = ROOT / "docs/STAGE-IO-OVERVIEW.md"
+CONTRACTS = ROOT / "process/STEP-ARTIFACT-CONTRACTS.json"
+DAG = ROOT / "process/WORKFLOW-STAGES.json"
+TARGET = ROOT / "process/STAGE-IO-OVERVIEW.md"
 args = sys.argv[1:]
 mode = "stdout"
 out_path = TARGET
@@ -81,12 +81,12 @@ lines = [
     "",
     "> Status: DERIVED (auto-generated from the authoritative contracts; do not edit by hand)",
     "> Change ID: N/A (project-level process overview)",
-    "> Source baseline: `docs/STEP-ARTIFACT-CONTRACTS.json` (inputs/outputs/approval/gates), `docs/WORKFLOW-STAGES.json` (dependency DAG)",
+    "> Source baseline: `process/STEP-ARTIFACT-CONTRACTS.json` (inputs/outputs/approval/gates), `process/WORKFLOW-STAGES.json` (dependency DAG)",
     "> Related requirements/AC: N/A (process document)",
     f"> Generation version: `src-sha256:{source_hash}`",
     "",
-    "> This file summarizes only the stage handoff surface. Field-level artifact templates are in `docs/OUTPUT-TEMPLATE-MATRIX.csv`; the process entry point is `prompts/00-next-step.md`.",
-    "> To change stage handoffs, first change the two JSON source files, then regenerate with `python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md`; `scripts/check-package.py` verifies that this file is current.",
+    "> This file summarizes only the stage handoff surface. Field-level artifact templates are in `process/OUTPUT-TEMPLATE-MATRIX.csv`; the process entry point is `prompts/00-next-step.md`.",
+    "> To change stage handoffs, first change the two JSON source files, then regenerate with `python scripts/stage-io-report.py --out process/STAGE-IO-OVERVIEW.md`; `scripts/check-package.py` verifies that this file is current.",
     "",
     f"{len(contracts)} contract stages: {len(stages)} DAG stages + 00 next-step orchestration (non-DAG stage).",
     "",
@@ -198,12 +198,12 @@ text = "\n".join(lines).rstrip() + "\n"
 if mode == "check":
     if not TARGET.is_file():
         print(f"ERROR: missing derived overview: {TARGET.relative_to(ROOT)}", file=sys.stderr)
-        print("Run: python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md", file=sys.stderr)
+        print("Run: python scripts/stage-io-report.py --out process/STAGE-IO-OVERVIEW.md", file=sys.stderr)
         sys.exit(1)
     current = TARGET.read_text(encoding="utf-8")
     if current != text:
         print(f"ERROR: {TARGET.relative_to(ROOT)} is stale; regenerate with:", file=sys.stderr)
-        print("  python scripts/stage-io-report.py --out docs/STAGE-IO-OVERVIEW.md", file=sys.stderr)
+        print("  python scripts/stage-io-report.py --out process/STAGE-IO-OVERVIEW.md", file=sys.stderr)
         sys.exit(1)
     print(f"Stage I/O overview is current ({len(contracts)} stages, src-sha256:{source_hash}).")
 elif mode == "write":

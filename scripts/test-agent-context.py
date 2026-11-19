@@ -57,8 +57,9 @@ def main() -> int:
     failures: list[str] = []
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
+        (root / "process").mkdir(parents=True, exist_ok=True)
         (root / "docs").mkdir(parents=True)
-        (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
+        (root / "process" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
             json.dumps(contract(2), ensure_ascii=False), encoding="utf-8"
         )
         (root / "docs" / "product").mkdir(parents=True)
@@ -70,7 +71,7 @@ def main() -> int:
         if ok.returncode != 0 or "Lean inputs" not in ok.stdout or "Budget: 2/2 lean read groups" not in ok.stdout:
             failures.append("lean bundle should pass within budget: " + ok.stdout + ok.stderr)
 
-        (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
+        (root / "process" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
             json.dumps(contract(1), ensure_ascii=False), encoding="utf-8"
         )
         over = run(root)
@@ -79,6 +80,7 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
+        (root / "process").mkdir(parents=True, exist_ok=True)
         (root / "docs" / "product").mkdir(parents=True)
         stage02 = {
             "steps": [{
@@ -92,7 +94,7 @@ def main() -> int:
                 "max_files": 8
             }}}
         }
-        (root / "docs" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
+        (root / "process" / "STEP-ARTIFACT-CONTRACTS.json").write_text(
             json.dumps(stage02, ensure_ascii=False), encoding="utf-8"
         )
         optional = run(root, "02")

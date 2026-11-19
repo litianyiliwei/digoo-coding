@@ -95,8 +95,8 @@ def main() -> int:
         return deny('workflow-state.json 只能由 scripts/workflow.py 命令写入；禁止直接编辑状态文件。')
 
     try:
-        stages = json.loads((root / 'docs/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
-        contract = json.loads((root / 'docs/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
+        stages = json.loads((root / 'process/WORKFLOW-STAGES.json').read_text(encoding='utf-8'))['stages']
+        contract = json.loads((root / 'process/STEP-ARTIFACT-CONTRACTS.json').read_text(encoding='utf-8'))
     except Exception:
         return 0
     order = [s['id'] for s in stages]

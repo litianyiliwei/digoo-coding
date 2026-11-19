@@ -11,14 +11,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTRACTS = ROOT / 'docs/STEP-ARTIFACT-CONTRACTS.json'
+CONTRACTS = ROOT / 'process/STEP-ARTIFACT-CONTRACTS.json'
 
 RESIDENT = {
     '02': [
-        'docs/TEMPLATE-POLICY.md',
-        'docs/OUTPUT-TEMPLATE-MATRIX.csv',
-        'docs/STEP-ARTIFACT-CONTRACTS.md',
-        'docs/STEP-ARTIFACT-CONTRACTS.json',
+        'process/TEMPLATE-POLICY.md',
+        'process/OUTPUT-TEMPLATE-MATRIX.csv',
+        'process/STEP-ARTIFACT-CONTRACTS.md',
+        'process/STEP-ARTIFACT-CONTRACTS.json',
     ],
     '03': [
         'docs/product/BASELINE-BRIEF.md',
@@ -102,7 +102,7 @@ def main():
     global ROOT, CONTRACTS
     if root_arg:
         ROOT = Path(root_arg).resolve()
-        CONTRACTS = ROOT / 'docs/STEP-ARTIFACT-CONTRACTS.json'
+        CONTRACTS = ROOT / 'process/STEP-ARTIFACT-CONTRACTS.json'
     row = load_stage(stage.split('-')[0])
     if not row:
         print(f'Unknown stage: {stage}', file=sys.stderr)
