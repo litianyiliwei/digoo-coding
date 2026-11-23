@@ -17,12 +17,16 @@ HEADINGS = {
     "6": ("影响映射", "Impact Mapping"),
     "7": ("未决问题", "Open Questions"),
     "8": ("来源与审批", "Sources and Approval"),
+    "9": ("同类产品偏差确认", "Similar Product Deviation Confirmation"),
 }
 PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|PENDING|待确认|待补充|\[填充\]")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 URL = re.compile(r"https?://[^\s|\]]+")
 IMPACT = re.compile(r"(FLOW-\d{3}|NODE-\d{3}-\d{2}|DO-\d{3}|BR-\d{3}|NFR-\d{3})")
 DECISION = re.compile(r"采纳|不采纳|部分采纳|N/A|adopt|do not adopt|partially adopt", re.I)
+SAME_CATEGORY = re.compile(r"同类|同类型|same category|similar product|competitor|竞品", re.I)
+CONFIRMED = re.compile(r"用户已确认|已确认|confirmed|approved", re.I)
+UNCONFIRMED = re.compile(r"待用户确认|未确认|pending|unconfirmed", re.I)
 
 
 def sections(text: str) -> dict[str, list[str]]:
@@ -115,6 +119,13 @@ def main() -> int:
         products = table_rows(product_section)
         if not products:
             errors.append("section 2: 参考产品状态=PRESENT requires at least one product row")
+        elif not any(
+            len(cells) > 1 and SAME_CATEGORY.search(cells[1]) for cells in products
+        ):
+            errors.append(
+                "section 2: 参考产品状态=PRESENT requires at least one same-category "
+                "(同类/竞品/same category/similar product) product row"
+            )
         for index, cells in enumerate(products, 1):
             joined = " | ".join(cells)
             if has_placeholder(joined):
@@ -176,6 +187,89 @@ def main() -> int:
     status_line = next((line for line in source.splitlines() if "审批状态" in line or "Approval status" in line), "")
     if not re.search(r"DRAFT|APPROVED", status_line, re.I):
         errors.append("section 8: approval status (审批状态 / Approval status) must be DRAFT or APPROVED")
+
+    deviation_section = section(data, "9")
+    if deviation_section is None:
+        errors.append(
+            "missing section: ## 9. 同类产品偏差确认 / Similar Product Deviation Confirmation"
+        )
+    else:
+        deviation_body = "\n".join(deviation_section)
+        deviation_rows = table_rows(deviation_section)
+        if status == "NONE":
+            if not re.search(r"N/A", deviation_body):
+                errors.append(
+                    "section 9: when there is no reference product, write N/A + reason"
+                )
+            reason_line = next(
+                (
+                    line
+                    for line in deviation_section
+                    if "理由" in line or "reason" in line.lower()
+                ),
+                None,
+            )
+            reason_text = re.split(r"[:：]", reason_line, 1)[-1].strip() if reason_line else ""
+            if (
+                reason_line is None
+                or has_placeholder(reason_text)
+                or reason_text.upper() in {"N/A", "NONE", "无"}
+            ):
+                errors.append(
+                    "section 9: N/A requires a non-placeholder reason "
+                    "(理由 / Reason)"
+                )
+        else:
+            if len(deviation_rows) < 2:
+                errors.append(
+                    "section 9: need at least 2 similar-product deviation rows "
+                    "(对比项 / 本项目输出 / 同类产品做法 / 偏差等级 / 影响对象 / 确认状态)"
+                )
+            for index, cells in enumerate(deviation_rows, 1):
+                joined = " | ".join(cells)
+                level = cells[3] if len(cells) > 3 else ""
+                if args.strict and has_placeholder(joined):
+                    errors.append(f"section 9: deviation row {index} has unresolved placeholder")
+                if not re.match(
+                    r"(一致|可接受差异|重大差异|重大偏差|小差异|consistent|acceptable|minor|major|acceptable difference)",
+                    level,
+                    re.I,
+                ):
+                    errors.append(
+                        f"section 9: deviation row {index} needs a deviation level "
+                        "(一致/可接受差异/重大偏差 / consistent/acceptable/major)"
+                    )
+                if not IMPACT.search(joined) and "N/A" not in joined:
+                    errors.append(
+                        f"section 9: deviation row {index} needs a FLOW/NODE/DO/BR/NFR "
+                        "reference or N/A"
+                    )
+                if re.match(r"(重大偏差|\bmajor\b)", level or joined, re.I):
+                    if len(cells) < 8:
+                        errors.append(
+                            f"section 9: major deviation row {index} must record "
+                            "confirmation status, confirmer, and date"
+                        )
+                        continue
+                    confirm_status = cells[5]
+                    approver = cells[6]
+                    confirmed_at = cells[7]
+                    if UNCONFIRMED.search(confirm_status) or not CONFIRMED.search(confirm_status):
+                        errors.append(
+                            f"section 9: major deviation row {index} deviates too far from "
+                            "similar products; prompt the user to confirm and record "
+                            "确认状态=用户已确认 plus 确认人/确认日期"
+                        )
+                    elif not approver or has_placeholder(approver):
+                        errors.append(
+                            f"section 9: major deviation row {index} requires the confirmer "
+                            "(确认人 / Confirmer)"
+                        )
+                    elif not DATE.fullmatch(confirmed_at):
+                        errors.append(
+                            f"section 9: major deviation row {index} requires the confirmation "
+                            "date as YYYY-MM-DD (确认日期 / Confirmed at)"
+                        )
 
     if errors:
         for error in errors:

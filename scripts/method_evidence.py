@@ -25,6 +25,7 @@ DEFAULT_POLICY: dict[str, dict[str, Any]] = {
         "required": [
             {"skill": "brainstorming", "requires_artifact": True},
             {"skill": "internet-research", "requires_artifact": True},
+            {"skill": "competitor-research", "requires_artifact": True},
         ]
     },
     "03-project-architecture-baseline": {
@@ -39,7 +40,8 @@ DEFAULT_POLICY: dict[str, dict[str, Any]] = {
     },
     "05-feature-requirements": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True},
+            {"skill": "baseline-impact-classification", "requires_artifact": True},
         ]
     },
     "06-figma-design-review": {
@@ -52,6 +54,7 @@ DEFAULT_POLICY: dict[str, dict[str, Any]] = {
         "required": [
             {"skill": "brainstorming", "requires_artifact": True},
             {"skill": "writing-plans", "requires_artifact": True},
+            {"skill": "existing-code-impact-analysis", "requires_artifact": True},
         ]
     },
     "08-implementation-orchestrator": {
@@ -67,7 +70,8 @@ DEFAULT_POLICY: dict[str, dict[str, Any]] = {
     },
     "10-acceptance-audit": {
         "required": [
-            {"skill": "verification-before-completion", "requires_artifact": False}
+            {"skill": "verification-before-completion", "requires_artifact": False},
+            {"skill": "baseline-impact-classification", "requires_artifact": True},
         ]
     },
 }

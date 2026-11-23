@@ -1,0 +1,4 @@
+page_id,element_id,figma_node_id,element_type,label,event,action_type,route,route_params,operation_id,handler,test_id,confirmation,approver,confirmed_at,notes
+PAGE-001,PAGE-001-E06,3:17,button,登录,click,navigate,/dashboard,NONE,,handleLogin,TEST-001,N/A,,,登录成功后跳转首页；示例行，按实际 PAGE/元素替换
+PAGE-002,PAGE-002-E10,5:10,icon,帮助,click,api,,,help.getContent,showHelp,TEST-002,N/A,,,帮助图标调用内容接口；示例行，按实际 PAGE/元素替换
+PAGE-003,PAGE-003-E12,7:12,button,刷新,click,local-only,,,handleRefresh,TEST-003,CONFIRMED,产品负责人,2026-11-20,仅刷新当前列表，无跳转/API；必须由用户确认后填写确认人/日期

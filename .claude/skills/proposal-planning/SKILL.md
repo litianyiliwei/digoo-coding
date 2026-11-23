@@ -15,6 +15,7 @@ Reviewed and frozen project overall architecture baseline, business flows/nodes/
 
 ## Execution Flow
 1. Split Changes by business capabilities that users can perceive and that can be independently accepted, not horizontally by frontend/backend/database.
+1a. **Module registries and roadmap columns (module model):** Create or update `docs/product/capabilities.csv` (capability progress: `owner_module`/`related_modules`, `delivered_slices`/`remaining_slices`, `active_changes`) and `docs/product/modules.csv` (module ownership: `frontend_paths`/`backend_paths`/`shared_paths`, `capabilities`, `status`) in this stage, before the roadmap is reviewed. Every candidate Change row must fill `Primary Capability`, `Owner Module`, `Related Modules`, `Slice Type` (`initial`/`extend`), `Slice Coverage` (`partial`/`full`), `Code Target`, `Demo Path`, and `Slice Budget`; `Primary Capability` must exist in the capability registry and `Owner Module` must be the capability's registered owner. A Change raised outside the roadmap in Stage 05 is recorded under `## Roadmap Amendments`; only a `BASELINE_CHANGE_REQUIRED` classification needs BCR/ADR.
 2. For each item, state value, goals, non-goals, associated FLOW/NODE/DO/BR, expected acceptance direction, dependencies, data migration, risks, and release strategy; dependencies must explicitly check platform/native/device/third-party preconditions (cross-platform approach, native plugins and JS Bridge, devices/gateways, third-party approvals such as maps/weather/payment/real-name verification/traceability, offline sync), and must not be hidden in notes. Proposal-level UC/US/AC are refined in stage 05 and must not be fabricated at this stage.
 3. Read open-questions and the stage 03 baseline audit report, bring open issues, audit gaps, and pending-approval items into the risks/dependencies/blocking conditions of candidate Changes, and do not unilaterally close them.
 4. Prefer vertical slices that span UI/API/domain/persistence/test as early as possible.
@@ -23,7 +24,7 @@ Reviewed and frozen project overall architecture baseline, business flows/nodes/
 7. Check whether each item's size can be clearly designed, implemented, and accepted; continue splitting Changes that are too large.
 
 ## Output
-Proposal roadmap, dependency Mermaid diagram, Change list, and ordering rationale.
+Proposal roadmap (module-aware columns), capability progress registry `docs/product/capabilities.csv`, module registry `docs/product/modules.csv`, dependency Mermaid diagram, Change list, and ordering rationale.
 
 ## Quality and Safety Boundaries
 Each Change has independent acceptance conditions; no cyclic dependencies; do not hide unknown dependencies in notes.
@@ -35,7 +36,7 @@ Each Change has independent acceptance conditions; no cyclic dependencies; do no
 - Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
 ## Recommended Checks
-`scripts/check-roadmap.py --strict`
+`scripts/check-roadmap.py --strict`; `python scripts/check-capabilities.py`; `python scripts/check-modules.py`
 
 
 ## Actual Tool Invocation Requirements
@@ -57,9 +58,9 @@ Each Change has independent acceptance conditions; no cyclic dependencies; do no
 
 Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="proposal-planning"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
 
-- **Inputs for this stage:** Frozen project baseline; project requirements analysis, workflows, data objects, RD matrix, business rules, and acceptance policy (US/ACs are produced in Stage 05, not consumed here); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, lessons.md, id-conventions.md (baseline standing layer and lessons write-back); known technical debt and dependencies. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** docs/product/proposal-roadmap.md; scope/dependency/value description for each candidate Change. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
-- **Downstream handoff:** Approved Change list, priorities, dependency order. Explicitly state which files/fields the next stage consumes.
+- **Inputs for this stage:** Frozen project baseline (including `code-layout.json` strategy, roots, package pattern, integration/frozen paths); project requirements analysis, workflows, data objects, RD matrix, business rules, and acceptance policy (US/ACs are produced in Stage 05, not consumed here); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, lessons.md, id-conventions.md (baseline standing layer and lessons write-back); known technical debt and dependencies. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
+- **Outputs for this stage:** docs/product/proposal-roadmap.md (module-aware columns); docs/product/capabilities.csv (capability progress registry); docs/product/modules.csv (module ownership registry); scope/dependency/value description for each candidate Change. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
+- **Downstream handoff:** Approved Change list, priorities, dependency order, capability/module registries. Explicitly state which files/fields the next stage consumes.
 - **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
 - **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
 

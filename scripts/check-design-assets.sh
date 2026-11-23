@@ -95,6 +95,14 @@ else
   echo "Figma design contract: design/figma-audit.md absent; stage 06 must have declared no UI."
 fi
 
+# Every functional UI button/icon/link/menu/tab must map to a navigation route
+# with input parameters, an OpenAPI operationId, or a user-confirmed local-only
+# action. The checker cross-checks figma-layout.csv and figma-code/ and passes
+# with N/A when the Change declares no UI.
+ui_actions_args=(--change "$CHANGE_ID")
+if (( STRICT )); then ui_actions_args+=(--strict); fi
+"$PYTHON" "$ROOT/scripts/check-ui-actions.py" "${ui_actions_args[@]}"
+
 if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
   io_args=("$OPENAPI" "$API_MAP" "$IO_CATALOG")
   if (( STRICT )); then io_args+=(--strict); fi
@@ -103,4 +111,4 @@ if [[ -f "$OPENAPI" && $API_SCOPE_NONE -eq 0 ]]; then
 else
   echo "API scope: none (x-api-scope: none); API→IO checks skipped."
 fi
-echo "Unified design (design.md sections), test-case matrix, traceability, interface catalog and API→IO mapping passed."
+echo "Unified design (design.md sections), test-case matrix, traceability, interface catalog, API→IO mapping and UI action mapping passed."

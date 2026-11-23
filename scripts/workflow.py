@@ -189,6 +189,43 @@ def run_baseline_impact_gate(change_id):
         raise ValueError('Implementation baseline-impact gate failed'+(': '+detail if detail else ''))
     return result.stdout.strip()
 
+LAYOUT_FILE='docs/architecture/code-layout.json'
+MODULE_STRATEGIES={'none','footprint','module-packages'}
+
+def project_strategy():
+    """Return the project module strategy from code-layout.json; ``none`` when absent.
+
+    A malformed layout fails closed: an unreadable strategy can never be
+    interpreted as "none" because that would silently disable the hard gates.
+    """
+    path=ROOT/LAYOUT_FILE
+    if not path.exists(): return 'none'
+    try: data=json.loads(path.read_text(encoding='utf-8'))
+    except (OSError,json.JSONDecodeError) as exc:
+        raise ValueError(f'Invalid {LAYOUT_FILE}: {exc}')
+    value=data.get('strategy') if isinstance(data,dict) else None
+    if not isinstance(value,str) or value.strip() not in MODULE_STRATEGIES:
+        raise ValueError(f"Invalid strategy {value!r} in {LAYOUT_FILE}; expected one of none, footprint, module-packages")
+    return value.strip()
+
+def run_slice_gate(change_id):
+    """07 hard gate: the design.md Implementation Slice must be valid."""
+    command=[sys.executable,str(ROOT/'scripts'/'check-design-sections.py'),'--change',change_id,'--slice-only']
+    result=subprocess.run(command,capture_output=True,text=True)
+    if result.returncode:
+        detail=(result.stdout+'\n'+result.stderr).strip()
+        raise ValueError(f'07 slice gate blocked for {change_id} (exit={result.returncode}): {detail}')
+    return result.stdout.strip()
+
+def run_footprint_gate(change_id):
+    """08 hard gate: the implemented diff must stay inside the declared footprint."""
+    command=[sys.executable,str(ROOT/'scripts'/'check-change-footprint.py'),change_id,'--verify']
+    result=subprocess.run(command,capture_output=True,text=True)
+    if result.returncode:
+        detail=(result.stdout+'\n'+result.stderr).strip()
+        raise ValueError(f'08 footprint gate blocked for {change_id} (exit={result.returncode}): {detail}')
+    return result.stdout.strip()
+
 def static_evidence_gate(step_id, change_id):
     """Fail closed unless the Change has passing static-analysis evidence."""
     if not change_id:
@@ -703,6 +740,17 @@ def cmd_transition(args):
         gates_path=ROOT/'docs/architecture/quality-gates.json'
         if gates_path.exists():
             static_evidence_gate(sid,cid)
+    # Hard gate: 07 -> 08 proves the Implementation Slice is valid; 08 -> 09
+    # proves the landed diff stays inside the declared code footprint. Both are
+    # strategy-driven and fail closed on an unreadable code-layout.json.
+    if stage['scope']=='change' and cid and sid in ('07-detailed-design','08-implementation-orchestrator'):
+        strategy=project_strategy()
+        if strategy=='none':
+            print('FOOTPRINT_GATE=SKIPPED (strategy none)')
+        elif sid=='07-detailed-design':
+            run_slice_gate(cid)
+        else:
+            run_footprint_gate(cid)
     if sid=='03-project-architecture-baseline':
         run_baseline_gate(['audit','--require-frozen'],label='Baseline freeze gate')
         artifact_paths={a['path'] for a in artifacts}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Regression tests for workflow state machine and SHA-256 handoff guards."""
-import importlib.util, json, subprocess, sys, tempfile, unittest
+import contextlib, importlib.util, io, json, subprocess, sys, tempfile, unittest
 from pathlib import Path
 
 SCRIPT=Path(__file__).with_name('workflow.py')
@@ -234,7 +234,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self._write_method_artifact()
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
-                  'methods':[self._method_entry()],
+                  'methods':[self._method_entry(),self._method_entry(skill='baseline-impact-classification')],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self._write_evidence('handoff-recovery-evidence.json',evidence)
@@ -247,7 +247,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self._write_method_artifact()
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
-                  'methods':[self._method_entry()],
+                  'methods':[self._method_entry(),self._method_entry(skill='baseline-impact-classification')],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':True,'status':'pending'}}
         ep=self.root/'feature-evidence.json'; ep.write_text(json.dumps(evidence),encoding='utf-8')
@@ -294,7 +294,7 @@ class WorkflowRuntimeTests(unittest.TestCase):
         state=w.load_state(); state['active_change_id']='sample-change'; w.STATE.write_text(json.dumps(state),encoding='utf-8')
         evidence={'step_id':'05-feature-requirements','change_id':'sample-change',
                   'outputs':[{'path':'out.md','status':'verified'}],
-                  'methods':[self._method_entry()],
+                  'methods':[self._method_entry(),self._method_entry(skill='baseline-impact-classification')],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'required':False,'status':'not-required'}}
         ep=self._write_evidence('risk-based-05-evidence.json',evidence)
@@ -536,6 +536,10 @@ class WorkflowRuntimeTests(unittest.TestCase):
             'questions':['q1','q2','q3'],'alternatives':['a1','a2'],'decisions':['d1'],'open_questions':[],
             'artifact_section':'docs/product/reference-research.md#3. 研究记录',
             'evidence':'docs/product/reference-research.md'})
+        evidence['methods'].append({'skill':'competitor-research','mode':'stage-scoped','summary':'same-category comparison',
+            'questions':['同类产品有哪些？','核心流程差异？'],'alternatives':['采纳','不采纳'],'decisions':['d1'],'open_questions':[],
+            'artifact_section':'docs/product/reference-research.md#3. 研究记录',
+            'evidence':'docs/product/reference-research.md'})
         errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
         self.assertEqual([],errors)
 
@@ -547,7 +551,9 @@ class WorkflowRuntimeTests(unittest.TestCase):
         entry=self._method_entry(skill='brainstorming',artifact_section=section,evidence='docs/product/reference-research.md')
         research=self._method_entry(skill='internet-research',questions=['q1','q2','q3'],alternatives=['a1','a2'],
                                     decisions=['d1'],artifact_section=section,evidence='docs/product/reference-research.md')
-        evidence={'step_id':'02-requirements-analysis','methods':[entry,research]}
+        competitor=self._method_entry(skill='competitor-research',questions=['同类产品？','流程差异？'],alternatives=['采纳','不采纳'],
+                                      decisions=['d1'],artifact_section=section,evidence='docs/product/reference-research.md')
+        evidence={'step_id':'02-requirements-analysis','methods':[entry,research,competitor]}
         errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
         self.assertEqual([],errors)
 
@@ -875,5 +881,202 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertEqual(0,self._transition('01-project-bootstrap',ep))
         events=[json.loads(line) for line in (self.root/'workflow/state-events.jsonl').read_text(encoding='utf-8').splitlines()]
         self.assertEqual('transition',events[-1]['event'])
+
+    # --- Task 11: workflow hard gates (07 slice / 08 footprint) ---
+
+    def _temporarily(self, **overrides):
+        """Patch module globals and return the originals for restoration."""
+        originals={name:getattr(w,name,None) for name in overrides}
+        for name,value in overrides.items(): setattr(w,name,value)
+        return originals
+
+    def _restore(self, originals):
+        for name,value in originals.items():
+            if value is None: delattr(w,name)
+            else: setattr(w,name,value)
+
+    def _run_transition_cli(self, step, evidence):
+        argv=sys.argv
+        sys.argv=['workflow.py','transition','--step',step,'--evidence',str(evidence)]
+        try: return w.main()
+        finally: sys.argv=argv
+
+    def _design_evidence(self, change_id, name):
+        rel=f'openspec/changes/{change_id}/design.md'
+        design=self.root/rel
+        design.parent.mkdir(parents=True,exist_ok=True)
+        design.write_text('# 详细设计\n\n## 设计决策\n\n### Implementation Slice\n\n- Owned paths: `app/**`\n- Integration paths: N/A\n',encoding='utf-8')
+        methods=[{'skill':skill,'mode':'stage-scoped','summary':'slice design','questions':[],
+                  'alternatives':[],'decisions':[],'open_questions':[],
+                  'artifact_section':rel+'#设计决策','evidence':rel}
+                 for skill in ('brainstorming','writing-plans','existing-code-impact-analysis')]
+        evidence={'step_id':'07-detailed-design','change_id':change_id,
+                  'outputs':[{'path':'out.md','status':'created','required':True}],
+                  'methods':methods,
+                  'checks':[{'name':'gate','kind':'automated','status':'passed',
+                             'command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-19'}}
+        return self._write_evidence(name,evidence)
+
+    def _verification_evidence(self, change_id, name):
+        base=f'openspec/changes/{change_id}/design/evidence'
+        report=f'{base}/independent-verification-report.md'
+        machine=f'{base}/independent-verification.json'
+        (self.root/base).mkdir(parents=True,exist_ok=True)
+        (self.root/report).write_text('# Independent verification\n\nPASS\n',encoding='utf-8')
+        (self.root/machine).write_text('{"verdict": "PASS"}\n',encoding='utf-8')
+        evidence={'step_id':'09-independent-verification','change_id':change_id,
+                  'outputs':[{'path':report,'status':'created','required':True},
+                             {'path':machine,'status':'created','required':True}],
+                  'methods':[{'skill':'verification-before-completion','mode':'stage-scoped',
+                              'summary':'verify','questions':[],'alternatives':[],'decisions':[],
+                              'open_questions':[],'artifact_section':'','evidence':'check.log'}],
+                  'checks':[{'name':'verifier','kind':'automated','status':'passed',
+                             'command':f'python scripts/check-independent-verification.py --change {change_id}',
+                             'exit_code':0,'log':'check.log'}],
+                  'approval':{'required':True,'status':'approved','approver':'Owner','approved_at':'2026-11-19'}}
+        return self._write_evidence(name,evidence)
+
+    CHANGE_COMPLETE=['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline',
+                     '04-proposal-planning','05-feature-requirements','06-figma-design-review']
+
+    def test_07_transition_blocks_when_slice_gate_fails(self):
+        change='demo-change'
+        self._write_change_state('07-detailed-design',change,self.CHANGE_COMPLETE)
+        ep=self._design_evidence(change,'slice-fail-evidence.json')
+        calls=[]
+        def fail(change_id):
+            calls.append(change_id)
+            raise ValueError(f'07 slice gate blocked for {change_id} (exit=1): ERROR: slice invalid')
+        def wrong_gate(*a,**k):
+            raise AssertionError('footprint gate must not run for stage 07')
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'footprint',
+                                    run_slice_gate=fail,
+                                    run_footprint_gate=wrong_gate)
+        try:
+            code=self._run_transition_cli('07-detailed-design',ep)
+        finally:
+            self._restore(originals)
+        self.assertNotEqual(0,code)
+        self.assertEqual(['demo-change'],calls)
+        state=w.load_state()
+        self.assertEqual('07-detailed-design',state['current_step'])
+        self.assertNotIn('07-detailed-design',state['completed_steps'])
+
+    def test_07_skips_slice_gate_when_strategy_none(self):
+        change='demo-change'
+        self._write_change_state('07-detailed-design',change,self.CHANGE_COMPLETE)
+        ep=self._design_evidence(change,'slice-skip-evidence.json')
+        calls=[]
+        def unexpected(name):
+            def gate(*a,**k):
+                calls.append(name); raise AssertionError(f'{name} must not run when strategy is none')
+            return gate
+        out=io.StringIO()
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'none',
+                                    run_slice_gate=unexpected('slice'),
+                                    run_footprint_gate=unexpected('footprint'))
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(0,self._transition('07-detailed-design',ep))
+        finally:
+            self._restore(originals)
+        self.assertEqual([],calls)
+        self.assertIn('FOOTPRINT_GATE=SKIPPED (strategy none)',out.getvalue())
+        self.assertEqual('08-implementation-orchestrator',w.load_state()['current_step'])
+
+    def test_08_transition_blocks_when_footprint_gate_fails(self):
+        change='demo-change'
+        self._write_change_state('08-implementation-orchestrator',change,
+                                 self.CHANGE_COMPLETE+['07-detailed-design'])
+        ep=self._stage_evidence('08-implementation-orchestrator',change,'footprint-fail-evidence.json')
+        calls=[]
+        def fail(change_id):
+            calls.append(change_id)
+            raise ValueError(f'08 footprint gate blocked for {change_id} (exit=1): ERROR: owned path outside module')
+        def wrong_gate(*a,**k):
+            raise AssertionError('slice gate must not run for stage 08')
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'module-packages',
+                                    run_footprint_gate=fail,
+                                    run_slice_gate=wrong_gate)
+        try:
+            code=self._run_transition_cli('08-implementation-orchestrator',ep)
+        finally:
+            self._restore(originals)
+        self.assertNotEqual(0,code)
+        self.assertEqual(['demo-change'],calls)
+        state=w.load_state()
+        self.assertEqual('08-implementation-orchestrator',state['current_step'])
+        self.assertNotIn('08-implementation-orchestrator',state['completed_steps'])
+
+    def test_08_skips_footprint_gate_when_strategy_none(self):
+        change='demo-change'
+        self._write_change_state('08-implementation-orchestrator',change,
+                                 self.CHANGE_COMPLETE+['07-detailed-design'])
+        ep=self._stage_evidence('08-implementation-orchestrator',change,'footprint-skip-evidence.json')
+        calls=[]
+        def unexpected(name):
+            def gate(*a,**k):
+                calls.append(name); raise AssertionError(f'{name} must not run when strategy is none')
+            return gate
+        out=io.StringIO()
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'none',
+                                    run_footprint_gate=unexpected('footprint'),
+                                    run_slice_gate=unexpected('slice'))
+        try:
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(0,self._transition('08-implementation-orchestrator',ep))
+        finally:
+            self._restore(originals)
+        self.assertEqual([],calls)
+        self.assertIn('FOOTPRINT_GATE=SKIPPED (strategy none)',out.getvalue())
+        self.assertEqual('09-independent-verification',w.load_state()['current_step'])
+
+    def test_footprint_gate_not_called_for_09(self):
+        change='demo-change'
+        self._write_change_state('09-independent-verification',change,
+                                 self.CHANGE_COMPLETE+['07-detailed-design','08-implementation-orchestrator'])
+        ep=self._verification_evidence(change,'verifier-gate-evidence.json')
+        calls=[]
+        def unexpected(*a,**k):
+            calls.append(a); raise AssertionError('slice/footprint gate must not run for stage 09')
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'footprint',
+                                    run_slice_gate=unexpected,
+                                    run_footprint_gate=unexpected)
+        try:
+            self.assertEqual(0,self._transition('09-independent-verification',ep))
+        finally:
+            self._restore(originals)
+        self.assertEqual([],calls)
+        self.assertEqual('10-acceptance-audit',w.load_state()['current_step'])
+
+    def test_project_strategy_rejects_invalid_value(self):
+        self.assertEqual('none',w.project_strategy())
+        layout=self.root/'docs/architecture/code-layout.json'
+        layout.parent.mkdir(parents=True,exist_ok=True)
+        layout.write_text(json.dumps({'strategy':'bogus-strategy'}),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,"bogus-strategy.*docs/architecture/code-layout.json"):
+            w.project_strategy()
+        layout.write_text('{ not json',encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'docs/architecture/code-layout.json'):
+            w.project_strategy()
+
+    def test_roadmap_declared_later_output_is_mutable_by_design(self):
+        contract={'steps':[{'step':'04','outputs':['docs/product/proposal-roadmap.md']},
+                           {'step':'05','outputs':['docs/product/proposal-roadmap.md']}]}
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        artifacts=w.annotate_mutable_artifacts(
+            [{'path':'docs/product/proposal-roadmap.md'}],'04-proposal-planning')
+        self.assertTrue(artifacts[0].get('mutable_by_design'))
 
 if __name__=='__main__': unittest.main(verbosity=2)

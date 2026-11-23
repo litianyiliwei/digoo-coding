@@ -15,4 +15,5 @@
 ## Boundary Rules
 
 - PENDING — which domains may call which; what must go through a public interface; what is forbidden.
+- Code layout, integration paths, and frozen paths are authoritative in `docs/architecture/code-layout.json`; domain boundary rules must not contradict that file.
 </content>

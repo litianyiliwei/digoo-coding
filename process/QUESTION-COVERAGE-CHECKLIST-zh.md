@@ -51,6 +51,8 @@
 | T13 | 负责人与 RACI | - | F | - | - |
 | T14 | 业务日历、季节、时限 | F | - | - | - |
 | T15 | 测试策略、环境、数据、替身 | - | Q | F | Q |
+| T16 | 参考产品、能力/模块归属与偏差确认 | Q | F | F | F |
+| T17 | 实现切片/模块 footprint 与 UI 控件动作映射 | - | - | - | Q |
 
 最明显的断线是 T02（规模与容量）、T06（数据生命周期与隐私）、T08（报表与打印）、T09（NFR）、T10（迁移）、T11（验收）、T13（负责人/RACI）、T14（业务日历）。这些主线目前没有任何一个阶段从头到尾负责。
 
@@ -76,6 +78,7 @@
 | 02-T13-01 | 负责人、审批人、RACI | 业务/产品/技术/设计/验收 owner 和审批人是谁，决策 SLA 是什么？ | `decisions.md`；`BASELINE-BRIEF.md`；`open-questions.md` | 所有阶段审批门 | [ ] |
 | 02-T14-01 | 业务日历、季节、时限 | 种植/收获/加工/销售窗口、安全间隔期、监管申报截止、节假日和禁期是什么？ | `business-rules.md`；`acceptance-policy.md`；`change-sizing.md` | 04 排序；05 时间窗 AC；07 调度；08 测试数据 | [ ] |
 | 02-T15-01 | 测试与验收输入 | 有哪些环境、真实设备、第三方沙箱和样本数据可用于验收和测试？ | `acceptance-policy.md`；`open-questions.md` | 03 测试策略；07 测试设计；08 执行 | [ ] |
+| 02-T16-01 | 同类产品与重大偏差 | 有哪些同类/竞品产品，它们的流程/角色/数据对象/规则是什么样的，本项目在哪些关键点偏差过大，每个重大偏差是否已由用户确认（确认人+日期）？ | `docs/product/reference-research.md` §9（同类产品偏差确认）；`open-questions.md` | 03 边界；05 场景；07 设计 | [ ] |
 
 ### 3.2 03 项目总体架构设计
 
@@ -116,6 +119,7 @@
 | 05-T14-01 | 业务日历 AC | 本 Change 是否受种植/收获/销售窗口、安全间隔期或监管截止日约束，对应的时间窗 AC 是什么？ | AC；`proposal.md`；`change-sizing.md` | 07 调度；08 测试数据 | [ ] |
 | 05-T15-01 | 可测试性输入 | 需要哪些测试数据、替身、真实设备和沙箱，每条 AC 是否可观察、可断言？ | `specs/<capability>/spec.md` Scenario；AC；`test-cases.csv`（07） | 07 测试设计；08 执行 | [ ] |
 | 05-T13-01 | Change 负责人与开放项 owner | 本 Change 的产品 owner、技术 owner、验收人是谁，每个开放问题由谁关闭？ | `proposal.md`；`decisions.md`；`open-questions.md` | 06/07/08/09/10 审批 | [ ] |
+| 05-T16-01 | 能力、归属模块、关联模块与迟到提案修订 | 本 Change 交付哪个能力，由哪个模块拥有，涉及哪些关联/共享模块？两个注册表是否已更新，使归属模块列出该能力、owner/related slug 均存在，且 `partial` 切片声明了 `remaining_slices`？若提案不在路线图主表内，是否有已批准的 `## Roadmap Amendments` 行（理由/提出人/审批人/日期/基线影响）？ | `docs/product/capabilities.csv`；`docs/product/modules.csv`；`docs/product/proposal-roadmap.md` `## Roadmap Amendments` | 07 实现切片；08 footprint；10 注册表回写 | [ ] |
 
 ### 3.4 07 详细设计、接口与测试设计
 
@@ -135,8 +139,10 @@
 | 07-T15-01 | 测试覆盖与证据 | 测试策略是否覆盖每个 AC/页面/operationId/IO/边界，并包含数据、替身、清理和失败注入？ | `design.md` `## Test Design`；`design/test-cases.csv`；`traceability.csv` | 08 执行；09 验证 | [ ] |
 | 07-T15-02 | 离线、同步、多端、设备 | 离线缓存、同步冲突、多端差异、JS Bridge 和设备能力落在哪些组件、事件和接口？ | `design.md` `## Frontend Detailed Design`；`design/interface-catalog.csv`；`design/test-cases.csv` | 08 实现；09 设备验证 | [ ] |
 | 07-T15-03 | 静态分析配置与豁免计划 | 采用静态分析时：08 将从已批准规则包复制/固定哪些配置文件到各栈根目录，是否与 `quality-gates.json` 一致（不一致时记录偏差），哪些 blocking 问题需要 Change 级豁免，且审批人与过期时间在 `policy.waiver.max_days` 之内？未采用时记录 `N/A + reason`。 | `design.md` `### Static Analysis`；`design/static-waivers.json`（条件适用） | 08 门禁；09 独立验证；10 验收 | [ ] |
+| 07-T16-01 | UI 控件动作映射 | `figma-code/` 与 `figma-audit.md` 中的每个功能按钮/图标/链接/菜单/标签页，是否都有跳转地址+入参或 OpenAPI operationId；两者都没有的本地动作，是否已由用户确认（确认人+日期）？`ui-actions.csv` 是机读清单，`### 事件处理` 解释 handler 行为并按 `element_id` 引用其行、不重复动作映射。 | `design/ui-actions.csv`；`design/figma-code/`；`design/figma-layout.csv`；`design.md` `### Event Handling` | 08 实现；09 验证 | [ ] |
 | 07-T13-01 | 设计与执行负责人 | 设计、实现、测试、验收的 owner 是谁，未决决策的截止/阻塞条件是什么？ | `design.md` `### Key Decisions and Trade-offs`；`### Open Decisions` | 08/09/10 审批 | [ ] |
 | 07-T03-01 | 权限与审计实现 | 每个页面、接口、IO 的权限、数据范围、脱敏和审计如何实现？ | `api/openapi.yaml`；前端/后端子节；`design/test-cases.csv` | 08 实现；09 验证 | [ ] |
+| 07-T17-01 | 实现切片、模块 footprint 与模块卡 | `design.md` 是否含 `### Implementation Slice`，并写明 Primary capability、Owner module、Related modules、Slice type/coverage、Code packages、Owned paths、Integration paths 与 Module card？代码包与拥有路径是否位于归属/关联模块路径下，`shared_paths` 变更是否以拥有条目出现，集成路径是否匹配 `code-layout.json` 且带理由与 task ID，模块卡是否为 create/update（或 `N/A + reason`）？`strategy=none` 时不要求切片；`footprint` 时仅要求 Owned paths 与 Integration paths。 | `design.md` `### Implementation Slice`；`docs/product/capabilities.csv`；`docs/product/modules.csv`；`docs/architecture/code-layout.json`；`<module_path>/MODULE.md` | 08 实现；09 footprint 验证 | [ ] |
 
 ## 4. 建议的阶段退出检查
 

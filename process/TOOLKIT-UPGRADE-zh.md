@@ -52,7 +52,19 @@ python scripts/toolkit-sync.py apply --ref toolkit-v2.1.0
 - 不启用静态分析的项目可正常持续升级；工具包检查保持绿色，任何阶段都不要求新产物。
 - 现有 `scripts/test-upgrade-rehearsal.py` 只演练 init → upgrade → conflict → repair → rollback；不包含静态门禁夹具，也不演练启用路径。
 
-## 5. 冲突与分叉
+## 5. 模块包：新项目默认
+
+模块模型由 `docs/architecture/code-layout.json` 的策略驱动；新项目默认 `module-packages`。
+
+- **新项目**：阶段 03 记录 `code-layout.json`，`strategy: module-packages`，并填写 roots、`package_pattern`、`integration_paths`、`frozen_paths`、`module_card` 与 `dependency_rules`；阶段 04 创建 `docs/product/capabilities.csv`、`docs/product/modules.csv` 与模块化路线图列。此后 07 的 `### Implementation Slice` 与 08 的 footprint 检查为硬转换门禁。
+- **既有项目**升级后按项目选择：
+  - `none`：不提供 `code-layout.json`（或写 `strategy: none`）；切片/footprint 门禁打印 `FOOTPRINT_GATE=SKIPPED (strategy none)`，注册表规则跳过。无需新增产物。
+  - `footprint`：新增 `code-layout.json`，`strategy: footprint`，填写 roots/包模式与集成/冻结路径；路线图行需 `Code Target`；不要求注册表与模块卡。
+  - `module-packages`：另需新增 `capabilities.csv`/`modules.csv`（在阶段 04 或显式重跑阶段 04 时），补充模块化路线图列，并在 `<module_path>/MODULE.md` 维护模块卡。
+- **采用布局与注册表**：通过下一次阶段 03 基线修订或显式重跑阶段 03 采用；布局随架构基线冻结。`capabilities.csv` 与 `modules.csv` 是可变的项目级注册表，不是冻结基线文件：阶段 05 更新、阶段 10 回写；它们有意不列入 `baseline-manifest.json`，变更无需基线修订。
+- 升级不会因缺少模块文件而失败：所有模块门禁以 `code-layout.json` 存在且声明有效策略为前提；布局无效时 fail-closed，而不是静默跳过。
+
+## 6. 冲突与分叉
 
 本地修改过的 vendored 文件会中止升级并被列出，二选一：
 
@@ -61,7 +73,7 @@ python scripts/toolkit-sync.py apply --ref toolkit-v2.1.0
 
 登记的分叉应尽快回流到工具包；当下一次升级包含对应上游改动时即可丢弃分叉。
 
-## 6. 回滚
+## 7. 回滚
 
 每次升级是一个单独提交。回滚步骤：
 
@@ -69,17 +81,17 @@ python scripts/toolkit-sync.py apply --ref toolkit-v2.1.0
 2. 若执行过迁移，恢复状态备份：`python scripts/workflow.py recover-state --backup workflow/state-backups/<timestamp>.json`。
 3. 从被回退的提交恢复上一版 `toolkit-lock.json`。
 
-## 7. 多人协作规则
+## 8. 多人协作规则
 
 - 升级由一名指定的维护者以专门 PR 执行；其他成员只拉取合并后的提交。
 - vendored 路径对团队成员只读；CI 的 `toolkit-sync.py verify` 对任何哈希不符直接失败。
 - 每个工作流阶段只有一名“驱动者”；`workflow-state.json` 只由 `scripts/workflow.py` 写入，并发修改通过重跑工作流命令解决，绝不手工合并 JSON。
 - `.claude/settings.local.json` 保持按机器本地、gitignore。
 
-## 8. 第三方文件
+## 9. 第三方文件
 
 `openspec-*` Skills 与 `opsx` 命令由 OpenSpec CLI 在项目仓库中生成。`toolkit-sync.py` 从不写入或删除它们；锁在安装时记录它们的存在与 CLI 版本。OpenSpec CLI 升级后，用 CLI 重新生成这些文件。
 
-## 9. CI 期望
+## 10. CI 期望
 
 vendored `.github/workflows/toolkit-ci.yml` 运行 `bash scripts/ci-check.sh`；项目模式下依次执行工具包包检查、清单检查、布局检查、`toolkit-sync.py verify --require-lock` 与项目检查。`verify` 失败意味着有 vendored 文件被手工修改；运行 `toolkit-sync.py repair` 或重新应用该发布版本。

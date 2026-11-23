@@ -19,6 +19,7 @@ assets=(
   "design/figma-code/README.md:design/figma-code/README.md"
   "design/figma-assets/README.md:design/figma-assets/README.md"
   "design/figma-layout.csv:design/figma-layout.csv"
+  "design/ui-actions.csv:design/ui-actions.csv"
   "api/openapi.yaml:api/openapi.yaml"
   "design/api-io-mapping.csv:design/api-io-mapping.csv"
   "design/io-catalog.csv:design/io-catalog.csv"

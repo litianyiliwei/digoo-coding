@@ -22,23 +22,25 @@ python scripts/check-layout.py --mode toolkit  # 更严格的工具包专用布�
 | 阶段 | Skill | Prompt | 主要产物 |
 |---|---|---|---|
 | 01 项目初始化与工具链检查 | `project-bootstrap` | `prompts/01-project-bootstrap.md` | `AGENTS.md`、`workflow-state.json`、`docs/architecture/baseline-status.md`、`docs/project/toolchain-report.md` |
-| 02 需求业务梳理 | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `docs/product/` 需求、流程节点表、数据对象、RD 矩阵、业务规则、术语、验收政策 |
-| 03 项目总体架构设计 | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `docs/architecture/` 基线、ADR、基线 Manifest 与约束注册表（冻结） |
-| 04 提案拆分与路线图 | `proposal-planning` | `prompts/04-proposal-planning.md` | `docs/product/proposal-roadmap.md` |
+| 02 需求业务梳理 | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `docs/product/` 需求、流程节点表、数据对象、RD 矩阵、业务规则、术语、验收政策、含同类产品调研与用户确认偏差的参考调研 |
+| 03 项目总体架构设计 | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `docs/architecture/` 基线、ADR、基线 Manifest 与约束注册表（冻结）、`code-layout.json`（模块策略） |
+| 04 提案拆分与路线图 | `proposal-planning` | `prompts/04-proposal-planning.md` | `docs/product/proposal-roadmap.md`、`docs/product/capabilities.csv`、`docs/product/modules.csv` |
 | 05 提案级需求分析 | `feature-requirements` | `prompts/05-feature-requirements.md` | `openspec/changes/<change-id>/` 的 proposal、specs、design、tasks、user-stories、基线影响/绑定 |
 | 06 Figma 设计与评审（Figma-only） | `figma-design-review` | `prompts/06-figma-design-review.md` | `openspec/changes/<change-id>/design/figma-audit.md`、`.../figma-code/`、`.../figma-layout.csv` |
-| 07 详细设计 | `detailed-design` | `prompts/07-detailed-design.md` | `openspec/changes/<change-id>/design.md` 五节、`.../design/test-cases.csv`、OpenAPI、API→IO 映射、`.../traceability.csv` |
+| 07 详细设计 | `detailed-design` | `prompts/07-detailed-design.md` | `openspec/changes/<change-id>/design.md` 五节、`.../design/test-cases.csv`、`.../design/ui-actions.csv`（按钮/图标跳转或 API 映射）、OpenAPI、API→IO 映射、`.../traceability.csv` |
 | 08 实现与代码审查 | `implementation-orchestrator` | `prompts/08-implementation-orchestrator.md` | 源代码、测试、`.../design/evidence/code-review.md`、`figma-layout-check.json` |
 | 09 独立验证 | `independent-verifier` | `prompts/09-independent-verification.md` | `.../design/evidence/independent-verification-report.md` 与 `.json` |
 | 10 人工验收与归档 | `acceptance-audit` | `prompts/10-acceptance-audit.md` | `.../design/evidence/acceptance.md`、验收记录、OpenSpec archive、基线回写 |
 
 阶段 DAG 的唯一权威定义在 `process/WORKFLOW-STAGES.json`；每个阶段的输入/输出/交接契约在 `process/STEP-ARTIFACT-CONTRACTS.md` 与 `.json`。
 
+模块模型可选且由策略驱动：`docs/architecture/code-layout.json` 选择 `module-packages`（新项目默认）、`footprint` 或 `none`。采用 `module-packages` 时，阶段 03 记录布局，阶段 04 创建能力/模块注册表，阶段 07 的 `### Implementation Slice` 是 07→08 硬门禁（`check-design-sections.py --slice-only`），阶段 08 的 footprint 是 08→09 硬门禁（`check-change-footprint.py --verify`）；阶段 10 回写注册表。`strategy=none` 时两个门禁均以显式标记跳过。
+
 ## 目录结构
 
 | 路径 | 作用 |
 |---|---|
-| `.claude/skills/` | 11 个项目流程 Skill（10 个阶段 + `workflow-orchestrator`）；OpenSpec 辅助 Skill 由 OpenSpec CLI 在项目仓库中生成 |
+| `.claude/skills/` | 11 个项目流程 Skill（10 个阶段 + `workflow-orchestrator`）与本地方法 Skill（`competitor-research`、`existing-code-impact-analysis`、`baseline-impact-classification`）；OpenSpec 辅助 Skill 由 OpenSpec CLI 在项目仓库中生成 |
 | `prompts/` | 与 Skill 一一对应的阶段 Prompt；`prompts/00-next-step.md` 是入口 |
 | `scripts/` | 结构、追踪、OpenAPI、测试、基线治理、工作流状态机等检查与工具脚本 |
 | `templates/` | 项目基线、Change 辅助产物、工作流证据与交接报告模板 |
@@ -69,7 +71,7 @@ python scripts/check-layout.py --mode toolkit  # 更严格的工具包专用布�
 2. **状态纪律**：`workflow-state.json` 只记录门禁通过且审批完成的阶段；草案不得记为完成。
 3. **模板治理**：正式产物遵循 `process/TEMPLATE-POLICY.md` 与 `process/OUTPUT-TEMPLATE-MATRIX.csv`；未知项写 `PENDING` 并说明责任人与阻塞条件，不适用项写 `N/A` 及理由，不得删除模板字段。
 4. **基线优先**：功能 Change 开始前必须读取冻结基线并生成 `design/baseline-impact.md` 与 `design/baseline-binding.json`；实施期间不得直接修改冻结基线。
-5. **UI 证据**：阶段 06 为 Figma-only。`openspec/changes/<change-id>/design/figma-audit.md`、`.../figma-code/`、`.../figma-layout.csv` 是唯一界面输入；08/09 运行 `check-figma-layout.py`、`check-design-tokens.py` 做数值断言。全流程不使用截图作为证据。
+5. **UI 证据**：阶段 06 为 Figma-only。`openspec/changes/<change-id>/design/figma-audit.md`、`.../figma-code/`、`.../figma-layout.csv` 是唯一界面输入；阶段 07 增加 `.../design/ui-actions.csv`，每个功能按钮/图标/链接/菜单/标签页必须映射到跳转地址+入参、OpenAPI operationId，或用户已确认的本地动作（`check-ui-actions.py --strict`）；08/09 运行 `check-figma-layout.py`、`check-design-tokens.py` 做数值断言。全流程不使用截图作为证据。
 6. **OpenSpec**：标准 artifact 为 `proposal.md`、`specs/<capability>/spec.md`、`design.md`、`tasks.md`；`tasks.md` 必须使用 `- [ ]` / `- [x]`；归档前必须人工批准。
 7. **Agent 边界**：不自动安装依赖、不提交代码、不改 CI、不归档、不发布，不替业务/设计/架构负责人批准未决规则。
 

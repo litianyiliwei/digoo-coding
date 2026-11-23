@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "strategy": "module-packages",
+  "roots": {
+    "backend": "server/",
+    "frontend": "web/"
+  },
+  "package_pattern": {
+    "backend": "server/src/main/java/<org>/<domain>/<module>/<resource>/",
+    "frontend": "web/src/features/<domain>/<module>/"
+  },
+  "integration_paths": [
+    "web/src/router/routes.ts",
+    "web/src/main.ts",
+    "server/src/main/java/<org>/config/ApplicationConfig.java"
+  ],
+  "frozen_paths": [
+    "server/src/main/java/<org>/platform/**",
+    "web/src/ui/**"
+  ],
+  "module_card": "MODULE.md",
+  "dependency_rules": [
+    "Modules must not deep-import each other's internals; call only through public entry points or public contracts",
+    "Modules must not access other modules' data tables directly",
+    "Shared logic between resources of a module is consolidated into a module-level shared directory and declared per slice"
+  ],
+  "architecture_rules_tool": "dependency-cruiser | ArchUnit | import-linter | N/A + reason"
+}

@@ -27,9 +27,15 @@ for p in skill_paths:
     if len(body.strip())<500: errors.append(f"Skill suspiciously short: {p.relative_to(ROOT)}")
 missing_prompts=[]
 SPECIAL_PROMPT_PAIRS = {"workflow-orchestrator": "00-next-step.md", "independent-verifier": "09-independent-verification.md"}
+# Local method Skills are invoked inside a stage and do not own a stage prompt.
+METHOD_SKILLS = {
+    "competitor-research",
+    "existing-code-impact-analysis",
+    "baseline-impact-classification",
+}
 # openspec-* skills are OpenSpec CLI helpers, not workflow stages; they have no stage prompt.
 for skill in ids:
-    if skill.startswith("openspec-"): continue
+    if skill.startswith("openspec-") or skill in METHOD_SKILLS: continue
     paired = (prompts_dir / SPECIAL_PROMPT_PAIRS[skill]).is_file() if skill in SPECIAL_PROMPT_PAIRS else bool(list(prompts_dir.glob(f"*-{skill}.md")))
     if not paired:
         missing_prompts.append(skill)
@@ -136,7 +142,16 @@ if hooks_dir.is_dir():
 print(f"Skills: {len(skill_paths)}; prompts: {len(prompt_paths)}")
 # Expected counts derive from the contract registry: one Skill per contract step,
 # plus the contract prompts and the standalone workflow-prompts.md overview.
-expected_steps = len(json.loads((ROOT / "process/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))["steps"])
+contract_doc = json.loads((ROOT / "process/STEP-ARTIFACT-CONTRACTS.json").read_text(encoding="utf-8"))
+expected_steps = len(contract_doc["steps"])
+required_methods = {
+    str(requirement.get("skill") or "").strip()
+    for rule in (contract_doc.get("method_policy") or {}).values()
+    for requirement in (rule.get("required") or [])
+}
+for method in sorted(METHOD_SKILLS):
+    if method not in required_methods:
+        errors.append(f"Method Skill is not required by method_policy: {method}")
 if len(skill_paths) < expected_steps: errors.append(f"Expected at least {expected_steps} Skills (one per contract step); found {len(skill_paths)}")
 if len(prompt_paths) != expected_steps + 1: errors.append(f"Expected {expected_steps + 1} Prompts (contract prompts + workflow-prompts.md); found {len(prompt_paths)}")
 if errors:

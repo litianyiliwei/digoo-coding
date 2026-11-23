@@ -65,6 +65,14 @@
 |---|---|---|---|---|
 | | | | | NO_IMPACT / REBASE_REQUIRED / BLOCKED |
 
+## Roadmap Amendment
+
+Fill this section only when this Change is not in the main table of `docs/product/proposal-roadmap.md`. Mirror the approved amendment record from the roadmap's `## Roadmap Amendments` table and record the baseline impact classification.
+
+| Change ID | Primary Capability | Extends | Slice Type | Slice Coverage | Code Target | Reason | Requester | Approver | Date | Baseline Impact |
+|---|---|---|---|---|---|---|---|---|---|---|
+| N/A + reason (not an off-roadmap Change) | | | | | | | | | | CHANGE_ONLY / BASELINE_CHANGE_REQUIRED |
+
 ## 8. Conclusion and Gates
 
 - This Change baseline classification: CHANGE_ONLY

@@ -51,6 +51,8 @@ Legend: `Q` = an explicit question/interview exists in the current Prompt/Skill;
 | T13 | Owners and RACI | - | F | - | - |
 | T14 | Business calendar, seasonality, deadlines | F | - | - | - |
 | T15 | Test strategy, environments, data, doubles | - | Q | F | Q |
+| T16 | Reference products, capability/module ownership, and deviation confirmation | Q | F | F | F |
+| T17 | Implementation slice/module footprint and UI control action mapping | - | - | - | Q |
 
 The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/privacy), T08 (reports/printing), T09 (NFR), T10 (migration), T11 (acceptance), T13 (owners/RACI), and T14 (business calendar). None of them is owned end to end by one stage today.
 
@@ -76,6 +78,7 @@ The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/pr
 | 02-T13-01 | Owners, approvers, RACI | Who are the business/product/technical/design/acceptance owners and approvers, and what is the decision SLA? | `decisions.md`; `BASELINE-BRIEF.md`; `open-questions.md` | All stage approval gates | [ ] |
 | 02-T14-01 | Business calendar, seasonality, deadlines | What are the planting/harvest/processing/sales windows, safety intervals, regulatory reporting deadlines, holidays, and blackout periods? | `business-rules.md`; `acceptance-policy.md`; `change-sizing.md` | 04 ordering; 05 time-window AC; 07 scheduling; 08 test data | [ ] |
 | 02-T15-01 | Test and acceptance inputs | Which environments, real devices, third-party sandboxes, and sample data are available for acceptance and testing? | `acceptance-policy.md`; `open-questions.md` | 03 test strategy; 07 test design; 08 execution | [ ] |
+| 02-T16-01 | Same-category products and major deviations | Which same-category (同类)/competing products exist, what do their flows/roles/data objects/rules look like, where does this project deviate materially, and has the user confirmed each major deviation with a confirmer and date? | `docs/product/reference-research.md` §9 (Similar Product Deviation Confirmation); `open-questions.md` | 03 boundaries; 05 scenarios; 07 design | [ ] |
 
 ### 3.2 Stage 03: Overall Project Architecture Design
 
@@ -116,6 +119,7 @@ The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/pr
 | 05-T14-01 | Business-calendar ACs | Is this Change constrained by planting/harvest/sales windows, safety intervals, or regulatory deadlines, and what time-window ACs follow? | AC; `proposal.md`; `change-sizing.md` | 07 scheduling; 08 test data | [ ] |
 | 05-T15-01 | Testability inputs | Which test data, doubles, real devices, and sandboxes are needed, and is every AC observable and assertable? | `specs/<capability>/spec.md` Scenario; AC; `test-cases.csv` (Stage 07) | 07 test design; 08 execution | [ ] |
 | 05-T13-01 | Change owners and open-item owners | Who are the product owner, technical owner, and acceptance owner for this Change, and who closes each open question? | `proposal.md`; `decisions.md`; `open-questions.md` | 06/07/08/09/10 approvals | [ ] |
+| 05-T16-01 | Capability, owner module, related modules, and late-proposal amendment | Which capability does this Change deliver, which module owns it, and which related/shared modules does it touch? Are both registries updated so the owner module lists the capability, owner and related slugs exist, and a `partial` slice declares `remaining_slices`? If the proposal is outside the roadmap main table, is there an approved `## Roadmap Amendments` row with reason/requester/approver/date/baseline impact? | `docs/product/capabilities.csv`; `docs/product/modules.csv`; `docs/product/proposal-roadmap.md` `## Roadmap Amendments` | 07 Implementation Slice; 08 footprint; 10 registry write-back | [ ] |
 
 ### 3.4 Stage 07: Detailed Design, Interfaces, and Test Design
 
@@ -135,8 +139,10 @@ The most visible broken threads are T02 (scale/capacity), T06 (data lifecycle/pr
 | 07-T15-01 | Test coverage and evidence | Does the test strategy cover every AC/page/operationId/IO/boundary with data, doubles, cleanup, and failure injection? | `design.md` `## Test Design`; `design/test-cases.csv`; `traceability.csv` | 08 execution; 09 verification | [ ] |
 | 07-T15-02 | Offline, sync, multi-platform, device | Where do offline cache, sync conflict, multi-platform differences, JS Bridge, and device capabilities land in components, events, and interfaces? | `design.md` `## Frontend Detailed Design`; `design/interface-catalog.csv`; `design/test-cases.csv` | 08 implementation; 09 device verification | [ ] |
 | 07-T15-03 | Static analysis config and waiver plan | When static analysis is adopted: which config files will 08 copy/pin into each stack root from the approved rule packs, do they match `quality-gates.json` (or is the deviation recorded), and which blocking findings need a Change-scoped waiver with approver and expiry inside `policy.waiver.max_days`? When not adopted, record `N/A + reason`. | `design.md` `### Static Analysis`; `design/static-waivers.json` (conditional) | 08 gates; 09 independent verification; 10 acceptance | [ ] |
+| 07-T16-01 | UI control action mapping | Does every functional button/icon/link/menu/tab in `figma-code/` and `figma-audit.md` have a navigation route with input parameters or an OpenAPI operationId, and has the user confirmed (confirmer + date) any local-only control that has neither? `ui-actions.csv` is the machine-readable inventory; `### Event Handling` explains handler behavior and references its rows by `element_id` without duplicating the mapping. | `design/ui-actions.csv`; `design/figma-code/`; `design/figma-layout.csv`; `design.md` `### Event Handling` | 08 implementation; 09 verification | [ ] |
 | 07-T13-01 | Design and execution owners | Who owns design, implementation, testing, and acceptance, and what are the deadlines/blocking conditions for open decisions? | `design.md` `### Key Decisions and Trade-offs`; `### Open Decisions` | 08/09/10 approvals | [ ] |
 | 07-T03-01 | Permission and audit implementation | How are permissions, data scope, masking, and audit implemented for every page, API, and IO? | `api/openapi.yaml`; frontend/backend sections; `design/test-cases.csv` | 08 implementation; 09 verification | [ ] |
+| 07-T17-01 | Implementation Slice, module footprint, and module card | Does `design.md` contain `### Implementation Slice` with Primary capability, Owner module, Related modules, Slice type/coverage, Code packages, Owned paths, Integration paths and Module card? Do code packages and owned paths stay under the owner/related module paths, does a `shared_paths` change appear as an owned entry, do integration paths match `code-layout.json` with a reason plus task ID, and is the module card create/update (or `N/A + reason`)? With `strategy=none` no slice is required; with `footprint` only Owned paths and Integration paths are required. | `design.md` `### Implementation Slice`; `docs/product/capabilities.csv`; `docs/product/modules.csv`; `docs/architecture/code-layout.json`; `<module_path>/MODULE.md` | 08 implementation; 09 footprint verification | [ ] |
 
 ## 4. Recommended Stage-Exit Checks
 

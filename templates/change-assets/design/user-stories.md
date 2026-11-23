@@ -17,3 +17,14 @@
 - When: PENDING
 - Then: PENDING
 - Coverage: permissions/empty values/boundaries/exceptions/duplicate submission/concurrency (mark N/A + reason when not applicable)
+- Scenario: <spec Scenario title>
+- Slice position: entry | behavior | result
+
+## Acceptance Walkthrough
+
+1. AC-001 — PENDING
+
+## Slice Budget
+
+- AC count: 1
+- Budget exception: N/A (write `<approver> — <reason>` only when AC count exceeds 12)

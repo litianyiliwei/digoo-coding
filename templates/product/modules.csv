@@ -1,0 +1,2 @@
+module_slug,module_name,domain_id,frontend_paths,backend_paths,shared_paths,capabilities,status,notes
+order,Order,DOM-001,web/src/features/sales/order/,server/src/main/java/com/acme/sales/order/,server/src/main/java/com/acme/sales/order/shared/,order-create;order-status,PLANNED,"Example row; replace with the real module slug, concrete paths and capability slugs"

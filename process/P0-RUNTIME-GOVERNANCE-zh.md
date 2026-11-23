@@ -38,6 +38,7 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 
 涉及 UI 的 Change 还必须满足以下条件才允许推进：
 - 06：`design/figma-audit.md` 是唯一 UI 契约（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、MCP 读取记录、UI 评审 APPROVED）；同时产出 `design/figma-code/`（06 按总体技术选型转码的 `.vue`/`.tsx` 目标框架设计代码）与 `design/figma-layout.csv`（断言映射）；`check-figma-audit.py --strict --require-framework` 退出码 0；不使用截图。
+- 07：`design/ui-actions.csv` 是 `design.md` `### 事件处理` 的机读投影，登记 `figma-code/` 与 `figma-audit.md` 中的每个功能按钮/图标/链接/菜单/标签页；`### 事件处理` 解释 handler 行为并按 `element_id` 引用对应行，不重复动作映射；每个控件映射到 `navigate`（跳转地址+`route_params` 入参）、`api`（`api/openapi.yaml` 中的 operationId），或用户明确确认（确认人+日期）的 `local-only`。既无跳转也无 API 调用的控件必须提交用户确认；`check-ui-actions.py --change <change-id> --strict` 退出码 0。
 - 08：直接移植目标框架设计代码、只补业务逻辑；`design/evidence/code-review.md` 含 `## UI fidelity`，逐 PAGE 有 Figma node、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论与审批人；数值直接取自 JSON，仅差异/`UI-DERIVED` PAGE 需人工说明；`check-figma-layout.py` 与 `check-design-tokens.py` 退出码 0；`check-code-review.py --strict` 退出码 0。
 - 09：`independent-verification.json` 含 `layout_checks`，逐 PAGE 覆盖断言元素数/最大偏差/容差/缺失元素/判定/证据并独立重跑 `check-figma-layout.py`；`check-independent-verification.py` 退出码 0；有 `differences` 但未 `deviation_approved` 不得 PASS。
 - 10：`acceptance.md` 含 `## UI acceptance`，逐 PAGE 由设计负责人签收；无差异 PAGE 按机器证据批量签收，差异/`UI-DERIVED` PAGE 并排核对；`check-acceptance.py` 退出码 0。
@@ -48,6 +49,14 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 - 07 存在 HTTP API、App↔Native（uni-app/Flutter/React Native/原生桥接）、设备、第三方、异步或文件边界时，必须生成 `design/interface-catalog.csv`，并在 `design.md` 的 `### 接口边界清单` 引用它；无跨边界接口时写 `N/A + 理由` 并在 evidence 把该输出标记 `n/a` + `waiver_reason`。
 - `python scripts/check-interface-catalog.py --change <change-id> --strict` 校验必填字段、HTTP_API 与 OpenAPI operationId 双向一致、每个接口至少一个 TEST 与 traceability 行；总体选型为 uni-app/Flutter/React Native/原生 App 时加 `--require-native`。
 - 08/09/10 逐行消费该目录：08 为每个 interface_id 执行测试/真机/替身并记录证据；09 独立核对契约、测试与追踪，缺失或未执行判 FAIL/BLOCKED；10 逐行签收 owner 与证据后方可归档。
+
+### 模块包门禁（07 → 08 / 08 → 09）
+
+- `docs/architecture/code-layout.json` 选择模块策略：`module-packages`（新项目默认）、`footprint`（仅切片与差异）、`none`。缺少文件按 `none` 处理；文件不可读或格式错误时 fail-closed，绝不静默关闭门禁。
+- 07→08 硬门禁：阶段 07 转换时，`workflow.py` 运行 `scripts/check-design-sections.py --change <change-id> --slice-only`。它只校验 `## Design Decisions` 与 `### Implementation Slice`（主能力、归属/关联模块、切片类型/覆盖、代码包、拥有路径、集成路径、模块卡、frozen approvals/out-of-context），跳过其余章节与全部 UI 检查。
+- 08→09 硬门禁：阶段 08 转换时，`workflow.py` 运行 `scripts/check-change-footprint.py <change-id> --verify`。它对照 `design/evidence/implementation-base.json` 重算工作区差异，与 `design/evidence/implementation-diff.json` 比较排序后的 changed-path 集合与 `diff_sha256`，并重跑切片分类。差异缺失/不一致，或路径超出声明的 footprint 时阻断转换。
+- 失败语义：检查器非 0 退出、布局不可读或证据缺失均阻断转换；不生成 handoff，`current_step` 不前进。`strategy=none`（或缺少布局）时转换打印 `FOOTPRINT_GATE=SKIPPED (strategy none)` 并继续；这是显式跳过，不是通过声明。
+- 08 入口与 09 验证：08 在写代码前运行 `scripts/implementation-snapshot.py`，并用 `scripts/code-context.py` 获取检索清单；09 对同一入口快照独立重算差异。注册表检查（`check-capabilities.py`、`check-modules.py`）与 roadmap 检查在 04/05 运行，回写的 `--completed` 检查在 10 运行。
 
 状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python3 scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
 
@@ -149,7 +158,7 @@ python3 scripts/workflow.py next-change --change-id change-b
 - 03 结束前运行 `python scripts/check-architecture-baseline.py --strict`；缺少“现有系统二开约束”“第三方接口依赖清单”、代码访问记录、第三方数据流或 `LEGACY-*`/`EXT-*` 约束时不得冻结基线。
 - 07 修改现有功能时 `design.md` 的 `### 现有代码变更影响` 必须登记文件/类/函数/接口/表/测试、修改策略、兼容性、迁移/回滚、风险；第三方接口必须进入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行并有 test/fakes 证据。
 - `mode=equivalent` 只在技能确实不可用时使用，必须写 `reason`，并在 `docs/project/toolchain-report.md` 记录缺失；不能把“可用”当作“已使用”。
-- 02 的 `internet-research` 结果必须写入 `docs/product/reference-research.md` 并通过 `python scripts/check-reference-research.py --strict`（校验真实来源 URL、访问日期、参考产品状态与影响映射）。无联网能力时标记 BLOCKED，不能用 `equivalent` 绕过。methods 块只记录调研参与，不设问题数量配额。
+- 02 的 `internet-research` 结果必须写入 `docs/product/reference-research.md` 并通过 `python scripts/check-reference-research.py --strict`（校验真实来源 URL、访问日期、参考产品状态、存在参考产品时至少一个同类产品、`## 9. 同类产品偏差确认` 与影响映射；重大偏差未取得用户明确确认（确认人+日期）时不通过，须提交用户确认）。无联网能力时标记 BLOCKED，不能用 `equivalent` 绕过。methods 块只记录调研参与，不设问题数量配额。
 - 单独校验：`python scripts/check-method-evidence.py --step <step-id> --evidence <path>`；`workflow.py transition` 会自动调用同一逻辑。
 - 交接报告第 4 节必须展示关键问题、备选、决策、未决项、产物落点与证据路径。
 

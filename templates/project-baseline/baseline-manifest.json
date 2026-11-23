@@ -82,6 +82,10 @@
           "sha256": ""
         },
         {
+          "path": "docs/architecture/code-layout.json",
+          "sha256": ""
+        },
+        {
           "path": "docs/adr/README.md",
           "sha256": ""
         }

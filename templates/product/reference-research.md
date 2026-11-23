@@ -7,7 +7,7 @@
 - Research date: PENDING
 - Research executor: PENDING
 
-> Step 02 must first confirm with the user whether reference products exist; regardless of whether they exist, research must be completed on the internet with queries, sources, dates, and conclusions recorded. "Research" without real sources must not pass.
+> Step 02 must first confirm with the user whether reference products exist; regardless of whether they exist, research must be completed on the internet with queries, sources, dates, and conclusions recorded. "Research" without real sources must not pass. When reference products exist, at least one **same-category (同类) product** is mandatory, and outputs are compared against it in Section 9; a major deviation must be confirmed by the user before stage review.
 
 ## 1. Research Scope and Questions
 
@@ -19,6 +19,7 @@
 
 - Reference product status: PRESENT / NONE
 - Reason for no reference product: PENDING (required when status is NONE)
+- Same-category requirement: when status is PRESENT, at least one product row must be type "same category" (同类); ask the user for it and research it before comparison.
 
 | Product/Solution | Type (same category/adjacent/substitute) | Access method (official site/docs/trial/screenshot/user-provided) | Link | Research date | Notes |
 |---|---|---|---|---|---|
@@ -64,3 +65,13 @@
 - Source credibility/limitations: PENDING
 - Product/business owner: PENDING
 - Approval status: DRAFT
+
+## 9. Similar Product Deviation Confirmation
+
+> Compare this stage's outputs with the mainstream practice of same-category products (flow coverage, roles/permissions, data objects, business rules, exception handling). Deviation level is one of consistent / acceptable / major. A **major** deviation must be confirmed by the user with confirmer and date before the stage can be submitted for review; the check fails and asks for confirmation otherwise.
+
+- When there is no reference product: write `N/A` + reason.
+
+| Comparison item | Our output/approach | Similar-product approach | Deviation level (consistent/acceptable/major) | Impacted object (FLOW/NODE/DO/BR/NFR) | Confirmation status (user confirmed/pending/N/A) | Confirmer | Confirmed at | Notes |
+|---|---|---|---|---|---|---|---|---|
+| PENDING | PENDING | PENDING | consistent / acceptable / major | PENDING | user confirmed / pending / N/A | PENDING | PENDING | PENDING |

@@ -74,6 +74,15 @@ VALID = """# 参考产品与互联网调研
 - 来源可信度/限制：公开资料，需用户确认
 - 产品/业务负责人：待评审
 - 审批状态：DRAFT
+
+## 9. 同类产品偏差确认
+
+- 无参考产品理由（状态为 NONE 时必填）：N/A
+
+| 对比项 | 本项目输出/做法 | 同类产品做法 | 偏差等级 | 影响对象（FLOW/NODE/DO/BR/NFR） | 确认状态 | 确认人 | 确认日期 | 说明 |
+|---|---|---|---|---|---|---|---|---|
+| 客户档案组织 | 以客户为中心 | 以客户为中心 | 一致 | FLOW-001 | N/A | N/A | N/A | 无偏差 |
+| 离线记录方式 | 本地队列+冲突提示 | 仅在线记录 | 重大偏差 | FLOW-002 | 用户已确认 | 业务负责人 | 2026-11-13 | 本项目弱网可用为硬需求 |
 """
 
 
@@ -111,6 +120,33 @@ class ReferenceResearchTests(unittest.TestCase):
         result = run_checker(text)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("无参考产品理由", result.stdout)
+
+    def test_requires_same_category_product(self):
+        text = VALID.replace("| 同类 | 官网 |", "| 相邻 | 官网 |")
+        result = run_checker(text)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("same-category", result.stdout)
+
+    def test_requires_deviation_confirmation_section(self):
+        text = VALID.split("## 9. 同类产品偏差确认")[0]
+        result = run_checker(text)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Similar Product Deviation Confirmation", result.stdout)
+
+    def test_major_deviation_requires_user_confirmation(self):
+        text = VALID.replace("| 重大偏差 | FLOW-002 | 用户已确认 |", "| 重大偏差 | FLOW-002 | 待用户确认 |")
+        result = run_checker(text)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("prompt the user to confirm", result.stdout)
+
+    def test_major_deviation_requires_confirmation_date(self):
+        text = VALID.replace(
+            "| 重大偏差 | FLOW-002 | 用户已确认 | 业务负责人 | 2026-11-13 |",
+            "| 重大偏差 | FLOW-002 | 用户已确认 | 业务负责人 | 2026-11 |",
+        )
+        result = run_checker(text)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("YYYY-MM-DD", result.stdout)
 
 
 if __name__ == "__main__":

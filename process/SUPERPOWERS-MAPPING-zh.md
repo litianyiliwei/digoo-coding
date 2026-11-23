@@ -8,7 +8,7 @@
 |---|---|---|
 | 对话启动/技能发现 | `using-superpowers` | 若已安装且 Agent 可发现，先读取其规则，再选择任务相关技能；按宿主 Agent 的真实调用方式执行 |
 | 需求业务梳理/方案讨论 | `brainstorming` | 先与用户澄清目标、用户、痛点、范围、成功标准和未决问题；不应未经澄清就一次性生成完整方案；需求规格最终落入项目基线/OpenSpec |
-| 参考产品/互联网调研 | `internet-research` | 用 WebSearch/WebFetch 或宿主等价联网工具记录研究问题、来源、对比、结论与影响映射；无联网能力时标记 BLOCKED，不得用记忆替代 |
+| 参考产品/同类产品调研 | 本地方法 Skill `competitor-research` + `internet-research` | 加载 `competitor-research` 询问同类产品、定义对比维度、用真实来源调研、判定偏差等级，并让用户确认重大偏差；用 WebSearch/WebFetch 或宿主等价联网工具记录 URL/访问日期；无联网能力时标记 BLOCKED，不得用记忆替代 |
 | 计划实施 | `using-git-worktrees`、`writing-plans` | 在获批方案后准备隔离工作区并拆成小任务 |
 | 编码实施 | `test-driven-development` | RED → GREEN → REFACTOR，验证先行 |
 | 任务执行 | `subagent-driven-development` 或 `executing-plans` | 按当前环境支持的模式执行并设置检查点 |
@@ -16,6 +16,8 @@
 | 代码审查 | `requesting-code-review`、`receiving-code-review` | 根据规格/计划检查并核实审查反馈 |
 | 完成前验证 | `verification-before-completion` | 用真实命令和结果证明功能已修复/实现 |
 | 07 详细设计 | `brainstorming`、`writing-plans` | 用 `brainstorming` 比较数据模型、接口形态、状态流转与测试策略的取舍；用 `writing-plans` 把已批准 spec/AC 拆成设计任务与测试计划；必须记录方法证据 |
+| 05 提案需求 / 10 验收归档 | 本地方法 Skill `baseline-impact-classification` | 将每个受影响项分类为 `CHANGE_ONLY`、`BASELINE_CHANGE_REQUIRED`、`BASELINE_UPDATE_AFTER_ACCEPTANCE` 或 `N/A`；记录版本/约束/冲突与回写决策；不得直接修改冻结基线 |
+| 07 详细设计（现有代码） | 本地方法 Skill `existing-code-impact-analysis` | 询问是否修改现有功能，读取真实代码位置，逐项登记文件/类/函数/接口/表/测试、兼容性、回滚、风险与验证；全新功能写 `N/A + reason` |
 | 09 独立验证 | `verification-before-completion`、`systematic-debugging`（只读） | 用 `verification-before-completion` 要求真实命令/退出码/测试结果；用 `systematic-debugging` 复现失败、定位根因但不修复代码；不得用 code review 技能替代独立验证 |
 | 分支结束 | `finishing-a-development-branch` | 在所有验证通过后讨论合并/PR/清理，不能自动发布 |
 
@@ -78,5 +80,6 @@ python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.js
 - 每个阶段 Prompt 必须先加载对应的项目 Skill，并检查适用的 Superpowers 技能是否实际可用。
 - 详细设计必须实际使用 `brainstorming` 与 `writing-plans`，并记录方法证据；独立验证必须使用 `verification-before-completion`，独立运行 OpenSpec `status`/`validate`，不能用 code review 技能替代独立验证。
 - 需求业务梳理阶段明确使用 `brainstorming` 与 `internet-research`；它通常发生在正式 OpenSpec Change 之前，因此先读取已有 specs，不要提前创建 Change。调研结果写入 `docs/product/reference-research.md`。
+- `method_policy` 要求的本地方法 Skill 必须实际使用：`competitor-research`（02）、`baseline-impact-classification`（05/10，07 按需）、`existing-code-impact-analysis`（07）。在阶段证据 `methods` 中记录真实证据路径与产物落点章节。
 - OpenSpec 相关阶段必须运行真实 CLI：用 `openspec list/status/instructions/validate` 读取状态和规则；只有用户批准且门禁通过后才 archive。
 - 若 Agent 没有仓库/终端/Skill 访问能力，必须请求用户提供文件或说明无法执行，不能模拟工具结果。
