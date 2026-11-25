@@ -63,6 +63,105 @@ def declared_outputs(row, cid):
     return paths
 
 
+def _lane_check(rel, current, completed, pending_steps, stage_ids, cid, by_step, volatile):
+    """Return a deny reason for one lane, or None when the write is allowed."""
+    if current not in stage_ids:
+        current_index = len(stage_ids)
+    else:
+        current_index = stage_ids.index(current)
+
+    def outputs(step_id):
+        row = by_step.get(step_id.split('-')[0])
+        return set(declared_outputs(row, cid)) if row else set()
+
+    def matches(path):
+        return rel.startswith(path) if path.endswith('/') else rel == path
+
+    allowed = set()
+    for sid in stage_ids[:current_index + 1]:
+        allowed.update(outputs(sid))
+    future = set()
+    for sid in stage_ids[current_index + 1:]:
+        future.update(outputs(sid))
+    future_only = future - allowed
+    if any(matches(path) for path in future_only):
+        if pending_steps:
+            waiting = ', '.join(str(x) for x in sorted(pending_steps))
+            return (f'阶段 {current} 处于待评审（{waiting}），禁止写入后续阶段产物：{rel}。'
+                    ' 请先完成当前阶段并运行 workflow.py request-review，结束回合等待用户评审。')
+        return (f'阶段 {current} 尚未完成或尚未推进，禁止提前写入后续阶段产物：{rel}。'
+                ' 请先完成当前阶段并运行 workflow.py request-review，结束回合等待用户评审。')
+
+    shared = future | outputs(current) if current in stage_ids else future
+    completed_outputs = set()
+    for sid in completed:
+        if sid in stage_ids:
+            completed_outputs.update(outputs(sid))
+    if any(matches(path) for path in completed_outputs if path not in volatile and path not in shared):
+        return (f'{rel} 属于已完成阶段 {current} 之前已批准的产物，不能直接改写；'
+                '请先运行 workflow.py reopen --step <stage> --reason <reason> 并重新评审。')
+
+    if current in pending_steps:
+        if any(matches(path) for path in outputs(current) if path not in volatile):
+            return (f'阶段 {current} 正在等待用户评审，{rel} 已进入评审范围；'
+                    '如需修改，请先修改并重新运行 workflow.py request-review。')
+    return None
+
+
+def check_v2(state, rel, by_step, volatile):
+    """Multi-lane boundary check. Any matching lane that allows the write wins."""
+    project = state.get('project') or {}
+    lanes = state.get('changes') or {}
+    project_steps = ['01-project-bootstrap', '02-requirements-analysis',
+                     '03-project-architecture-baseline', '04-proposal-planning']
+    change_steps = ['05-feature-requirements', '06-figma-design-review',
+                    '07-detailed-design', '08-implementation-orchestrator',
+                    '09-independent-verification', '10-acceptance-audit']
+    candidates = []
+    project_pending = {x.get('step_id') if isinstance(x, dict) else x
+                       for x in (project.get('pending_approvals') or [])}
+    project_outputs = set()
+    for sid in project_steps:
+        row = by_step.get(sid.split('-')[0])
+        if row:
+            project_outputs.update(declared_outputs(row, None))
+    if any(rel.startswith(path) if path.endswith('/') else rel == path for path in project_outputs):
+        candidates.append(('project', None))
+    for cid, lane in lanes.items():
+        if str(lane.get('status', '')).upper() == 'ABANDONED':
+            continue
+        lane_outputs = set()
+        for sid in change_steps:
+            row = by_step.get(sid.split('-')[0])
+            if row:
+                lane_outputs.update(declared_outputs(row, cid))
+        if any(rel.startswith(path) if path.endswith('/') else rel == path for path in lane_outputs):
+            candidates.append(('change', cid))
+
+    reasons = []
+    for kind, cid in candidates:
+        if kind == 'project':
+            reason = _lane_check(rel, project.get('current_step'), set(project.get('completed_steps') or []),
+                                 project_pending, project_steps, None, by_step, volatile)
+        else:
+            lane = lanes[cid]
+            pending = {x.get('step_id') if isinstance(x, dict) else x
+                       for x in (lane.get('pending_approvals') or [])} | project_pending
+            if project_pending:
+                # A project-lane review freezes every change lane's current
+                # artifacts, because the project prefix is not settled yet.
+                pending.add(lane.get('current_step'))
+            reason = _lane_check(rel, lane.get('current_step'), set(lane.get('completed_steps') or []),
+                                 pending, change_steps, cid, by_step, volatile)
+        if reason is None:
+            return 0
+        reasons.append(reason)
+    if reasons:
+        return deny(reasons[0])
+    # A path that belongs to no declared lane output is left to the permission system.
+    return 0
+
+
 def main() -> int:
     try:
         payload = json.load(sys.stdin)
@@ -100,13 +199,15 @@ def main() -> int:
     except Exception:
         return 0
     order = [s['id'] for s in stages]
+    by_step = {str(row.get('step')): row for row in contract.get('steps', [])}
+    volatile = set(DEFAULT_VOLATILE)
+    volatile.update(norm(x) for x in (contract.get('handoff_policy') or {}).get('volatile_artifacts', []) if isinstance(x, str))
+    if str(state.get('state_schema_version')) == '2.0' and isinstance(state.get('project'), dict) and isinstance(state.get('changes'), dict):
+        return check_v2(state, rel, by_step, volatile)
     current = state.get('current_step')
     if current not in order:
         return 0
     cid = state.get('active_change_id') or ''
-    by_step = {str(row.get('step')): row for row in contract.get('steps', [])}
-    volatile = set(DEFAULT_VOLATILE)
-    volatile.update(norm(x) for x in (contract.get('handoff_policy') or {}).get('volatile_artifacts', []) if isinstance(x, str))
     completed = set(state.get('completed_steps') or [])
     pending_steps = {x.get('step_id') if isinstance(x, dict) else x for x in (state.get('pending_approvals') or [])}
     current_index = order.index(current)

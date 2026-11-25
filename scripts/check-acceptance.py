@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed structural check for human acceptance evidence.
 
-Human UI acceptance compares the running system directly with the Figma file.
+Human UI acceptance compares the running system directly with the UI design source (the HTML review entry by default, or the optional Figma file).
 No screenshots are required or accepted as the primary evidence. The machine
 geometry evidence (`figma-layout-check.json`) is still required from stage 08.
 """
@@ -92,7 +92,7 @@ if ui_change:
                 ui_rows.append(cells)
         if not ui_rows:
             errors.append("## UI acceptance must contain per-PAGE rows")
-        allowed_ui = {"accepted", "approved", "pass", "passed", "approved deviation", "deviation approved"}
+        allowed_ui = {"accepted", "approved", "pass", "passed", "approved deviation", "deviation approved", "deviation_approved"}
         covered = set()
         for cells in ui_rows:
             while len(cells) < 7:
@@ -101,8 +101,8 @@ if ui_change:
             covered.add(pid)
             if cells[1].lower() not in allowed_ui:
                 errors.append(f"UI acceptance {pid}: result must be ACCEPTED/DEVIATION_APPROVED")
-            if not cells[2] or not re.search(r"\d+:\d+", cells[2]):
-                errors.append(f"UI acceptance {pid}: Figma node is required")
+            if not cells[2] or not re.search(r"\d+\s*:\s*\d+|[A-Za-z_][A-Za-z0-9_.:-]+", cells[2]):
+                errors.append(f"UI acceptance {pid}: design source reference (HTML data-node-id or Figma node) is required")
             if not cells[3] or cells[3].lower() in {"todo", "tbd", "pending"}:
                 errors.append(f"UI acceptance {pid}: a live system entry (URL or route) is required")
             method = cells[5].strip()
@@ -110,7 +110,7 @@ if ui_change:
                 errors.append(f"UI acceptance {pid}: acceptance method must be machine evidence sign-off or side-by-side verification (机器证据签收/并排核对)")
             deviation = cells[4].strip()
             if deviation and deviation.lower() not in {"-", "—", "无", "n/a", "none"}:
-                if "审批" not in deviation and "approver" not in deviation.lower() and cells[1].lower() not in {"approved deviation", "deviation approved"}:
+                if "审批" not in deviation and "approver" not in deviation.lower() and cells[1].lower() not in {"approved deviation", "deviation approved", "deviation_approved"}:
                     errors.append(f"UI acceptance {pid}: recorded deviation must name the approver")
             if not cells[6] or cells[6].lower() in {"todo", "tbd", "pending"}:
                 errors.append(f"UI acceptance {pid}: reviewer is required")

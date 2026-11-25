@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UI Design Review - &lt;change-id&gt;</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    :root {
+      --review-bg: #f4f7f1;
+      --review-surface: #ffffff;
+      --review-text: #1f2a24;
+      --review-muted: #5f6f64;
+      --review-border: #dce5d7;
+      --review-brand: #2f6b3f;
+    }
+    body {
+      margin: 0;
+      font-family: "Noto Sans SC", system-ui, sans-serif;
+      background: var(--review-bg);
+      color: var(--review-text);
+    }
+    header { padding: 32px 40px 16px; }
+    header h1 { margin: 0 0 8px; font-size: 28px; }
+    header p { margin: 0; color: var(--review-muted); }
+    main { padding: 0 40px 40px; display: grid; gap: 24px; }
+    section {
+      background: var(--review-surface);
+      border: 1px solid var(--review-border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    section h2 { margin: 0 0 12px; font-size: 18px; color: var(--review-brand); }
+    ul { margin: 0; padding-left: 20px; }
+    li { margin: 6px 0; }
+    a { color: var(--review-brand); }
+    code { color: var(--review-muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>UI Design Review</h1>
+    <p>Change <code>&lt;change-id&gt;</code> · HTML-first design documents · review every PAGE per declared platform.</p>
+  </header>
+  <main>
+    <!-- Replace each example link with the real platform folders and PAGE files. -->
+    <section>
+      <h2>Web</h2>
+      <ul>
+        <li><a href="web/PAGE-001.html">PAGE-001 Login</a> <code>1440×900</code></li>
+      </ul>
+    </section>
+    <section>
+      <h2>App</h2>
+      <ul>
+        <li><a href="app/PAGE-003.html">PAGE-003 Login</a> <code>375×812</code></li>
+      </ul>
+    </section>
+    <section>
+      <h2>Android</h2>
+      <ul>
+        <li><code>Add the Android PAGE links here when the Change targets Android.</code></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

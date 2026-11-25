@@ -1,8 +1,10 @@
-page_id,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes
-PAGE-001,PENDING,PAGE-001-E01,3:3,0,0,600,900,.brand-panel,Y,N,2,,,品牌区容器；坐标相对 PAGE 画板
-PAGE-001,PENDING,PAGE-001-E02,3:4,22,382,176,53,.brand-panel h1,Y,Y,4,,44px,700,品牌标题
-PAGE-001,PENDING,PAGE-001-E03,3:8,810,265,420,370,.form-card,Y,N,2,,,表单卡
-PAGE-001,PENDING,PAGE-001-E04,3:9,829,284,96,29,.form-card h2,Y,Y,4,登录平台,24px,700,表单标题
-PAGE-001,PENDING,PAGE-001-E05,3:12,829,397,382,40,[data-figma-node="3:12"],Y,N,2,,,账号输入容器
-PAGE-001,PENDING,PAGE-001-E06,3:17,829,545,66,39,[data-figma-node="3:17"],Y,Y,2,登录,14px,500,登录按钮
-PAGE-001,PENDING,PAGE-001-E07,3:19,829,602,382,14,.login-hint,Y,Y,4,消费者扫码查询无需登录；监管账号为只读。,12px,400,底部说明；含逗号/分号的文本必须用 CSV 引号
+page_id,platform,viewport,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes
+PAGE-001,web,1440x900,PENDING,PAGE-001-E01,login-brand,0,0,600,900,.brand-panel,Y,N,2,,,,品牌区容器；HTML 模式下 figma_node_id 填 data-node-id；坐标相对 PAGE 视口
+PAGE-001,web,1440x900,PENDING,PAGE-001-E02,login-brand-title,22,382,176,53,.brand-panel h1,Y,Y,4,灵犀智学,44px,700,品牌标题
+PAGE-001,web,1440x900,PENDING,PAGE-001-E03,login-form-card,810,265,420,370,.form-card,Y,N,2,,,,表单卡
+PAGE-001,web,1440x900,PENDING,PAGE-001-E04,login-form-title,829,284,96,29,.form-card h2,Y,Y,4,登录平台,24px,700,表单标题
+PAGE-001,web,1440x900,PENDING,PAGE-001-E05,login-account,829,397,382,40,[data-node-id="login-account"],Y,N,2,,,,账号输入容器
+PAGE-001,web,1440x900,PENDING,PAGE-001-E06,login-submit,829,545,66,39,[data-node-id="login-submit"],Y,Y,2,登录,14px,500,登录按钮
+PAGE-003,app,375x812,PENDING,PAGE-003-E01,app-brand,0,44,375,180,.app-brand,Y,N,2,,,,App 品牌头部；App/H5 使用自身视口
+PAGE-003,app,375x812,PENDING,PAGE-003-E02,app-form-card,16,240,343,360,.app-form-card,Y,N,2,,,,App 表单卡
+PAGE-003,app,375x812,PENDING,PAGE-003-E03,app-login-submit,16,520,343,48,[data-node-id="app-login-submit"],Y,Y,2,登录,14px,500,App 登录按钮；含逗号/分号的文本必须用 CSV 引号

@@ -10,7 +10,7 @@ Prompt files are in `prompts/` and correspond one-to-one to `.claude/skills/<ski
 | 03 Project Overall Architecture Design | `prompts/03-project-architecture-baseline.md` | `project-architecture-baseline` |
 | 04 Proposal Breakdown, Dependency Ordering, and Roadmap | `prompts/04-proposal-planning.md` | `proposal-planning` |
 | 05 Proposal-Level Requirements Analysis | `prompts/05-feature-requirements.md` | `feature-requirements` |
-| 06 Figma Design and Review (Figma-only) | `prompts/06-figma-design-review.md` | `figma-design-review` |
+| 06 UI Design and Review (HTML-first, Figma optional) | `prompts/06-figma-design-review.md` | `figma-design-review` |
 | 07 Detailed Design, Interfaces, and Test Design | `prompts/07-detailed-design.md` | `detailed-design` |
 | 08 Implementation, TDD, Verification, and Code Review | `prompts/08-implementation-orchestrator.md` | `implementation-orchestrator` |
 | 09 Independent Verification and Acceptance Evidence | `prompts/09-independent-verification.md` | `independent-verifier` |

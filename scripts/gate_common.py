@@ -54,6 +54,53 @@ NESTED_BULLET_RE = re.compile(r"^\s+-\s+(.*)$")
 
 CHANGE_ID_KEYS = {"change id", "change-id", "change_id", "变更 id", "变更id", "变更编号"}
 STRATEGIES = {"none", "footprint", "module-packages"}
+
+# Canonical client-platform vocabulary used by Stage 02/04/05 declarations and
+# Stage 06 PAGE coverage. HTML-first UI design: one PAGE set per declared
+# platform, with Figma as an optional supplementary source.
+PLATFORMS = {
+    "web", "h5", "mini-program", "app", "android", "ios", "harmonyos",
+    "desktop", "pda",
+}
+PLATFORM_ALIASES = {
+    "web端": "web", "pc": "web", "pc端": "web", "浏览器": "web",
+    "h5端": "h5", "小程序": "mini-program", "weapp": "mini-program",
+    "微信小程序": "mini-program",
+    "app端": "app", "移动端": "app", "mobile": "app", "客户端": "app",
+    "android端": "android", "安卓": "android", "app-android": "android",
+    "app-ios": "ios", "ios端": "ios", "苹果": "ios",
+    "harmony": "harmonyos", "鸿蒙": "harmonyos", "app-harmony": "harmonyos",
+    "桌面端": "desktop", "pda端": "pda",
+}
+PLATFORM_SPLIT_RE = re.compile(r"[;,；，、]")
+
+
+def normalize_platform(value: str) -> str:
+    """Return the canonical platform name, or an empty string when unknown."""
+    text = str(value or "").strip().strip("`").strip().casefold()
+    if not text:
+        return ""
+    if text in PLATFORMS:
+        return text
+    return PLATFORM_ALIASES.get(text, "")
+
+
+def parse_platform_list(value: str) -> tuple[list[str], list[str]]:
+    """Split a free-form platform list into (canonical, unknown) tokens."""
+    known: list[str] = []
+    unknown: list[str] = []
+    for token in PLATFORM_SPLIT_RE.split(str(value or "")):
+        token = token.strip()
+        if not token or token.upper().startswith("N/A"):
+            continue
+        name = normalize_platform(token)
+        if name:
+            if name not in known:
+                known.append(name)
+        elif token not in unknown:
+            unknown.append(token)
+    return known, unknown
+
 MODULE_LIST_FIELDS = ("frontend_paths", "backend_paths", "shared_paths", "capabilities")
 SLICE_FIELD_ALIASES = {
     "primary capability": "primary",

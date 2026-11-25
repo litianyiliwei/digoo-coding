@@ -27,4 +27,3 @@
 ## Rollback
 
 PENDING — trigger conditions, procedure, data impact, verification after rollback.
-</content>

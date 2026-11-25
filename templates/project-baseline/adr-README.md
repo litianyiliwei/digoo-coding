@@ -19,4 +19,3 @@
 - Status values: PROPOSED / ACCEPTED / SUPERSEDED / REJECTED.
 - An accepted ADR that changes shared constraints requires a baseline amendment per `process/BASELINE-FEATURE-INTERACTION.md`.
 - ADR files follow the project's language rules; identifiers stay English.
-</content>

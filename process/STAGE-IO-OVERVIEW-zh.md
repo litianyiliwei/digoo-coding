@@ -18,7 +18,7 @@
 | 分组 | 阶段链路 | 说明 |
 |---|---|---|
 | 项目基线链 | 00 → 01 → 02 → 03 → 04 | 初始化 → 需求业务梳理 → 总体架构/基线冻结 → 路线图 |
-| 提案交付链 | 04 → 05 → 06 → 07 → 08 → 09 → 10 | 提案需求 → Figma 设计/评审 → 详细设计（含接口/测试） → 实现 → 独立验证 → 验收 |
+| 提案交付链 | 04 → 05 → 06 → 07 → 08 → 09 → 10 | 提案需求 → UI 设计/评审 → 详细设计（含接口/测试） → 实现 → 独立验证 → 验收 |
 
 ## 总览
 
@@ -31,13 +31,13 @@
 | 01 | 项目初始化与工具链检查 | 项目级 | `project-bootstrap` | 无（流程起点） | 用户提供的项目目标与仓库位置<br>仓库现有目录/配置/AGENTS.md（若存在） | AGENTS.md（仅缺失时创建或经批准修改）<br>workflow-state.json<br>docs/architecture/baseline-status.md（依据 templates/project-baseline/baseline-status.md）<br>docs/project/toolchain-report.md（依据 templates/project-baseline/toolchain-report.md） | N/A |
 | 02 | 需求业务梳理 | 项目级 | `requirements-analysis` | `01-project-bootstrap` | 用户提供访谈/业务/旧系统资料及项目目标、用户、角色、约束<br>阶段 02 契约与模板对应行<br>阶段 02 Prompt/Skill 规则<br>存在时读取 BASELINE-BRIEF 与开放问题（只读相关项）<br>既有需求/流程/数据/规则仅按命中 ID/章节读取<br>用户指定的参考产品或匹配研究问题的官方来源<br>存在时读取 change-sizing 与 id-conventions 相关规则 | docs/product/requirements-analysis.md<br>docs/product/workflows.md（每个 FLOW 必须含完整节点表：节点角色、输入/输出数据对象、前置条件、处理动作、异常/分支、下一节点）<br>docs/product/data-objects.csv（业务数据对象目录）<br>docs/product/rd-matrix.csv（需求-数据对象矩阵：需求/规则 → 流程节点 → 角色 → 数据对象）<br>docs/product/business-rules.md<br>docs/product/glossary.md<br>docs/product/acceptance-policy.md<br>docs/product/open-questions.md<br>docs/product/BASELINE-BRIEF.md（一页式基线入口，约 1 页；阶段 03–05 常驻上下文）<br>docs/product/role-permission-matrix.csv（角色-能力-数据范围-访问级别）<br>docs/product/change-sizing.md（Change 切片预算与完成定义）<br>docs/product/decisions.md（DEC 决策日志）<br>docs/product/assumptions.md（ASM 假设登记）<br>docs/product/lessons.md（教训/反模式；验收后由阶段 10 追加）<br>docs/product/id-conventions.md（项目级/Change 级 ID 与并行分配规则）<br>docs/product/BASELINE-INDEX.md（由 scripts/gen-baseline-index.py 生成的常驻基线索引）<br>docs/product/reference-research.md（参考产品与互联网调研：研究问题/参考产品（存在参考产品时至少含一个同类产品）/来源记录/对比/结论/影响映射/同类产品偏差确认，重大偏差须用户确认） | 6 项（见明细） |
 | 03 | 项目总体架构设计 | 项目级 | `project-architecture-baseline` | `02-requirements-analysis` | docs/product/BASELINE-BRIEF.md（先读，约 1 页）<br>docs/product/reference-research.md（技术选型/第三方判断）<br>docs/product/open-questions.md（仅相关条目）<br>docs/project/toolchain-report.md（工具链/测试命令）<br>docs/architecture/baseline-status.md（初始基线）<br>现有系统代码库地址/第三方接口清单（用户提供）<br>命中的 FLOW/NODE/DO/RD/BR 行（按 ID 定向读取） | docs/architecture/system-context.md<br>docs/architecture/domain-boundaries.md<br>docs/architecture/containers-and-deployment.md<br>docs/architecture/data-flows.md（数据流转：DF ID、同步/异步、事务边界、失败与补偿）<br>docs/architecture/logical-erd.md（逻辑实体、关系、数据所有权、领域不变量）<br>docs/architecture/technology-decisions.md（含技术选型访谈记录、候选比较、用户确认人与日期）<br>docs/architecture/api-conventions.md<br>docs/architecture/frontend-conventions.md<br>docs/architecture/test-strategy.md<br>docs/architecture/code-layout.json（代码布局策略（module-packages | footprint | none）、roots、package_pattern、integration_paths、frozen_paths、module_card 与 dependency_rules；随架构基线冻结，仅通过基线变更流程修改；策略 module-packages 启用能力/模块注册表、切片与 footprint 门禁）<br>docs/architecture/quality-gates.json（条件适用：项目采用静态分析时；机器可读静态分析门禁：栈根目录、工具命令、配置路径、严重度与豁免政策；阶段 03 仅校验结构，因为从零仓库可能尚无栈目录；批准来自冻结的 test_quality 基线域，而非文件自身；未采用时省略文件、evidence 标记 n/a 并记录决策）<br>docs/adr/README.md<br>docs/architecture/baseline-status.md（经本阶段结束审计的各域版本/冻结状态）<br>docs/architecture/baseline-manifest.json（机器权威版本/冻结状态/域文件 SHA-256）<br>docs/architecture/constraint-registry.json（稳定约束 ID 与审批状态）<br>docs/project/baseline-audit-report.md（本阶段结束审计报告） | 13 项（见明细） |
-| 04 | 提案拆分、依赖排序与路线图 | 项目级到功能级 | `proposal-planning` | `03-project-architecture-baseline` | docs/product/BASELINE-BRIEF.md<br>docs/product/change-sizing.md<br>docs/architecture/baseline-manifest.json<br>docs/architecture/constraint-registry.json<br>docs/architecture/baseline-status.md<br>docs/project/baseline-audit-report.md<br>docs/product/open-questions.md（仅相关条目）<br>命中的 FLOW/NODE/DO/BR 行 | docs/product/proposal-roadmap.md（含每个候选 Change 的范围/依赖/价值/基线适用域与潜在修订摘要，并含模块列：Primary Capability、Owner Module、Related Modules、Slice Type、Slice Coverage、Code Target、Demo Path、Slice Budget）<br>docs/product/capabilities.csv（能力进度注册表：capability_slug、capability_name、domain_id、owner_module、related_modules、status、delivered_slices、remaining_slices、active_changes、notes；04 创建、05 更新、10 回写）<br>docs/product/modules.csv（模块归属注册表：module_slug、module_name、domain_id、frontend_paths、backend_paths、shared_paths、capabilities、status、notes；04 创建、10 回写） | 6 项（见明细） |
-| 05 | 提案级需求分析 | 单个功能 Change | `feature-requirements` | `04-proposal-planning` | docs/product/BASELINE-BRIEF.md<br>docs/product/change-sizing.md、id-conventions.md<br>docs/product/proposal-roadmap.md（当前行）<br>docs/architecture/baseline-status.md、baseline-manifest.json、constraint-registry.json<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP 行<br>openspec/specs/**（仅相关 capability）<br>docs/product/open-questions.md（仅相关条目）<br>docs/product/reference-research.md（仅范围/场景需要时） | openspec/changes/<change-id>/proposal.md<br>openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）<br>openspec/changes/<change-id>/tasks.md（初步任务；08 更新勾选状态）<br>openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；AC 是测试与验证的唯一锚点）<br>openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md；07 更新设计复核结论）<br>openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，按 manifest governance_profile 绑定约束：standard 全部 ACTIVE，lite 仅 critical；07 写入设计证据）<br>docs/product/capabilities.csv（更新能力进度注册表：status、delivered_slices、remaining_slices 与 active_changes）<br>docs/product/modules.csv（更新模块归属注册表：为当前 Change 新增或更新模块及其能力）<br>docs/product/proposal-roadmap.md（当接受主表之外的迟到提案时追加 Roadmap Amendments 记录：Reason、Requester、Approver、Date、Baseline Impact；该后续阶段输出声明使 04 handoff 将路线图标记为 mutable_by_design） | 9 项（见明细） |
-| 06 | Figma 设计与评审（Figma-only） | 单个功能 Change | `figma-design-review` | `05-feature-requirements` | 当前 Change 的 proposal/specs/design/user-stories<br>当前 Change 的 design/baseline-impact.md、baseline-binding.json<br>docs/architecture/frontend-conventions.md 第 9 节、technology-decisions.md<br>docs/architecture/baseline-status.md<br>docs/product/BASELINE-BRIEF.md、id-conventions.md<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/PAGE 行<br>docs/product/open-questions.md（仅页面相关）<br>Figma MCP 可访问性 | openspec/changes/<change-id>/design/figma-audit.md（唯一 UI 契约（单文件）：Figma 文件/版本、目标框架/转码说明、PAGE 清单、token 实际值、文字样式、每 PAGE 区块规格、设计代码说明、断言范围、状态覆盖与决策、资产清单、MCP 读取记录、差异与待确认、UI 评审 APPROVED；无 UI 时 N/A + 理由）<br>openspec/changes/<change-id>/design/figma-code/（README.md + 每 PAGE 一个 PAGE-00N.vue（React 栈为 .tsx）；06 按总体技术选型转码的目标框架设计代码；08 直接移植只补业务逻辑）<br>openspec/changes/<change-id>/design/figma-layout.csv（精简断言表：page_id/route/element_id/figma_node_id/x/y/width/height/dom_selector/assert_geometry/assert_text/tolerance_px/text_content/font_size/font_weight/notes；06 可留 route/dom_selector 为 PENDING，07 填满）<br>openspec/changes/<change-id>/design/figma-assets/README.md（仅当有真实图片/SVG 资产时生成；不保存参考截图） | 11 项（见明细） |
-| 07 | 详细设计、接口与测试设计 | 单个功能 Change | `detailed-design` | `06-figma-design-review` | openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design/user-stories.md、tasks.md、design.md<br>openspec/changes/<change-id>/design/baseline-impact.md、baseline-binding.json<br>现有功能代码地址/第三方接口清单（用户提供）<br>涉及 UI 时：openspec/changes/<change-id>/design/figma-audit.md、figma-code/、figma-layout.csv、Figma 评审稿<br>docs/architecture/technology-decisions.md、docs/architecture/api-conventions.md、docs/architecture/frontend-conventions.md#9、docs/architecture/test-strategy.md（按设计域）<br>docs/architecture/baseline-status.md<br>docs/product/BASELINE-BRIEF.md、docs/product/id-conventions.md<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE 行（按 ID 定向读取） | openspec/changes/<change-id>/design.md（统一设计：设计决策、接口、前端、后端、测试五节；`## Design Decisions` 下含 `### Implementation Slice`：主能力、归属/关联模块、切片类型/覆盖、代码包、拥有/集成路径、模块卡动作，以及可选的 Frozen approvals/out-of-context 声明；切片是本文件中的内容，不是单独文件）<br>openspec/changes/<change-id>/design/figma-layout.csv（07 填满每行 route/dom_selector，并据此定义响应式规则；几何/文本/字体值以目标框架设计代码与 metadata 为准）<br>openspec/changes/<change-id>/design.md 的 ### PAGE→BLOCK→组件映射（以 figma-code 目标框架设计代码为基线，仅登记业务化适配与 UI-DEVIATION，不重新设计样式/布局/文案）<br>openspec/changes/<change-id>/design/ui-actions.csv（交互控件清单：每个功能按钮/图标/链接/菜单/标签页映射到跳转（地址+入参）、API（operationId 存在于 api/openapi.yaml）或用户已确认（确认人+日期）的本地动作）<br>openspec/changes/<change-id>/design/baseline-impact.md（07 更新设计复核结论：NO_IMPACT/REBASE_REQUIRED 与设计证据）<br>openspec/changes/<change-id>/design/baseline-binding.json（07 写入逐条约束的设计证据）<br>openspec/changes/<change-id>/design/test-cases.csv（TEST ID → AC/PAGE/API/IO 的测试用例矩阵，含失败注入/替身环境/人工原因；BLOCK 可选，不适用写 N/A）<br>openspec/changes/<change-id>/api/openapi.yaml（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/api-io-mapping.csv（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/io-catalog.csv（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/interface-catalog.csv（跨边界接口目录：HTTP/原生桥接/设备/第三方/异步/文件；条件适用：有跨边界接口时）<br>openspec/changes/<change-id>/design/static-waivers.json（条件适用：需要静态分析豁免时；Change 级文件+规则豁免，含理由/责任人/审批人/批准日期/过期时间；绝不存入冻结门禁文件；无需豁免时省略文件或保留空列表）<br>openspec/changes/<change-id>/traceability.csv（合并 API 与测试映射；唯一追踪聚合文件） | 14 项（见明细） |
-| 08 | 实现、TDD、验证与代码审查 | 单个功能 Change | `implementation-orchestrator` | `07-detailed-design` | 当前 Change 的 tasks.md、design.md、specs、user-stories、test-cases.csv、traceability.csv<br>适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv<br>涉及 UI 的 figma-audit.md、figma-code/、figma-layout.csv<br>当前 Change 的 design/baseline-impact.md、baseline-binding.json、baseline-status.md<br>设计域命中的架构章节：system-context/domain-boundaries/logical-erd/data-flows/technology-decisions/api-conventions/frontend-conventions/test-strategy<br>docs/product/BASELINE-BRIEF.md<br>docs/product/open-questions.md（仅相关条目）<br>现有功能代码地址（若修改现有功能） | 实际源代码/迁移/配置<br>自动化测试代码与运行结果<br>openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 ## UI fidelity 逐 PAGE 数值表：Figma node/断言元素数/最大偏差/布局证据/差异/结论/审批人；数值直接取自 figma-layout-check.json，仅差异/UI-DERIVED PAGE 需人工说明与审批；启用质量门禁时含 ## Static analysis 表，从 static-analysis.json 逐行复制：各栈/工具命令、配置路径 @ SHA-256、结果、字面 exit 0 及生效豁免与审批人）<br>openspec/changes/<change-id>/design/evidence/static-analysis.json（启用质量门禁时；由 scripts/run-quality-gates.py 生成：各 blocking 栈/工具命令、工作目录、退出码、配置 SHA-256、门禁文件 SHA-256、源码 revision、生效豁免、结论）<br>openspec/changes/<change-id>/design/evidence/static-analysis-logs/（启用质量门禁时；每个 blocking 栈/工具一份捕获日志；日志文件名由净化后的栈根目录加工具 id 派生）<br>openspec/changes/<change-id>/design/evidence/figma-layout-check.json（scripts/check-figma-layout.py 的逐元素 expected/actual/delta 证据）<br>openspec/changes/<change-id>/design/evidence/implementation-base.json（脚本生成的入口快照：git HEAD、逐文件 SHA-256 与指纹；由 scripts/implementation-snapshot.py 写入；implementation-snapshot 始终写入入口基线，即使 code-layout 策略为 none）<br>openspec/changes/<change-id>/design/context-manifest.json（scripts/code-context.py 生成的检索闭包：read_set/not_needed/missing；不是门禁；strategy none 时不写文件）<br>模块卡 `<module_path>/MODULE.md`：为本切片创建或更新的每个模块创建/更新（无固定路径；由模块注册表检查校验）<br>openspec/changes/<change-id>/design/evidence/implementation-diff.json（已验证 revision 的 commit/diff SHA-256 与变更路径）<br>实现/验证证据<br>条件适用：基线变更请求/ADR 草案（发现冲突时；未经批准不更新冻结基线） | 10 项（见明细） |
-| 09 | 独立验证与验收证据 | 功能级 | `independent-verifier` | `08-implementation-orchestrator` | 已实现代码及 revision/diff 指纹<br>当前 Change 的 proposal/specs/design/user-stories/tasks<br>适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv<br>涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json<br>test-cases.csv、traceability.csv、code-review.md、Builder 测试证据<br>docs/product/BASELINE-BRIEF.md<br>docs/product/acceptance-policy.md<br>当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md | openspec/changes/<change-id>/design/evidence/independent-verification-report.md<br>openspec/changes/<change-id>/design/evidence/independent-verification.json<br>openspec/changes/<change-id>/design/evidence/static-analysis-independent.json（启用质量门禁时；verifier 与 builder 身份不同的独立重跑证据；由 scripts/run-quality-gates.py --independent 生成） | 10 项（见明细） |
-| 10 | 人工验收、归档与基线回写 | 单个功能 Change | `acceptance-audit` | `09-independent-verification` | independent-verification-report.md 与 independent-verification.json<br>当前 Change 的 specs、user-stories、traceability.csv、design.md、code-review.md<br>涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json<br>test-cases.csv、interface-catalog.csv<br>当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md<br>docs/product/acceptance-policy.md、BASELINE-BRIEF.md、change-sizing.md<br>docs/product/decisions.md、assumptions.md、id-conventions.md<br>运行中的验收环境入口 | openspec/changes/<change-id>/design/evidence/acceptance.md（涉及 UI 时含 ## UI acceptance 逐 PAGE 签收：Figma node/运行系统入口/差异审批/验收方式（机器证据/并排核对）/评审人；启用质量门禁时含 ## Static analysis，从 static-analysis.json 与 static-analysis-independent.json 核对：各栈/工具命令、结果、字面 exit 0 及每个生效豁免与审批人）<br>docs/product/lessons.md（追加本次可复用教训；无则 N/A + 理由）<br>docs/product/decisions.md（受验收结果影响的状态更新）<br>docs/product/assumptions.md（受验收结果影响的状态更新）<br>docs/product/capabilities.csv（能力进度回写：status、delivered_slices、remaining_slices 与 active_changes；由 scripts/check-capabilities.py --completed <change-id> 校验）<br>docs/product/modules.csv（模块归属回写：模块 status/capabilities；Change 完成某个模块时由 scripts/check-modules.py --completed <module-slug> 校验）<br>验收报告与批准记录<br>OpenSpec archive 结果及更新后的主规格（仅批准后） | 7 项（见明细） |
+| 04 | 提案拆分、依赖排序与路线图 | 项目级到功能级 | `proposal-planning` | `03-project-architecture-baseline` | docs/product/BASELINE-BRIEF.md<br>docs/product/reference-research.md（参考产品与互联网调研结论；用于 Change 拆分与依赖决策）<br>docs/product/change-sizing.md<br>docs/architecture/baseline-manifest.json<br>docs/architecture/constraint-registry.json<br>docs/architecture/baseline-status.md<br>docs/project/baseline-audit-report.md<br>docs/product/open-questions.md（仅相关条目）<br>命中的 FLOW/NODE/DO/BR 行 | docs/product/proposal-roadmap.md（含每个候选 Change 的范围/依赖/价值/基线适用域与潜在修订摘要，并含模块列：Primary Capability、Owner Module、Related Modules、Slice Type、Slice Coverage、Code Target、Demo Path、Slice Budget）<br>docs/product/capabilities.csv（能力进度注册表：capability_slug、capability_name、domain_id、owner_module、related_modules、status、delivered_slices、remaining_slices、active_changes、notes；04 创建、05 更新、10 回写）<br>docs/product/modules.csv（模块归属注册表：module_slug、module_name、domain_id、frontend_paths、backend_paths、shared_paths、capabilities、status、notes；04 创建、10 回写） | 6 项（见明细） |
+| 05 | 提案级需求分析 | 单个功能 Change | `feature-requirements` | `04-proposal-planning` | docs/product/BASELINE-BRIEF.md<br>docs/product/change-sizing.md、id-conventions.md<br>docs/product/proposal-roadmap.md（当前行）<br>docs/architecture/baseline-status.md、baseline-manifest.json、constraint-registry.json<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP 行<br>openspec/specs/**（仅相关 capability）<br>docs/product/open-questions.md（仅相关条目）<br>docs/product/reference-research.md（仅范围/场景需要时） | openspec/changes/<change-id>/proposal.md<br>openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）<br>openspec/changes/<change-id>/tasks.md（初步任务；08 更新勾选状态）<br>openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；每个 AC 带 - Scenario: 与 - Slice position:，文件含 ## Acceptance Walkthrough 与 ## Slice Budget；AC 是测试与验证的唯一锚点）<br>openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md；07 更新设计复核结论）<br>openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，按 manifest governance_profile 绑定约束：standard 全部 ACTIVE，lite 仅 critical；07 写入设计证据）<br>docs/product/capabilities.csv（更新能力进度注册表：status、delivered_slices、remaining_slices 与 active_changes）<br>docs/product/modules.csv（更新模块归属注册表：为当前 Change 新增或更新模块及其能力）<br>docs/product/proposal-roadmap.md（当接受主表之外的迟到提案时追加 Roadmap Amendments 记录：Reason、Requester、Approver、Date、Baseline Impact；该后续阶段输出声明使 04 handoff 将路线图标记为 mutable_by_design） | 9 项（见明细） |
+| 06 | UI 设计与评审（HTML 优先，Figma 可选） | 单个功能 Change | `figma-design-review` | `05-feature-requirements` | 当前 Change 的 proposal/specs/design/user-stories（含 - Target platforms:）<br>当前 Change 的 design/baseline-impact.md、baseline-binding.json<br>docs/architecture/frontend-conventions.md（Visual Conventions 节）、technology-decisions.md<br>docs/architecture/baseline-status.md<br>docs/product/BASELINE-BRIEF.md、id-conventions.md<br>docs/product/reference-research.md（参考产品与互联网调研结论；用于页面与状态参考）<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/PAGE 行<br>docs/product/open-questions.md（仅页面相关）<br>用户直接提供的 HTML 设计稿（User-provided 时）；AI 生成或 Figma-to-HTML 来源所需的 HTML 编写/渲染能力；仅 Figma-to-HTML 或旧版直接 Figma 来源时需要 Figma MCP 可访问性 | openspec/changes/<change-id>/design/figma-audit.md（唯一 UI 契约（单文件）：设计来源与 HTML 来源（用户直接提供 / AI 按需求生成 / Figma-to-HTML）、平台选择、目标框架/转码说明、按平台的 PAGE 清单、token 实际值、文字样式、每 PAGE 区块规格、设计代码说明、断言范围、状态覆盖与决策、资产清单、HTML 渲染量测记录（Figma-to-HTML 时含 Figma 读取/转换记录）、差异与待确认、UI 评审 APPROVED；无 UI 时 N/A + 理由）<br>openspec/changes/<change-id>/design/ui-html/（默认 HTML 来源：README.md + index.html 评审入口 + tokens.css + 每个平台每个 PAGE 一个自包含 PAGE-00N.html；仅旧版直接 Figma 来源时省略）<br>openspec/changes/<change-id>/design/figma-code/（README.md + 每 PAGE 一个 PAGE-00N.vue（React 栈为 .tsx）；06 从 HTML 设计稿（或选定 Figma 的 get_design_context）转码的目标框架设计代码；08 直接移植只补业务逻辑）<br>openspec/changes/<change-id>/design/figma-layout.csv（精简断言表：page_id/platform/viewport/route/element_id/figma_node_id/x/y/width/height/dom_selector/assert_geometry/assert_text/tolerance_px/text_content/font_size/font_weight/notes；HTML 模式下 figma_node_id 填 HTML data-node-id；06 可留 route/dom_selector 为 PENDING，07 填满）<br>openspec/changes/<change-id>/design/figma-assets/README.md（仅当有真实图片/SVG 资产时生成；不保存参考截图） | 11 项（见明细） |
+| 07 | 详细设计、接口与测试设计 | 单个功能 Change | `detailed-design` | `06-figma-design-review` | openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design/user-stories.md、tasks.md、design.md<br>openspec/changes/<change-id>/design/baseline-impact.md、baseline-binding.json<br>现有功能代码地址/第三方接口清单（用户提供）<br>涉及 UI 时：openspec/changes/<change-id>/design/figma-audit.md、figma-code/、figma-layout.csv、Figma 评审稿<br>docs/architecture/technology-decisions.md、docs/architecture/api-conventions.md、docs/architecture/frontend-conventions.md（Visual Conventions 节）、docs/architecture/test-strategy.md（按设计域）<br>docs/architecture/baseline-status.md<br>docs/product/BASELINE-BRIEF.md、docs/product/id-conventions.md<br>命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE 行（按 ID 定向读取） | openspec/changes/<change-id>/design.md（统一设计：设计决策、接口、前端、后端、测试五节；`## Design Decisions` 下含 `### Implementation Slice`：主能力、归属/关联模块、切片类型/覆盖、代码包、拥有/集成路径、模块卡动作，以及可选的 Frozen approvals/out-of-context 声明；切片是本文件中的内容，不是单独文件）<br>openspec/changes/<change-id>/design/figma-layout.csv（07 填满每行 route/dom_selector，并据此定义响应式规则；几何/文本/字体值以目标框架设计代码与 metadata 为准）<br>openspec/changes/<change-id>/design.md 的 ### PAGE→BLOCK→组件映射（以 figma-code 目标框架设计代码为基线，仅登记业务化适配与 UI-DEVIATION，不重新设计样式/布局/文案）<br>openspec/changes/<change-id>/design/ui-actions.csv（交互控件清单：每个功能按钮/图标/链接/菜单/标签页映射到跳转（地址+入参）、API（operationId 存在于 api/openapi.yaml）或用户已确认（确认人+日期）的本地动作）<br>openspec/changes/<change-id>/design/baseline-impact.md（07 更新设计复核结论：NO_IMPACT/REBASE_REQUIRED 与设计证据）<br>openspec/changes/<change-id>/design/baseline-binding.json（07 写入逐条约束的设计证据）<br>openspec/changes/<change-id>/design/test-cases.csv（TEST ID → AC/PAGE/API/IO 的测试用例矩阵，含失败注入/替身环境/人工原因；BLOCK 可选，不适用写 N/A）<br>openspec/changes/<change-id>/api/openapi.yaml（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/api-io-mapping.csv（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/io-catalog.csv（条件适用：有 API 时）<br>openspec/changes/<change-id>/design/interface-catalog.csv（跨边界接口目录：HTTP/原生桥接/设备/第三方/异步/文件；条件适用：有跨边界接口时）<br>openspec/changes/<change-id>/design/static-waivers.json（条件适用：需要静态分析豁免时；Change 级文件+规则豁免，含理由/责任人/审批人/批准日期/过期时间；绝不存入冻结门禁文件；无需豁免时省略文件或保留空列表）<br>openspec/changes/<change-id>/traceability.csv（合并 API 与测试映射；唯一追踪聚合文件） | 14 项（见明细） |
+| 08 | 实现、TDD、验证与代码审查 | 单个功能 Change | `implementation-orchestrator` | `07-detailed-design` | 当前 Change 的 tasks.md、design.md、specs、user-stories、test-cases.csv、traceability.csv<br>适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv<br>涉及 UI 的 figma-audit.md、figma-code/、figma-layout.csv<br>当前 Change 的 design/baseline-impact.md、baseline-binding.json、baseline-status.md<br>docs/product/capabilities.csv、docs/product/modules.csv、docs/architecture/code-layout.json（模块归属与切片/footprint 门禁规则）<br>设计域命中的架构章节：system-context/domain-boundaries/logical-erd/data-flows/technology-decisions/api-conventions/frontend-conventions/test-strategy<br>docs/product/BASELINE-BRIEF.md<br>docs/product/open-questions.md（仅相关条目）<br>现有功能代码地址（若修改现有功能） | 实际源代码/迁移/配置<br>自动化测试代码与运行结果<br>openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 ## UI fidelity 逐 PAGE 数值表：设计来源引用（HTML data-node-id 或 Figma node）/断言元素数/最大偏差/布局证据/差异/结论/审批人；数值直接取自 figma-layout-check.json，仅差异/UI-DERIVED PAGE 需人工说明与审批；启用质量门禁时含 ## Static analysis 表，从 static-analysis.json 逐行复制：各栈/工具命令、配置路径 @ SHA-256、结果、字面 exit 0 及生效豁免与审批人）<br>openspec/changes/<change-id>/design/evidence/static-analysis.json（启用质量门禁时；由 scripts/run-quality-gates.py 生成：各 blocking 栈/工具命令、工作目录、退出码、配置 SHA-256、门禁文件 SHA-256、源码 revision、生效豁免、结论）<br>openspec/changes/<change-id>/design/evidence/static-analysis-logs/（启用质量门禁时；每个 blocking 栈/工具一份捕获日志；日志文件名由净化后的栈根目录加工具 id 派生）<br>openspec/changes/<change-id>/design/evidence/figma-layout-check.json（scripts/check-figma-layout.py 的逐元素 expected/actual/delta 证据）<br>openspec/changes/<change-id>/tasks.md（实现更新勾选状态；08 可变）<br>openspec/changes/<change-id>/design/evidence/implementation-base.json（脚本生成的入口快照：git HEAD、逐文件 SHA-256 与指纹；由 scripts/implementation-snapshot.py 写入；implementation-snapshot 始终写入入口基线，即使 code-layout 策略为 none）<br>openspec/changes/<change-id>/design/context-manifest.json（scripts/code-context.py 生成的检索闭包：read_set/not_needed/missing；不是门禁；strategy none 时不写文件）<br>模块卡 `<module_path>/MODULE.md`：为本切片创建或更新的每个模块创建/更新（无固定路径；由模块注册表检查校验）<br>openspec/changes/<change-id>/design/evidence/implementation-diff.json（已验证 revision 的 commit/diff SHA-256 与变更路径）<br>实现/验证证据<br>条件适用：基线变更请求/ADR 草案（发现冲突时；未经批准不更新冻结基线） | 10 项（见明细） |
+| 09 | 独立验证与验收证据 | 功能级 | `independent-verifier` | `08-implementation-orchestrator` | 已实现代码及 revision/diff 指纹<br>当前 Change 的 proposal/specs/design/user-stories/tasks<br>适用时的 api/openapi.yaml、api-io-mapping.csv、io-catalog.csv、interface-catalog.csv<br>涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json<br>test-cases.csv、traceability.csv、code-review.md、Builder 测试证据<br>docs/product/BASELINE-BRIEF.md<br>docs/product/acceptance-policy.md<br>当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md<br>docs/product/modules.csv、docs/architecture/code-layout.json（独立 footprint 重算所需的模块归属与布局）<br>openspec/changes/<change-id>/design/evidence/static-analysis-logs/（启用质量门禁时；独立静态重跑日志校验） | openspec/changes/<change-id>/design/evidence/independent-verification-report.md<br>openspec/changes/<change-id>/design/evidence/independent-verification.json<br>openspec/changes/<change-id>/design/evidence/static-analysis-independent.json（启用质量门禁时；verifier 与 builder 身份不同的独立重跑证据；由 scripts/run-quality-gates.py --independent 生成） | 10 项（见明细） |
+| 10 | 人工验收、归档与基线回写 | 单个功能 Change | `acceptance-audit` | `09-independent-verification` | independent-verification-report.md 与 independent-verification.json<br>当前 Change 的 specs、user-stories、traceability.csv、design.md、code-review.md、design/evidence/implementation-diff.json（已验证 revision 指纹）<br>涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json<br>test-cases.csv、interface-catalog.csv<br>当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md<br>docs/product/acceptance-policy.md、BASELINE-BRIEF.md、change-sizing.md<br>docs/product/decisions.md、assumptions.md、id-conventions.md<br>运行中的验收环境入口 | openspec/changes/<change-id>/design/evidence/acceptance.md（涉及 UI 时含 ## UI acceptance 逐 PAGE 签收：设计来源引用（HTML data-node-id 或 Figma node）/运行系统入口/差异审批/验收方式（机器证据/并排核对）/评审人；启用质量门禁时含 ## Static analysis，从 static-analysis.json 与 static-analysis-independent.json 核对：各栈/工具命令、结果、字面 exit 0 及每个生效豁免与审批人）<br>docs/product/lessons.md（追加本次可复用教训；无则 N/A + 理由）<br>docs/product/decisions.md（受验收结果影响的状态更新）<br>docs/product/assumptions.md（受验收结果影响的状态更新）<br>docs/product/capabilities.csv（能力进度回写：status、delivered_slices、remaining_slices 与 active_changes；由 scripts/check-capabilities.py --completed <change-id> 校验）<br>docs/product/modules.csv（模块归属回写：模块 status/capabilities；Change 完成某个模块时由 scripts/check-modules.py --completed <module-slug> 校验）<br>验收报告与批准记录<br>OpenSpec archive 结果及更新后的主规格（仅批准后） | 7 项（见明细） |
 
 ## 逐阶段明细
 
@@ -270,7 +270,7 @@
 - 已批准的 docs/product/requirements-analysis.md、workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、glossary.md、acceptance-policy.md
 - docs/product/BASELINE-BRIEF.md、role-permission-matrix.csv、change-sizing.md、decisions.md、assumptions.md、id-conventions.md、BASELINE-INDEX.md（常驻基线；先读简报，细节按需加载）
 - docs/product/reference-research.md（参考产品与互联网调研结论；用于技术选型、边界与第三方判断）
-- docs/product/open-questions.md（只读；未决问题不得由架构阶段擅自关闭）
+- docs/product/open-questions.md（可追加新问题；已有问题仅由其 owner 关闭；未决问题不得由架构阶段擅自关闭）
 - docs/project/toolchain-report.md（工具链、测试命令与环境约束）
 - docs/architecture/baseline-status.md（阶段 01 的初始基线与模板状态；本阶段更新为冻结候选）
 
@@ -452,7 +452,7 @@
 - openspec/specs/**（只读）
 - docs/architecture/baseline-manifest.json 与 docs/architecture/constraint-registry.json（机器权威来源）
 - docs/architecture/quality-gates.json（已启用时；从 Change 基线影响清单引用的适用静态分析门禁）
-- docs/product/open-questions.md（只读；提案需求不得替用户决策）
+- docs/product/open-questions.md（可追加新问题；已有问题仅由其 owner 关闭；提案需求不得替用户决策）
 
 **输出（内容/材料）**
 
@@ -464,7 +464,7 @@
 - openspec/changes/<change-id>/specs/<capability>/spec.md（适用时）
 - openspec/changes/<change-id>/tasks.md（初步任务）
 - openspec/changes/<change-id>/design.md（初始设计决策；约 1 页；接口/前端/后端/测试细节留到 07）
-- openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；AC 是测试与验证的唯一锚点）
+- openspec/changes/<change-id>/design/user-stories.md（用户故事与 AC；每个 AC 带 - Scenario: 与 - Slice position:，文件含 ## Acceptance Walkthrough 与 ## Slice Budget；AC 是测试与验证的唯一锚点）
 - openspec/changes/<change-id>/design/baseline-impact.md（依据 templates/change-assets/design/baseline-impact.md；07 更新设计复核结论）
 - openspec/changes/<change-id>/design/baseline-binding.json（依据当前冻结基线自动生成，按 manifest governance_profile 绑定约束：standard 全部 ACTIVE，lite 仅 critical；07 写入设计证据）
 - docs/product/capabilities.csv（更新能力进度注册表：status、delivered_slices、remaining_slices 与 active_changes）
@@ -502,84 +502,14 @@
 
 ---
 
-### 06 Figma 设计与评审（Figma-only）
+### 06 UI 设计与评审（HTML 优先，Figma 可选）
 
-- 范围：单个功能 Change
-- Skill：`figma-design-review`
-- Prompt：`prompts/06-figma-design-review.md`
-- 依赖（DAG）：`05-feature-requirements`
-
-**精简输入（默认读取，建议预算）**
-
-- 当前 Change 的 proposal/specs/design/user-stories
-- 当前 Change 的 design/baseline-impact.md、baseline-binding.json
-- docs/architecture/frontend-conventions.md 第 9 节、technology-decisions.md
-- docs/architecture/baseline-status.md
-- docs/product/BASELINE-BRIEF.md、id-conventions.md
-- 命中的 FLOW/NODE/DO/RD/BR/ROLE/PAGE 行
-- docs/product/open-questions.md（仅页面相关）
-- Figma MCP 可访问性
-
-> 预算（建议值）：8/8 条；超出时缩小范围或记录多读原因。
-
-**按需输入（触发后读取，不计入默认预算）**
-
-- docs/product/workflows.md
-- docs/product/data-objects.csv
-- docs/product/rd-matrix.csv
-- docs/product/business-rules.md
-- docs/product/role-permission-matrix.csv
-- docs/product/reference-research.md
-- docs/architecture/system-context.md
-- docs/architecture/domain-boundaries.md
-- docs/architecture/api-conventions.md
-- docs/architecture/test-strategy.md
-- docs/adr/*
-
-**完整契约输入（内容/材料，审计集）**
-
-- Figma MCP 实际可访问能力（生成并回读真实 Figma 设计必须；不可用或读不到真实文件/节点时阻断，不得伪造）
-
-**完整契约输入（文档/文件，审计集）**
-
-- openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md（已批准的提案级需求与 AC）
-- docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、role-permission-matrix.csv、id-conventions.md（业务流程/数据对象/RD 矩阵/角色权限/ID 约定）；docs/architecture/frontend-conventions.md（UI/前端规范，视觉权威取第 9 节）；docs/architecture/technology-decisions.md（总体技术选型，确定目标前端框架/组件库）
-- docs/product/open-questions.md（只读，生成时不擅自决策）
-- docs/product/reference-research.md（参考产品与互联网调研结论；用于页面与状态参考）
-- docs/architecture/baseline-status.md（当前版本）
-- openspec/changes/<change-id>/design/baseline-impact.md（已批准的基线快照）
-- openspec/changes/<change-id>/design/baseline-binding.json（阶段 05 已审批的约束绑定；本阶段只读继承）
-
-**输出（内容/材料）**
-
-- N/A
-
-**输出（文档/文件）**
-
-- openspec/changes/<change-id>/design/figma-audit.md（唯一 UI 契约（单文件）：Figma 文件/版本、目标框架/转码说明、PAGE 清单、token 实际值、文字样式、每 PAGE 区块规格、设计代码说明、断言范围、状态覆盖与决策、资产清单、MCP 读取记录、差异与待确认、UI 评审 APPROVED；无 UI 时 N/A + 理由）
-- openspec/changes/<change-id>/design/figma-code/（README.md + 每 PAGE 一个 PAGE-00N.vue（React 栈为 .tsx）；06 按总体技术选型转码的目标框架设计代码；08 直接移植只补业务逻辑）
-- openspec/changes/<change-id>/design/figma-layout.csv（精简断言表：page_id/route/element_id/figma_node_id/x/y/width/height/dom_selector/assert_geometry/assert_text/tolerance_px/text_content/font_size/font_weight/notes；06 可留 route/dom_selector 为 PENDING，07 填满）
-- openspec/changes/<change-id>/design/figma-assets/README.md（仅当有真实图片/SVG 资产时生成；不保存参考截图）
-
-**输出消费者**
-
-- openspec/changes/<change-id>/design/figma-audit.md → 07、08、09、10
-- openspec/changes/<change-id>/design/figma-assets/README.md → evidence-only
-- openspec/changes/<change-id>/design/figma-code/ → 07、08、09、10
-- openspec/changes/<change-id>/design/figma-layout.csv → 07、08、09、10
-
-**下游交接**
-
-- design/figma-audit.md（目标框架/转码说明、token 实际值、PAGE 规格、状态决策）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（运行态断言表）是 07/08/09/10 的唯一界面输入；07/08 默认离线消费，仅在文件版本变化或页面有歧义时按页批量重读 Figma（串行，避免限流）
-- PAGE ID 与页面集合在 06 冻结；07 初始化 traceability.csv 的 PAGE→AC，08–10 只读，不新增或重命名 PAGE
-- 视觉规范取 docs/architecture/frontend-conventions.md 第 9 节与 figma-audit.md 的 token 实际值；Figma 评审稿与 figma-code/ 是视觉/组件/变量的最终参考；不维护 design-tokens.json 或分散 token/contract JSON；截图不是门禁证据
-
-**审批与门禁**
-
-- 审批：用户（设计负责人）在真实 Figma 评审稿上完成 UI 评审并 APPROVED，且 Figma MCP 审计通过
-- 门禁：scripts/check-figma-audit.py --change <change-id> --strict --require-framework（目标框架/转码 + token 实际值 + 每 PAGE 规格 + figma-code/ 每 PAGE 代码 + figma-layout.csv 断言表几何/文本/选择器完整性 + 状态决策 + UI 评审 APPROVED）；workflow.py 自动复核 baseline-binding.json（requirement phase）
-
----
+- **HTML 优先的 UI 设计**：以已批准的需求/AC、声明的目标平台、产品流程、`docs/architecture/technology-decisions.md`（总体技术选型）与 `docs/architecture/frontend-conventions.md` 的 Visual Conventions 节为输入，默认在 `design/ui-html/` 产出各平台的自包含高保真 HTML 设计稿：每个平台每个 PAGE 一个 HTML 文件，外加可浏览的 `index.html` 评审入口、`README.md` 与 `tokens.css`；设计负责人在 HTML 评审入口完成 UI 评审。HTML 来源可为用户直接提供、AI 按需求生成，或由 AI 通过 Figma-to-HTML 转换（Figma 是上游输入，不是评审交付物）。
+- **按平台覆盖**：`design/user-stories.md` 声明的每个平台（`web|h5|mini-program|app|android|ios|harmonyos|desktop|pda`）至少有一个 PAGE；PAGE ID 全局唯一并在 06 冻结，07–10 不得新增或重命名。
+- **唯一 UI 契约**：`design/figma-audit.md`（设计来源/平台选择、目标框架/转码说明、token 实际值、文字样式、PAGE/区块规格、设计代码说明、断言范围、状态覆盖与决策、资产清单、HTML 渲染量测记录或 MCP 读取记录、UI 评审 APPROVED）+ `design/ui-html/`（默认 HTML 来源）+ `design/figma-code/`（每 PAGE 一个目标框架设计代码）+ `design/figma-layout.csv`（含 `platform`/`viewport` 的断言表）。有真实图片/SVG 时附 `design/figma-assets/README.md`。不再使用 pen.dev、`prototype.pen`、`PAGE-*.html` 交接原型、`prototype.md`、`manifest.json`、`design/design-tokens.json` 或分散 token/contract JSON；不保存参考截图。
+- **门禁**：`python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`；要求 `- Design source status: APPROVED`、`- UI review status: APPROVED`、声明的平台覆盖、目标框架/扩展名与转码记录、token 实际值、文字样式、每 PAGE 的来源引用/尺寸/区块规格、`figma-code/` 中每 PAGE 的目标框架代码，以及 `figma-layout.csv` 断言表（platform/viewport/几何/文本/字体/选择器）与状态决策。
+- **UI 权威**：HTML 评审入口（或旧版 Figma 评审稿）与 `figma-code/` 是 UI 视觉/组件/变量的最终参考；视觉规范取 `docs/architecture/frontend-conventions.md` 的 Visual Conventions 节。PAGE ID 在 06 冻结，07–10 不得新增或重命名；页面集合变化须回到需求/提案审批。来源中未定义的弹窗/抽屉/状态必须新增设计页面，或将其规格与审批记录为 `UI-DERIVED`。
+- **下游输入**：07/08 默认离线消费 `figma-audit.md`、`ui-html/`、`figma-code/` 与 `figma-layout.csv`，仅在来源变化或页面有歧义时按页批量重读（串行，避免限流）；07 以目标框架设计代码为基线填写 `### PAGE→BLOCK→Component Mapping`，填 `route`/`dom_selector`，创建 `design/ui-actions.csv`，并定义响应式规则；08 直接移植设计代码只补业务逻辑，运行 `check-figma-layout.py`（各页视口取自 CSV）与 `check-design-tokens.py`，并写数值化 `## UI fidelity`；09 用 `layout_checks` 独立复核；10 逐 PAGE 签收并写 `## UI acceptance`。**全流程不保存截图。**
 
 ### 07 详细设计、接口与测试设计
 
@@ -594,7 +524,7 @@
 - openspec/changes/<change-id>/design/baseline-impact.md、baseline-binding.json
 - 现有功能代码地址/第三方接口清单（用户提供）
 - 涉及 UI 时：openspec/changes/<change-id>/design/figma-audit.md、figma-code/、figma-layout.csv、Figma 评审稿
-- docs/architecture/technology-decisions.md、docs/architecture/api-conventions.md、docs/architecture/frontend-conventions.md#9、docs/architecture/test-strategy.md（按设计域）
+- docs/architecture/technology-decisions.md、docs/architecture/api-conventions.md、docs/architecture/frontend-conventions.md（Visual Conventions 节）、docs/architecture/test-strategy.md（按设计域）
 - docs/architecture/baseline-status.md
 - docs/product/BASELINE-BRIEF.md、docs/product/id-conventions.md
 - 命中的 FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE 行（按 ID 定向读取）
@@ -628,8 +558,8 @@
 - openspec/changes/<change-id>/proposal.md、specs/<capability>/spec.md、design.md、design/user-stories.md（提案需求、AC 与初始设计决策）
 - openspec/changes/<change-id>/tasks.md（任务范围）
 - openspec/changes/<change-id>/design/figma-audit.md（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、状态决策；默认离线消费，仅在版本变化/歧义时按页重读）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射；07 填满 route/dom_selector）
-- Figma 评审稿（视觉/组件/变量权威）与 docs/architecture/frontend-conventions.md 第 9 节（视觉规范）；不维护 design-tokens.json，token 实际值见 figma-audit.md
-- docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、acceptance-policy.md、role-permission-matrix.csv、id-conventions.md、open-questions.md（关联 FLOW/NODE/DO/BR、验收口径、权限与 ID 约定；open-questions 只读）
+- HTML 评审入口（或旧版 Figma 评审稿）作为视觉/组件/变量权威与 docs/architecture/frontend-conventions.md 的 Visual Conventions 节（视觉规范）；不维护 design-tokens.json，token 实际值见 figma-audit.md
+- docs/product/workflows.md、data-objects.csv、rd-matrix.csv、business-rules.md、acceptance-policy.md、role-permission-matrix.csv、id-conventions.md、open-questions.md（关联 FLOW/NODE/DO/BR、验收口径、权限与 ID 约定；可追加新问题，已有问题由 owner 关闭）
 - docs/product/capabilities.csv、docs/product/modules.csv、docs/architecture/code-layout.json（模块归属、模块路径与集成/冻结路径，用于声明并校验 ### Implementation Slice）
 - docs/architecture/system-context.md、domain-boundaries.md、containers-and-deployment.md、data-flows.md、logical-erd.md、technology-decisions.md、api-conventions.md、frontend-conventions.md、test-strategy.md、docs/adr/README.md 与 docs/adr/*（按设计域按需读取）；docs/product/BASELINE-BRIEF.md（先读）
 - docs/architecture/quality-gates.json（已启用时；用于规划的冻结静态分析门禁与豁免政策）
@@ -678,7 +608,7 @@
 **审批与门禁**
 
 - 审批：技术负责人确认设计范围、接口与测试方案
-- 门禁：scripts/check-change.sh <change-id>；scripts/check-design-assets.sh <change-id> --strict --lint-api（涉及 UI 时同时校验 figma-audit 与 ui-actions）；scripts/check-design-sections.py --change <change-id>（含 ### 现有代码变更影响、figma-layout.csv route/dom_selector 填满、ui-actions.csv 存在与响应式规则）；scripts/check-design-sections.py --change <change-id> --slice-only 与 scripts/check-change-footprint.py <change-id> --declaration-only（07→08 Implementation Slice 硬门禁；workflow.py transition 自动运行 slice-only 检查）；涉及 UI 时 scripts/check-ui-actions.py --change <change-id> --strict（每个功能按钮/图标/链接/菜单/标签页映射到跳转地址+入参或 OpenAPI operationId，否则须用户确认本地动作）；scripts/check-test-cases.py --change <change-id> --strict；scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict；有 API 时 scripts/check-api-traceability.py --change <change-id>；有跨边界接口时 scripts/check-interface-catalog.py --change <change-id> --strict；python scripts/check-method-evidence.py --step 07-detailed-design --evidence <evidence>（必需方法技能、真实证据路径与产物落点）；python3 scripts/baseline-governance.py check-change --change-id <id> --phase design
+- 门禁：scripts/check-change.sh <change-id>；scripts/check-design-assets.sh <change-id> --strict --lint-api（涉及 UI 时同时校验 figma-audit 与 ui-actions）；scripts/check-design-sections.py --change <change-id>（含 ### 现有代码变更影响、figma-layout.csv route/dom_selector 填满、ui-actions.csv 存在与响应式规则）；scripts/check-design-sections.py --change <change-id> --slice-only 与 scripts/check-change-footprint.py <change-id> --declaration-only（07→08 Implementation Slice 硬门禁；workflow.py transition 自动运行 slice-only 检查）；涉及 UI 时 scripts/check-ui-actions.py --change <change-id> --strict（每个功能按钮/图标/链接/菜单/标签页映射到跳转地址+入参或 OpenAPI operationId，否则须用户确认本地动作）；scripts/check-test-cases.py --change <change-id> --strict；scripts/check-traceability.py --file openspec/changes/<change-id>/traceability.csv --strict；有 API 时 scripts/check-api-traceability.py --change <change-id>；有跨边界接口时 scripts/check-interface-catalog.py --change <change-id> --strict；python scripts/check-method-evidence.py --step 07-detailed-design --evidence <evidence>（必需方法技能、真实证据路径与产物落点）；python scripts/baseline-governance.py check-change --change-id <id> --phase design
 
 **基线交互**
 
@@ -735,7 +665,7 @@
 - openspec/changes/<change-id>/design/figma-audit.md（涉及 UI 时读取目标框架/转码说明、token 实际值/PAGE 规格/状态决策；06 冻结 PAGE 清单）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射）
 - openspec/changes/<change-id>/traceability.csv
 - docs/architecture/quality-gates.json（已启用时；冻结静态分析门禁）与 openspec/changes/<change-id>/design/static-waivers.json（存在时；由运行器与检查器应用的 Change 级豁免）
-- docs/architecture/system-context.md、domain-boundaries.md、logical-erd.md、data-flows.md、technology-decisions.md、api-conventions.md、frontend-conventions.md、test-strategy.md、docs/adr/README.md（实现约束）；docs/product/open-questions.md（只读；实现不得擅自关闭未决问题）
+- docs/architecture/system-context.md、domain-boundaries.md、logical-erd.md、data-flows.md、technology-decisions.md、api-conventions.md、frontend-conventions.md、test-strategy.md、docs/adr/README.md（实现约束）；docs/product/open-questions.md（可追加新问题；已有问题仅由其 owner 关闭；实现不得擅自关闭未决问题）
 - openspec/changes/<change-id>/design/baseline-impact.md（已批准的基线快照）
 - docs/architecture/baseline-status.md（当前版本）
 - openspec/changes/<change-id>/design/baseline-binding.json（已批准约束绑定）
@@ -749,7 +679,7 @@
 
 **输出（文档/文件）**
 
-- openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 ## UI fidelity 逐 PAGE 数值表：Figma node/断言元素数/最大偏差/布局证据/差异/结论/审批人；数值直接取自 figma-layout-check.json，仅差异/UI-DERIVED PAGE 需人工说明与审批；启用质量门禁时含 ## Static analysis 表，从 static-analysis.json 逐行复制：各栈/工具命令、配置路径 @ SHA-256、结果、字面 exit 0 及生效豁免与审批人）
+- openspec/changes/<change-id>/design/evidence/code-review.md（涉及 UI 时含 ## UI fidelity 逐 PAGE 数值表：设计来源引用（HTML data-node-id 或 Figma node）/断言元素数/最大偏差/布局证据/差异/结论/审批人；数值直接取自 figma-layout-check.json，仅差异/UI-DERIVED PAGE 需人工说明与审批；启用质量门禁时含 ## Static analysis 表，从 static-analysis.json 逐行复制：各栈/工具命令、配置路径 @ SHA-256、结果、字面 exit 0 及生效豁免与审批人）
 - openspec/changes/<change-id>/design/evidence/static-analysis.json（启用质量门禁时；由 scripts/run-quality-gates.py 生成：各 blocking 栈/工具命令、工作目录、退出码、配置 SHA-256、门禁文件 SHA-256、源码 revision、生效豁免、结论）
 - openspec/changes/<change-id>/design/evidence/static-analysis-logs/（启用质量门禁时；每个 blocking 栈/工具一份捕获日志；日志文件名由净化后的栈根目录加工具 id 派生）
 - openspec/changes/<change-id>/design/evidence/figma-layout-check.json（scripts/check-figma-layout.py 的逐元素 expected/actual/delta 证据）
@@ -830,7 +760,7 @@
 - openspec/changes/<change-id>/design/figma-audit.md（涉及 UI 时对照目标框架/转码说明、token 实际值/PAGE 规格/状态决策）、design/figma-code/（06 按总体技术选型转码的目标框架设计代码）与 design/figma-layout.csv（断言映射）
 - docs/product/acceptance-policy.md（项目级验收口径）
 - openspec/changes/<change-id>/design/test-cases.csv（测试用例与执行结果核对）
-- openspec/changes/<change-id>/design/evidence/code-review.md、Builder 测试与验证证据；docs/product/open-questions.md（只读；验证不得擅自关闭未决问题）
+- openspec/changes/<change-id>/design/evidence/code-review.md、Builder 测试与验证证据；docs/product/open-questions.md（可追加新问题；已有问题仅由其 owner 关闭；验证不得擅自关闭未决问题）
 - openspec/changes/<change-id>/traceability.csv（追踪矩阵）
 - docs/architecture/quality-gates.json 与 openspec/changes/<change-id>/design/static-waivers.json（已启用时；冻结门禁与 Change 级豁免独立复核）
 - openspec/changes/<change-id>/design/evidence/static-analysis.json（启用质量门禁时；08 Builder 证据与 builder 身份；09 独立重跑门禁）
@@ -884,7 +814,7 @@
 **精简输入（默认读取，建议预算）**
 
 - independent-verification-report.md 与 independent-verification.json
-- 当前 Change 的 specs、user-stories、traceability.csv、design.md、code-review.md
+- 当前 Change 的 specs、user-stories、traceability.csv、design.md、code-review.md、design/evidence/implementation-diff.json（已验证 revision 指纹）
 - 涉及 UI 的 figma-audit.md、figma-layout.csv、figma-layout-check.json
 - test-cases.csv、interface-catalog.csv
 - 当前 Change 的 baseline-impact.md、baseline-binding.json、baseline-status.md
@@ -924,7 +854,7 @@
 - docs/architecture/baseline-status.md（当前版本）
 - openspec/changes/<change-id>/design/baseline-binding.json（所有适用约束有最终验证证据）
 - docs/product/acceptance-policy.md（项目级验收口径）
-- docs/product/BASELINE-BRIEF.md、change-sizing.md（DoD）、lessons.md、open-questions.md（常驻基线、完成定义、历史教训与未决问题；open-questions 只读）
+- docs/product/BASELINE-BRIEF.md、change-sizing.md（DoD）、lessons.md、open-questions.md（常驻基线、完成定义、历史教训与未决问题；open-questions 可追加新问题、已有问题只由 owner 关闭）
 - docs/product/decisions.md、assumptions.md（待验收结果更新的决策与假设登记）
 - docs/product/capabilities.csv、docs/product/modules.csv（验收后待回写的能力进度与模块归属注册表）
 - docs/product/id-conventions.md（回写基线与 Change ID 的分配规则）
@@ -937,7 +867,7 @@
 
 **输出（文档/文件）**
 
-- openspec/changes/<change-id>/design/evidence/acceptance.md（涉及 UI 时含 ## UI acceptance 逐 PAGE 签收：Figma node/运行系统入口/差异审批/验收方式（机器证据/并排核对）/评审人；启用质量门禁时含 ## Static analysis，从 static-analysis.json 与 static-analysis-independent.json 核对：各栈/工具命令、结果、字面 exit 0 及每个生效豁免与审批人）
+- openspec/changes/<change-id>/design/evidence/acceptance.md（涉及 UI 时含 ## UI acceptance 逐 PAGE 签收：设计来源引用（HTML data-node-id 或 Figma node）/运行系统入口/差异审批/验收方式（机器证据/并排核对）/评审人；启用质量门禁时含 ## Static analysis，从 static-analysis.json 与 static-analysis-independent.json 核对：各栈/工具命令、结果、字面 exit 0 及每个生效豁免与审批人）
 - docs/product/lessons.md（追加本次可复用教训；无则 N/A + 理由）
 - docs/product/decisions.md（受验收结果影响的状态更新）
 - docs/product/assumptions.md（受验收结果影响的状态更新）

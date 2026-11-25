@@ -16,7 +16,7 @@
 | `toolkit-sync.py init\|verify\|plan\|apply\|repair` | 在项目仓库内安装/升级 vendored 工具包；校验哈希、托管块与第三方文件 | 项目锁定版本与工具包发布一致，且只改动了工具包路径 | 项目业务工作正确 |
 | `check-api-io-mapping.py <openapi> <mapping.csv> <catalog.csv> [--strict]` | 每个 OpenAPI operationId 映射到一个或多个具体 IO ID；严格模式下 catalog 契约完整；有意无 API 的变更必须声明 `x-api-scope: none` | 设计具有正确的业务行为或安全的事务语义 |
 | `test-api-io-mapping.sh` | 临时正向/负向夹具验证 API→IO 检查器行为，包括显式无 API 范围 | 基本检查器回归能被捕获 | 真实项目 API/IO 设计正确 |
-| `check-acceptance.py <id>` | 验收结果、证据、评审人和 AC 行；UI Change 还需要逐 PAGE 的真实系统入口 + Figma 节点 + `figma-layout-check.json` PASS | 证据表没有待填字段并包含已接受的 AC 行；UI 验收针对运行中的系统和 Figma 文件签署（不含截图） | 业务验收确实合理 |
+| `check-acceptance.py <id>` | 验收结果、证据、评审人和 AC 行；UI Change 还需要逐 PAGE 的真实系统入口 + 设计来源引用（HTML data-node-id 或 Figma node）+ `figma-layout-check.json` PASS | 证据表没有待填字段并包含已接受的 AC 行；UI 验收针对运行中的系统和 UI 设计来源签署（HTML 评审入口或可选 Figma 文件；不含截图） | 业务验收确实合理 |
 | `check-package.py` | Skill/Prompt 配对、frontmatter 与语法检查 | 包结构一致 | 内容/逻辑正确 |
 | `check-output-consumption.py` | 正向：每个文件输出都有登记的消费者；反向：每个对更早输出的输入引用都已登记 | 输出/消费者映射双向闭合 | 下游语义正确 |
 | `check-requirements.py [--strict]` | 声明的 workflow/story/AC/business-rule ID 与重复项 | 必需 ID 存在且声明唯一 | 语义完整性已被证明 |
@@ -52,13 +52,13 @@
 | `test-agent-context.py` | 精简包建议值的正向/负向夹具 | 检查器回归能被捕获 | 真实阶段上下文符合建议值 |
 | `check-api-traceability.py --change <id> [--strict]` | 每个 OpenAPI operationId 在 traceability.csv 中链接到 PAGE/EVT/AC | API 到 UI/AC 的追踪已闭合 | API 行为正确 |
 | `check-test-cases.py --change <id> [--strict]` | TEST ID 唯一性、必需字段、AC/page/operationId/IO 覆盖（PAGE 来自 figma-audit.md；BLOCK 可选），以及 traceability.csv 中链接的 TEST ID | 测试用例矩阵结构完整 | 测试断言确实通过 |
-| `check-figma-audit.py --change <id> [--strict] [--require-framework]` / `--no-ui --reason "..." --strict` | UI Change 必须具有 `design/figma-audit.md`，包含真实 Figma 链接/节点、实际的 `get_metadata`/`get_variable_defs` 记录、目标框架 + `figma-design-to-code` 使用（配合 `--require-framework`）、`figma-code/` 目标框架设计代码（Vue 为 `.vue`，React 为 `.tsx`/`.jsx`）、`figma-layout.csv`（断言映射）、每个可见 TEXT 已断言或说明理由，以及 `- UI 评审状态：APPROVED` | Figma 设计确实已生成/读取、框架对齐、完整清点并评审；参考截图不被接受 | Figma 视觉质量正确 |
-| `check-figma-layout.py --change <id> --base-url <url> --viewport 1440x900 [--out <json>] [--storage-state <file>]` | 参数化视觉回归：使用 Playwright 测量运行中 DOM 的每个已映射元素，并将其 x/y/w/h/text/font 与 Figma 节点几何比较；写入 `design/evidence/figma-layout-check.json` | 几何/文本/字体断言全部在容差内通过且无已映射元素缺失 | Figma 设计本身正确；未映射元素不在覆盖范围内 |
-| `check-design-tokens.py --change <id> --tokens <token.css>` | 将 Figma token 实际值（颜色/px）与项目 CSS 自定义属性进行精确静态比较 | token 层与 Figma 实际值一致 | 布局/间距结构正确（由 `check-figma-layout.py` 覆盖） |
+| `check-figma-audit.py --change <id> [--strict] [--require-framework]` / `--no-ui --reason "..." --strict` | UI Change 必须具有 `design/figma-audit.md`，包含设计来源/平台选择（HTML 默认、Figma 可选）、声明平台覆盖、目标框架/转码记录、`design/ui-html/` 自包含 HTML 页面（HTML 来源）或真实 Figma `get_metadata`/`get_variable_defs` 记录（Figma 来源）、`figma-code/` 目标框架设计代码（Vue 为 `.vue`，React 为 `.tsx`/`.jsx`）、`figma-layout.csv`（含平台/视口的断言映射）、每个可见 TEXT 已断言或说明理由，以及 `- UI 评审状态：APPROVED` | 选定的设计来源（默认 HTML）确实已生成/量测、框架对齐、按平台完整清点并评审；参考截图不被接受 | Figma 视觉质量正确 |
+| `check-figma-layout.py --change <id> --base-url <url> --viewport 1440x900 [--out <json>] [--storage-state <file>]` | 参数化视觉回归：使用 Playwright 按 CSV 中各 PAGE 的视口测量运行中 DOM 的每个已映射元素，并将其 x/y/w/h/text/font 与设计期望几何比较；写入 `design/evidence/figma-layout-check.json` | 几何/文本/字体断言全部在容差内通过且无已映射元素缺失 | 设计来源本身正确；未映射元素不在覆盖范围内 |
+| `check-design-tokens.py --change <id> --tokens <token.css>` | 将 UI 设计 token 实际值（颜色/px；HTML 或可选 Figma 来源）与项目 CSS 自定义属性进行精确静态比较 | token 层与 UI 设计实际值一致 | 布局/间距结构正确（由 `check-figma-layout.py` 覆盖） |
 | `check-traceability.py --file <csv> [--strict]` | 追踪 CSV 列、重复链接与状态 | 追踪边结构合理 | 所有语义覆盖都存在 |
 | `validate-openapi.sh <file>` | Redocly OpenAPI lint | Linter 接受该契约 | 业务语义正确 |
 | `test-all.sh <dir>...` | 运行检测到的测试入口（仅测试；lint 与静态分析由 `run-quality-gates.py` 运行） | 所有请求的检测到的测试命令均已通过 | 除非另行执行，否则 lint/build/E2E/静态分析未运行 |
-| `verify-before-completion.sh <id> ...` | 运行严格 OpenSpec、diff 及可选 API/测试检查；`docs/architecture/quality-gates.json` 存在时还运行静态门禁运行器与检查器（显式 `--skip-static` 不属于完整验证） | 配置的检查已成功运行（启用时包含静态门禁） | 人工验收/发布批准完成 |
+| `verify-before-completion.sh <id> [--openapi <文件>] [--test-dir <目录>]... [--skip-tests] [--skip-static]` | 运行严格 OpenSpec、diff 及可选 API 检查，并在一个或多个 `--test-dir` 根下运行检测到的测试（未给测试目录且未显式 `--skip-tests` 时退出 2；`STATIC_IDENTITY` 指定记录的静态分析身份）；`docs/architecture/quality-gates.json` 存在时还运行静态门禁运行器与检查器（显式 `--skip-static` 不属于完整验证） | 配置的检查已成功运行（启用时包含静态门禁） | 人工验收/发布批准完成 |
 | `check-code-review.py --change <id> [--strict]` | 阶段 08 `design/evidence/code-review.md` 必须具有真实头字段、已批准的结论、findings/status、没有未解决的 TODO/PENDING 标记；UI Change 还需要数值化 `## UI fidelity` 和 PASS 的 `figma-layout-check.json`；启用质量门禁时还需从 `static-analysis.json` 复制的 `## Static analysis` 表（含字面 `exit 0` 行与豁免审批人） | 代码审查证据结构完整且 UI 几何与静态结果经机器校验 | 审查发现技术上正确 |
 | `check-quality-gates.py --root <项目根> [--strict] [--require-materialized]` | 校验 `docs/architecture/quality-gates.json`：schema/policy 完整性、blocking 栈/工具、安全的仓库相对根路径、栈相对配置、离线安全命令；`--strict` 交叉核对 `technology-decisions.md`；`--require-materialized` 要求栈根与配置文件存在且 SHA-256 可读。文件不存在时报告 `QUALITY_GATES_NOT_ADOPTED` 并退出 0；带 `--require-materialized`（已采用模式）则视为缺失错误 | 门禁选型与结构有效；技术选型提及每个栈语言 | 选定规则在技术上正确或已获批准；冻结批准仍属基线治理 |
 | `run-quality-gates.py <change-id> --output <证据路径> [--root <项目根>] [--identity <名称>] [--builder-identity <名称>] [--independent] [--stack <id>] [--source-revision <rev>]` | 读取冻结门禁与 Change 级豁免文件，探测每个工具但绝不安装，在栈根目录按超时运行每个 blocking 命令，在 `design/evidence/static-analysis-logs/` 下按工具捕获日志（文件名取自净化后的栈根目录），并原子写入 `design/evidence/static-analysis.json` | 结论为 PASS，每个 blocking 栈/工具一条干净结果且有真实日志；`--independent` 记录不同的 verifier 与 builder 身份 | 项目代码质量在选定规则之外是否正确；工具缺失为 BLOCKED，绝不跳过 |
@@ -66,18 +66,25 @@
 
 当脚本无法运行必需检查时，它们会有意地 fail-closed。如果仓库不使用 Bash/WSL/macOS/Linux，请针对 Windows PowerShell 进行适配。
 
-| `workflow.py status` | 展示工作流状态 | 状态 JSON 可读取且阶段 ID 合法 | 业务产物真实完成 |
-| `workflow.py check-entry --step <id>` | 阶段进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff | 阶段满足进入条件 | 当前阶段产物质量正确 |
+| `workflow.py status` | 展示工作流状态（v2：项目泳道 + 全部 Change 泳道） | 状态 JSON 可读取且泳道阶段 ID 合法 | 业务产物真实完成 |
+| `workflow.py check-entry --step <id> [--change-id <id>]` | 泳道进入守卫，核验依赖/审批/阻断/上游 SHA-256 handoff；v2 在 05 与 08 入口再次核对提案依赖 | 泳道满足进入条件 | 当前阶段产物质量正确 |
 | `workflow.py check-methods --step <id> --evidence <json>` | 校验 evidence 的 `methods` 块（02–10）；`transition` 也会自动调用 | 方法证据已记录且引用真实产物 | 问题质量与决策正确性 |
 | `workflow.py check-coverage --step <id> --evidence <json>` | 校验可选的 evidence `question_coverage` 块；`request-review` 和 `transition` 也会自动调用 | 记录的问题已落点或明确分类 | 答案质量与决策正确性 |
-| `workflow.py request-review --step <id> --summary <text>` | 阶段完成后登记待评审：写入 pending_approvals 且 current_step 不前进；next-step/check-entry 随即阻断 | 送审状态已记录 | 产物质量正确 |
-| `workflow.py approve --step <id> --approver <name> --approved-at <date> --evidence <file>` | 记录用户明确批准，写入 approvals_history 并清除该阶段待评审 | 用户审批已登记 | 审批身份由脚本认证 |
-| `workflow.py set-approval-policy --policy <standard\|risk-based> --reason <text> [--by <name>]` | 设置状态级 `approval_policy`；`risk-based` 让低风险阶段 01/04/06 快车道通过，高风险阶段仍需审批。存在待评审项时拒绝，并记录 `approval_policy_history` | 策略变更已记录，待评审项不受影响 | 用户确实授权了策略 |
-| `workflow.py transition --step <id> --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进状态；人工审批阶段必须有 approvals_history 记录 | 阶段证据通过且状态推进成功 | 人工审批身份由脚本认证 |
-| `workflow.py reopen --step <id> --reason <text>` | 返工回退：移除目标阶段及其下游依赖闭包，清理相关审批/阻断，current_step 回到目标阶段 | 回退完成并记录 reopen_history | 不校验返工后产物质量 |
-| `workflow.py next-change --change-id <id>` | 当前 Change 验收后归档 05–10，切换 active_change_id 并从 05 开始下一个 Change | 上一个 Change 已完成验收且无阻断 | 不支持并发 Change 调度 |
+| `workflow.py request-review --step <id> [--change-id <id>] --evidence <json> --summary <text>` | 阶段完成后登记待评审：写入该泳道 pending_approvals 且 `current_step` 不前进；评审包按 v2 命名空间写入 `workflow/evidence/<change-id>/` 或 `.../project/` | 送审状态已记录 | 产物质量正确 |
+| `workflow.py approve --step <id> [--change-id <id>] --approver <name> --approved-at <date> --evidence <file>` | 记录用户明确批准，写入带 `change_id` 的 approvals_history 并清除该泳道待评审 | 用户审批已登记 | 审批身份由脚本认证 |
+| `workflow.py set-approval-policy --policy <standard\|risk-based> --reason <text> [--by <name>]` | 设置状态级 `approval_policy`；`risk-based` 让低风险阶段 01/04/06 快车道通过，高风险阶段仍需审批。任一泳道存在待评审项时拒绝 | 策略变更已记录，待评审项不受影响 | 用户确实授权了策略 |
+| `workflow.py transition --step <id> [--change-id <id>] --evidence <json>` | 校验契约声明的全部文件型输出、门禁、审批，生成下游 handoff 并原子推进泳道；07 获取实现租约，10 标记 ACCEPTED 并释放租约 | 阶段证据通过且泳道状态推进成功 | 人工审批身份由脚本认证 |
+| `workflow.py reopen --step <id> [--change-id <id>] --reason <text>` | 泳道返工回退：移除目标阶段及其泳道内下游闭包，只作废该泳道审批并失效其 handoff；返回该泳道目标阶段 | 回退完成并记录 reopen_history | 不校验返工后产物质量；存在 ACTIVE 泳道时不得重置项目阶段 |
+| `workflow.py skip-stage --step <id> [--change-id <id>] --evidence <json>` | 条件阶段（当前为无 UI 的 06）在真实 `check-figma-audit --no-ui` 检查后跳过；写入按泳道命名空间的 skip handoff 并推进 | 无 UI 检查通过且跳过记录存在 | 仅条件阶段；有 UI 的 Change 仍须完整评审 |
+| `workflow.py reset-state --reason <text>` | 管理性重置到 `01-project-bootstrap`：归档旧状态，清空项目/Change 泳道、审批与基线索引，失效全部 handoff | 重置记录与归档存在 | 仅限用户明确指示；会破坏当前流程位置 |
+| `workflow.py upgrade-state --reason <text>` | 单向、幂等的 v1→v2 转换：01–04 进入项目泳道，活动 05–10 进入 Change 泳道，并备份旧状态 | 备份存在且 schema 为 2.0 | 不校验产物质量 |
+| `workflow.py start-change --change-id <id> [--retry-abandoned] [--waive-dependency <dep> --reason <text> --by <user> --evidence <path>]` | 进入 05 的唯一入口：校验项目完成、基线冻结、roadmap 登记、重复/已放弃状态与提案依赖门禁（ACCEPTED + 传递闭包）；创建泳道并登记 `active_changes` | 依赖已交付或用户显式豁免且留证据 | 豁免/审批身份由脚本认证；BROKEN 链不可豁免 |
+| `workflow.py list-changes` | 只读 JSON：项目/Change 泳道、当前阶段、待审批/阻断、依赖与实现租约 | 状态可读取 | 不判断产物质量 |
+| `workflow.py next-change --change-id <id>` | 兼容别名：上一个泳道 ACCEPTED 时委托给 `start-change` 门禁并启动下一个 Change | 上一个 Change 已 ACCEPTED 且新 Change 通过启动门禁 | 按 Change 调度以 `start-change` 为准 |
+| `workflow.py abandon-change --change-id <id> --reason <text>` | 未验收放弃泳道：标记 ABANDONED、作废其审批、失效 handoff、移除活动登记、释放租约并记录 `abandoned_changes` | 泳道匹配且无待审批/阻断 | 不删除或归档 Change 目录 |
 | `workflow.py sync-baseline-index` | 从 baseline-manifest.json 同步 workflow-state.json 的基线版本/状态索引 | 状态索引与机器权威 Manifest 一致 | 不冻结或修改基线本身 |
 | `workflow.py handoff-verify --manifest <json>` | 校验交接包文件 SHA-256 | 交接文件未变化 | 文件语义正确 |
+| `update-capabilities.py --change <id> --action add\|remove` | 在主要能力的 `active_changes` 单元中加入/移除 Change；注册表存在时由 start-change、10 验收和 abandon-change 自动调用 | CSV 表头/列保持不变且单元操作幂等 | 不代替能力归属决策 |
 | `check-independent-verification.py` | 校验独立验证报告与结构化证据；UI Change 需要逐 PAGE 的 `layout_checks`（已断言元素、最大偏差/容差、缺失元素）以及独立运行 `check-figma-layout.py` | AC/tests/revision/read-only/findings 满足 PASS 规则；UI 几何已被独立重新测量 | 无法证明 Verifier Agent 身份确实独立 |
 | `workflow.py handoff-create --from-step <id> --to-step <id> --evidence <json>` | 从原阶段已批准 evidence 恢复丢失的交接 manifest；必须提供 `--evidence`，不再接受 `--file` | 重新校验原始输出/门禁/审批并重建哈希 | 不可绕过原阶段失败门禁；09 必须保留独立验证 checker 证据 |
 

@@ -9,20 +9,20 @@
 查看状态：
 
 ```bash
-python3 scripts/workflow.py status
+python scripts/workflow.py status
 ```
 
 检查阶段能否进入（会核验依赖、当前阶段、审批/阻断项及所有上游交接哈希）：
 
 ```bash
-python3 scripts/workflow.py check-entry --step 01-project-bootstrap
-python3 scripts/workflow.py check-entry --step 05-feature-requirements --change-id <change-id>
+python scripts/workflow.py check-entry --step 01-project-bootstrap
+python scripts/workflow.py check-entry --step 05-feature-requirements --change-id <change-id>
 ```
 
 阶段完成后，先准备 evidence JSON，再执行唯一允许的状态转换入口：
 
 ```bash
-python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence workflow/evidence/01-project-bootstrap.json
+python scripts/workflow.py transition --step 01-project-bootstrap --evidence workflow/evidence/01-project-bootstrap.json
 ```
 
 状态机仅在以下条件同时满足时推进：
@@ -37,12 +37,12 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 ### UI 一致性门禁
 
 涉及 UI 的 Change 还必须满足以下条件才允许推进：
-- 06：`design/figma-audit.md` 是唯一 UI 契约（目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、MCP 读取记录、UI 评审 APPROVED）；同时产出 `design/figma-code/`（06 按总体技术选型转码的 `.vue`/`.tsx` 目标框架设计代码）与 `design/figma-layout.csv`（断言映射）；`check-figma-audit.py --strict --require-framework` 退出码 0；不使用截图。
+- 06：HTML 优先的 UI 设计。`design/figma-audit.md` 是唯一 UI 契约（设计来源/平台选择、目标框架/转码说明、token 实际值、文字样式、每 PAGE 区块规格、设计代码、断言范围、状态覆盖与决策、需求覆盖矩阵（每个 AC/US 在每个声明平台 FULL 或 N/A + 理由，每个 PAGE 反向映射，覆盖评审 APPROVED）、HTML 渲染量测或 MCP 读取记录、UI 评审 APPROVED）；产出 `design/ui-html/`（默认：按平台自包含 HTML 页面、评审入口、tokens）、`design/figma-code/`（06 转码的 `.vue`/`.tsx` 目标框架设计代码）与 `design/figma-layout.csv`（含平台/视口的断言映射）；`check-figma-audit.py --strict --require-framework` 退出码 0；不使用截图。无 UI 的 Change 先在 `figma-audit.md` 写 `- Design source status: N/A` 与 `- Reason for no UI: <理由>`，`--no-ui` 才通过。
 - 07：`design/ui-actions.csv` 是 `design.md` `### 事件处理` 的机读投影，登记 `figma-code/` 与 `figma-audit.md` 中的每个功能按钮/图标/链接/菜单/标签页；`### 事件处理` 解释 handler 行为并按 `element_id` 引用对应行，不重复动作映射；每个控件映射到 `navigate`（跳转地址+`route_params` 入参）、`api`（`api/openapi.yaml` 中的 operationId），或用户明确确认（确认人+日期）的 `local-only`。既无跳转也无 API 调用的控件必须提交用户确认；`check-ui-actions.py --change <change-id> --strict` 退出码 0。
-- 08：直接移植目标框架设计代码、只补业务逻辑；`design/evidence/code-review.md` 含 `## UI fidelity`，逐 PAGE 有 Figma node、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论与审批人；数值直接取自 JSON，仅差异/`UI-DERIVED` PAGE 需人工说明；`check-figma-layout.py` 与 `check-design-tokens.py` 退出码 0；`check-code-review.py --strict` 退出码 0。
-- 09：`independent-verification.json` 含 `layout_checks`，逐 PAGE 覆盖断言元素数/最大偏差/容差/缺失元素/判定/证据并独立重跑 `check-figma-layout.py`；`check-independent-verification.py` 退出码 0；有 `differences` 但未 `deviation_approved` 不得 PASS。
+- 08：直接移植目标框架设计代码、只补业务逻辑；`design/evidence/code-review.md` 含 `## UI fidelity`，逐 PAGE 有设计来源引用（HTML data-node-id 或 Figma node）、断言元素数/最大偏差、布局证据 `design/evidence/figma-layout-check.json#PAGE-xxx`、差异、结论与审批人；数值直接取自 JSON，仅差异/`UI-DERIVED` PAGE 需人工说明；`check-figma-layout.py` 与 `check-design-tokens.py` 退出码 0；`check-code-review.py --strict` 退出码 0。
+- 09：`independent-verification.json` 含 `layout_checks`，逐 PAGE 覆盖断言元素数/最大偏差/容差/缺失元素/判定/证据并独立重跑 `check-figma-layout.py --out design/evidence/independent-figma-layout-check.json`（08 已批准的 `figma-layout-check.json` 只读）；`check-independent-verification.py` 退出码 0；有 `differences` 但未 `deviation_approved` 不得 PASS。
 - 10：`acceptance.md` 含 `## UI acceptance`，逐 PAGE 由设计负责人签收；无差异 PAGE 按机器证据批量签收，差异/`UI-DERIVED` PAGE 并排核对；`check-acceptance.py` 退出码 0。
-- 07/08 默认离线消费 06 导出包；仅在 Figma 文件版本变化或页面有歧义时按页批量重读（串行、避免限流）。缺失上述任一 UI 证据时，不得 transition 或归档。
+- 07/08 默认离线消费 06 导出包；仅在设计来源变化或页面有歧义时按页批量重读（串行、避免限流）。缺失上述任一 UI 证据时，不得 transition 或归档。
 
 ### 接口边界门禁
 
@@ -58,14 +58,14 @@ python3 scripts/workflow.py transition --step 01-project-bootstrap --evidence wo
 - 失败语义：检查器非 0 退出、布局不可读或证据缺失均阻断转换；不生成 handoff，`current_step` 不前进。`strategy=none`（或缺少布局）时转换打印 `FOOTPRINT_GATE=SKIPPED (strategy none)` 并继续；这是显式跳过，不是通过声明。
 - 08 入口与 09 验证：08 在写代码前运行 `scripts/implementation-snapshot.py`，并用 `scripts/code-context.py` 获取检索清单；09 对同一入口快照独立重算差异。注册表检查（`check-capabilities.py`、`check-modules.py`）与 roadmap 检查在 04/05 运行，回写的 `--completed` 检查在 10 运行。
 
-状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python3 scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
+状态文件使用临时文件 + 原子替换和独占锁写入；每次成功转换追加 `transition_history`，保留证据路径、输出、门禁结果和审批摘要。不要直接编辑 `completed_steps` 或 `current_step`；修复状态必须先查明证据并走受控恢复流程。拓扑重构导致旧阶段 ID 失效时，使用 `python scripts/workflow.py migrate-state --reason <原因> --reset-step <需重跑阶段>`：失效阶段保留在 `legacy_completed_steps` 与 `topology_migrations`，当前阶段按新 DAG 重算。
 
 ### 阶段评审停等（强制）
 
 阶段完成不等于可进入下一阶段。每个阶段产物与检查完成后，必须先把流程冻结为待评审：
 
 ```bash
-python3 scripts/workflow.py request-review --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json --summary "需求业务梳理送审"
+python scripts/workflow.py request-review --step 02-requirements-analysis --evidence workflow/evidence/02-requirements-analysis.json --summary "需求业务梳理送审"
 ```
 
 - `request-review` 写入 `pending_approvals` 且 **不推进** `current_step`；此后 `next-step.py` 与 `check-entry --step <下一阶段>` 均会阻断。
@@ -73,21 +73,21 @@ python3 scripts/workflow.py request-review --step 02-requirements-analysis --evi
 - 只有用户明确批准待评审阶段（任何无歧义的表述都算；沉默或检查通过不算）后，才可记录审批：
 
 ```bash
-python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at 2026-11-13 --evidence workflow/evidence/02-approval.md
+python scripts/workflow.py approve --step 02-requirements-analysis --approver "<用户>" --approved-at 2026-11-13 --evidence workflow/evidence/02-approval.md
 ```
 
 - `approve` 校验审批证据文件真实存在，把审批记录写入 `approvals_history` 并清除该阶段 `pending_approvals`；随后才能执行 `transition`。
 - `transition` 对当前策略要求审批的每个阶段要求存在未 superseded 的 `approvals_history` 记录（`standard` 为全部人工评审阶段；`risk-based` 仅高风险阶段）；只写 evidence 中的审批或使用 `handoff-create` 都不能绕过。
 - `reopen` 会清除被回退阶段的审批记录，重跑后必须重新评审。
-- Claude Code 下 `.claude/settings.json` 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物（共享产物除外）与直接编辑 `workflow-state.json`；待评审期间同样拒绝。其他 Agent 应以 `pending_approvals` 与 `current_step` 为准自行停止。
+- Claude Code 下 `.claude/settings.json` 的 PreToolUse hook 会拒绝写入当前阶段之后的阶段产物、已完成阶段中非 volatile 的产物、待评审期间当前阶段的声明产物，以及直接编辑 `workflow-state.json`；机器管理的 volatile 文件除外。其他 Agent 应以 `pending_approvals` 与 `current_step` 为准自行停止。
 
 ### 基于风险的审批策略（可选）
 
 - 默认 `approval_policy` 为 `standard`：所有 `human_approval_required` 的阶段都需要记录用户审批。
 - 小型项目可由用户选择 `risk-based`：
-  `python3 scripts/workflow.py set-approval-policy --policy risk-based --reason "<原因>" --by "<用户>"`
+  `python scripts/workflow.py set-approval-policy --policy risk-based --reason "<原因>" --by "<用户>"`
   存在待评审项时命令会拒绝，并把变更记入 `approval_policy_history`。
-- risk-based 模式下，`WORKFLOW-STAGES.json` 中 `risk_level: low` 的阶段（当前为 01 项目初始化、04 提案路线图、06 Figma）仍可运行 `request-review` 生成审计包，但不需要记录审批。`request-review` 会输出 `STATUS=RISK_BASED_FAST_TRACK`，门禁通过后可直接 `transition`。
+- risk-based 模式下，`WORKFLOW-STAGES.json` 中 `risk_level: low` 的阶段（当前为 01 项目初始化、04 提案路线图、06 UI 设计）仍可运行 `request-review` 生成审计包，但不需要记录审批。`request-review` 会输出 `STATUS=RISK_BASED_FAST_TRACK`，门禁通过后可直接 `transition`。
 - 高风险阶段（02 需求、03 架构冻结、05 提案需求、07 详细设计、08 实现、09 独立验证、10 验收）保持标准审批要求。
 - 该策略是状态级设置，不是阶段产物。不得把 fast-track 理解成整体放弃人工评审：它只豁免特定低风险阶段。
 
@@ -103,7 +103,7 @@ python3 scripts/workflow.py approve --step 02-requirements-analysis --approver "
 ### 返工回退
 
 ```bash
-python3 scripts/workflow.py reopen --step 07-detailed-design --reason "测试设计缺口"
+python scripts/workflow.py reopen --step 07-detailed-design --reason "测试设计缺口"
 ```
 
 - 按 DAG 依赖闭包移除目标阶段及其全部下游阶段，清理这些阶段的 `pending_approvals` / `blocked_items`，并把 `current_step` 设回目标阶段。
@@ -113,18 +113,18 @@ python3 scripts/workflow.py reopen --step 07-detailed-design --reason "测试设
 ### 条件阶段跳过
 
 ```bash
-python3 scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <id> --evidence workflow/evidence/06-figma-design-review-skip.json
+python scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <id> --evidence workflow/evidence/06-figma-design-review-skip.json
 ```
 
 - 只有 `"conditional": true` 的阶段可跳过（当前为无 UI Change 的 06）。
-- 跳过 evidence 必须设置 `skip: true`、理由，并包含真实的 `check-figma-audit.py --strict --no-ui` 通过检查及仓库内日志。
+- 跳过 evidence 必须设置 `skip: true`、理由，并包含真实的 `check-figma-audit.py --strict --no-ui` 通过检查及仓库内日志；`figma-audit.md` 必须先写 `- Design source status: N/A` 与 `- Reason for no UI: <理由>`，否则 `--no-ui` 不通过。
 - 命令把该阶段记入 `completed_steps` 与 `skipped_steps`，推进 current_step，并生成 `skipped: true`、无产物的跳过交接；下游入口接受该交接。
 - 有 UI 的 Change 不得使用 skip-stage；其 06 evidence 必须设置 `approval.required=true` 并要求已记录的用户 UI 评审。
 
 ### 重置为未初始化
 
 ```bash
-python3 scripts/workflow.py reset-state --reason "用户要求全新开始" --note "..."
+python scripts/workflow.py reset-state --reason "用户要求全新开始" --note "..."
 ```
 
 - 将完整旧状态归档到 `workflow/evidence/state-reset-<timestamp>.json`。
@@ -132,17 +132,21 @@ python3 scripts/workflow.py reset-state --reason "用户要求全新开始" --no
 - 将所有现有 handoff 标记为 invalidated；旧 evidence 保留供审计。
 - 这是管理性重置，不是阶段转换，仅按用户明确指示使用。
 
-### 多 Change 迭代
+### 多 Change 泳道（v2 状态）
 
 ```bash
-python3 scripts/workflow.py next-change --change-id change-b
+python scripts/workflow.py upgrade-state --reason "adopt v2 lanes"
+python scripts/workflow.py start-change --change-id change-b
+python scripts/workflow.py list-changes
 ```
 
-- 仅在当前 Change 的 05–10 全部完成、无 pending/blocker、且 `transition_history` 中存在该 Change 的 10 验收记录时可用。
-- 把 05–10 归档到 `completed_changes`，保留项目级 01–04，切换 `active_change_id`，并把 `current_step` 设回 05。
-- 第一个 Change 仍从 04 正常进入 05；不支持多个 Change 并发调度。
-- `abandon-change --change-id <id> --reason <text>` 可在未验收时放弃当前 Change：supersede 审批、失效发出的 handoff、从 `completed_steps` 移除 05–10、清空 `active_change_id`，并记录 `abandoned_changes`。Change 目录保留供审计，不做归档。
-- 所有会写状态的命令都会追加一行到 `workflow/state-events.jsonl`（`review_requested`、`approved`、`transition`、`reopen`、`skip`、`abandon_change`、`next_change`、`reset`、`migrate`、`baseline_index_synced`）。JSONL 为二级审计数据，`workflow-state.json` 仍是运行状态。
+- `upgrade-state` 把 v1 单泳道状态转换为 v2：01–04 进入 `project` 泳道，当前 Change 的 05–10 进入 `changes[<id>]`；先备份旧状态，可重复执行。项目未执行升级前，新的多泳道命令返回 `UPGRADE_REQUIRED`。
+- `start-change` 是进入 05 的唯一入口。项目 01–04 未完成或存在项目级 pending/blocker、基线未冻结、Change 不在 roadmap 主表或已批准 amendment、或任一 `Dependencies` / `Depends On` 前置未在 10 阶段验收交付（含传递链）时，命令 fail-closed 拒绝，并输出 `ACTIVE@<阶段>`、`NOT_STARTED`、`ABANDONED` 或 `BROKEN`；豁免必须由用户明确指示并提供理由与证据，记录在泳道中。
+- 每个 Change 泳道用 `--change-id` 独立推进 05–10。待审批与阻塞按泳道隔离，只有项目泳道的事项会阻止所有泳道。依赖门禁在 05 入口和 08 入口各复核一次，交付后被 reopen 的前置会再次阻断下游泳道。
+- 审批、评审包、证据、跳过证据与 handoff 都按 Change 命名空间隔离（`workflow/evidence/<change-id>/`、`workflow/handoffs/<change-id>/`）；项目证据使用 `workflow/evidence/project/`。A 泳道 reopen 不再作废 B 泳道的同名审批。
+- 10 阶段把泳道标记为 `ACCEPTED`、写入 `completed_changes`、从能力注册表 `active_changes` 移除并释放实现租约。`abandon-change` 标记 `ABANDONED`、移除活动登记并释放租约；之后可用 `start-change --retry-abandoned --reason <原因>` 重新启动同一 ID。
+- 实现并发由 `implementation_lease` 控制：07→08 的 `transition` 在全部检查通过后获取租约，并在泳道到达 10、被 abandon，或 ACCEPTED 泳道被 reopen 时释放。`strategy=none` 同一时间只允许一个泳道持有租约；`footprint`/`module-packages` 仅当所有参与泳道都声明了有效的 `### Implementation Slice` 且 owned/integration 路径互不重叠时才允许并行实现，否则以 `IMPLEMENTATION_LEASE_HELD` 拒绝。
+- `next-change` 保留为兼容别名：上一个泳道 ACCEPTED 时委托给同一启动门禁。所有写状态命令都会追加审计行到 `workflow/state-events.jsonl`（`upgrade_state`、`change_started`、`review_requested`、`approved`、`transition`、`reopen`、`skip`、`abandon_change`、`next_change`、`reset`、`migrate`、`baseline_index_synced`）。JSONL 为二级审计，`workflow-state.json` 仍是运行状态。
 
 ### 声明式输出完整性
 
@@ -153,6 +157,7 @@ python3 scripts/workflow.py next-change --change-id change-b
 ### 方法证据门禁
 
 - 02–10 的 evidence 必须包含 `methods`；策略以 `process/STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy` 为准，缺失时使用 `scripts/method_evidence.py` 的内置默认策略。
+- 02/03/05/07 的 evidence 可选包含 `question_coverage` 块；`scripts/check-question-coverage.py` 做形状校验，`workflow.py request-review`/`transition` 自动复核同一可选块。阶段问题清单是建议提问指引，不是逐项硬门禁；待确认问题必须写入 `docs/product/open-questions.md`，写明 owner 与阻塞条件。
 - 每条 method 记录 skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence。校验器要求声明的必需方法技能、合法 `mode`、真实仓内证据路径，以及策略设置 `requires_artifact` 时文件与标题都存在的 `artifact_section`；它刻意不校验问题/备选/决策的最少数量，也不做主题关键词匹配——思考是否足够深由阶段评审和下游消费判定，而不是数字符串。
 - 03 的访谈必须确定系统来源（新系统/现有系统/混合），并覆盖代码地址与第三方接口；若二开，必须实际读取代码地址并在 `technology-decisions.md` 写“现有系统二开约束”，转换为 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。这些是产物层面的实质要求，不是 methods 块的关键词检查。
 - 03 结束前运行 `python scripts/check-architecture-baseline.py --strict`；缺少“现有系统二开约束”“第三方接口依赖清单”、代码访问记录、第三方数据流或 `LEGACY-*`/`EXT-*` 约束时不得冻结基线。
@@ -183,7 +188,7 @@ python3 scripts/workflow.py next-change --change-id change-b
     {"path": "docs/architecture/baseline-status.md", "status": "created", "required": true}
   ],
   "checks": [
-    {"name": "toolchain-check", "kind": "automated", "status": "passed", "command": "python3 scripts/check-package.py", "exit_code": 0, "log": "workflow/evidence/logs/toolchain-check.log"}
+    {"name": "toolchain-check", "kind": "automated", "status": "passed", "command": "python scripts/check-package.py", "exit_code": 0, "log": "workflow/evidence/logs/toolchain-check.log"}
   ],
   "approval": {"required": false, "status": "not-required"}
 }
@@ -206,7 +211,7 @@ workflow/handoffs/
 手动检查：
 
 ```bash
-python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/07-detailed-design--08-implementation-orchestrator.json
+python scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-id>/07-detailed-design--08-implementation-orchestrator.json
 ```
 
 `handoff-create` 仅用于人工确认的恢复/重建；必须提供原阶段的 `--evidence`，不再接受手工 `--file`；不得用它绕过失败门禁或审批。09 独立验证交接必须保留 Verifier 证据和 PASS 证明。
@@ -228,7 +233,7 @@ python3 scripts/workflow.py handoff-verify --manifest workflow/handoffs/<change-
 检查：
 
 ```bash
-python3 scripts/check-independent-verification.py \
+python scripts/check-independent-verification.py \
   --report openspec/changes/<change-id>/design/evidence/independent-verification-report.md \
   --evidence openspec/changes/<change-id>/design/evidence/independent-verification.json
 ```
@@ -237,7 +242,7 @@ python3 scripts/check-independent-verification.py \
 
 ## 4. 边界与限制
 
-- 此版本以单个 `workflow-state.json` 的一个活动 Change 为主；`next-change` 支持依次进入下一个 Change，但尚未实现多个 Change 的并发状态调度器。
+- 此版本在单个 `workflow-state.json` 中支持多个活跃 Change 泳道（v2）；每个泳道独立推进 05–10，旧单泳道项目需先执行 `upgrade-state`。从 07→08 transition 起的实现并发受实现租约限制，规则见上。
 - 脚本能验证文件、哈希、命令退出码和结构化证据，不能证明人工评审意见本身真实；审批人身份由团队现有权限体系保证。
 - Verifier 的独立性需要 Agent 运行环境提供独立会话/不同 Agent；若同一 Agent 自己扮演 Builder 和 Verifier，应明确标记为非独立，不得声称独立验证通过。
 - `workflow.py transition` 是本地仓库的受控入口，不是安全沙箱；有仓库写权限的 Agent 仍可能绕过脚本直接改文件。团队应通过 Agent 工具权限/CI 分支保护进一步限制。
@@ -249,13 +254,13 @@ python3 scripts/check-independent-verification.py \
 首次冻结顺序、BCR 修订、版本升级、Change 约束适用性/例外、设计/实现/验收独立证据以及在途 Change rebase 详见 `process/BASELINE-FEATURE-INTERACTION-zh.md` 第 9 节。核心命令：
 
 ```bash
-python3 scripts/baseline-governance.py audit
-python3 scripts/baseline-governance.py audit --require-frozen
-python3 scripts/baseline-governance.py init-binding --change-id <change-id>
-python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement
-python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase design
-python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase implementation
-python3 scripts/baseline-governance.py check-change --change-id <change-id> --phase acceptance
+python scripts/baseline-governance.py audit
+python scripts/baseline-governance.py audit --require-frozen
+python scripts/baseline-governance.py init-binding --change-id <change-id>
+python scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement
+python scripts/baseline-governance.py check-change --change-id <change-id> --phase design
+python scripts/baseline-governance.py check-change --change-id <change-id> --phase implementation
+python scripts/baseline-governance.py check-change --change-id <change-id> --phase acceptance
 ```
 
 工具包默认 Manifest 和示例约束均为 DRAFT，`audit` 通过只表示结构合法，不表示项目基线已冻结。真实项目必须完成负责人审批后再执行冻结；不得把示例规则或示例审批信息直接当作项目正式规范。

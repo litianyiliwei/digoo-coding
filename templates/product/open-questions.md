@@ -19,4 +19,3 @@
 | Question ID | Decision | Decided by | Date | Evidence |
 |---|---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING | PENDING |
-</content>

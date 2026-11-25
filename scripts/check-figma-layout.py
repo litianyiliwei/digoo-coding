@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Parameterized visual regression: compare Figma geometry with runtime DOM.
+"""Parameterized visual regression: compare UI design geometry with runtime DOM.
 
 Expected values come from the compact assertion table `design/figma-layout.csv`
-(which is derived from Figma's `get_design_context` / `get_metadata`). Actual
-values come from the running DOM measured with Playwright at the frozen viewport
-(default 1440x900). No screenshots are involved.
+(derived from the rendered HTML design documents by default, or from Figma
+`get_design_context` / `get_metadata` for the optional/legacy Figma source).
+Actual values come from the running DOM measured with Playwright at the PAGE
+viewport recorded in each CSV row (falling back to the CLI viewport, default
+1440x900). No screenshots are involved.
 
 Exit codes:
   0 PASS
@@ -115,6 +117,17 @@ def main():
             fail(f"FAIL: {pid}/{row['element_id']} assert_text must be Y/N", 1)
         for field in ("x", "y", "width", "height", "tolerance_px"):
             num(row[field], field, f"{pid}/{row['element_id']}")
+        # New-contract rows carry a per-page viewport so one Change can assert
+        # Web (1440x900) and App/H5 (375x812) designs at their own sizes.
+        viewport_raw = str(row.get("viewport", "")).strip().lower()
+        if viewport_raw and viewport_raw != "pending":
+            match = re.fullmatch(r"(\d+)[x×](\d+)", viewport_raw)
+            if not match:
+                fail(
+                    f"FAIL: {pid}/{row['element_id']} viewport must look like "
+                    f"1440x900 or 375x812, got {row.get('viewport')!r}",
+                    1,
+                )
         layout_by_page.setdefault(pid, []).append(row)
     if not layout_by_page:
         fail("FAIL: figma-layout.csv has no rows", 1)
@@ -156,7 +169,21 @@ def main():
                     fail(f"FAIL: {pid} rows use inconsistent routes: {sorted(routes)}", 1)
                 route = rows[0]["route"]
                 url = args.base_url.rstrip("/") + (route if route.startswith("/") else "/" + route)
-                context_args = {"viewport": {"width": width, "height": height}}
+                viewport_raw = {
+                    str(row.get("viewport", "")).strip().lower()
+                    for row in rows
+                    if str(row.get("viewport", "")).strip()
+                    and str(row.get("viewport", "")).strip().upper() != "PENDING"
+                }
+                if len(viewport_raw) > 1:
+                    fail(f"FAIL: {pid} rows use inconsistent viewports: {sorted(viewport_raw)}", 1)
+                if viewport_raw:
+                    page_width, page_height = parse_viewport(
+                        next(iter(viewport_raw)).replace("×", "x")
+                    )
+                else:
+                    page_width, page_height = width, height
+                context_args = {"viewport": {"width": page_width, "height": page_height}}
                 if args.storage_state:
                     context_args["storage_state"] = args.storage_state
                 context = browser.new_context(**context_args)
@@ -187,8 +214,10 @@ def main():
 
                 page_result = {
                     "page_id": pid,
+                    "platform": rows[0].get("platform", ""),
                     "route": route,
                     "url": url,
+                    "viewport": {"width": page_width, "height": page_height},
                     "result": "PASS",
                     "element_count": len(rows),
                     "max_delta_px": 0.0,

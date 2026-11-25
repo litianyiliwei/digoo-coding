@@ -6,7 +6,7 @@
 > Related requirement/AC IDs: PENDING
 > Version/date: PENDING
 
-> Shared frontend engineering conventions. Stage 06 consumes Section 9 of this document as the UI input set; keep it current.
+> Shared frontend engineering conventions. Stage 06 consumes the `## Visual Conventions` section as its visual input set; keep it current.
 
 ## Directory and Component Rules
 
@@ -27,4 +27,9 @@
 ## Accessibility and Internationalization
 
 - PENDING
-</content>
+
+## Visual Conventions
+
+> The single visual authority consumed by stages 06 and 07: token source, typography/scale, spacing/radius/shadow rules, component-library theme mapping per platform, icon/imagery rules, and responsive/viewport rules. Write `N/A + reason` only when the project has no UI.
+
+- PENDING — token source and naming, typography and scale, spacing/radius/shadow rules, component-library theme mapping per platform, icon/imagery rules, responsive/viewport baselines.

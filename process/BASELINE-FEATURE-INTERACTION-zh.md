@@ -55,7 +55,7 @@ AI 不应无差别把所有文档全文塞入上下文；必须先读取基线�
 | 变化类型 | 权威落点 | 是否更新项目基线 | 典型例子 |
 |---|---|---|---|
 | 当前功能独有的行为、规则、AC、异常场景 | 当前 Change 的 proposal / delta spec | 否 | 订单导出时的字段筛选规则 |
-| 当前功能独有的页面、按钮、接口和 API schema | 当前 Change 的页面清单、Figma 审计、OpenAPI | 否 | 新增 `GET /orders/{id}` |
+| 当前功能独有的页面、按钮、接口和 API schema | 当前 Change 的页面清单、UI 设计契约/HTML 设计稿、OpenAPI | 否 | 新增 `GET /orders/{id}` |
 | 当前功能独有的表/字段/索引/迁移和查询 | 当前 Change 的 migration、后端设计、IO 目录 | 通常否 | 仅订单导出任务使用的状态字段 |
 | 当前功能独有的类、方法、内部 IO 编排 | 当前 Change 的详细设计和代码 | 否 | 某个功能调用 Redis 的一次性缓存实现 |
 | 新的共享业务规则、全局角色/权限语义、跨功能流程或公共术语 | 产品基线（必要时同步 OpenSpec 主规格） | 是，审批后 | 所有订单类操作必须满足统一的审批规则 |
@@ -174,7 +174,7 @@ AI 可以分析、提出候选修改和生成文档，不可代替负责人批�
 创建 Change 辅助资产时运行：
 
 ```bash
-python3 scripts/baseline-governance.py init-binding --change-id <change-id>
+python scripts/baseline-governance.py init-binding --change-id <change-id>
 ```
 
 生成的 `baseline-binding.json` 必须覆盖 manifest `governance_profile` 要求的约束：`standard` 覆盖全部 ACTIVE，`lite` 只覆盖标记 `critical: true` 的约束。两种模式下基线快照、`baseline-impact.md`、rebase 复核与绑定批准仍然必填。禁止删除必需约束行。每条绑定约束必须选择 `APPLICABLE` 或 `NOT_APPLICABLE`；N/A 必须写明理由。适用约束在设计阶段必须为 `COMPLIANT` 或 `EXCEPTION_APPROVED`，并关联真实设计证据文件。
@@ -190,7 +190,7 @@ python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 | 03 架构基线 | `audit --require-frozen` | 冻结后校验 Manifest、约束目录、哈希与审批 |
 | 04 提案规划 | `audit --require-frozen` | 确保项目基线仍有效 |
 | 05 提案需求 | `check-change --phase requirement` | 约束覆盖完整、适用性已判定、基线绑定已审批 |
-| 06 Figma 设计 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
+| 06 UI 设计 | `check-change --phase requirement` | 防止早期需求绑定被删改或基线漂移 |
 | 07 详细设计 | `check-change --phase design` | 每条约束有设计结论和证据，例外已审批 |
 | 08 实现 | `check-change --phase implementation` | 适用约束有实现验证证据 |
 | 09 独立验证 | `check-change --phase implementation` | 独立证据仍覆盖已批准实现约束 |
@@ -201,7 +201,7 @@ python3 scripts/baseline-governance.py init-binding --change-id <change-id>
 冻结后发现需要修改基线时，**必须先**运行：
 
 ```bash
-python3 scripts/baseline-governance.py open-amendment \
+python scripts/baseline-governance.py open-amendment \
   --request-id BCR-<id> --domains architecture,data_domain --opened-by <reviewer>
 ```
 

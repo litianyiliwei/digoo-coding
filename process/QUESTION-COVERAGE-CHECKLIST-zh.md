@@ -53,6 +53,7 @@
 | T15 | 测试策略、环境、数据、替身 | - | Q | F | Q |
 | T16 | 参考产品、能力/模块归属与偏差确认 | Q | F | F | F |
 | T17 | 实现切片/模块 footprint 与 UI 控件动作映射 | - | - | - | Q |
+| T18 | 目标平台与各端范围 | Q | F | Q | F |
 
 最明显的断线是 T02（规模与容量）、T06（数据生命周期与隐私）、T08（报表与打印）、T09（NFR）、T10（迁移）、T11（验收）、T13（负责人/RACI）、T14（业务日历）。这些主线目前没有任何一个阶段从头到尾负责。
 
@@ -71,6 +72,7 @@
 | 02-T06-01 | 数据生命周期、隐私、保留 | 数据从哪里来、归谁所有、保留多久、何时归档/删除/导出、是否有法务保留、哪些字段属于个人或敏感数据？ | `business-rules.md`；`data-objects.csv`；NFR 表；`open-questions.md` | 03 数据治理；05 隐私 AC；07 脱敏/保留 | [ ] |
 | 02-T07-01 | 外部系统与第三方清单 | 需要哪些外部系统、监管/追溯平台、天气/地图/支付/短信/微信/ERP/物流服务，目的、数据流向、账号/沙箱、SLA、审批和隐私条款是什么？ | `requirements-analysis.md` §6/§7；`reference-research.md`；`open-questions.md` | 03 第三方清单；05 场景；07 接口目录 | [ ] |
 | 02-T07-02 | 现场终端、网络、离线、设备 | 现场使用什么终端（手机/PDA/平板/PC），有没有网络，是否需要离线作业，是否需要扫码/拍照/GPS/称重/打印？ | `workflows.md` 节点输入；`requirements-analysis.md`；NFR 表 | 03 平台；06 交互；07 接口 | [ ] |
+| 02-T07-03 | 目标平台与客户端形态 | 项目实际开发哪几个端——web、h5、小程序、app、android、ios、harmonyos、desktop、pda？每端的用户/场景、客户端形态偏好是什么，不开发的端为什么排除？ | `requirements-analysis.md` §10 Target Platforms and Client Forms | 04 每个 Change 的 `Target Platforms`；05 proposal/user-stories 声明；06 按平台的 HTML UI 设计 | [ ] |
 | 02-T08-01 | 报表、台账、凭证、导出、打印 | 需要哪些报表、台账、追溯凭证或监管报送，维度、频率、导出格式、打印/签字/二维码要求是什么？ | `requirements-analysis.md`；`workflows.md`；`acceptance-policy.md` | 06 打印布局；07 IO/导出；08/10 验收 | [ ] |
 | 02-T09-01 | 量化 NFR 目标 | 性能、可用性、RPO/RTO、离线容忍、安全、隐私、审计保留、可访问性、合规（等保/信创/行业法规）的量化目标是什么？ | `requirements-analysis.md` §6 NFR 表 | 03 约束；05 NFR AC；07 NFR 测试；08/09 验证 | [ ] |
 | 02-T10-01 | 旧数据来源、数量、质量、迁移 | 旧数据有哪些（纸/Excel/旧系统）、有多少、有多脏、谁清洗、怎么迁移、双跑多久、旧系统何时停？ | `workflows.md`；`requirements-analysis.md` §7；`open-questions.md` | 03 迁移；04 依赖；07 backfill；08 割接 | [ ] |
@@ -112,6 +114,7 @@
 | 05-T05-01 | 字段级规则 | 每个字段或数据对象的校验、计算、单位、精度、状态转换、唯一性、重复提交和并发规则是什么？ | `specs/<capability>/spec.md` Scenario；`design/user-stories.md` AC；`business-rules.md` | 07 数据模型/API；08 实现 | [ ] |
 | 05-T06-01 | PII 与数据生命周期行为 | 本 Change 涉及哪些 PII/敏感字段，保留、删除、导出和审计的可观察行为是什么？ | `specs/<capability>/spec.md` Scenario；AC；`baseline-impact.md` | 07 脱敏/保留；08/09 审计 | [ ] |
 | 05-T07-01 | 多端、离线、第三方失败 | 多平台、设备、离线/弱网、推送/深链、第三方失败/超时/限流/降级、人工兜底的可观察行为是什么？ | `specs/<capability>/spec.md` Scenario；AC | 06 状态；07 接口/错误设计；08 测试 | [ ] |
+| 05-T07-02 | 本 Change 的目标平台 | 本 Change 实际开发项目声明的哪几个端？每个声明端是否有该端专属的 AC/Scenario 覆盖或明确的 N/A + 理由？`proposal.md`、`design/user-stories.md` 与路线图 `Target Platforms` 单元格是否完全一致？ | `proposal.md` `## Target Platforms`；`design/user-stories.md` `- Target platforms:`；`docs/product/proposal-roadmap.md` `Target Platforms` | 06 按平台 PAGE 覆盖；07 各端前端设计；08/09 验证 | [ ] |
 | 05-T08-01 | 报表、打印、导出、凭证 | 本 Change 是否产出报表、打印、导出或追溯凭证，AC 是什么？ | `specs/<capability>/spec.md` Scenario；AC | 06 打印布局；07 IO/导出；10 验收 | [ ] |
 | 05-T09-01 | NFR 转成验收 | 本 Change 承接哪些 NFR，什么阈值、证据、环境和验收方式使每项可验证？ | AC；`baseline-binding.json`；`acceptance-policy.md` | 07 NFR 测试；08/09 验证 | [ ] |
 | 05-T10-01 | 迁移、兼容、回滚 | 本 Change 是否涉及旧数据、旧接口、旧页面，迁移正确性、双跑、回滚、向后兼容的 AC 是什么？ | AC；`baseline-impact.md`；`proposal.md` Impact | 07 backfill；08 割接 | [ ] |
@@ -119,7 +122,8 @@
 | 05-T14-01 | 业务日历 AC | 本 Change 是否受种植/收获/销售窗口、安全间隔期或监管截止日约束，对应的时间窗 AC 是什么？ | AC；`proposal.md`；`change-sizing.md` | 07 调度；08 测试数据 | [ ] |
 | 05-T15-01 | 可测试性输入 | 需要哪些测试数据、替身、真实设备和沙箱，每条 AC 是否可观察、可断言？ | `specs/<capability>/spec.md` Scenario；AC；`test-cases.csv`（07） | 07 测试设计；08 执行 | [ ] |
 | 05-T13-01 | Change 负责人与开放项 owner | 本 Change 的产品 owner、技术 owner、验收人是谁，每个开放问题由谁关闭？ | `proposal.md`；`decisions.md`；`open-questions.md` | 06/07/08/09/10 审批 | [ ] |
-| 05-T16-01 | 能力、归属模块、关联模块与迟到提案修订 | 本 Change 交付哪个能力，由哪个模块拥有，涉及哪些关联/共享模块？两个注册表是否已更新，使归属模块列出该能力、owner/related slug 均存在，且 `partial` 切片声明了 `remaining_slices`？若提案不在路线图主表内，是否有已批准的 `## Roadmap Amendments` 行（理由/提出人/审批人/日期/基线影响）？ | `docs/product/capabilities.csv`；`docs/product/modules.csv`；`docs/product/proposal-roadmap.md` `## Roadmap Amendments` | 07 实现切片；08 footprint；10 注册表回写 | [ ] |
+| 05-T18-01 | 提案依赖与并行安全 | 本 Change 启动前必须已验收交付哪些前置提案？依赖是否写入路线图 `Dependencies` / `Depends On` 列并在 `Ordering Rationale` 说明理由？是否有其他活跃提案共享同一能力或代码足迹？ | `docs/product/proposal-roadmap.md` `Dependencies` / `## Ordering Rationale`；`design.md` `### Implementation Slice` | `start-change` 依赖门禁；05/08 二次核对；实现租约/足迹 | [ ] |
+| 05-T16-01 | 能力、归属模块、关联模块与迟到提案修订 | 本 Change 交付哪个能力，由哪个模块拥有，涉及哪些关联/共享模块？两个注册表是否已更新，使归属模块列出该能力、owner/related slug 均存在，且 `partial` 切片声明了 `remaining_slices`？若提案不在路线图主表内，是否有已批准的 `## Roadmap Amendments` 行（理由/提出人/审批人/日期/基线影响/依赖）？ | `docs/product/capabilities.csv`；`docs/product/modules.csv`；`docs/product/proposal-roadmap.md` `## Roadmap Amendments` | 07 实现切片；08 footprint；10 注册表回写 | [ ] |
 
 ### 3.4 07 详细设计、接口与测试设计
 

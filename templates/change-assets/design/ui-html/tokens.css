@@ -1,0 +1,17 @@
+/* UI design tokens for the HTML review entry. Replace the placeholder
+   comments with actual values extracted from the rendered HTML design. */
+:root {
+  /* Color tokens: every color must record a concrete hex value. */
+  --color-bg: #f4f7f1;
+  --color-surface: #ffffff;
+  --color-brand: #2f6b3f;
+  --color-text: #1f2a24;
+  --color-text-secondary: #5f6f64;
+  --color-border: #dce5d7;
+
+  /* Spacing / radius / shadow tokens: every value must carry a unit. */
+  --space-page: 22px;
+  --radius-card: 10px;
+  --radius-control: 8px;
+  --shadow-card: 0 2px 8px rgba(31, 42, 36, 0.08);
+}

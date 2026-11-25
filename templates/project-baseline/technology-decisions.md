@@ -38,7 +38,23 @@ PENDING — domain → selected option → reason → ADR ID (when one exists).
 - Deviations from the shipped rule pack: PENDING — rule/path change, reason, and where it is recorded (`quality-gates.json` wins for execution).
 - Confirmation: PENDING — owner/approver and date of the selection decision.
 
-## Third-Party Interface Dependencies
+## Existing System Secondary-Development Constraints
+
+> Required when the system origin is secondary development on an existing system; for a new system, write `N/A + reason`. The code address must actually have been read; record the areas read and the constraints converted to `LEGACY-*` in `constraint-registry.json`.
+
+| System origin | Code address (repository/branch/commit) | Areas actually read | Constraints (→ `LEGACY-*`) | Compatibility/rollback notes |
+|---|---|---|---|---|
+| PENDING | PENDING | PENDING | PENDING | PENDING |
+
+## Third-Party Interface Dependency List
+
+> List every third-party interface the architecture depends on; write `NONE + reason` when there are none. The EXTERNAL data flows in `data-flows.md` and the integration conventions in `api-conventions.md` must match this table.
+
+| Provider | Purpose | Protocol | Authentication | SLA/quota | Sandbox/test account | Approval | Data sharing/privacy | Owner |
+|---|---|---|---|---|---|---|---|---|
+| PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING | PENDING |
+
+### Third-Party Library Licenses
 
 | Dependency | Version | License | Upgrade Policy | Risk |
 |---|---|---|---|---|
@@ -53,4 +69,3 @@ PENDING — domain → selected option → reason → ADR ID (when one exists).
 ## Pending Items
 
 - PENDING — unknown selection, owner, blocking condition.
-</content>

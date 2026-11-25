@@ -58,6 +58,17 @@ HEADING_TITLE_RE = re.compile(r"^#+\s+(.*?)\s*$")
 SLICE_POSITIONS = {"entry", "behavior", "result"}
 AC_BUDGET = 12
 
+PLATFORM_SECTION_RE = re.compile(
+    r"^##\s+(?:[0-9]+\.\s*)?(Target Platforms and Client Forms|目标平台与客户端形态)\s*$",
+    re.I,
+)
+PROPOSAL_PLATFORM_HEADING_RE = re.compile(
+    r"^##\s+(Target Platforms|目标平台)\s*$", re.I
+)
+TARGET_PLATFORM_LINE_RE = re.compile(
+    r"^- (?:Target platforms|目标平台)[:：]\s*(.+?)\s*$", re.M | re.I
+)
+
 
 def read_lines(path):
     if not path.is_file():
@@ -132,7 +143,220 @@ def project_context():
     return workflows, objects, rd, flows, node_ids, node_flow, brs, ras, do_rows, rd_rows
 
 
+def _is_separator_row(cells: list[str]) -> bool:
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells)
+
+
+def _platform_cell_index(header: list[str], needles: tuple[str, ...]) -> int:
+    for index, cell in enumerate(header):
+        folded = cell.casefold()
+        if any(needle in folded for needle in needles):
+            return index
+    return -1
+
+
+def _check_project_platforms() -> None:
+    """Stage 02 must name which client platforms the project develops."""
+    path = ROOT / "docs/product/requirements-analysis.md"
+    if not path.is_file():
+        return
+    reqs = path.read_text(encoding="utf-8").splitlines()
+    section = None
+    for index, line in enumerate(reqs):
+        if PLATFORM_SECTION_RE.match(line):
+            body = []
+            for inner in reqs[index + 1:]:
+                if inner.startswith("## "):
+                    break
+                body.append(inner)
+            section = (index + 1, body)
+            break
+    if section is None:
+        ERRORS.append(
+            "requirements-analysis.md: missing ## Target Platforms and Client Forms "
+            "(目标平台与客户端形态); name web/h5/app/android/ios/harmonyos/mini-program/desktop/pda "
+            "and whether each is in scope"
+        )
+        return
+    line_no, body = section
+    table = [
+        [cell.strip() for cell in line.strip().strip("|").split("|")]
+        for line in body
+        if line.strip().startswith("|")
+    ]
+    if not table:
+        ERRORS.append(
+            f"requirements-analysis.md:{line_no}: Target Platforms section needs a table "
+            "(Platform / In scope / Reason or notes)"
+        )
+        return
+    header = table[0]
+    platform_index = _platform_cell_index(header, ("platform", "平台"))
+    scope_index = _platform_cell_index(header, ("in scope", "scope", "开发", "范围"))
+    if platform_index < 0 or scope_index < 0:
+        ERRORS.append(
+            f"requirements-analysis.md:{line_no}: platform table needs Platform and "
+            "In scope (是否开发) columns"
+        )
+        return
+    selected: list[str] = []
+    seen: set[str] = set()
+    for cells in table[1:]:
+        if _is_separator_row(cells) or not cells or not any(cells):
+            continue
+        if cells == header:
+            continue
+        raw_platform = cells[platform_index] if platform_index < len(cells) else ""
+        platform = gm.normalize_platform(raw_platform)
+        if not platform:
+            ERRORS.append(
+                f"requirements-analysis.md: unknown platform {raw_platform!r}; use "
+                f"{', '.join(sorted(gm.PLATFORMS))}"
+            )
+            continue
+        if platform in seen:
+            ERRORS.append(
+                f"requirements-analysis.md: duplicate platform row {platform!r}"
+            )
+            continue
+        seen.add(platform)
+        scope = (cells[scope_index] if scope_index < len(cells) else "").strip()
+        scope_folded = scope.casefold()
+        in_scope = scope_folded in {"yes", "y", "是", "开发", "in scope", "in-scope"}
+        out_scope = scope_folded in {"no", "n", "否", "不开发", "out of scope", "out-of-scope"}
+        if in_scope:
+            selected.append(platform)
+        elif out_scope:
+            notes = [
+                cell for index, cell in enumerate(cells)
+                if index not in {platform_index, scope_index} and cell.strip()
+            ]
+            if not notes:
+                ERRORS.append(
+                    f"requirements-analysis.md: platform {platform!r} is out of scope but "
+                    "has no reason/notes"
+                )
+        else:
+            ERRORS.append(
+                f"requirements-analysis.md: platform {platform!r} In scope value {scope!r} "
+                "must be YES/NO (是/否)"
+            )
+    if not selected:
+        ERRORS.append(
+            "requirements-analysis.md: Target Platforms must select at least one platform "
+            "to develop (web/h5/app/android/ios/harmonyos/mini-program/desktop/pda)"
+        )
+
+
+def _change_platform_line(lines: list[str]) -> tuple[list[str], list[str]] | None:
+    text = "\n".join(lines)
+    match = TARGET_PLATFORM_LINE_RE.search(text)
+    if not match:
+        return None
+    return gm.parse_platform_list(match.group(1))
+
+
+def _platforms_from_section(lines: list[str], heading_re) -> tuple[list[str], list[str]]:
+    found = _find_section(lines, heading_re)
+    if found is None:
+        return [], []
+    _, body = found
+    known: list[str] = []
+    unknown: list[str] = []
+    for _, line in body:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("<!--"):
+            continue
+        if stripped.startswith("|"):
+            cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+            if _is_separator_row(cells):
+                continue
+            values = cells
+        elif stripped.startswith("-") or re.match(r"[0-9]+\.", stripped):
+            values = [stripped.lstrip("-0123456789. ").strip()]
+        else:
+            continue
+        for value in values:
+            candidate = re.split(r"[:：]", value, maxsplit=1)[0].strip().strip("`").strip()
+            name = gm.normalize_platform(candidate)
+            if name and name not in known:
+                known.append(name)
+            elif not name and candidate and re.search(r"端|app|web|android|ios|harmony|mini", candidate, re.I):
+                if candidate not in unknown:
+                    unknown.append(candidate)
+    return known, unknown
+
+
+def _check_change_platforms(change: str, lines: list[str]) -> list[str]:
+    declared_result = _change_platform_line(lines)
+    if declared_result is None:
+        ERRORS.append(
+            "user-stories.md: missing '- Target platforms: <web|h5|app|android|ios|"
+            "harmonyos|mini-program|desktop|pda> ...'"
+        )
+        return []
+    declared, declared_unknown = declared_result
+    for token in declared_unknown:
+        ERRORS.append(
+            f"user-stories.md: unsupported target platform {token!r}; use "
+            f"{', '.join(sorted(gm.PLATFORMS))}"
+        )
+    if not declared:
+        ERRORS.append("user-stories.md: Target platforms declares no platform")
+        return declared
+
+    proposal_path = ROOT / "openspec/changes" / change / "proposal.md"
+    if not proposal_path.is_file():
+        ERRORS.append(f"Missing artifact: {proposal_path.relative_to(ROOT)}")
+        return declared
+    proposal_lines = proposal_path.read_text(encoding="utf-8").splitlines()
+    proposal_known, proposal_unknown = _platforms_from_section(
+        proposal_lines, PROPOSAL_PLATFORM_HEADING_RE
+    )
+    for token in proposal_unknown:
+        ERRORS.append(
+            f"proposal.md: unsupported target platform {token!r}; use "
+            f"{', '.join(sorted(gm.PLATFORMS))}"
+        )
+    if not proposal_known:
+        ERRORS.append(
+            "proposal.md: missing '## Target Platforms' section naming the platforms "
+            "this Change develops"
+        )
+    elif set(proposal_known) != set(declared):
+        ERRORS.append(
+            "proposal.md Target Platforms "
+            f"({', '.join(sorted(proposal_known))}) disagree with user-stories.md "
+            f"({', '.join(sorted(declared))})"
+        )
+
+    roadmap_path = ROOT / ROADMAP_REL
+    if roadmap_path.is_file():
+        try:
+            roadmap = gm.parse_roadmap(root=ROOT)
+        except RuntimeError:
+            roadmap = None
+        if roadmap is not None:
+            row, _ = _roadmap_lookup(roadmap, change)
+            raw = _cell(row, "Target Platforms") if row else ""
+            if raw:
+                row_known, row_unknown = gm.parse_platform_list(raw)
+                for token in row_unknown:
+                    ERRORS.append(
+                        f"{ROADMAP_REL}: Change {change!r} Target Platforms has unsupported "
+                        f"value {token!r}"
+                    )
+                if row_known and set(row_known) != set(declared):
+                    ERRORS.append(
+                        f"{ROADMAP_REL}: Change {change!r} Target Platforms "
+                        f"({', '.join(sorted(row_known))}) disagree with user-stories.md "
+                        f"({', '.join(sorted(declared))})"
+                    )
+    return declared
+
+
 def check_project():
+    _check_project_platforms()
     workflows, objects, rd, flows, node_ids, node_flow, brs, ras, do_rows, rd_rows = project_context()
     for label, lines in (('workflows.md', workflows), ('data-objects.csv', objects), ('rd-matrix.csv', rd)):
         placeholders(lines, label)
@@ -592,6 +816,7 @@ def check_change(change):
         ERRORS.append(str(exc))
         strategy = 'none'
     if strategy != 'none':
+        _check_change_platforms(change, us_lines)
         if strategy == 'module-packages':
             _check_proposal(change)
         _check_stories_and_scenarios(change, us_lines)

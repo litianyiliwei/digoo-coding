@@ -22,13 +22,14 @@ MODULE_HEADER = (
 
 MAIN_HEADER = (
     "| Change ID | Primary Capability | Owner Module | Related Modules | "
-    "Slice Type | Slice Coverage | Code Target | Demo Path | Slice Budget |"
+    "Slice Type | Slice Coverage | Code Target | Demo Path | Slice Budget "
+    "| Dependencies |"
 )
 
 AMENDMENT_HEADER = (
     "| Change ID | Primary Capability | Owner Module | Related Modules | "
     "Slice Type | Slice Coverage | Code Target | Reason | Requester | Approver "
-    "| Date | Baseline Impact |"
+    "| Date | Baseline Impact | Depends On |"
 )
 
 LEGACY_HEADER = (
@@ -49,7 +50,18 @@ def load(root: Path):
 def table(header: str, rows) -> str:
     columns = len([cell for cell in header.strip("|").split("|")])
     separator = "|" + "---|" * columns
-    return "\n".join([header, separator, *rows]) + "\n"
+    return "\n".join([header, separator, *[_pad_row(header, row) for row in rows]]) + "\n"
+
+
+def _pad_row(header: str, row: str) -> str:
+    """Fill a trailing missing cell with ``none`` so fixtures stay focused."""
+    expected = len([cell for cell in header.strip("|").split("|")])
+    actual = len([cell for cell in row.strip("|").split("|")])
+    while actual < expected:
+        row = row.rstrip()
+        row = row[:-1] + "| none |" if row.endswith("|") else row + "| none |"
+        actual += 1
+    return row
 
 
 class RoadmapCheckerTests(unittest.TestCase):
@@ -93,13 +105,15 @@ class RoadmapCheckerTests(unittest.TestCase):
             "\n".join([CAPABILITY_HEADER, *rows]) + "\n",
         )
 
-    def roadmap(self, main_rows, amendment_rows=None, main_header=MAIN_HEADER):
+    def roadmap(self, main_rows, amendment_rows=None, main_header=MAIN_HEADER, rationale=None):
         text = f"# Proposal Roadmap\n\n## Candidate Changes\n\n{table(main_header, main_rows)}"
         if amendment_rows is not None:
             text += (
                 "\n## Roadmap Amendments\n\n"
                 + table(AMENDMENT_HEADER, amendment_rows)
             )
+        if rationale is not None:
+            text += "\n## Ordering Rationale\n\n" + rationale + "\n"
         self.write("docs/product/proposal-roadmap.md", text)
 
     def legacy_roadmap(self, rows, heading=LEGACY_HEADING, header=LEGACY_HEADER):
@@ -934,6 +948,115 @@ class RoadmapCheckerTests(unittest.TestCase):
         self.assertNotIn("docs/product/modules.csv", out)
         self.assertNotIn("docs/product/capabilities.csv", out)
 
+    # -- dependencies ---------------------------------------------------------
+    def test_dependencies_column_required_for_module_packages(self):
+        self.layout()
+        self.registries()
+        self.roadmap(
+            [
+                "| chg-a | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC |",
+            ],
+            main_header=(
+                "| Change ID | Primary Capability | Owner Module | Related Modules "
+                "| Slice Type | Slice Coverage | Code Target | Demo Path | Slice Budget |"
+            ),
+        )
+        self.change("chg-a")
+        code, out = self.run_check()
+        self.assertEqual(1, code)
+        self.assertIn("missing Dependencies column", out)
+
+    def test_unknown_dependency_fails(self):
+        self.layout()
+        self.registries()
+        self.roadmap(
+            [
+                "| chg-a | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC "
+                "| ghost-change |",
+            ]
+        )
+        self.change("chg-a")
+        code, out = self.run_check()
+        self.assertEqual(1, code)
+        self.assertIn("unknown dependency", out)
+        self.assertIn("ghost-change", out)
+
+    def test_dependency_cycle_fails(self):
+        self.layout()
+        self.registries()
+        self.roadmap(
+            [
+                "| chg-a | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC "
+                "| chg-b |",
+                "| chg-b | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC "
+                "| chg-a |",
+            ]
+        )
+        for change_id in ("chg-a", "chg-b"):
+            self.change(change_id)
+        code, out = self.run_check()
+        self.assertEqual(1, code)
+        self.assertIn("dependency cycle", out)
+
+    def test_deps_json_writes_edges(self):
+        self.layout()
+        self.registries()
+        self.roadmap(
+            [
+                "| chg-a | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC "
+                "| chg-b |",
+                "| chg-b | order-create | order | N/A + reason | extend | full "
+                "| server/src/main/java/org/sales/order/resource/ | demo | 4 AC "
+                "| none |",
+            ],
+            rationale="- chg-a ← chg-b: foundation first",
+        )
+        for change_id in ("chg-a", "chg-b"):
+            self.change(change_id)
+        target = self.root / "deps.json"
+        code, out = self.run_check("--deps-json", str(target))
+        self.assertEqual(0, code, out)
+        data = json.loads(target.read_text(encoding="utf-8"))
+        self.assertEqual(["chg-a", "chg-b"], data["registered"])
+        self.assertEqual(
+            [{"change": "chg-a", "depends_on": "chg-b", "source": "main"}],
+            data["edges"],
+        )
+
+    def test_footprint_dependency_rationale_is_advisory_under_strict(self):
+        self.layout(strategy="footprint")
+        self.write(
+            "docs/product/proposal-roadmap.md",
+            "# Roadmap\n\n## Candidate Changes\n\n"
+            + table(
+                "| Change ID | Code Target | Dependencies |",
+                ["| chg-a | server/sales/ | chg-b |",
+                 "| chg-b | server/sales/ | none |"],
+            )
+            + "\n## Ordering Rationale\n\n",
+        )
+        code, out = self.run_check("--strict")
+        self.assertEqual(0, code, out)
+        self.assertIn("WARN:", out)
+        self.assertIn("ordering rationale", out)
+
+    def test_strategy_none_validates_dependency_cycle(self):
+        self.legacy_roadmap(
+            [
+                "| chg-a | chg-b | v |",
+                "| chg-b | chg-a | v |",
+            ],
+            header="| Change ID | Dependencies | Value |",
+        )
+        code, out = self.run_check("--strict")
+        self.assertEqual(1, code, out)
+        self.assertIn("dependency cycle", out)
+
     # -- missing inputs / errors ---------------------------------------------
     def test_missing_capability_registry_fails(self):
         self.layout()
@@ -987,6 +1110,37 @@ class RoadmapCheckerTests(unittest.TestCase):
         self.assertEqual(1, code)
         self.assertIn("ERROR:", out)
         self.assertIn("invalid strategy", out)
+
+    # -- target platforms (optional column, validated when present) -----------
+    def test_target_platforms_column_accepts_canonical_values(self):
+        self.layout()
+        self.registries()
+        header = MAIN_HEADER + " Target Platforms |"
+        row = (
+            "| chg-a | order-create | order | N/A + reason | extend | partial "
+            "| server/src/main/java/org/sales/order/resource/ | demo | 6 AC | none "
+            "| web; app |"
+        )
+        self.roadmap([row], main_header=header)
+        self.change("chg-a")
+        code, out = self.run_check()
+        self.assertEqual(0, code, out)
+
+    def test_target_platforms_column_rejects_unknown_platform(self):
+        self.layout()
+        self.registries()
+        header = MAIN_HEADER + " Target Platforms |"
+        row = (
+            "| chg-a | order-create | order | N/A + reason | extend | partial "
+            "| server/src/main/java/org/sales/order/resource/ | demo | 6 AC | none "
+            "| blackberry |"
+        )
+        self.roadmap([row], main_header=header)
+        self.change("chg-a")
+        code, out = self.run_check()
+        self.assertEqual(1, code, out)
+        self.assertIn("Target Platforms", out)
+        self.assertIn("blackberry", out)
 
     def test_bad_arguments_usage(self):
         code, out = self.run_check("--unknown")

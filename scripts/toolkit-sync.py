@@ -396,6 +396,19 @@ def working_tree_dirty(project: Path) -> bool:
     return any(line.strip() for line in result.stdout.splitlines())
 
 
+def state_has_reviews(state: dict) -> bool:
+    """True when a v1 or v2 state has pending reviews or blockers."""
+    if str(state.get("state_schema_version")) == "2.0" and isinstance(state.get("project"), dict) and isinstance(state.get("changes"), dict):
+        project = state.get("project") or {}
+        if project.get("pending_approvals") or project.get("blocked_items"):
+            return True
+        for lane in (state.get("changes") or {}).values():
+            if isinstance(lane, dict) and (lane.get("pending_approvals") or lane.get("blocked_items")):
+                return True
+        return False
+    return bool(state.get("pending_approvals") or state.get("blocked_items"))
+
+
 def pending_review(project: Path) -> bool:
     state_path = project / "workflow-state.json"
     if not state_path.is_file():
@@ -404,7 +417,7 @@ def pending_review(project: Path) -> bool:
         state = json.loads(state_path.read_text(encoding="utf-8"))
     except Exception:
         return False
-    return bool(state.get("pending_approvals") or state.get("blocked_items"))
+    return state_has_reviews(state)
 
 
 def backup_state(project: Path) -> Path | None:
@@ -501,7 +514,7 @@ def apply(project_root, target: Source, ref: str = "", *, take_upstream: bool = 
         except Exception:
             print("SYNC_APPLY_ABORTED workflow-state.json is unreadable; run toolkit-sync.py repair first")
             return 2
-        if state.get("pending_approvals") or state.get("blocked_items"):
+        if state_has_reviews(state):
             print("SYNC_APPLY_ABORTED pending_approvals or blocked_items exist; resolve the review before upgrading")
             return 2
     if working_tree_dirty(project):

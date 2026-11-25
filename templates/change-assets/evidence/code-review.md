@@ -41,7 +41,7 @@ TODO
 > Paths are relative to the Change's `design/` directory; `assertion elements/max deviation` must be copied directly from the JSON's `element_count` / `max_delta_px`, not manually estimated.
 > **UI verification relies primarily on machine evidence**: for PAGES with no differences, write "machine evidence sign-off" in the `Review method` column; only PAGES with differences or `UI-DERIVED` are written as "manual review", with the reason and approver given in the `Difference` column.
 
-| PAGE | Figma node | Assertion elements/max deviation | Layout evidence | Difference | Conclusion | Approver | Review method |
+| PAGE | Design source reference (HTML data-node-id / Figma node) | Assertion elements/max deviation | Layout evidence | Difference | Conclusion | Approver | Review method |
 |---|---|---|---|---|---|---|---|
 | PAGE-001 | `3:2` | `8 elements / 0.0px (tol 2px)` | `evidence/figma-layout-check.json#PAGE-001` | None | PASS | — | machine evidence sign-off |
 

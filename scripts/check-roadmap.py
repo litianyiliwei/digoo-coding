@@ -37,6 +37,7 @@ The rule set follows the project's code-layout strategy:
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -45,6 +46,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 import gate_common as gm  # noqa: E402
+import roadmap_deps  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -70,6 +72,7 @@ MAIN_REQUIRED = (
     "Code Target",
     "Demo Path",
     "Slice Budget",
+    "Dependencies",
 )
 AMENDMENT_REQUIRED = (
     "Change ID",
@@ -84,6 +87,7 @@ AMENDMENT_REQUIRED = (
     "Approver",
     "Date",
     "Baseline Impact",
+    "Depends On",
 )
 AMENDMENT_APPROVAL_FIELDS = ("Reason", "Requester", "Approver", "Date", "Baseline Impact")
 
@@ -503,6 +507,24 @@ def _validate_slice_row(
             f"{tag}: invalid Slice Coverage {coverage_raw!r}; expected partial|full"
         )
 
+    platform_raw = _cell(row, "Target Platforms")
+    if platform_raw:
+        if _placeholder_cell(platform_raw):
+            warnings.append(
+                f"{tag}: placeholder remains in Target Platforms for Change {change_id!r}"
+            )
+        else:
+            known, unknown = gm.parse_platform_list(platform_raw)
+            for token in unknown:
+                errors.append(
+                    f"{tag}: Change {change_id!r} Target Platforms has unsupported value "
+                    f"{token!r}; use {', '.join(sorted(gm.PLATFORMS))}"
+                )
+            if not known:
+                errors.append(
+                    f"{tag}: Change {change_id!r} Target Platforms names no platform"
+                )
+
     if not code_target_raw:
         errors.append(f"{tag}: Change {change_id!r} has a blank Code Target")
     else:
@@ -557,6 +579,12 @@ def _run_module_packages(
 ) -> int:
     errors: list[str] = []
     warnings: list[str] = []
+    deps_errors, deps_warnings, deps_advisories = roadmap_deps.validate(
+        roadmap_deps.parse(root), require_dependencies=True
+    )
+    errors.extend(deps_errors)
+    warnings.extend(deps_warnings)
+    advisories=deps_advisories
 
     main_missing: list[str] = []
     if main_table is None or not roadmap.get("rows"):
@@ -702,7 +730,7 @@ def _run_module_packages(
                         "main roadmap or an approved amendment"
                     )
 
-    for warning in warnings:
+    for warning in warnings+advisories:
         print(f"WARN: {warning}")
     for error in errors:
         print(f"ERROR: {error}")
@@ -794,6 +822,12 @@ def _run_footprint(
 ) -> int:
     errors: list[str] = []
     warnings: list[str] = []
+    deps_errors, deps_warnings, deps_advisories = roadmap_deps.validate(
+        roadmap_deps.parse(root), require_dependencies=False
+    )
+    errors.extend(deps_errors)
+    warnings.extend(deps_warnings)
+    advisories=deps_advisories
 
     main_missing: list[str] = []
     if main_table is None or not roadmap.get("rows"):
@@ -875,7 +909,7 @@ def _run_footprint(
             warnings=warnings,
         )
 
-    for warning in warnings:
+    for warning in warnings+advisories:
         print(f"WARN: {warning}")
     for error in errors:
         print(f"ERROR: {error}")
@@ -889,12 +923,64 @@ def _run_footprint(
 
 
 # -- entry point --------------------------------------------------------------
+def _parse_args(args: list[str]) -> tuple[bool, str | None]:
+    strict = False
+    deps_json = None
+    index = 0
+    while index < len(args):
+        token = args[index]
+        if token == "--strict":
+            strict = True
+            index += 1
+        elif token == "--deps-json":
+            if index + 1 >= len(args):
+                raise ValueError("--deps-json requires a path")
+            deps_json = args[index + 1]
+            index += 2
+        else:
+            raise ValueError(f"unknown argument: {token}")
+    return strict, deps_json
+
+
+def _write_deps_json(root: Path, target: str, require_dependencies: bool) -> None:
+    parsed = roadmap_deps.parse(root)
+    errors, warnings, advisories = roadmap_deps.validate(
+        parsed, require_dependencies=require_dependencies
+    )
+    path = Path(target)
+    if not path.is_absolute():
+        path = root / path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "version": 1,
+        "roadmap": roadmap_deps.ROADMAP_REL,
+        "registered": parsed["registered"],
+        "edges": parsed["edges"],
+        "entries": [
+            {
+                key: entry.get(key)
+                for key in ("change_id", "depends_on", "source", "approved")
+            }
+            for entry in parsed["entries"]
+        ],
+        "errors": errors,
+        "warnings": warnings,
+        "advisories": advisories,
+    }
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(f"DEPS_JSON={path}")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    if args and args != ["--strict"]:
-        print("Usage: check-roadmap.py [--strict]", file=sys.stderr)
+    try:
+        strict, deps_json = _parse_args(args)
+    except ValueError as exc:
+        print(f"Usage: check-roadmap.py [--strict] [--deps-json <path>]", file=sys.stderr)
+        print(f"ERROR: {exc}", file=sys.stderr)
         return 2
-    strict = "--strict" in args
 
     root = _root()
     path = root / ROADMAP_REL
@@ -916,10 +1002,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if strategy == "none":
         errors, warnings, count = _legacy_check(text)
-        for warning in warnings:
+        dep_errors, dep_warnings, dep_advisories = roadmap_deps.validate(
+            roadmap_deps.parse(root), require_dependencies=False
+        )
+        errors.extend(dep_errors)
+        warnings.extend(dep_warnings)
+        for warning in warnings + dep_advisories:
             print(f"WARN: {warning}")
         for error in errors:
             print(f"ERROR: {error}")
+        if deps_json:
+            _write_deps_json(root, deps_json, require_dependencies=False)
         if errors or (strict and warnings):
             print(
                 f"Roadmap check failed: {len(errors)} error(s), "
@@ -937,6 +1030,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     main_table, amend_table = _scan_sections(text)
+    if deps_json:
+        _write_deps_json(root, deps_json, require_dependencies=(strategy == "module-packages"))
     if strategy == "module-packages":
         return _run_module_packages(root, roadmap, main_table, amend_table, strict)
     return _run_footprint(root, roadmap, main_table, amend_table, strict)

@@ -404,6 +404,25 @@ class WorkflowRuntimeTests(unittest.TestCase):
         self.assertIn('03-project-architecture-baseline',removed)
         self.assertIn('04-proposal-planning',removed)
 
+    def test_v1_project_reopen_closes_downstream_change_stages(self):
+        state={'project_name':'test','active_change_id':'change-a',
+               'completed_steps':[s['id'] for s in w.STAGES],
+               'current_step':'ALL_STEPS_COMPLETE','pending_approvals':[],'blocked_items':[],
+               'last_completed_outputs':[],
+               'approvals_history':[
+                   {'step_id':sid,'change_id':'change-a','approver':'Owner',
+                    'approved_at':'2026-11-19','evidence':'check.log','targets':[]}
+                   for sid in ('05-feature-requirements','06-figma-design-review','07-detailed-design')]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        args=type('Args',(),{'step':'04-proposal-planning','reason':'roadmap rework','note':'','change_id':None})()
+        self.assertEqual(0,w.cmd_reopen(args))
+        state=w.load_state()
+        self.assertEqual(['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline'],state['completed_steps'])
+        self.assertEqual('04-proposal-planning',state['current_step'])
+        history={item['step_id']:item for item in state['approvals_history']}
+        for sid in ('05-feature-requirements','06-figma-design-review','07-detailed-design'):
+            self.assertTrue(history[sid].get('superseded_at'))
+
     def test_next_change_archives_change_phase_and_reopens_stage_05(self):
         change_steps=[s['id'] for s in w.STAGES if s['scope']=='change']
         state={'project_name':'test','active_change_id':'change-a','completed_steps':[s['id'] for s in w.STAGES],

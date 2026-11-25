@@ -86,7 +86,7 @@ The system SHALL allow authorized users to filter reports by time range and stat
 
 ## 6. Prototype and Page Inventory (Stage 06)
 
-The only UI artifact of Stage 06 (Figma-only) is `design/figma-audit.md`: generate and read back a real Figma design through Figma MCP, the user completes UI review on the real Figma file, and the MCP read results and PAGE mapping are persisted as a stable input for subsequent interfaces. pen.dev, prototype.pen, or PAGE HTML are no longer used. When there is no UI, explicitly exclude it with `--no-ui --reason "<reason>" --strict`.
+Stage 06 is HTML-first: the default UI artifacts are the per-platform HTML design documents under `design/ui-html/` (review `index.html` plus `README.md`/`tokens.css` and one self-contained page per PAGE per declared platform) and the single contract `design/figma-audit.md`: the design owner completes UI review on the HTML review entry, and the render/measure results and PAGE mapping are persisted as stable input for subsequent interfaces. Figma is an optional supplementary source. When there is no UI, explicitly exclude it with `--no-ui --reason "<reason>" --strict`.
 
 ## 7. Detailed Design (Five Sections of design.md)
 

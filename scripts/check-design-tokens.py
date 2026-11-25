@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Static, exact comparison between Figma tokens and the project token layer.
+"""Static, exact comparison between UI design tokens and the project token layer.
 
-No browser and no screenshots: compare the actual values read from Figma
-(`## 设计令牌（实际值）` in figma-audit.md) with CSS custom properties in the
-project's global token file(s). This is the deterministic half of visual
-regression; runtime geometry is covered by check-figma-layout.py.
+No browser and no screenshots: compare the actual values recorded in the UI
+design contract (`## 设计令牌（实际值）` in figma-audit.md, derived from the
+default HTML design documents or the optional Figma source) with CSS custom
+properties in the project's global token file(s). This is the deterministic
+half of visual regression; runtime geometry is covered by check-figma-layout.py.
 """
 import argparse
 import re
@@ -133,7 +134,7 @@ def main():
             checked += 1
             if expected != got:
                 errors.append(
-                    f"{name}: expected {expected!r} from Figma, but {var} is {got!r}"
+                    f"{name}: expected {expected!r} from the UI design contract, but {var} is {got!r}"
                 )
 
     if errors:

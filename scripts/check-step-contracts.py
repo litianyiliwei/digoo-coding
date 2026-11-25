@@ -135,6 +135,37 @@ if not output_policy.get('rules'):
 if not output_policy.get('stage_focus'):
     errors.append('output_policy.stage_focus is missing')
 if not (ROOT/'templates/workflow/step-handoff-report.md').is_file(): errors.append('missing handoff report template')
+# Guard the hand-maintained human contract table against drift from the machine
+# contract: every declared docs/ or openspec/ artifact path must appear in the
+# matching step row. CI previously validated only the JSON.
+CONTRACTS_MD=ROOT/'process/STEP-ARTIFACT-CONTRACTS.md'
+ARTIFACT_RE=re.compile(r'(?:docs/|openspec/)[A-Za-z0-9_./<>-]+?\.(?:md|csv|json|ya?ml)')
+if not CONTRACTS_MD.is_file():
+    errors.append('missing contract document: process/STEP-ARTIFACT-CONTRACTS.md')
+else:
+    md_lines=CONTRACTS_MD.read_text(encoding='utf-8').splitlines()
+    try:
+        start=md_lines.index('## Stage Contract Master Table')
+    except ValueError:
+        start=0
+        errors.append('contract md missing "## Stage Contract Master Table" heading')
+    table_lines=md_lines[start:]
+    def md_row(step):
+        for line in table_lines:
+            if re.match(r'^\|\s*'+re.escape(str(step))+r'\s', line):
+                return line
+        return None
+    for row in data.get('steps',[]):
+        step=str(row.get('step'))
+        line=md_row(step)
+        if line is None:
+            errors.append(f'contract md has no table row for step {step}')
+            continue
+        for kind in ('outputs','inputs'):
+            for entry in row.get(kind,[]):
+                for token in ARTIFACT_RE.findall(str(entry)):
+                    if token not in line:
+                        errors.append(f'contract md step {step} {kind} omits {token}')
 if errors:
     print('Step contract check failed:')
     for e in errors: print('ERROR:',e)

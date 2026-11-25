@@ -39,7 +39,7 @@ This is a local **method Skill**: it is invoked inside a stage and does not own 
 6. **Handle a required baseline change.** Do not edit the frozen baseline. Submit a BCR/ADR, run `baseline-governance.py open-amendment`, and block affected work. Close only after the owner approves, the domain version and hashes are refreshed, and evidence is complete.
 7. **Handle write-back.** For `BASELINE_UPDATE_AFTER_ACCEPTANCE`, do not write back early. At acceptance, write back only decisions that are approved, implemented, verified, and reusable across features; feature-specific details stay in the archived Change.
 8. **Handle version drift.** If any baseline version changed, record `NO_IMPACT` or `REBASE_REQUIRED`; after an approved rebase refresh the binding and re-review affected designs.
-9. **Run the gates.** `python3 scripts/check-baseline-impact.py <change-id>`, `python3 scripts/baseline-governance.py check-change --change-id <id> --phase requirement|design|acceptance`, and at stage 03 `audit --require-frozen`.
+9. **Run the gates.** `python scripts/check-baseline-impact.py <change-id>`, `python scripts/baseline-governance.py check-change --change-id <id> --phase requirement|design|acceptance`, and at stage 03 `audit --require-frozen`.
 10. **Evidence.** Record a `methods` entry for `baseline-impact-classification` with a real evidence path and `<artifact>#<heading>` landing section.
 
 ## Output Landing by Stage

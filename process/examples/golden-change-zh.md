@@ -86,7 +86,7 @@
 
 ## 6. 原型与页面清单（06 阶段）
 
-阶段 06（Figma-only）的唯一 UI 产物是 `design/figma-audit.md`：通过 Figma MCP 生成并回读真实 Figma 设计，用户在真实 Figma 稿上完成 UI 评审，并把 MCP 读取结果与 PAGE 映射落盘，作为后续界面的稳定输入。不再使用 pen.dev、prototype.pen 或 PAGE HTML。无 UI 时用 `--no-ui --reason "<原因>" --strict` 明确排除。
+阶段 06 以 HTML 为主：默认 UI 产物是 `design/ui-html/` 下按平台的自包含 HTML 设计稿（评审入口 `index.html` + `README.md`/`tokens.css`，每个声明平台每个 PAGE 一个 HTML 文件）与唯一单文件契约 `design/figma-audit.md`：设计负责人在 HTML 评审入口完成 UI 评审，渲染量测结果与 PAGE 映射落盘，作为后续界面的稳定输入。Figma 为可选补充来源。无 UI 时用 `--no-ui --reason "<原因>" --strict` 明确排除。
 
 ## 7. 详细设计（design.md 五节）
 

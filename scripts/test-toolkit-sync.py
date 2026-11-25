@@ -225,6 +225,21 @@ class ToolkitSyncUpgradeTests(unittest.TestCase):
         rewrite_source_v2(self.source)
         self.assertEqual(2, self.m.apply(self.project, self.target(), "v2.1.0"))
 
+    def test_apply_refuses_with_v2_lane_pending_approvals(self):
+        state = {
+            "state_schema_version": "2.0",
+            "project": {"current_step": "PROJECT_COMPLETE", "completed_steps": [],
+                        "skipped_steps": [], "pending_approvals": [], "blocked_items": []},
+            "changes": {"chg-a": {"status": "ACTIVE", "current_step": "07-detailed-design",
+                                  "completed_steps": [], "skipped_steps": [],
+                                  "pending_approvals": [{"step_id": "07-detailed-design",
+                                                         "change_id": "chg-a"}],
+                                  "blocked_items": []}},
+        }
+        (self.project / "workflow-state.json").write_text(json.dumps(state), encoding="utf-8")
+        rewrite_source_v2(self.source)
+        self.assertEqual(2, self.m.apply(self.project, self.target(), "v2.1.0"))
+
     def test_backup_and_repair_restores_state(self):
         rewrite_source_v2(self.source)
         self.assertEqual(0, self.m.apply(self.project, self.target(), "v2.1.0"))

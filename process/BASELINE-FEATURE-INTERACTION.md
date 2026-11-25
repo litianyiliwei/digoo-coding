@@ -55,7 +55,7 @@ AI must not indiscriminately stuff the full text of all documents into context; 
 | Change type | Authoritative landing point | Whether the project baseline is updated | Typical example |
 |---|---|---|---|
 | Behavior, rules, AC, and exception scenarios unique to the current feature | The current Change's proposal / delta spec | No | Field filtering rules for order export |
-| Pages, buttons, endpoints, and API schemas unique to the current feature | The current Change's page list, Figma audit, OpenAPI | No | Add `GET /orders/{id}` |
+| Pages, buttons, endpoints, and API schemas unique to the current feature | The current Change's page list, UI design contract/HTML design docs, OpenAPI | No | Add `GET /orders/{id}` |
 | Tables/fields/indexes/migrations and queries unique to the current feature | The current Change's migration, backend design, IO catalog | Usually no | Status field used only by the order export task |
 | Classes, methods, internal IO orchestration unique to the current feature | The current Change's detailed design and code | No | One-off cache implementation where a feature calls Redis |
 | New shared business rules, global role/permission semantics, cross-feature flows, or shared terminology | Product baseline (synchronize the OpenSpec main specs where necessary) | Yes, after approval | All order-type operations must satisfy unified approval rules |
@@ -174,7 +174,7 @@ Each constraint contains at least: `id`, `domain`, `revision`, `status`, `level`
 Run the following when creating Change auxiliary assets:
 
 ```bash
-python3 scripts/baseline-governance.py init-binding --change-id <change-id>
+python scripts/baseline-governance.py init-binding --change-id <change-id>
 ```
 
 The generated `baseline-binding.json` must cover the constraints required by the manifest `governance_profile`: every ACTIVE constraint in `standard`, or only constraints marked `critical: true` in `lite`. In both profiles the baseline snapshot, `baseline-impact.md`, rebase reviews, and binding approval remain mandatory. Deleting required constraint rows is prohibited. Each bound constraint must be selected as `APPLICABLE` or `NOT_APPLICABLE`; N/A must state the reason. Applicable constraints must be `COMPLIANT` or `EXCEPTION_APPROVED` at the design stage and be linked to real design evidence files.
@@ -190,7 +190,7 @@ Workflow gate mapping:
 | 03 Architecture baseline | `audit --require-frozen` | Verify Manifest, constraint catalog, hashes, and approvals after the freeze |
 | 04 Proposal planning | `audit --require-frozen` | Ensure the project baseline is still effective |
 | 05 Proposal requirements | `check-change --phase requirement` | Constraint coverage complete, applicability determined, baseline binding approved |
-| 06 Figma design review | `check-change --phase requirement` | Prevent early requirement bindings from being deleted/modified or baseline drift |
+| 06 UI design review | `check-change --phase requirement` | Prevent early requirement bindings from being deleted/modified or baseline drift |
 | 07 Detailed design | `check-change --phase design` | Every constraint has a design conclusion and evidence, exceptions approved |
 | 08 Implementation | `check-change --phase implementation` | Applicable constraints have implementation verification evidence |
 | 09 Independent verification | `check-change --phase implementation` | Independent evidence still covers the approved implementation constraints |
@@ -201,7 +201,7 @@ Workflow gate mapping:
 When the baseline needs modification after freezing, **it must first** run:
 
 ```bash
-python3 scripts/baseline-governance.py open-amendment \
+python scripts/baseline-governance.py open-amendment \
   --request-id BCR-<id> --domains architecture,data_domain --opened-by <reviewer>
 ```
 

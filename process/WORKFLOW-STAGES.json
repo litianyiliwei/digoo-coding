@@ -61,7 +61,7 @@
     },
     {
       "id": "06-figma-design-review",
-      "title": "Figma design and review (Figma-only)",
+      "title": "UI design and review (HTML-first, Figma optional)",
       "skill": "figma-design-review",
       "prompt": "prompts/06-figma-design-review.md",
       "dependencies": [

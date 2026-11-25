@@ -251,8 +251,8 @@ try:
             if not re.fullmatch(r"PAGE-\d{3}", str(pid or "")):
                 errors.append(f"layout_check has invalid page_id: {pid!r}")
                 continue
-            if not re.search(r"\d+:\d+", str(ui.get("figma_node", ""))):
-                errors.append(f"{pid}: layout_check missing Figma node")
+            if not re.search(r"\d+\s*:\s*\d+|[A-Za-z_][A-Za-z0-9_.:-]+", str(ui.get("figma_node", ""))):
+                errors.append(f"{pid}: layout_check missing design source reference (HTML data-node-id or Figma node)")
             if not isinstance(ui.get("asserted_elements"), int) or ui["asserted_elements"] <= 0:
                 errors.append(f"{pid}: asserted_elements must be a positive integer")
             if not isinstance(ui.get("max_delta_px"), (int, float)):
@@ -269,8 +269,8 @@ try:
                 errors.append(f"UI check missing evidence: {pid}")
             elif not resolve_artifact(ui.get("evidence", "")):
                 errors.append(f"{pid}: layout evidence file not found: {ui.get('evidence')}")
-            elif "figma-layout-check.json" not in str(ui.get("evidence", "")):
-                errors.append(f"{pid}: layout evidence must reference figma-layout-check.json")
+            elif "figma-layout-check" not in str(ui.get("evidence", "")):
+                errors.append(f"{pid}: layout evidence must reference a figma-layout-check JSON file (08 or independent)")
             differences = str(ui.get("differences", "")).strip()
             if differences and differences.lower() not in {"-", "—", "无", "n/a", "none"}:
                 if not ui.get("deviation_approved"):

@@ -13,4 +13,3 @@
 | Term ID | Term | Definition | Aliases | Notes |
 |---|---|---|---|---|
 | TERM-001 | PENDING | PENDING | PENDING | PENDING |
-</content>

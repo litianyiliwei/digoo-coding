@@ -50,7 +50,7 @@
 > Use the independently re-run runtime geometry assertions in `evidence/figma-layout-check.json` for each PAGE; do not use screenshots.
 > `layout_checks` must be consistent with the table in this document; if any PAGE lacks evidence, exceeds tolerance, or has unapproved differences, the Verdict must not be PASS.
 
-| PAGE | Figma node | Number of assertion elements | Max deviation | Missing/difference | Verdict |
+| PAGE | Design source reference (HTML data-node-id / Figma node) | Number of assertion elements | Max deviation | Missing/difference | Verdict |
 |---|---|---|---|---|---|
 | PAGE-001 | `3:2` | 8 | 0.0px / tol 2px | None | PASS/FAIL/NOT_RUN |
 

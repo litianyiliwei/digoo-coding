@@ -49,4 +49,4 @@ python scripts/check-layout.py --mode toolkit
 - 不自动安装依赖、不提交代码、不在已批准的工具包变更之外改动 CI、不归档、不发布。
 - 不替业务/设计/架构负责人批准未决规则。
 - 不编辑生成物；绝不把项目产物复制进本仓库。
-- 外部工具（Figma MCP、OpenSpec CLI、Superpowers）以实际可访问能力为准；不可读取的链接/字段不视为已审查。
+- 外部工具（HTML 设计稿编写/渲染、可选 Figma MCP、OpenSpec CLI、Superpowers）以实际可访问能力为准；不可读取的链接/字段不视为已审查。

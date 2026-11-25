@@ -193,8 +193,8 @@ if ui_change():
             if expected_pages and pid not in expected_pages:
                 errors.append(f"UI fidelity row references unknown PAGE: {pid}")
             covered.add(pid)
-            if not re.search(r"\d+:\d+", cells[1]):
-                errors.append(f"UI fidelity row missing Figma node: {row}")
+            if not re.search(r"\d+\s*:\s*\d+|[A-Za-z_][A-Za-z0-9_.:-]+", cells[1]):
+                errors.append(f"UI fidelity row missing design source reference (HTML data-node-id or Figma node): {row}")
             if "figma-layout-check.json" not in cells[3] or not resolve_artifact(
                     (re.findall(r"`([^`]+)`", cells[3]) or [cells[3]])[0]):
                 errors.append(f"UI fidelity row missing existing figma-layout-check.json evidence: {row}")

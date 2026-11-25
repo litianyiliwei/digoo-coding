@@ -17,4 +17,3 @@
 ## Assumptions and Open Questions
 
 - PENDING
-</content>

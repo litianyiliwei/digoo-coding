@@ -23,4 +23,3 @@
 ## Data Ownership and Invariants
 
 - PENDING
-</content>

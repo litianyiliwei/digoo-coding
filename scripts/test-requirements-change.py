@@ -93,10 +93,10 @@ class RequirementsChangeTests(unittest.TestCase):
         self.write("docs/product/workflows.md", "## FLOW-001 Demo workflow\n")
         self.write("docs/product/business-rules.md", "| BR-001 | demo rule |\n")
 
-    def roadmap(self, main_rows=(), amendment_rows=None):
+    def roadmap(self, main_rows=(), amendment_rows=None, main_header=None):
         text = (
             "# Proposal Roadmap\n\n## Candidate Changes\n\n"
-            + table(MAIN_HEADER, list(main_rows))
+            + table(main_header or MAIN_HEADER, list(main_rows))
         )
         if amendment_rows is not None:
             text += "\n## Roadmap Amendments\n\n" + table(
@@ -133,6 +133,15 @@ class RequirementsChangeTests(unittest.TestCase):
         lines += [f"- `{slug}`: new behavior" for slug in new]
         lines += ["", "### Modified Capabilities"]
         lines += [f"- `{slug}`: changed behavior" for slug in modified]
+        lines += [
+            "",
+            "## Target Platforms",
+            "",
+            "| Platform | In scope | Notes |",
+            "|---|---|---|",
+            "| web | YES | Browser console |",
+            "",
+        ]
         self.write(f"openspec/changes/{change}/proposal.md", "\n".join(lines) + "\n")
 
     def specs(self, change="chg-a", scenarios=("Normal export", "Unauthorized export")):
@@ -162,6 +171,8 @@ class RequirementsChangeTests(unittest.TestCase):
         refs = ";".join(ac["id"] for ac in acs)
         lines = [
             "# Proposal-Level User Stories and Acceptance Criteria",
+            "",
+            "- Target platforms: web",
             "",
             "| US ID | User role | Story/value | Related FLOW/NODE/BR | AC IDs | "
             "Status | Source/approval |",
@@ -293,12 +304,12 @@ class RequirementsChangeTests(unittest.TestCase):
     def test_footprint_runs_scenario_and_story_rules_only(self):
         self.layout("footprint")
         self.project_docs()
+        self.proposal()
         self.specs(scenarios=("Normal export", "Unauthorized export"))
         self.stories()
         code, out = self.run_check("--change", "chg-a")
         self.assertEqual(0, code, out)
         self.assertNotIn("docs/product/capabilities.csv", out)
-        self.assertNotIn("proposal.md", out)
 
     def test_footprint_requires_slice_position(self):
         self.layout("footprint")
@@ -482,8 +493,67 @@ class RequirementsChangeTests(unittest.TestCase):
         self.assertIn("ERROR:", out)
         self.assertIn("Approver", out)
 
-    # -- legacy behaviour retained --------------------------------------------
-    def test_legacy_unknown_ac_reference_still_fails(self):
+    # -- target platform declaration -------------------------------------------
+    def test_missing_target_platforms_fails(self):
+        self.valid_setup()
+        path = self.root / "openspec/changes/chg-a/design/user-stories.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "- Target platforms: web\n", ""
+        )
+        path.write_text(text, encoding="utf-8", newline="\n")
+        code, out = self.run_check("--change", "chg-a")
+        self.assertEqual(1, code, out)
+        self.assertIn("ERROR:", out)
+        self.assertIn("Target platforms", out)
+
+    def test_proposal_target_platforms_must_match_user_stories(self):
+        self.valid_setup()
+        proposal = self.root / "openspec/changes/chg-a/proposal.md"
+        text = proposal.read_text(encoding="utf-8").replace(
+            "| web | YES | Browser console |",
+            "| android | YES | Mobile app |",
+        )
+        proposal.write_text(text, encoding="utf-8", newline="\n")
+        code, out = self.run_check("--change", "chg-a")
+        self.assertEqual(1, code, out)
+        self.assertIn("ERROR:", out)
+        self.assertIn("disagree with user-stories.md", out)
+
+    def test_missing_proposal_platform_section_fails(self):
+        self.valid_setup()
+        proposal = self.root / "openspec/changes/chg-a/proposal.md"
+        text = proposal.read_text(encoding="utf-8").split("## Target Platforms")[0]
+        proposal.write_text(text, encoding="utf-8", newline="\n")
+        code, out = self.run_check("--change", "chg-a")
+        self.assertEqual(1, code, out)
+        self.assertIn("ERROR:", out)
+        self.assertIn("proposal.md: missing '## Target Platforms'", out)
+
+    def test_unsupported_platform_fails(self):
+        self.valid_setup()
+        path = self.root / "openspec/changes/chg-a/design/user-stories.md"
+        text = path.read_text(encoding="utf-8").replace(
+            "- Target platforms: web", "- Target platforms: web; blackberry"
+        )
+        path.write_text(text, encoding="utf-8", newline="\n")
+        code, out = self.run_check("--change", "chg-a")
+        self.assertEqual(1, code, out)
+        self.assertIn("ERROR:", out)
+        self.assertIn("unsupported target platform", out)
+
+    def test_roadmap_target_platforms_must_match(self):
+        self.valid_setup()
+        # Give the roadmap row an explicit Target Platforms column.
+        header = MAIN_HEADER + " Target Platforms |"
+        self.roadmap(
+            main_rows=[self.main_row() + " android |"],
+            main_header=header,
+        )
+        code, out = self.run_check("--change", "chg-a")
+        self.assertEqual(1, code, out)
+        self.assertIn("disagree with user-stories.md", out)
+
+
         self.valid_setup()
         self.stories(
             acs=self.default_acs(),

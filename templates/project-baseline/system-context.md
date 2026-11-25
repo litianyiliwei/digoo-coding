@@ -31,4 +31,3 @@ PENDING — what the system owns, what it explicitly does not own.
 ## Assumptions and Open Questions
 
 - PENDING
-</content>

@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() { echo "Usage: $0 <change-id> [--openapi <file>] [--test-dir <dir>]... [--skip-tests] [--skip-static]"; }
+usage() { echo "Usage: $0 <change-id> [--openapi <file>] [--test-dir <dir>]... [--skip-tests] [--skip-static] [--static-output <path>] [--static-identity <name>]"; echo "  STATIC_IDENTITY=<name> sets the recorded static-analysis identity (default: AGENT)."; echo "  --static-output writes a distinct evidence file (for the acceptance rerun); default: openspec/changes/<id>/design/evidence/static-analysis.json"; }
 if [[ $# -lt 1 ]]; then usage >&2; exit 2; fi
 CHANGE_ID="$1"; shift
-OPENAPI=""; SKIP_TESTS=0; SKIP_STATIC=0; TEST_DIRS=()
+OPENAPI=""; SKIP_TESTS=0; SKIP_STATIC=0; TEST_DIRS=(); STATIC_OUTPUT=""; STATIC_IDENTITY_ARG=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --openapi) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; OPENAPI="$2"; shift 2 ;;
     --test-dir) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; TEST_DIRS+=("$2"); shift 2 ;;
     --skip-tests) SKIP_TESTS=1; shift ;;
     --skip-static) SKIP_STATIC=1; shift ;;
+    --static-output) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; STATIC_OUTPUT="$2"; shift 2 ;;
+    --static-identity) [[ $# -ge 2 ]] || { usage >&2; exit 2; }; STATIC_IDENTITY_ARG="$2"; shift 2 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
 done
@@ -45,10 +47,12 @@ fi
 if (( SKIP_STATIC )); then
   echo "WARNING: static analysis explicitly skipped"
 elif [[ -f "$ROOT/docs/architecture/quality-gates.json" ]]; then
+  STATIC_EVIDENCE="${STATIC_OUTPUT:-openspec/changes/$CHANGE_ID/design/evidence/static-analysis.json}"
+  STATIC_NAME="${STATIC_IDENTITY_ARG:-${STATIC_IDENTITY:-AGENT}}"
   python scripts/run-quality-gates.py "$CHANGE_ID" \
-    --output "openspec/changes/$CHANGE_ID/design/evidence/static-analysis.json" \
-    --root "$ROOT" --identity "${STATIC_IDENTITY:-AGENT}"
-  python scripts/check-static-analysis.py --change "$CHANGE_ID" --root "$ROOT" --strict
+    --output "$STATIC_EVIDENCE" \
+    --root "$ROOT" --identity "$STATIC_NAME"
+  python scripts/check-static-analysis.py --change "$CHANGE_ID" --root "$ROOT" --strict --evidence "$STATIC_EVIDENCE"
 fi
 
 echo "Git status (inspect; this script never commits or archives):"

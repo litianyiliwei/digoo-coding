@@ -75,3 +75,23 @@ Open questions are all registered in `docs/product/open-questions.md`.
 - Impact mapping (FLOW/NODE/DO/BR/NFR): PENDING
 
 > Step 02 must actually use WebSearch/WebFetch (or an equivalent host network tool) to complete the research and record real URLs and access dates; when no network capability exists, mark BLOCKED and do not substitute memory.
+
+## 10. Target Platforms and Client Forms
+
+> This is the project-level platform inventory. It is a hard gate for Stage 02 and the source for Stage 04/05 per-Change `Target Platforms` declarations. Use the canonical vocabulary `web | h5 | mini-program | app | android | ios | harmonyos | desktop | pda`. Every platform row needs an explicit YES/NO; a NO row needs a reason. At least one platform must be YES.
+
+| Platform | In scope | Target users/scenarios | Client form/technology preference | Offline/device needs | Notes/reason |
+|---|---|---|---|---|---|
+| web | YES | PENDING | PENDING | PENDING | PENDING |
+| h5 | NO | PENDING | PENDING | PENDING | PENDING |
+| mini-program | NO | PENDING | PENDING | PENDING | PENDING |
+| app | PENDING | PENDING | PENDING | PENDING | PENDING |
+| android | PENDING | PENDING | PENDING | PENDING | PENDING |
+| ios | PENDING | PENDING | PENDING | PENDING | PENDING |
+| harmonyos | PENDING | PENDING | PENDING | PENDING | PENDING |
+| desktop | NO | PENDING | PENDING | PENDING | PENDING |
+| pda | NO | PENDING | PENDING | PENDING | PENDING |
+
+- Platform selection owner/decision: PENDING
+- Cross-platform approach (shared shell / uni-app / native / separate builds): PENDING
+- Field devices, network coverage, and offline requirements: PENDING

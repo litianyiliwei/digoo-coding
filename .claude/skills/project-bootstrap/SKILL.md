@@ -27,7 +27,7 @@ Do not overwrite existing files; do not write "not found" as "installed"; explic
 ## Boundaries with OpenSpec / Superpowers
 - OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
 - Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
-- Figma MCP input must be based on actually accessible links, nodes, and MCP responses.
+- UI design input (HTML design documents or Figma MCP) must be based on real readable files/links, nodes, and responses.
 - Do not automatically commit, publish, archive, or overwrite user files at this stage.
 
 ## Recommended Checks

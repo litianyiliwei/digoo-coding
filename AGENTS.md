@@ -49,4 +49,4 @@ Projects upgrade to a tag with `scripts/toolkit-sync.py` inside their own reposi
 - Do not automatically install dependencies, commit code, modify CI beyond an approved toolkit change, archive, or release.
 - Do not approve undecided rules on behalf of business/design/architecture owners.
 - Do not edit generated files; never copy project outputs into this repository.
-- External tools (Figma MCP, OpenSpec CLI, Superpowers) are subject to their actual accessible capability; unreadable links/fields are not reviewed.
+- External tools (HTML design authoring/rendering, optional Figma MCP, OpenSpec CLI, Superpowers) are subject to their actual accessible capability; unreadable links/fields are not reviewed.

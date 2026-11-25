@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-STATE_SCHEMA = "1.0"
+STATE_SCHEMA = "2.0"
 
 
 def manifest_path() -> Path:

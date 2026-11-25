@@ -61,4 +61,3 @@
 ## Flaky Test Policy
 
 - PENDING — detection, quarantine rules, owner, re-enable condition.
-</content>
