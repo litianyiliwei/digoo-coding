@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Regression tests for check-layout.py (toolkit and project ownership modes)."""
+import contextlib
 import importlib.util
+import io
 import json
+import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -32,6 +36,18 @@ def make_toolkit_root(root: Path) -> None:
     for name in ["README.md", "LICENSE", ".gitattributes", ".gitignore", "AGENTS.md",
                  "AGENTS-zh.md", "VERSION"]:
         (root / name).write_text("x\n", encoding="utf-8")
+
+
+GITIGNORE_BLOCK = "# project\n<!-- toolkit:begin -->\nblock\n<!-- toolkit:end -->\n"
+
+
+def git_init(root: Path) -> bool:
+    """Make the fixture a Git work tree and stage its content."""
+    if not shutil.which("git"):
+        return False
+    subprocess.run(["git", "-C", str(root), "init", "-q"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(root), "add", "-A"], check=True, capture_output=True)
+    return True
 
 
 def make_project_root(root: Path) -> None:
@@ -96,6 +112,58 @@ class CheckLayoutTests(unittest.TestCase):
         )
         module = load(self.root)
         self.assertEqual(0, module.main(["--mode", "project"]))
+
+    def test_project_mode_ignores_gitignored_root_entry(self):
+        make_project_root(self.root)
+        (self.root / ".gitignore").write_text(GITIGNORE_BLOCK + "node_modules/\n", encoding="utf-8")
+        (self.root / "node_modules").mkdir()
+        if not git_init(self.root):
+            self.skipTest("git is required")
+        module = load(self.root)
+        self.assertEqual(0, module.main(["--mode", "project"]))
+
+    def test_project_mode_flags_untracked_undeclared_root_entry(self):
+        make_project_root(self.root)
+        if not git_init(self.root):
+            self.skipTest("git is required")
+        (self.root / "backend").mkdir()
+        module = load(self.root)
+        self.assertEqual(1, module.main(["--mode", "project"]))
+
+    def test_project_mode_ignores_gitignored_docs_child(self):
+        make_project_root(self.root)
+        (self.root / "docs/product").mkdir(parents=True)
+        (self.root / "docs/node_modules").mkdir(parents=True)
+        (self.root / ".gitignore").write_text(GITIGNORE_BLOCK + "docs/node_modules/\n", encoding="utf-8")
+        if not git_init(self.root):
+            self.skipTest("git is required")
+        module = load(self.root)
+        self.assertEqual(0, module.main(["--mode", "project"]))
+
+    def test_project_mode_without_git_still_flags_working_tree_entries(self):
+        make_project_root(self.root)
+        (self.root / "node_modules").mkdir()
+        module = load(self.root)
+        self.assertEqual(1, module.main(["--mode", "project"]))
+
+    def test_project_mode_accepts_docs_path_with_first_child_only(self):
+        make_project_root(self.root)
+        (self.root / "docs/api").mkdir(parents=True)
+        (self.root / "project-extensions.json").write_text(
+            json.dumps({"root": [], "paths": ["docs/api"]}), encoding="utf-8"
+        )
+        module = load(self.root)
+        self.assertEqual(0, module.main(["--mode", "project"]))
+
+    def test_project_mode_error_shows_extension_registry_hint(self):
+        make_project_root(self.root)
+        (self.root / "backend").mkdir()
+        module = load(self.root)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = module.main(["--mode", "project"])
+        self.assertEqual(1, code)
+        self.assertIn("project-extensions.json", output.getvalue())
 
 
 if __name__ == "__main__":

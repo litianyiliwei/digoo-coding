@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -27,7 +28,7 @@ TOOLKIT_CLAUDE_CHILDREN = {"skills", "hooks", "settings.json", "settings.local.j
 PROJECT_ROOT_BUILTINS = {
     "README.md", "README-zh.md", "LICENSE", ".gitattributes", ".gitignore",
     "AGENTS.md", "AGENTS-zh.md", "toolkit-lock.json", "project-extensions.json",
-    "workflow-state.json", ".env.example", "Makefile", "Dockerfile",
+    "workflow-state.json", ".toolkit-upgrade.lock", ".env.example", "Makefile", "Dockerfile",
     "docker-compose.yml", "compose.yml", "compose.yaml",
     "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock",
     "pyproject.toml", "requirements.txt", "Pipfile", "Pipfile.lock", "poetry.lock",
@@ -46,6 +47,54 @@ def load_json(path: Path) -> dict | None:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
+
+
+def git_tracked_paths() -> set[str] | None:
+    """Tracked paths relative to ROOT, or None outside a readable Git work tree."""
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "-z"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return {path for path in result.stdout.split("\0") if path}
+
+
+def git_ignored(relpath: str) -> bool:
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(ROOT), "check-ignore", "-q", "--", relpath],
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+        )
+    except OSError:
+        return False
+    return result.returncode == 0
+
+
+def in_repository(relpath: str, tracked: set[str] | None) -> bool:
+    """Whether a layout entry belongs to the repository.
+
+    Untracked paths that Git ignores (node_modules, .venv, dist) are local
+    artifacts, not repository content. Outside Git, keep scanning everything.
+    """
+    if tracked is None:
+        return True
+    prefix = relpath.rstrip("/") + "/"
+    if relpath in tracked or any(path.startswith(prefix) for path in tracked):
+        return True
+    return not git_ignored(relpath)
+
+
+def declared_docs_children(paths: set[str]) -> set[str]:
+    children = set()
+    for declared in paths:
+        parts = [part for part in declared.replace("\\", "/").split("/") if part]
+        if len(parts) >= 2 and parts[0] == "docs":
+            children.add(parts[1])
+    return children
 
 
 def extensions() -> dict:
@@ -88,19 +137,29 @@ def check_project_mode() -> list[str]:
         if any(relpath.startswith(prefix) for prefix in FORBIDDEN_FOR_VENDOR):
             errors.append(f"vendored path placed under a project output directory: {relpath}")
     ext = extensions()
+    tracked = git_tracked_paths()
     for entry in sorted(ROOT.iterdir()):
         name = entry.name
+        if not in_repository(name, tracked):
+            continue
         if name in vendored or name in PROJECT_ROOT_BUILTINS or name in ext["root"]:
             continue
-        errors.append(f"root entry is not vendored, built-in project-root, or declared: {name}")
+        errors.append(
+            f"root entry is not vendored, built-in project-root, or declared: {name} "
+            f'(declare it in project-extensions.json: {{"root": ["{name}"]}})'
+        )
     docs = ROOT / "docs"
     if docs.is_dir():
-        allowed_docs = PROJECT_DOCS_CHILDREN | {
-            p.split("/")[1] for p in ext["paths"] if p.startswith("docs/") and len(p.split("/")) > 2
-        }
+        allowed_docs = PROJECT_DOCS_CHILDREN | declared_docs_children(ext["paths"])
         for child in sorted(docs.iterdir()):
+            relpath = f"docs/{child.name}"
+            if not in_repository(relpath, tracked):
+                continue
             if child.name not in allowed_docs:
-                errors.append(f"docs child not allowed in project mode: docs/{child.name}")
+                errors.append(
+                    f"docs child not allowed in project mode: {relpath} "
+                    f'(declare it in project-extensions.json: {{"paths": ["{relpath}"]}})'
+                )
     openspec = ROOT / "openspec"
     if openspec.is_dir():
         for child in sorted(openspec.iterdir()):

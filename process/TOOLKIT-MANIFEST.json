@@ -265,14 +265,14 @@
     {
       "path": "process/TOOLKIT-UPGRADE-zh.md",
       "install": "process/TOOLKIT-UPGRADE-zh.md",
-      "sha256": "9db777bf6bc4db8f0cde749d163ff5e0bd1a9d2150c7981ee003a1f9e7f95d5f",
+      "sha256": "148d7ab2c9f7a4cda76745bffab7a52b28477174c606854deff00fae25d8b26f",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TOOLKIT-UPGRADE.md",
       "install": "process/TOOLKIT-UPGRADE.md",
-      "sha256": "3ed73af33744ca674f55712f4aa99263dfae09e6922e0efa61c51cae6c5e713e",
+      "sha256": "7932a3a22cda6624f311bc68c7898dacdfd411c198da379fe502644e2cb7fea7",
       "class": "toolkit",
       "vendor": true
     },
@@ -510,7 +510,7 @@
     {
       "path": "scripts/check-layout.py",
       "install": "scripts/check-layout.py",
-      "sha256": "06538881a4cd021bc4cd0405bb414372e19b7d2dc778719cb4ef5e27305e7a74",
+      "sha256": "cac2105862b121e494b7bd41e27df3e79527fac200751fae74783c8fff34de12",
       "class": "toolkit",
       "vendor": true
     },
@@ -790,7 +790,7 @@
     {
       "path": "scripts/test-check-layout.py",
       "install": "scripts/test-check-layout.py",
-      "sha256": "ea8c5b4700457bff08edf276b908c27c00f528f0aae12039612e9fc9401c3758",
+      "sha256": "1b46cdd21f5f71fcffd6b89881aa1ab3800378f0d986b26f284e3bcd7b765ab8",
       "class": "toolkit",
       "vendor": true
     },
@@ -958,7 +958,7 @@
     {
       "path": "scripts/test-toolkit-sync.py",
       "install": "scripts/test-toolkit-sync.py",
-      "sha256": "8c2715b76627e6afadd08d197e91389ea9f7fbc0939f28e2a3c4661eada49838",
+      "sha256": "b7b14afd7edd7dc50d7994ebe7e05b411d60cfc980d177f40add511f9fbd284c",
       "class": "toolkit",
       "vendor": true
     },
@@ -979,7 +979,7 @@
     {
       "path": "scripts/test-upgrade-rehearsal.py",
       "install": "scripts/test-upgrade-rehearsal.py",
-      "sha256": "655d40677036a979223f79a97a8c5b5976360ff7796e69ae0b6b99fe222dda5f",
+      "sha256": "60fd69ee150013c3cfaeeff895aecd7587987790329b44240069f2eb187e6742",
       "class": "toolkit",
       "vendor": true
     },
@@ -1000,7 +1000,7 @@
     {
       "path": "scripts/toolkit-sync.py",
       "install": "scripts/toolkit-sync.py",
-      "sha256": "d3cbca4994772ce900d406ae110b3e6e5e2d063d705fed19efae17c1fff9d587",
+      "sha256": "56ba547c86719cad52bd1658e79b8593bd10074c4026440a95dab32589e07f99",
       "class": "toolkit",
       "vendor": true
     },
@@ -1469,7 +1469,7 @@
     {
       "path": "templates/project-setup/gitignore-block.txt",
       "install": "templates/project-setup/gitignore-block.txt",
-      "sha256": "88181d6e086e90b48148e9da27cba36c86472574a46b358312d1c22accf90dec",
+      "sha256": "836132b90ad7d65135d5b366622a477787621d152a2675f82ae9ed4449b86269",
       "class": "toolkit",
       "vendor": true
     },

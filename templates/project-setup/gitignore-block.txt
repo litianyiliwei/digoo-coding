@@ -8,6 +8,7 @@ __pycache__/
 .ruff_cache/
 .claude/settings.local.json
 workflow/state-backups/
+.toolkit-upgrade.lock
 _trash/
 .DS_Store
 Thumbs.db

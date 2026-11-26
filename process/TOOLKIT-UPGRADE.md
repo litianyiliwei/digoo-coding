@@ -20,13 +20,29 @@ The project repository never merges the toolkit's git history. `toolkit-lock.jso
    python <path-to-toolkit>/scripts/toolkit-sync.py init --from <toolkit-git-url-or-local-path> --ref toolkit-v2.0.0 --project .
    ```
 
-   This writes the vendored toolkit files, composes `AGENTS.md` / `AGENTS-zh.md`, `openspec/config.yaml`, `.gitignore`, scaffolds `workflow-state.json` when absent, and writes `toolkit-lock.json`.
+   This writes the vendored toolkit files, composes `AGENTS.md` / `AGENTS-zh.md`, `openspec/config.yaml`, `.gitignore`, scaffolds `workflow-state.json` when absent, and writes `toolkit-lock.json`. After installation, declare project-owned paths as described under Project-Owned Paths below.
 3. Commit the installation as one commit, then start Stage 01 (`01-project-bootstrap`) as usual.
 4. Optionally add the toolkit repository as a read-only remote for future upgrades:
 
    ```bash
    git remote add toolkit <toolkit-git-url>
    ```
+
+### Project-Owned Paths
+
+After installation, declare any project-specific top-level paths in `project-extensions.json` at the repository root and commit it with the project content:
+
+```json
+{
+  "root": ["backend", "frontend", "infra", ".vscode"],
+  "paths": ["docs/api"]
+}
+```
+
+- `root` lists additional top-level directories or files owned by the project (service roots, monorepo packages, editor configuration).
+- `paths` lists paths under `docs/`; the first child after `docs` becomes allowed (for example `docs/api` allows the `docs/api/` directory).
+- The project-mode layout check accepts the vendored toolkit paths, the built-in project-root entries, and these declarations. An undeclared entry fails with a message that includes the exact declaration to add.
+- Git-ignored local artifacts do not need to be declared: the check evaluates the repository's tracked content and skips untracked paths that Git ignores (`node_modules/`, `.venv/`, `dist/`). Outside a Git work tree it falls back to scanning the working tree.
 
 ## 3. Upgrade a Project
 
@@ -39,7 +55,7 @@ python scripts/toolkit-sync.py apply --ref toolkit-v2.1.0
 ```
 
 - `plan` is read-only: it lists added/changed/removed vendored files, local-modification conflicts, and required state migrations.
-- `apply` refuses when the working tree is dirty, when `pending_approvals`/`blocked_items` exist, or when another upgrade lock is held. It backs up `workflow-state.json` to `workflow/state-backups/`, replaces only manifest-listed paths, refreshes managed blocks, regenerates `process/STAGE-IO-OVERVIEW.md` and the baseline index, runs the layout and CI checks, then updates `toolkit-lock.json`.
+- `apply` refuses when the working tree is dirty, when `pending_approvals`/`blocked_items` exist, or when another upgrade lock is held. Before writing anything it runs the target release's project layout rules against the current repository; a failure aborts with exit code 2 and leaves the working tree untouched (fix the declarations described under Project-Owned Paths). It then backs up `workflow-state.json` to `workflow/state-backups/`, replaces only manifest-listed paths, refreshes managed blocks, regenerates `process/STAGE-IO-OVERVIEW.md` and the baseline index, runs the layout and CI checks with the installed release, then updates `toolkit-lock.json`.
 - Put the result on a branch named `toolkit/upgrade-vX.Y.Z`, open a PR, let CI pass (`toolkit-sync.py verify`, layout, project checks), merge, and let the team pull.
 
 ### v2 Workflow State Upgrade (Multi-Change Lanes)
@@ -114,4 +130,4 @@ Each upgrade is a single commit. To roll back:
 
 ## 11. CI Expectations
 
-The vendored `.github/workflows/toolkit-ci.yml` runs `bash scripts/ci-check.sh`, which in project mode executes toolkit package checks, the manifest check, the layout check, `toolkit-sync.py verify --require-lock`, and the project checks. A failing `verify` means a vendored file was edited by hand; run `toolkit-sync.py repair` or re-apply the release.
+The vendored `.github/workflows/toolkit-ci.yml` runs `bash scripts/ci-check.sh`, which in project mode executes toolkit package checks, the manifest check, the layout check, `toolkit-sync.py verify --require-lock`, and the project checks. The layout check evaluates Git-tracked repository content and skips untracked paths that Git ignores, so dependency and build directories present locally (or installed before the check in CI) do not fail it. A failing `verify` means a vendored file was edited by hand; run `toolkit-sync.py repair` or re-apply the release.

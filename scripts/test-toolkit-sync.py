@@ -266,6 +266,19 @@ def add_migration_source(base: Path) -> None:
     (base / "process/TOOLKIT-MANIFEST.json").write_text(json.dumps(manifest), encoding="utf-8")
 
 
+def add_layout_checker(base: Path, body: bytes | None = None) -> None:
+    """Add the project layout checker to a fixture release and record its hash."""
+    body = body if body is not None else SCRIPT.with_name("check-layout.py").read_bytes()
+    (base / "scripts/check-layout.py").write_bytes(body)
+    manifest_path = base / "process/TOOLKIT-MANIFEST.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entries = [entry for entry in manifest["files"] if entry["path"] != "scripts/check-layout.py"]
+    entries.append({"path": "scripts/check-layout.py", "install": "scripts/check-layout.py",
+                    "sha256": norm_sha(body), "class": "toolkit", "vendor": True})
+    manifest["files"] = sorted(entries, key=lambda entry: entry["path"])
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+
 class ToolkitSyncHardeningTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -327,6 +340,20 @@ class ToolkitSyncHardeningTests(unittest.TestCase):
         self.assertEqual(2, self.m.apply(self.project, target, "v2.1.0"))
         self.assertEqual(0, self.m.apply(self.project, self.target(), "v2.1.0", run_migrations=True))
         self.assertTrue((self.project / "migrated.flag").is_file())
+
+    def test_apply_aborts_before_writing_when_layout_check_fails(self):
+        rewrite_source_v2(self.source)
+        add_layout_checker(self.source)
+        (self.project / "backend").mkdir()
+        self.assertEqual(2, self.m.apply(self.project, self.target(), "v2.1.0"))
+        self.assertEqual("# prompt\n", (self.project / "prompts/01.md").read_text(encoding="utf-8"))
+        self.assertEqual("2.0.0", self.lock()["version"])
+
+    def test_apply_preflight_passes_green_layout(self):
+        rewrite_source_v2(self.source)
+        add_layout_checker(self.source)
+        self.assertEqual(0, self.m.apply(self.project, self.target(), "v2.1.0"))
+        self.assertEqual("2.1.0", self.lock()["version"])
 
     def test_verify_detects_extra_vendored_file(self):
         (self.project / "prompts/99-extra.md").write_text("# extra\n", encoding="utf-8")

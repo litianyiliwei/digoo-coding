@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
@@ -503,6 +504,33 @@ def run_checks(project: Path) -> list[str]:
     return failures
 
 
+def preflight_layout_errors(source: Source, project: Path) -> list[str] | None:
+    """Run the target release's project layout rules before the project is touched."""
+    rel = "scripts/check-layout.py"
+    try:
+        code = source.read(rel)
+    except Exception:
+        return None
+    module = types.ModuleType("toolkit_preflight_layout")
+    module.__file__ = str(project / rel)
+    try:
+        exec(compile(code, rel, "exec"), module.__dict__)
+    except SystemExit as exc:
+        if exc.code in (0, None):
+            return None
+        return [f"preflight checker exited with code {exc.code}"]
+    except Exception as exc:
+        return [f"preflight could not load {rel}: {exc}"]
+    checker = getattr(module, "check_project_mode", None)
+    if not callable(checker):
+        return None
+    module.ROOT = project
+    try:
+        return list(checker())
+    except Exception as exc:
+        return [f"preflight failed: {exc}"]
+
+
 def apply(project_root, target: Source, ref: str = "", *, take_upstream: bool = False,
           keep_local: bool = False, run_migrations: bool = False) -> int:
     project = Path(project_root)
@@ -522,6 +550,13 @@ def apply(project_root, target: Source, ref: str = "", *, take_upstream: bool = 
         return 2
     manifest = target.manifest()
     validate_source_manifest(target, manifest)
+    preflight = preflight_layout_errors(target, project)
+    if preflight:
+        print("SYNC_APPLY_ABORTED layout check failed before upgrading; "
+              "declare project-owned paths in project-extensions.json and rerun")
+        for line in preflight:
+            print(" - " + line)
+        return 2
     new_entries = target_entries(manifest)
     old_files = lock.get("files") or {}
     conflicts = sorted(p for p, expected in old_files.items()

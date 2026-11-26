@@ -20,13 +20,29 @@
    python <工具包路径>/scripts/toolkit-sync.py init --from <工具包仓库URL或本地路径> --ref toolkit-v2.0.0 --project .
    ```
 
-   该命令写入 vendored 工具包文件、组合 `AGENTS.md` / `AGENTS-zh.md`、`openspec/config.yaml`、`.gitignore`，在缺失时脚手架 `workflow-state.json`，并写入 `toolkit-lock.json`。
+   该命令写入 vendored 工具包文件、组合 `AGENTS.md` / `AGENTS-zh.md`、`openspec/config.yaml`、`.gitignore`，在缺失时脚手架 `workflow-state.json`，并写入 `toolkit-lock.json`。安装后按“项目自有路径”小节声明项目自有路径。
 3. 将安装作为单独一次提交，然后照常开始阶段 01（`01-project-bootstrap`）。
 4. 可选：把工具包仓库添加为只读远端，便于后续升级：
 
    ```bash
    git remote add toolkit <工具包仓库URL>
    ```
+
+### 项目自有路径（project-extensions.json）
+
+安装后，把项目特有的顶层路径声明在仓库根的 `project-extensions.json`，并随项目内容一起提交：
+
+```json
+{
+  "root": ["backend", "frontend", "infra", ".vscode"],
+  "paths": ["docs/api"]
+}
+```
+
+- `root`：项目自有的额外顶层目录或文件（服务根、monorepo 包、编辑器配置等）。
+- `paths`：`docs/` 下的路径；`docs/` 后的第一级子目录会被放开（例如 `docs/api` 允许 `docs/api/` 目录）。
+- 项目模式布局检查接受 vendored 工具包路径、内置项目根条目与上述声明；未声明条目会让检查失败，报错信息会给出需要添加的声明片段。
+- 被 Git 忽略的本地产物无需声明：检查按仓库跟踪内容判断，会跳过未跟踪且被 Git 忽略的路径（`node_modules/`、`.venv/`、`dist/`）；不在 Git 工作树内时回退为扫描工作区。
 
 ## 3. 升级项目
 
@@ -39,7 +55,7 @@ python scripts/toolkit-sync.py apply --ref toolkit-v2.1.0
 ```
 
 - `plan` 为只读：列出新增/修改/删除的 vendored 文件、本地修改冲突、以及需要的状态迁移。
-- 工作区不干净、存在 `pending_approvals`/`blocked_items`、或另有升级锁时，`apply` 拒绝执行。它会把 `workflow-state.json` 备份到 `workflow/state-backups/`，只替换清单内路径，刷新托管块，重新生成 `process/STAGE-IO-OVERVIEW.md` 与基线索引，运行布局与 CI 检查，最后更新 `toolkit-lock.json`。
+- 工作区不干净、存在 `pending_approvals`/`blocked_items`、或另有升级锁时，`apply` 拒绝执行。在写入任何文件前，它会先用目标发布版本的项目布局规则检查当前仓库；失败时以退出码 2 中止且不改动工作区（按“项目自有路径”小节修正声明）。随后它把 `workflow-state.json` 备份到 `workflow/state-backups/`，只替换清单内路径，刷新托管块，重新生成 `process/STAGE-IO-OVERVIEW.md` 与基线索引，用安装后的版本运行布局与 CI 检查，最后更新 `toolkit-lock.json`。
 - 把结果放到 `toolkit/upgrade-vX.Y.Z` 分支，发起 PR，等待 CI 通过（`toolkit-sync.py verify`、布局、项目检查），合并后团队拉取。
 
 ### v2 工作流状态升级（多 Change 泳道）
@@ -114,4 +130,4 @@ python scripts/workflow.py upgrade-state --reason "adopt multi-lane workflow"
 
 ## 11. CI 期望
 
-vendored `.github/workflows/toolkit-ci.yml` 运行 `bash scripts/ci-check.sh`；项目模式下依次执行工具包包检查、清单检查、布局检查、`toolkit-sync.py verify --require-lock` 与项目检查。`verify` 失败意味着有 vendored 文件被手工修改；运行 `toolkit-sync.py repair` 或重新应用该发布版本。
+vendored `.github/workflows/toolkit-ci.yml` 运行 `bash scripts/ci-check.sh`；项目模式下依次执行工具包包检查、清单检查、布局检查、`toolkit-sync.py verify --require-lock` 与项目检查。布局检查按 Git 跟踪内容判断，未跟踪且被 Git 忽略的路径会被跳过，因此本地存在的依赖/构建目录（或 CI 在检查前安装的依赖）不会让它失败。`verify` 失败意味着有 vendored 文件被手工修改；运行 `toolkit-sync.py repair` 或重新应用该发布版本。

@@ -144,6 +144,24 @@ def main() -> int:
         assert "CI_CHECKS_PASSED" in ci.stdout, ci.stdout
         print("STEP ci: upgraded project without quality-gates.json keeps CI green (dormant static gates)")
 
+        write_source(toolkit, "2.2.0", V2_FILES)
+        real_layout = Path(__file__).with_name("check-layout.py").read_bytes()
+        (toolkit / "scripts/check-layout.py").write_bytes(real_layout)
+        manifest = json.loads((toolkit / MANIFEST_REL).read_text(encoding="utf-8"))
+        for entry in manifest["files"]:
+            if entry["path"] == "scripts/check-layout.py":
+                entry["sha256"] = norm_sha(real_layout)
+        (toolkit / MANIFEST_REL).write_text(json.dumps(manifest), encoding="utf-8")
+        (project / "backend").mkdir()
+        assert sync.apply(project, sync.open_source(str(toolkit), None, root / "work-layout"),
+                          "v2.2.0") == 2
+        assert json.loads((project / "toolkit-lock.json").read_text())["version"] == "2.1.0"
+        assert (project / "prompts/01.md").read_text(encoding="utf-8") == "# prompt v2\n"
+        assert not (project / ".toolkit-upgrade.lock").exists()
+        (project / "backend").rmdir()
+        print("STEP preflight: undeclared root entry aborted before writing")
+        write_source(toolkit, "2.1.0", V2_FILES)
+
         (project / "prompts/02.md").write_text("# local fork\n", encoding="utf-8")
         assert sync.apply(project, sync.open_source(str(toolkit), None, root / "work4"), "v2.1.0") == 2
         assert (project / "prompts/02.md").read_text(encoding="utf-8") == "# local fork\n"
