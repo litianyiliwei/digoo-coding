@@ -6,7 +6,7 @@
 > Change ID: N/A (project-level process overview)
 > Source baseline: `process/STEP-ARTIFACT-CONTRACTS.json` (inputs/outputs/approval/gates), `process/WORKFLOW-STAGES.json` (dependency DAG)
 > Related requirements/AC: N/A (process document)
-> Generation version: `src-sha256:a846d1ea2343`
+> Generation version: `src-sha256:b639d4b17355`
 
 > This file summarizes only the stage handoff surface. Field-level artifact templates are in `process/OUTPUT-TEMPLATE-MATRIX.csv`; the process entry point is `prompts/00-next-step.md`.
 > To change stage handoffs, first change the two JSON source files, then regenerate with `python scripts/stage-io-report.py --out process/STAGE-IO-OVERVIEW.md`; `scripts/check-package.py` verifies that this file is current.
