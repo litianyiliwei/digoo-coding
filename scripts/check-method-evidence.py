@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from method_evidence import validate_methods
+from method_evidence import validate_methods_detailed
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -30,7 +30,9 @@ def main() -> int:
     if evidence.get("step_id") != args.step:
         print(f"METHOD_EVIDENCE_FAILED: evidence.step_id must be {args.step}")
         return 1
-    errors = validate_methods(evidence, args.step, root)
+    errors, warnings = validate_methods_detailed(evidence, args.step, root)
+    for warning in warnings:
+        print("WARN: " + warning)
     if errors:
         print("METHOD_EVIDENCE_FAILED")
         for error in errors:

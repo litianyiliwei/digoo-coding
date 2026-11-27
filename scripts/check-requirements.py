@@ -11,7 +11,8 @@ always run. The code-layout strategy decides which proposal/slice rules apply:
 
 - ``none`` / missing layout: legacy checks only.
 - ``footprint``: Scenario -> AC tracing, ``Slice position``, the
-  ``Acceptance Walkthrough`` coverage and the AC budget exception.
+  ``Acceptance Walkthrough`` section (AC references must exist; covering all
+  three Slice positions is advisory) and the AC budget exception.
 - ``module-packages``: additionally the proposal ``New/Modified Capabilities``
   must exist in ``docs/product/capabilities.csv`` and agree with the Change's
   ``Primary Capability`` / ``Slice Type`` roadmap row (main table or an approved
@@ -36,6 +37,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ERRORS: list[str] = []
 WARNINGS: list[str] = []
+# Advisory findings never fail the check, not even under --strict.
+ADVISORIES: list[str] = []
 
 CAPABILITIES_REL = "docs/product/capabilities.csv"
 ROADMAP_REL = "docs/product/proposal-roadmap.md"
@@ -681,11 +684,18 @@ def _check_walkthrough(
     covered = {positions[ac] for ac in listed if ac in positions}
     missing = SLICE_POSITIONS - covered
     if missing:
-        ERRORS.append(
-            f"user-stories.md:{line_no}: Acceptance Walkthrough must cover at least "
-            "one AC at each Slice position; missing "
-            + ", ".join(sorted(missing))
+        # Advisory: small, backend-only or fix Changes may legitimately lack a
+        # position. Recommend coverage and a one-line reason; do not fail.
+        reason_given = any(
+            re.search(r"(理由|原因|reason|not applicable|N/A)", line, re.I)
+            for _, line in body
         )
+        if not reason_given:
+            ADVISORIES.append(
+                f"user-stories.md:{line_no}: Acceptance Walkthrough does not cover Slice "
+                "position(s) " + ", ".join(sorted(missing))
+                + "; cover them or add a one-line reason (理由 / Reason)"
+            )
 
 
 def _check_budget(lines: list[str], ac_count: int) -> None:
@@ -845,15 +855,18 @@ def _parse_args(argv):
 
 
 def main(argv=None):
-    global ERRORS, WARNINGS
+    global ERRORS, WARNINGS, ADVISORIES
     ERRORS = []
     WARNINGS = []
+    ADVISORIES = []
     change, strict, code = _parse_args(argv)
     if code:
         return code
     counts = check_change(change) if change else check_project()
     for w in WARNINGS:
         print('WARN:', w)
+    for a in ADVISORIES:
+        print('WARN (advisory):', a)
     for e in ERRORS:
         print('ERROR:', e)
     if ERRORS or (strict and WARNINGS):

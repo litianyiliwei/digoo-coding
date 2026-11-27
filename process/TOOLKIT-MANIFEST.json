@@ -1,5 +1,5 @@
 {
-  "version": "2.2.0",
+  "version": "2.3.0",
   "state_schema": "2.0",
   "migrations": [],
   "files": [
@@ -41,7 +41,7 @@
     {
       "path": ".claude/skills/detailed-design/SKILL.md",
       "install": ".claude/skills/detailed-design/SKILL.md",
-      "sha256": "3341e65a76541fb01b88dcf82eeb409eb1e0b428b9eedc386a2ea71f302d7b15",
+      "sha256": "f6503925d0ea1f1bf33c5f034715541726405d8d3236dfbb987b0133c0da7d30",
       "class": "toolkit",
       "vendor": true
     },
@@ -62,7 +62,7 @@
     {
       "path": ".claude/skills/figma-design-review/SKILL.md",
       "install": ".claude/skills/figma-design-review/SKILL.md",
-      "sha256": "305b5dbe688539d5d2db94adebea097033b93826516992b2178eb11b8a735722",
+      "sha256": "257d0cf62338a03a7ffe4b66bf453463ed360d394e6d637f36348bd7f4b40bcf",
       "class": "toolkit",
       "vendor": true
     },
@@ -76,7 +76,7 @@
     {
       "path": ".claude/skills/implementation-orchestrator/SKILL.md",
       "install": ".claude/skills/implementation-orchestrator/SKILL.md",
-      "sha256": "00f952c8fd3c776bee5c54c6422e49176b3446f064e93a4c7d51c55bb8342133",
+      "sha256": "5c7a4149bd111e9b865bcb2243844893e0725af41deacbd8d22b39841db2095d",
       "class": "toolkit",
       "vendor": true
     },
@@ -174,14 +174,14 @@
     {
       "path": "process/PROCESS-MAP-zh.md",
       "install": "process/PROCESS-MAP-zh.md",
-      "sha256": "5a32537b8d725975a61594781b63244269fee25165131cb0c45cde3daa25029b",
+      "sha256": "a5e8bdb7a8183d7f052113feee1d57e1554d91c5e82e473817313ad06ed99bc8",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/PROCESS-MAP.md",
       "install": "process/PROCESS-MAP.md",
-      "sha256": "cf3c8d91dcdd526054958687223f4ab98df9a26984aa0578e8effc49025b43ba",
+      "sha256": "232a78b6b93c1001e210a8470295b60d3c28ada3e65896b4e0ff30ba40197b14",
       "class": "toolkit",
       "vendor": true
     },
@@ -209,7 +209,7 @@
     {
       "path": "process/STAGE-IO-OVERVIEW.md",
       "install": "process/STAGE-IO-OVERVIEW.md",
-      "sha256": "fc5f19552aa91698dd23baa83e07f2560490223f6776cb59ae2fe0857b92c81d",
+      "sha256": "63aee3db90047663ea0fde2c7d322bec2fe35b3ba6c18770f78ac7b09f2535c2",
       "class": "generated",
       "vendor": true
     },
@@ -223,7 +223,7 @@
     {
       "path": "process/STEP-ARTIFACT-CONTRACTS.json",
       "install": "process/STEP-ARTIFACT-CONTRACTS.json",
-      "sha256": "0055ee5c5d13e9b91d3c44c67a3332f7e8c58cbcccd1566619c38764c02a8ff8",
+      "sha256": "6eb8c8eba38c30f6bfd862f03517b47d4a3e03c3f45460adb5dd05ad29f9bbdf",
       "class": "toolkit",
       "vendor": true
     },
@@ -237,35 +237,35 @@
     {
       "path": "process/SUPERPOWERS-MAPPING-zh.md",
       "install": "process/SUPERPOWERS-MAPPING-zh.md",
-      "sha256": "0cf0a309a03685afedff6a1c74f7b36dfd4c52721c69b23c8bbdef0ffb86c122",
+      "sha256": "680630e0f474d545cdb62e3981290c502513ce1fbd903d95813d1ef59389fdbb",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/SUPERPOWERS-MAPPING.md",
       "install": "process/SUPERPOWERS-MAPPING.md",
-      "sha256": "84bd1973ccb830677e06b0d69053b84b4ca9943d767fe3d66cbcc3d98a195f01",
+      "sha256": "c5c0f63ed1dd9f86bbcfb146ad1ea72a0ef8cda0913dd863e434a7f92bed5728",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TEMPLATE-POLICY-zh.md",
       "install": "process/TEMPLATE-POLICY-zh.md",
-      "sha256": "b0e0175afaef4c2ce8762f5629540381dce8ef87399d1db6c7dcc5c3281478fd",
+      "sha256": "85583bde49e1f60e9aec776586becf18952915e317a7d19f1a461142f99c63d2",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TEMPLATE-POLICY.md",
       "install": "process/TEMPLATE-POLICY.md",
-      "sha256": "1d43660fc2620abd9419579264a16f5f8c534b2dee3c114a64e8c20421c36e6c",
+      "sha256": "b9bd7b5ee6bc83a92c73288913c98a3661548c83e98757615537a00ad5e8776a",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "process/TOOLKIT-CHANGELOG.md",
       "install": "process/TOOLKIT-CHANGELOG.md",
-      "sha256": "2da9dc81b0765a8ce7cbea2d2a2cf478eeb240e9e601e05d9042f3ee791e0143",
+      "sha256": "63b34e8943b4c7e64789ce1f683d5ee0d8d211c4382b6035d2b6f412ea0ede32",
       "class": "toolkit",
       "vendor": true
     },
@@ -286,7 +286,7 @@
     {
       "path": "process/WORKFLOW-STAGES.json",
       "install": "process/WORKFLOW-STAGES.json",
-      "sha256": "ccff69b67ae398916f68d3b080f86192d7995fc52eabee1a127d26f33863a254",
+      "sha256": "bb6560061c77bf6f7be798d9effbe436d96fb347d5af1f7faa7462d6e9405441",
       "class": "toolkit",
       "vendor": true
     },
@@ -349,7 +349,7 @@
     {
       "path": "prompts/08-implementation-orchestrator.md",
       "install": "prompts/08-implementation-orchestrator.md",
-      "sha256": "4529989fc20dc2a3da707660f636e308a5b770f5ac0c839b1b480bf0a8e38c96",
+      "sha256": "123fa24c17e37bcba7d30aacb148a60bcf809f540b47eaabcf8036c2ca2c82ef",
       "class": "toolkit",
       "vendor": true
     },
@@ -377,14 +377,14 @@
     {
       "path": "scripts/README-zh.md",
       "install": "scripts/README-zh.md",
-      "sha256": "7a8916a698b1261e013cb806e4f29bb60c1a93e4ec2cd96a90e0a61f42f0d8ab",
+      "sha256": "19a63f9484ca454ae4bf389166195c7475f85c6fcd70fb1bb39df3ee5b816aad",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/README.md",
       "install": "scripts/README.md",
-      "sha256": "8263a684ec15b3575f7e4e04250ddada23c6d69715f6a68925c85143d590a3fe",
+      "sha256": "ccc8fd24497374e9c3a5ee359438dff887d43e7d6e9fcc4206b667b5a5fd6de3",
       "class": "toolkit",
       "vendor": true
     },
@@ -475,7 +475,7 @@
     {
       "path": "scripts/check-design-sections.py",
       "install": "scripts/check-design-sections.py",
-      "sha256": "0632b9ef24b105ecc524bf1b4d4ba9275bb2021e19a547b3014b44d19b519093",
+      "sha256": "34a131cdbd5fcfc3e96f2215b8209fea8f3cd5d3bc5ef432b26a49d06ef907a4",
       "class": "toolkit",
       "vendor": true
     },
@@ -489,7 +489,7 @@
     {
       "path": "scripts/check-figma-audit.py",
       "install": "scripts/check-figma-audit.py",
-      "sha256": "e55468276c7aec5ea4b6751b81421df803a6e26bac7d663fcc838b768031c5a0",
+      "sha256": "2ddc011ed2862f9cefd88fdabca83720893bdbe41b2e81c12471672e5de9d024",
       "class": "toolkit",
       "vendor": true
     },
@@ -524,7 +524,7 @@
     {
       "path": "scripts/check-method-evidence.py",
       "install": "scripts/check-method-evidence.py",
-      "sha256": "2f023498ae36d6fa7a9385cd37b18edfb3354a518d1158ee0586e193d420462d",
+      "sha256": "13a12d8a2792bb4ff49c40425a648cbc32f857524dfa8cb86181c59b09f98e08",
       "class": "toolkit",
       "vendor": true
     },
@@ -580,7 +580,7 @@
     {
       "path": "scripts/check-reference-research.py",
       "install": "scripts/check-reference-research.py",
-      "sha256": "ba0ed3c6c945eba73fdbf5ad6f11847aecbdbcce27b4f76e76e882a558eff98e",
+      "sha256": "4c4542093fdbf5b58034ce2405ec4d6c5139f44f79b7b71c8749e32741e5c3b0",
       "class": "toolkit",
       "vendor": true
     },
@@ -594,7 +594,7 @@
     {
       "path": "scripts/check-requirements.py",
       "install": "scripts/check-requirements.py",
-      "sha256": "ae77e6c534787ef2ed147c2b5f6c9cb86ae66c4b4379dfbf66c7966d00d2eaba",
+      "sha256": "e6661deaff25b20ac4ea82540f9e100b4a7f5bcf6fd5cdfcee358add2335cbb1",
       "class": "toolkit",
       "vendor": true
     },
@@ -636,7 +636,7 @@
     {
       "path": "scripts/check-ui-actions.py",
       "install": "scripts/check-ui-actions.py",
-      "sha256": "2c128f5fc4dbc9a226e543637a2ba0b7fb12dcb2c9e38d0ee5ed83f88f5f2407",
+      "sha256": "a7657e41f99f6436f1cf67e7f337438bcc14be7261d6edc21d02f8be57150b38",
       "class": "toolkit",
       "vendor": true
     },
@@ -657,7 +657,7 @@
     {
       "path": "scripts/gate_common.py",
       "install": "scripts/gate_common.py",
-      "sha256": "3e6de4bf18d40905a37a9c4d5509767dd8fa7da8e6c7628c8cebc3d4e3bf5b8f",
+      "sha256": "7e988ab7b04c7fb3fac4c4fda4017077ab83db5eebc707f05727d2eb0af0aeb0",
       "class": "toolkit",
       "vendor": true
     },
@@ -692,7 +692,7 @@
     {
       "path": "scripts/method_evidence.py",
       "install": "scripts/method_evidence.py",
-      "sha256": "3258cacb9502e850aee384b2e42489117ebc9ac62fd8cf99c5a0ee83f32bc663",
+      "sha256": "b046ce4e87fbaead6158b372ec79127a5412666a1e070cfa71e575ce27998c0a",
       "class": "toolkit",
       "vendor": true
     },
@@ -853,7 +853,7 @@
     {
       "path": "scripts/test-gate-common.py",
       "install": "scripts/test-gate-common.py",
-      "sha256": "92c863c884b9aa5f79af47229eefece09453ee775b1a90ee12eee6256dc0071d",
+      "sha256": "e8aed9aaa66b25999d162861ef08f7fa036a15479aa66258e84f74635ffb0c43",
       "class": "toolkit",
       "vendor": true
     },
@@ -923,14 +923,14 @@
     {
       "path": "scripts/test-reference-research.py",
       "install": "scripts/test-reference-research.py",
-      "sha256": "1f57c02ecd71ebc21264b4c713c63739dac1c5de3b7da015a7830d586202e633",
+      "sha256": "7e40aa5ed4539927d3833f504c70975d03d3f129f2fbafb19b56abbdeacdb59d",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "scripts/test-requirements-change.py",
       "install": "scripts/test-requirements-change.py",
-      "sha256": "2570e45f0faf7585af0915f2b09593966a61a204f645bc2744b749a42dc50f44",
+      "sha256": "fa2e0c40573088e072d0a6b415fc06f42175be031a104a7e02546193067bca42",
       "class": "toolkit",
       "vendor": true
     },
@@ -979,7 +979,7 @@
     {
       "path": "scripts/test-ui-actions.py",
       "install": "scripts/test-ui-actions.py",
-      "sha256": "3ac0b3b350e7478ba09b8a5ee7dfe13a233325411dd8ab5f6a59f6a0552253cc",
+      "sha256": "ebbcf9ebc0a42e5c5021a9d205e81a4398bd2eb8e43b311ef4e8b8498f30c166",
       "class": "toolkit",
       "vendor": true
     },
@@ -1000,7 +1000,7 @@
     {
       "path": "scripts/test-workflow-runtime.py",
       "install": "scripts/test-workflow-runtime.py",
-      "sha256": "0e864238da295b8c9cd029186cc2436616337ac8e349da1ae419ecb5fe86ea75",
+      "sha256": "971d8e15c346194a6e714d24a49795b9e0ac277e810454461007478be665f1c5",
       "class": "toolkit",
       "vendor": true
     },
@@ -1042,7 +1042,7 @@
     {
       "path": "scripts/workflow.py",
       "install": "scripts/workflow.py",
-      "sha256": "96271ab97c315265c1df1953b085cfae61d8a95e463808f63d10c0e3d17ac2d1",
+      "sha256": "b3283177a75cecf14d4dab920bfcacbd655e1934646eca76d67e1a729797ad28",
       "class": "toolkit",
       "vendor": true
     },
@@ -1168,7 +1168,7 @@
     {
       "path": "templates/change-assets/design/ui-actions.csv",
       "install": "templates/change-assets/design/ui-actions.csv",
-      "sha256": "613e1885700f686d532a97df6e3596dc83942069622d986a78060edd6272eb20",
+      "sha256": "90fe07f94bdaa3c1b48d67198d2e7ade27fcce8f7bef20512a735ae3af93fa59",
       "class": "toolkit",
       "vendor": true
     },
@@ -1623,14 +1623,14 @@
     {
       "path": "templates/workflow/agents-managed-zh.md",
       "install": "templates/workflow/agents-managed-zh.md",
-      "sha256": "39e817f4eb9f54dc9f72f47fc43d5dc65f737fcf016ee90a50cf8690eec67fee",
+      "sha256": "f5982b099948e25610467dc290748707fed1f360303cd7625b7a66287254f610",
       "class": "toolkit",
       "vendor": true
     },
     {
       "path": "templates/workflow/agents-managed.md",
       "install": "templates/workflow/agents-managed.md",
-      "sha256": "c6efb86bfedc2bda6811a0a6cb8084b85421811fab8de18a62b289bc1ef125c3",
+      "sha256": "dee1401d6895ed0dd6662be786afbea1106960ae9cbe8b9cca504b4d45961bfd",
       "class": "toolkit",
       "vendor": true
     },
@@ -1658,7 +1658,7 @@
     {
       "path": "templates/workflow/step-handoff-report.md",
       "install": "templates/workflow/step-handoff-report.md",
-      "sha256": "876beac02e02a652236bb826c948ab781bbbc4b1f3fb35f34d307424ac843abd",
+      "sha256": "e7e306685ea9e33a7f82dfd777d6d8593c0534c6df7cee72f027d078e6bd62c9",
       "class": "toolkit",
       "vendor": true
     },

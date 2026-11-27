@@ -488,13 +488,22 @@ class WorkflowRuntimeTests(unittest.TestCase):
         artifact.write_text('# 技术选型决策\n\n## 1. 技术选型访谈记录\n\n- 客户端形态：Web/H5、Android、iOS\n- 跨端方案：uni-app / Flutter / 原生双端\n',encoding='utf-8')
         return artifact
 
-    def test_method_evidence_required_for_stage_03(self):
+    def test_method_evidence_advisory_for_stage_03(self):
         evidence={'step_id':'03-project-architecture-baseline',
                   'outputs':[{'path':'out.md','status':'created'}],
                   'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
                   'approval':{'status':'not-required'}}
-        errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
-        self.assertTrue(any('methods' in e for e in errors),errors)
+        errors,warnings=w.validate_methods_detailed(evidence,'03-project-architecture-baseline',self.root)
+        self.assertEqual([],errors)
+        self.assertTrue(any('brainstorming' in msg for msg in warnings),warnings)
+
+    def test_method_evidence_hard_for_stage_05_and_09(self):
+        ev05={'step_id':'05-feature-requirements','methods':[]}
+        errors05,_=w.validate_methods_detailed(ev05,'05-feature-requirements',self.root)
+        self.assertTrue(any('baseline-impact-classification' in e for e in errors05),errors05)
+        ev09={'step_id':'09-independent-verification','methods':[]}
+        errors09,_=w.validate_methods_detailed(ev09,'09-independent-verification',self.root)
+        self.assertTrue(any('verification-before-completion' in e for e in errors09),errors09)
 
     def test_method_evidence_passes_with_questions_and_alternatives(self):
         self._write_method_artifact()
@@ -543,14 +552,15 @@ class WorkflowRuntimeTests(unittest.TestCase):
         errors=w.validate_methods(evidence,'03-project-architecture-baseline',self.root)
         self.assertTrue(any('custom-skill' in e for e in errors),errors)
 
-    def test_stage_02_requires_internet_research(self):
+    def test_stage_02_internet_research_is_advisory(self):
         self._write_method_artifact()
         (self.root/'docs/product').mkdir(parents=True,exist_ok=True)
         research=self.root/'docs/product/reference-research.md'
         research.write_text('# 参考产品与互联网调研\n\n## 3. 研究记录\n\n| 1 | WebSearch | https://example.com | 2026-11-13 |\n',encoding='utf-8')
         evidence={'step_id':'02-requirements-analysis','methods':[self._method_entry()]}
-        errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
-        self.assertTrue(any('internet-research' in e for e in errors),errors)
+        errors,warnings=w.validate_methods_detailed(evidence,'02-requirements-analysis',self.root)
+        self.assertEqual([],errors)
+        self.assertTrue(any('internet-research' in msg for msg in warnings),warnings)
         evidence['methods'].append({'skill':'internet-research','mode':'stage-scoped','summary':'market research',
             'questions':['q1','q2','q3'],'alternatives':['a1','a2'],'decisions':['d1'],'open_questions':[],
             'artifact_section':'docs/product/reference-research.md#3. 研究记录',
@@ -559,8 +569,9 @@ class WorkflowRuntimeTests(unittest.TestCase):
             'questions':['同类产品有哪些？','核心流程差异？'],'alternatives':['采纳','不采纳'],'decisions':['d1'],'open_questions':[],
             'artifact_section':'docs/product/reference-research.md#3. 研究记录',
             'evidence':'docs/product/reference-research.md'})
-        errors=w.validate_methods(evidence,'02-requirements-analysis',self.root)
+        errors,warnings=w.validate_methods_detailed(evidence,'02-requirements-analysis',self.root)
         self.assertEqual([],errors)
+        self.assertEqual([],warnings)
 
     def test_method_evidence_supports_multiple_required_skills(self):
         (self.root/'docs/product').mkdir(parents=True,exist_ok=True)
@@ -1097,5 +1108,77 @@ class WorkflowRuntimeTests(unittest.TestCase):
         artifacts=w.annotate_mutable_artifacts(
             [{'path':'docs/product/proposal-roadmap.md'}],'04-proposal-planning')
         self.assertTrue(artifacts[0].get('mutable_by_design'))
+
+    def test_request_review_aggregates_check_and_method_warnings(self):
+        (self.root/'docs').mkdir(exist_ok=True)
+        (self.root/'docs/out.md').write_text('approved output',encoding='utf-8')
+        (self.root/'warn.log').write_text('WARN: only 1 source URL; 3 recommended\nOK\n',encoding='utf-8')
+        contract={'steps':[{'step':'03','outputs':['docs/out.md']}]}
+        (self.root/'process/STEP-ARTIFACT-CONTRACTS.json').write_text(json.dumps(contract),encoding='utf-8')
+        state={'project_name':'test','active_change_id':'',
+               'completed_steps':['01-project-bootstrap','02-requirements-analysis'],
+               'current_step':'03-project-architecture-baseline','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        evidence={'step_id':'03-project-architecture-baseline',
+                  'outputs':[{'path':'docs/out.md','status':'created','required':True}],
+                  'checks':[{'name':'research','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'warn.log'}],
+                  'approval':{'status':'pending'}}
+        ep=self._write_evidence('warn-review-evidence.json',evidence)
+        args=type('Args',(),{'step':'03-project-architecture-baseline','change_id':None,'summary':'ready','target':[],'evidence':str(ep)})()
+        self.assertEqual(0,w.cmd_request_review(args))
+        packet_path=self.root/'workflow/evidence/03-project-architecture-baseline-review.json'
+        packet=json.loads(packet_path.read_text(encoding='utf-8'))
+        self.assertTrue(any('only 1 source URL' in msg for msg in packet.get('warnings',[])),packet)
+        self.assertTrue(any('brainstorming' in msg for msg in packet.get('warnings',[])),packet)
+
+    def test_stage_08_risk_based_fast_track_and_standard_approval(self):
+        self.assertEqual('low',w.BY_ID['08-implementation-orchestrator']['risk_level'])
+        change='demo-change'
+        state={'project_name':'test','active_change_id':change,'approval_policy':'risk-based',
+               'completed_steps':self.CHANGE_COMPLETE+['07-detailed-design'],
+               'current_step':'08-implementation-orchestrator','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        (self.root/'out.md').write_text('ok',encoding='utf-8')
+        evidence={'step_id':'08-implementation-orchestrator','change_id':change,
+                  'outputs':[{'path':'out.md','status':'created','required':True}],
+                  'checks':[{'name':'gate','kind':'automated','status':'passed','command':'python check.py','exit_code':0,'log':'check.log'}],
+                  'approval':{'status':'pending'}}
+        ep=self._write_evidence('08-fast-track.json',evidence)
+        out=io.StringIO()
+        originals=self._temporarily(check_entry=lambda *a,**k: [],
+                                    run_baseline_gate=lambda args,label: '',
+                                    project_strategy=lambda: 'none')
+        try:
+            with contextlib.redirect_stdout(out):
+                args=type('Args',(),{'step':'08-implementation-orchestrator','change_id':change,'summary':'done','target':[],'evidence':str(ep)})()
+                self.assertEqual(0,w.cmd_request_review(args))
+            self.assertIn('STATUS=RISK_BASED_FAST_TRACK',out.getvalue())
+            self.assertEqual(0,self._transition('08-implementation-orchestrator',ep))
+        finally:
+            self._restore(originals)
+        self.assertEqual('09-independent-verification',w.load_state()['current_step'])
+
+    def test_skip_stage_06_with_reason_auto_generates_audit_and_evidence(self):
+        change='backend-only'
+        state={'project_name':'test','active_change_id':change,
+               'completed_steps':['01-project-bootstrap','02-requirements-analysis','03-project-architecture-baseline','04-proposal-planning','05-feature-requirements'],
+               'current_step':'06-figma-design-review','pending_approvals':[],'blocked_items':[],'last_completed_outputs':[]}
+        w.STATE.write_text(json.dumps(state),encoding='utf-8')
+        # Copy real check-figma-audit.py and gate_common.py into temp workspace
+        src_scripts=Path(__file__).resolve().parent
+        dst_scripts=self.root/'scripts'
+        dst_scripts.mkdir(parents=True,exist_ok=True)
+        for fname in ('check-figma-audit.py','gate_common.py'):
+            (dst_scripts/fname).write_text((src_scripts/fname).read_text(encoding='utf-8'),encoding='utf-8')
+        originals=self._temporarily(run_baseline_gate=lambda *a,**k: '')
+        try:
+            args=type('Args',(),{'step':'06-figma-design-review','change_id':change,'evidence':None,'reason':'Backend API change only'})()
+            self.assertEqual(0,w.cmd_skip_stage(args))
+        finally:
+            self._restore(originals)
+        audit=self.root/'openspec/changes'/change/'design/figma-audit.md'
+        self.assertTrue(audit.is_file())
+        self.assertIn('Design source status: N/A',audit.read_text(encoding='utf-8'))
+        self.assertEqual('07-detailed-design',w.load_state()['current_step'])
 
 if __name__=='__main__': unittest.main(verbosity=2)

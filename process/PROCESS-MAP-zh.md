@@ -5,7 +5,7 @@
 | 阶段 | Skill ID | Prompt 文件 | 自动检查 |
 |---|---|---|---|
 | 01 项目初始化与工具链检查 | `project-bootstrap` | `prompts/01-project-bootstrap.md` | `scripts/check-package.py` + 按选定/现有语言探测静态分析工具并记录到 `docs/project/toolchain-report.md`（`Static Analysis Toolchain` 表与“静态分析配置存在性”说明；不安装任何工具） |
-| 02 需求业务梳理 | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `scripts/check-requirements.py --strict`（流程节点、数据对象、RD 矩阵结构）+ `python scripts/check-reference-research.py --strict`（参考产品与互联网调研：≥3 个问题、≥3 条来源、≥2 条对比；存在参考产品时至少 1 个同类产品、≥2 条同类产品偏差行，重大偏差须有用户明确确认） |
+| 02 需求业务梳理 | `requirements-analysis` | `prompts/02-requirements-analysis.md` | `scripts/check-requirements.py --strict`（流程节点、数据对象、RD 矩阵结构）+ `python scripts/check-reference-research.py --strict`（HARD：至少 1 条真实来源 URL、存在参考产品时至少 1 个同类产品、重大偏差须用户明确确认；ADVISORY WARN：建议 3 个问题 / 3 条来源 / 2 条对比 / 2 条偏差行） |
 | 03 项目总体架构设计 | `project-architecture-baseline` | `prompts/03-project-architecture-baseline.md` | `scripts/check-required-files.sh --strict` + `python scripts/check-quality-gates.py --root . --strict`（采用时：quality-gates.json 结构与选型，阶段 03 不要求栈目录已物化；文件不存在时报告 NOT_ADOPTED 并通过） + `python scripts/check-architecture-baseline.py --strict`（现有系统二开约束/第三方接口依赖清单/LEGACY-*/EXT-*） + 技术选型访谈记录 + 阶段结束审计 `baseline-governance.py freeze` / `audit --require-frozen`（采用时同时作为门禁文件的批准） + `docs/architecture/code-layout.json` 的结构、策略枚举与路径合法性在 04/05 首次消费时由 `check-capabilities.py` / `check-modules.py` / `check-roadmap.py` 校验（格式错误的布局 fail-closed） |
 | 04 提案拆分、依赖排序与路线图 | `proposal-planning` | `prompts/04-proposal-planning.md` | `baseline-governance.py audit --require-frozen` + `scripts/check-roadmap.py --strict`（模块列对照注册表校验） + `scripts/check-capabilities.py` + `scripts/check-modules.py` |
 | 05 提案级需求分析 | `feature-requirements` | `prompts/05-feature-requirements.md` | `scripts/check-requirements.py --change <change-id> --strict`（UC 可选）+ `baseline-governance.py check-change --phase requirement` + `scripts/check-baseline-impact.py <change-id>` + `scripts/check-capabilities.py` + `scripts/check-modules.py` + 写入 `## Roadmap Amendments` 行时 `scripts/check-roadmap.py --strict` |
@@ -17,11 +17,10 @@
 
 ## 方法与证据门禁
 
-- 02–10 的阶段 evidence 必须包含 `methods` 块；`python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` 可单独校验，`workflow.py transition` 会自动调用同一逻辑。
+- 02–10 的阶段 evidence 记录 `methods` 块；`python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>` 可单独校验，`workflow.py transition` 会自动调用同一逻辑。按 `STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy`，仅 `level: hard` 技能（05/10 `baseline-impact-classification`、09/10 `verification-before-completion`）阻断推进；`level: advisory` 技能缺失只输出非阻断 `WARN:`，并汇总进评审包。
 - 02/03/05/07 的逐阶段问题清单（`process/QUESTION-COVERAGE-CHECKLIST-zh.md`）是建议提问指引，不是逐项硬门禁。阶段证据可选包含 `question_coverage` 块；若提供，`scripts/check-question-coverage.py` 会做形状校验，`workflow.py request-review` / `transition` 自动复核同一个可选块。待确认问题必须写入 `docs/product/open-questions.md`，写明 owner 与阻塞条件。
-- 02/03/04/05/07 的 `brainstorming` 必须记录到 evidence 的 `methods` 块，结论落入阶段产物；不设问题/备选/决策的最少数量。缺少方法记录、证据路径或落点章节时不得推进。
-- 03 必须沟通“新系统 / 基于现有系统二开 / 混合、代码地址、第三方接口”：二开时实际读取代码并写入 `technology-decisions.md` 的“现有系统二开约束”与 `constraint-registry.json` 的 `LEGACY-*`；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
-- 07 必须沟通“修改现有功能代码 / 新功能开发、代码地址、第三方接口”：修改现有功能时实际读取代码并写入 `design.md` 的 `### 现有代码变更影响`；第三方接口写入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行与 test/fakes 证据。
+- 03 须明确“新系统 / 基于现有系统二开 / 混合、代码地址、第三方接口”（仓库/输入可明确判断时直接采用并标 `ASSUMED: <依据>` 供评审确认；无法判断时才先问）：二开时实际读取代码并写入 `technology-decisions.md` 的“现有系统二开约束”与 `constraint-registry.json` 的 `LEGACY-*`（代码不可访问仍 `BLOCKED`）；第三方接口写入“第三方接口依赖清单”、EXTERNAL 数据流与 API 约定。
+- 07 须明确“修改现有功能代码 / 新功能开发、代码地址、第三方接口”（可明确判断时标 `ASSUMED: <依据>`，否则先问）：修改现有功能时实际读取代码并写入 `design.md` 的 `### 现有代码变更影响`（代码不可访问仍 `BLOCKED`）；第三方接口写入 `interface-catalog.csv` 的 `THIRD_PARTY_API` 行与 test/fakes 证据。
 - 07 存在 HTTP API、原生桥接、设备、第三方、异步或文件边界时，必须生成 `design/interface-catalog.csv` 并运行 `check-interface-catalog.py --change <change-id> --strict`；仅 HTTP API 的 Change 也要在目录中登记 `HTTP_API` 行。
 - OpenSpec/Superpowers 的逐阶段允许/禁止范围见 `process/SUPERPOWERS-MAPPING.md` 的“OpenSpec 参与矩阵”与“阶段内方法模式”。
 

@@ -33,55 +33,55 @@
   "method_policy": {
     "02-requirements-analysis": {
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true},
-        {"skill": "internet-research", "requires_artifact": true},
-        {"skill": "competitor-research", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"},
+        {"skill": "internet-research", "requires_artifact": true, "level": "advisory"},
+        {"skill": "competitor-research", "requires_artifact": true, "level": "advisory"}
       ]
     },
     "03-project-architecture-baseline": {
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"}
       ]
     },
     "04-proposal-planning": {
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"}
       ]
     },
     "05-feature-requirements": {
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true},
-        {"skill": "baseline-impact-classification", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"},
+        {"skill": "baseline-impact-classification", "requires_artifact": true, "level": "hard"}
       ]
     },
     "06-figma-design-review": {
       "optional": true,
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"}
       ]
     },
     "07-detailed-design": {
       "required": [
-        {"skill": "brainstorming", "requires_artifact": true},
-        {"skill": "writing-plans", "requires_artifact": true},
-        {"skill": "existing-code-impact-analysis", "requires_artifact": true}
+        {"skill": "brainstorming", "requires_artifact": true, "level": "advisory"},
+        {"skill": "writing-plans", "requires_artifact": true, "level": "advisory"},
+        {"skill": "existing-code-impact-analysis", "requires_artifact": true, "level": "advisory"}
       ]
     },
     "08-implementation-orchestrator": {
       "required": [
-        {"skill": "test-driven-development", "requires_artifact": false},
-        {"skill": "verification-before-completion", "requires_artifact": false}
+        {"skill": "test-driven-development", "requires_artifact": false, "level": "advisory"},
+        {"skill": "verification-before-completion", "requires_artifact": false, "level": "advisory"}
       ]
     },
     "09-independent-verification": {
       "required": [
-        {"skill": "verification-before-completion", "requires_artifact": false}
+        {"skill": "verification-before-completion", "requires_artifact": false, "level": "hard"}
       ]
     },
     "10-acceptance-audit": {
       "required": [
-        {"skill": "verification-before-completion", "requires_artifact": false},
-        {"skill": "baseline-impact-classification", "requires_artifact": true}
+        {"skill": "verification-before-completion", "requires_artifact": false, "level": "hard"},
+        {"skill": "baseline-impact-classification", "requires_artifact": true, "level": "hard"}
       ]
     }
   },

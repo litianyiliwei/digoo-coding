@@ -19,8 +19,8 @@ Produce the single unified `design.md` (using `templates/change-assets/design/de
    - **`## Interface Design`**: Reference `api/openapi.yaml` (`x-api-scope: none` when no HTTP API) and `design/interface-catalog.csv` (cross-boundary interfaces; avoid duplicating internal DB/cache calls already in `io-catalog.csv`).
    - **`## Frontend Detailed Design`** (or `N/A + reason`):
      - Finalize `route` and `dom_selector` in `design/figma-layout.csv` (keep geometry/text/font faithful to Stage 06).
-     - Create `design/ui-actions.csv` mapping every functional control to `navigate` (route + `route_params`), `api` (`operationId` in `openapi.yaml`), or user-confirmed `local-only` (with `approver` + `confirmed_at`).
-     - Explicitly name `figma-layout.csv`, `check-figma-layout.py`, `ui-actions.csv`, and `check-ui-actions.py` in the frontend section (required by `check-design-sections.py`). Never redesign styles/layout/copy; register any `UI-DEVIATION` / `UI-DERIVED` with approver.
+     - Create `design/ui-actions.csv` mapping every functional control to `navigate` (route + `route_params`), `api` (`operationId` in `openapi.yaml`), `local-ui` (pure presentation state such as expand/collapse, tab switch, dialog toggle, or local sort/filter — record reason in `notes`, no user approval needed), or user-confirmed `local-only` (business meaning without navigation/API, with `approver` + `confirmed_at`).
+     - Reference real `element_id` values from `design/ui-actions.csv` in `### Event Handling`. Never redesign styles/layout/copy; routine states (loading/empty/error/toast/skeleton) may be filled with project tokens and recorded as `UI-DERIVED (routine)` without approver, while non-routine `UI-DERIVED` / `UI-DEVIATION` items still require an approver.
    - **`## Backend Detailed Design`** (or `N/A + reason`):
      - When APIs exist, author `api/openapi.yaml`, `design/api-io-mapping.csv` (every `operationId` → ≥ 1 real IO), and `design/io-catalog.csv` (contracts, timeouts, retries, idempotency, errors).
    - **`## Test Design`**:

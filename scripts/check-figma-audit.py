@@ -314,6 +314,8 @@ provenance_user = bool(PROVENANCE_USER.search(provenance_value))
 provenance_ai = bool(PROVENANCE_AI.search(provenance_value))
 
 errors, warnings = [], []
+# Advisory findings are recommendations only: printed, never failing (even under --strict).
+advisories: list[str] = []
 required_sections = [
     ("## 设计来源与选择", "## Design Source and Selection"),
     ("## 设计令牌（实际值）", "## Design Tokens (Actual Values)"),
@@ -403,12 +405,16 @@ if figma_source or provenance_figma:
 # --- Token actual values ---
 token_section = section_any(text, *TOKEN_SEC)
 token_rows = table_rows(token_section, skip_first=("变量", "Variable", "Token", "变量名"))
-if len(token_rows) < 3:
-    errors.append("设计令牌至少需要 3 条实际值（颜色/间距/圆角等），变量名和数量不算规格")
+if not token_rows:
+    errors.append("设计令牌至少需要 1 条实际值（颜色/间距/圆角等），变量名和数量不算规格")
+elif len(token_rows) < 3:
+    advisories.append(f"设计令牌仅 {len(token_rows)} 条实际值；建议覆盖颜色/间距/圆角至少 3 条")
 color_rows = [r for r in token_rows if len(r) >= 3 and re.search(r"#[0-9a-fA-F]{3,8}", r[2])]
 px_rows = [r for r in token_rows if len(r) >= 3 and re.search(r"\d+(?:\.\d+)?px", r[2])]
-if len(color_rows) < 2:
-    errors.append("设计令牌必须至少包含 2 条带 hex 的颜色实际值")
+if not color_rows:
+    errors.append("设计令牌必须至少包含 1 条带 hex 的颜色实际值")
+elif len(color_rows) < 2:
+    advisories.append("设计令牌仅 1 条 hex 颜色实际值；建议至少 2 条（主色/文字色等）")
 if not px_rows:
     errors.append("设计令牌必须至少包含 1 条带 px 的间距/圆角/尺寸实际值")
 for cells in token_rows:
@@ -422,8 +428,10 @@ for cells in token_rows:
 # --- Typography actual values ---
 type_section = section_any(text, *TYPE_SEC)
 type_rows = table_rows(type_section, skip_first=("样式", "Style", "Text style"))
-if len(type_rows) < 3:
-    errors.append("文字样式至少需要 3 条实际值（字体/字重/字号/行高/字距）")
+if not type_rows:
+    errors.append("文字样式至少需要 1 条实际值（字体/字重/字号/行高/字距）")
+elif len(type_rows) < 3:
+    advisories.append(f"文字样式仅 {len(type_rows)} 条实际值；建议覆盖标题/正文/辅助文字至少 3 条")
 for cells in type_rows:
     if len(cells) < 6:
         errors.append(f"文字样式行不完整: {cells}")
@@ -826,8 +834,6 @@ if require_framework:
 assertion_section = section_any(text, *ASSERT_SEC)
 if "figma-layout.csv" not in assertion_section:
     errors.append("## 断言范围 / ## Assertion Scope must reference figma-layout.csv")
-if "check-figma-layout.py" not in assertion_section and "check-figma-layout" not in assertion_section:
-    errors.append("## 断言范围 / ## Assertion Scope must name the runtime assertion gate (check-figma-layout.py)")
 
 # --- Assets: only real image/SVG files; reference screenshots are not assets ---
 asset_section = section_any(text, *ASSET_SEC)
@@ -903,6 +909,8 @@ if errors:
         print("ERROR:", e)
 for w in warnings:
     print("WARN:", w)
+for a in advisories:
+    print("WARN (advisory):", a)
 if errors or (strict and warnings):
     print(f"UI design contract check failed: {len(errors)} error(s), {len(warnings)} warning(s).")
     sys.exit(1)

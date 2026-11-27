@@ -6,7 +6,8 @@ from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from method_evidence import validate_methods
+from gate_common import extract_warnings
+from method_evidence import validate_methods, validate_methods_detailed
 from question_coverage import validate_coverage
 import roadmap_deps
 
@@ -848,7 +849,7 @@ def parse_evidence(path,step_id,change_id,require_approval=True,include_undeclar
             else:
                 if not pp.is_file(): failed.append(c.get('name','unnamed check')+f': proof file missing: {proof}')
     if failed: raise ValueError('Gate checks failed: '+'; '.join(failed))
-    method_errors=validate_methods(e,step_id,ROOT)
+    method_errors, _method_warnings = validate_methods_detailed(e, step_id, ROOT)
     if method_errors:
         raise ValueError('Method evidence failed: '+'; '.join(method_errors))
     coverage_errors=validate_coverage(e,step_id,ROOT)
@@ -869,6 +870,26 @@ def parse_evidence(path,step_id,change_id,require_approval=True,include_undeclar
     if require_approval and approval.get('status')=='approved' and (not approval.get('approver') or not approval.get('approved_at')):
         raise ValueError('Approved evidence requires approver and approved_at')
     return e,artifacts
+
+def collect_review_warnings(evidence, step_id):
+    """Aggregate WARN lines from gate check logs and advisory method warnings."""
+    found=[]
+    for c in evidence.get('checks',[]) or []:
+        proof=c.get('log') or c.get('evidence')
+        if not proof: continue
+        pp=(ROOT/proof).resolve()
+        try: pp.relative_to(ROOT.resolve())
+        except ValueError: continue
+        if not pp.is_file(): continue
+        try: text=pp.read_text(encoding='utf-8',errors='replace')
+        except OSError: continue
+        label=c.get('name') or proof
+        for msg in extract_warnings(text):
+            found.append(f'[{label}] {msg}')
+    _, method_warnings = validate_methods_detailed(evidence, step_id, ROOT)
+    for msg in method_warnings:
+        found.append(f'[method_evidence] {msg}')
+    return list(dict.fromkeys(found))
 
 def cmd_request_review(args):
     """Record that the current stage is finished and awaiting user review."""
@@ -899,8 +920,9 @@ def cmd_request_review(args):
             targets.append({'path':rel,'sha256':hash_file(p),'size_bytes':p.stat().st_size})
     checks=[{'name':c.get('name'),'status':c.get('status'),'exit_code':c.get('exit_code'),
              'command':c.get('command'),'log':c.get('log')} for c in e.get('checks',[])]
+    warnings=collect_review_warnings(e,sid)
     packet={'step_id':sid,'change_id':cid,'summary':args.summary or '','created_at':now(),
-            'evidence':ev_rel,'targets':targets,'checks':checks}
+            'evidence':ev_rel,'targets':targets,'checks':checks,'warnings':warnings}
     packet_rel=default_review_packet_path(s,sid,cid)
     packet_path=ROOT/packet_rel
     atomic_json(packet_path,packet)
@@ -914,12 +936,15 @@ def cmd_request_review(args):
         print('CURRENT_STEP='+lane['current_step'])
         if targets: print('REVIEW_TARGETS='+'; '.join(t['path'] for t in targets))
         print('REVIEW_PACKET='+relpath(packet_path))
+        if warnings:
+            print(f'WARNINGS_COUNT={len(warnings)}')
+            for w in warnings: print('WARN: '+w)
         print('STATUS=RISK_BASED_FAST_TRACK')
         print('NEXT_ACTION=Run transition after the gates; this low-risk stage needs no user approval under risk-based policy.')
         return 0
     entry={'step_id':sid,'change_id':cid,'requested_at':now(),
            'summary':args.summary or '','evidence':ev_rel,'targets':targets,
-           'checks':checks,'review_packet':relpath(packet_path)}
+           'checks':checks,'warnings':warnings,'review_packet':relpath(packet_path)}
     lane['pending_approvals']=[x for x in (lane.get('pending_approvals') or []) if item_step(x)!=sid]+[entry]
     s['last_updated']=now()
     atomic_json(STATE,s)
@@ -928,6 +953,9 @@ def cmd_request_review(args):
     print('CURRENT_STEP='+lane['current_step'])
     if targets: print('REVIEW_TARGETS='+'; '.join(t['path'] for t in targets))
     print('REVIEW_PACKET='+relpath(packet_path))
+    if warnings:
+        print(f'WARNINGS_COUNT={len(warnings)}')
+        for w in warnings: print('WARN: '+w)
     print('STATUS=AWAITING_USER_REVIEW')
     print('NEXT_ACTION=End the turn now. Do not read or execute any later stage Prompt/Skill or create later-stage artifacts until the user explicitly approves.')
     print(f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --change-id {cid} --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>' if cid else f'ON_APPROVAL=python scripts/workflow.py approve --step {sid} --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval evidence path>')
@@ -1036,6 +1064,37 @@ def cmd_skip_stage(args):
     ep=(ROOT/ev).resolve()
     try: ev_rel=ep.relative_to(ROOT.resolve()).as_posix()
     except ValueError: raise ValueError('Skip evidence must be inside project root')
+    reason_arg=str(getattr(args,'reason','') or '').strip()
+    if not ep.is_file() and reason_arg and sid=='06-figma-design-review' and cid:
+        audit_path=ROOT/'openspec/changes'/cid/'design/figma-audit.md'
+        if not audit_path.is_file() or audit_path.stat().st_size==0:
+            audit_path.parent.mkdir(parents=True,exist_ok=True)
+            audit_path.write_text(
+                f'# UI Design Audit\n\n- Change ID: {cid}\n- Status: N/A\n\n'
+                f'## Design Source and Selection\n\n'
+                f'- Design source status: N/A\n- Reason for no UI: {reason_arg}\n',
+                encoding='utf-8',
+            )
+        ep.parent.mkdir(parents=True,exist_ok=True)
+        log_path=ep.parent/'06-figma-audit-no-ui.log'
+        cmd=[sys.executable,str(ROOT/'scripts/check-figma-audit.py'),
+             '--change',cid,'--strict','--no-ui','--reason',reason_arg]
+        proc=subprocess.run(cmd,cwd=str(ROOT),capture_output=True,text=True,encoding='utf-8',errors='replace',check=False)
+        log_text=(proc.stdout or '')+('\n'+proc.stderr if proc.stderr else '')
+        log_path.write_text(log_text,encoding='utf-8')
+        if proc.returncode!=0:
+            raise ValueError(f'Auto check-figma-audit --no-ui failed (exit {proc.returncode}): {(proc.stderr or proc.stdout).strip()}')
+        auto_ev={
+            'step_id':sid,'change_id':cid,'skip':True,'reason':reason_arg,
+            'conditional_reason':'no-ui',
+            'checks':[{
+                'name':'check-figma-audit-no-ui','kind':'automated','status':'passed',
+                'exit_code':0,
+                'command':f'python scripts/check-figma-audit.py --change {cid} --strict --no-ui --reason {json.dumps(reason_arg,ensure_ascii=False)}',
+                'log':relpath(log_path),
+            }],
+        }
+        atomic_json(ep,auto_ev)
     if not ep.is_file(): raise ValueError('Skip evidence file missing: '+ev)
     e=json.loads(ep.read_text(encoding='utf-8'))
     if e.get('step_id')!=sid: raise ValueError(f'Skip evidence step_id must be {sid}')
@@ -1806,7 +1865,9 @@ def cmd_check_methods(args):
     if e.get('step_id')!=args.step:
         print(f'METHOD_EVIDENCE_FAILED: evidence.step_id must be {args.step}')
         return 1
-    errors=validate_methods(e,args.step,ROOT)
+    errors, warnings = validate_methods_detailed(e, args.step, ROOT)
+    for warning in warnings:
+        print('WARN: '+warning)
     if errors:
         print('METHOD_EVIDENCE_FAILED')
         for error in errors: print(' - '+error)
@@ -1870,7 +1931,7 @@ def main():
     p=sub.add_parser('migrate-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--reset-step',action='append',default=[],choices=ORDER); p.add_argument('--change-id')
     p=sub.add_parser('recover-state'); p.add_argument('--backup',required=True); p.add_argument('--reason',default='')
     p=sub.add_parser('reopen'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--change-id')
-    p=sub.add_parser('skip-stage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--evidence')
+    p=sub.add_parser('skip-stage'); p.add_argument('--step',required=True,choices=ORDER); p.add_argument('--change-id'); p.add_argument('--evidence'); p.add_argument('--reason',default='')
     p=sub.add_parser('reset-state'); p.add_argument('--reason',required=True); p.add_argument('--note'); p.add_argument('--clean',action='store_true')
     p=sub.add_parser('next-change'); p.add_argument('--change-id',required=True); p.add_argument('--note')
     p=sub.add_parser('abandon-change'); p.add_argument('--change-id',required=True); p.add_argument('--reason',required=True); p.add_argument('--note')

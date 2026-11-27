@@ -40,6 +40,12 @@
 |---|---|---|---|
 | | | | |
 
+### Advisory Warnings (Non-Blocking)
+
+> Aggregated from `WARN:` / `WARN (advisory):` lines in gate logs and advisory method checks (also recorded in the review packet's `warnings` field). Non-blocking; reviewer judges sufficiency. Write `None` if no warnings were emitted.
+
+- 
+
 ## 6. Pending Confirmation, Risks, and Blockers
 
 - Pending approval:

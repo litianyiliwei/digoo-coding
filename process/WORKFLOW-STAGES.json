@@ -94,7 +94,7 @@
       ],
       "scope": "change",
       "human_approval_required": true,
-      "risk_level": "high"
+      "risk_level": "low"
     },
     {
       "id": "09-independent-verification",

@@ -446,6 +446,18 @@ def check_existing_code(sections, errors: list[str]) -> None:
                 errors.append("### 现有代码变更影响 / ### Existing Code Change Impact must state change strategy/compatibility/migration/rollback")
 
 
+def _ui_action_element_ids(change: str) -> set[str]:
+    path = ROOT / "openspec/changes" / change / "design/ui-actions.csv"
+    if not path.is_file():
+        return set()
+    with path.open(newline="", encoding="utf-8-sig") as handle:
+        return {
+            (row.get("element_id") or "").strip()
+            for row in csv.DictReader(handle)
+            if (row.get("element_id") or "").strip()
+        }
+
+
 def check_ui(change: str, sections, frontend_body: str, errors: list[str], warnings: list[str]) -> None:
     # UI Changes must carry actual tokens, not only variable names.
     audit = ROOT / "openspec/changes" / change / "design/figma-audit.md"
@@ -459,28 +471,23 @@ def check_ui(change: str, sections, frontend_body: str, errors: list[str], warni
         errors.append("UI 前端详细设计必须包含 token → CSS 变量/Element Plus 映射（例如 --color-brand）")
     if not re.search(r"\d+px", frontend_body):
         errors.append("UI 前端详细设计必须包含实际尺寸/字号/间距（px），不能只写变量名")
-    if "figma-layout.csv" not in frontend_body:
-        errors.append("UI 前端详细设计必须引用 design/figma-layout.csv（07 填写 route/dom_selector）")
-    if "figma-code/" not in frontend_body:
-        errors.append("UI 前端详细设计必须引用 design/figma-code/（get_design_context 落盘的设计代码）")
-    if "check-figma-layout.py" not in frontend_body:
-        errors.append("UI 前端详细设计必须写明运行态几何断言命令 check-figma-layout.py")
-    if "ui-actions.csv" not in frontend_body:
-        errors.append("UI 前端详细设计必须引用 design/ui-actions.csv（功能按钮/图标交互清单）")
-    if "check-ui-actions.py" not in frontend_body:
-        errors.append("UI 前端详细设计必须写明按钮/图标跳转与 API 映射检查命令 check-ui-actions.py")
+    # File/command name mentions (figma-layout.csv, figma-code/, ui-actions.csv,
+    # check-*.py) are not required in prose: the files themselves and their
+    # gates are checked directly, so keyword presence proves nothing.
     event_body = extract_subsection(frontend_body, "### 事件处理")
     if not event_body:
         errors.append(
             "### 事件处理 / ### Event Handling is empty; explain handler behavior and "
             "reference the corresponding design/ui-actions.csv element_id"
         )
-    elif "ui-actions.csv" not in event_body:
-        errors.append(
-            "### 事件处理 / ### Event Handling must reference design/ui-actions.csv by "
-            "element_id; the CSV is the single machine-readable action inventory, so do "
-            "not duplicate route/params/operationId mapping in prose"
-        )
+    else:
+        element_ids = _ui_action_element_ids(change)
+        if element_ids and not any(eid in event_body for eid in element_ids):
+            warnings.append(
+                "### 事件处理 / ### Event Handling references no element_id from "
+                "design/ui-actions.csv; reference controls by element_id instead of "
+                "duplicating route/params/operationId mapping in prose"
+            )
     if not re.search(r"1440\s*[×x]\s*900|1440", frontend_body):
         errors.append("UI 前端详细设计必须声明 1440×900 基准视口")
     if not re.search(r"(\.css|tokens?\.css|token 文件)", frontend_body, re.I):

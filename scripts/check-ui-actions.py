@@ -7,8 +7,13 @@ action:
 
   * navigate   -> `route` (address) plus `route_params` (input parameters)
   * api        -> `operation_id` that exists in `api/openapi.yaml`
-  * local-only -> no navigation/API; requires explicit user confirmation
-                  (`confirmation` + `approver` + `confirmed_at`)
+  * local-ui   -> pure presentation state with no business meaning (expand /
+                  collapse, tab switch, dialog open/close, local sort/filter of
+                  an already loaded view); the agent records it with a reason in
+                  `notes`, no user confirmation needed
+  * local-only -> no navigation/API but with business meaning; requires
+                  explicit user confirmation (`confirmation` + `approver` +
+                  `confirmed_at`)
 
 A control with no mapping must stop the stage: the agent has to present the
 unmapped control to the user and record the user's confirmation. Coverage is
@@ -36,7 +41,7 @@ REQUIRED_COLUMNS = [
     "confirmation", "approver", "confirmed_at", "notes",
 ]
 ELEMENT_TYPES = {"button", "icon", "link", "menu", "tab", "form", "other"}
-ACTION_TYPES = {"navigate", "api", "local-only"}
+ACTION_TYPES = {"navigate", "api", "local-ui", "local-only"}
 NONE_PARAMS = {"none", "无", "{}", "[]", "-"}
 PLACEHOLDER = re.compile(r"\bTODO\b|\bTBD\b|PENDING|待确认|待补充|\[填充\]")
 PAGE_RE = re.compile(r"PAGE-\d{3}")
@@ -231,12 +236,19 @@ def main() -> int:
         if action_type not in ACTION_TYPES:
             errors.append(
                 f"{where}: '{label or element}' has no navigation/API mapping; "
-                "record action_type=navigate/api/local-only. If it truly has neither, "
-                "prompt the user to confirm and record the confirmation."
+                "record action_type=navigate/api/local-ui/local-only. If it has business "
+                "meaning but neither, prompt the user to confirm and record the confirmation."
             )
             continue
 
-        if action_type == "navigate":
+        if action_type == "local-ui":
+            if not row.get("notes") or has_placeholder(row.get("notes", "")):
+                errors.append(
+                    f"{where}: local-ui action requires a reason in `notes` "
+                    "(which presentation state it toggles)"
+                )
+
+        elif action_type == "navigate":
             route = row.get("route", "")
             params = row.get("route_params", "")
             if not route or has_placeholder(route) or not ROUTE_RE.fullmatch(route):
@@ -343,7 +355,7 @@ def main() -> int:
 
     print(
         "UI action check passed: "
-        f"{len(actions)} control(s) mapped to navigate/api/local-only; "
+        f"{len(actions)} control(s) mapped to navigate/api/local-ui/local-only; "
         f"{len(layout)} assertion row(s) cross-checked."
     )
     return 0

@@ -49,29 +49,31 @@ Superpowers `brainstorming` 的完整流程要求写独立设计文档并单独�
 4. 只有用户明确要求“独立 Superpowers 设计文档”时，才执行完整 `brainstorming` 流程；此时必须在交接报告中说明编外文档路径，并确保阶段产物仍为权威。
 5. 技能确实不可用时使用 `mode=equivalent`，记录 `reason` 与等价步骤；不得把“可用”当作“已使用”。
 
-## 阶段沟通清单（强制）
+## 阶段沟通清单（先推断后确认）
+
+> 当仓库或输入材料已能明确判断时，Agent 可直接采用，并在阶段产物与交接报告中标注 `ASSUMED: <依据>`，由阶段评审确认；无法判断时才先向用户提问。代码不可访问时仍为 `BLOCKED`。
 
 ### 03 项目总体架构
 
-- 系统来源：新系统、基于现有系统二开、还是混合；不得默认。
+- 系统来源：新系统、基于现有系统二开、还是混合（仓库/输入可明确判断时直接采用并标 `ASSUMED: <依据>`；否则先问）。
 - 若二开：要求代码地址（仓库/本地路径/分支/commit），实际探索代码结构、技术栈、模块边界、API/数据模型、构建/测试/发布命令、既有规范与技术债；写入 `technology-decisions.md` 的“现有系统二开约束”，并转换为 `constraint-registry.json` 的 `LEGACY-*` 约束；代码不可访问时 BLOCKED。
 - 第三方接口：列出提供方、用途、协议、鉴权、SLA/配额、沙箱/测试账号、审批、数据共享/隐私、错误/超时、责任人；写入“第三方接口依赖清单”、`data-flows.md` 的 EXTERNAL 数据流、`api-conventions.md` 的“第三方接口与集成约定”；无则 NONE + 理由。
 
 ### 07 详细设计
 
-- 变更类型：修改现有功能代码，还是新功能开发；不得默认。
+- 变更类型：修改现有功能代码，还是新功能开发（仓库/输入可明确判断时直接采用并标 `ASSUMED: <依据>`；否则先问）。
 - 若修改现有功能代码：要求代码地址（仓库/路径/分支/commit），实际探索文件/类/函数/数据结构/测试/迁移；写入 `design.md` 的 `### 现有代码变更影响`（文件/类/函数/接口/表/测试、修改策略、兼容性、迁移/回滚、风险、验证方式）；代码不可访问时 BLOCKED。
 - 第三方接口：与 03 清单核对；每个第三方接口在 `interface-catalog.csv` 建 `THIRD_PARTY_API` 行，记录 provider/协议/鉴权/输入输出/错误/超时重试幂等/SLA/配额/沙箱/数据共享隐私/test_ids/owner；测试在 `test-cases.csv` 的 `interface_ids`/`fakes_env` 覆盖沙箱、模拟器或人工验证。
 
 ## 方法证据
 
-02–10 的阶段 evidence 必须包含 `methods` 块，记录 skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence。策略见 `process/STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy`；单独校验命令：
+02–10 的阶段 evidence 记录 `methods` 块（skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence）。策略见 `process/STEP-ARTIFACT-CONTRACTS.json` 的 `method_policy`（每项声明 `level: hard | advisory`）；单独校验命令：
 
 ```bash
 python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>
 ```
 
-`workflow.py transition` 会自动调用同一校验；交接报告第 4 节必须展示关键问题、备选、决策、未决项与产物落点。没有 `methods`、缺少必需方法技能、缺少真实证据路径或缺少要求的产物落点章节时，阶段不得推进；问题/备选/决策数量不做强制。
+`workflow.py transition` 会自动调用同一校验；交接报告第 4 节展示关键问题、备选、决策、未决项与产物落点。仅 `level: hard` 技能（05/10 `baseline-impact-classification`、09/10 `verification-before-completion`）缺失或无效时阻断推进；`level: advisory` 技能缺失只输出非阻断 `WARN:`，并由 `request-review` 汇总进评审包的 `warnings` 字段。问题/备选/决策数量不做强制。
 
 
 

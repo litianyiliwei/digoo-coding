@@ -552,6 +552,21 @@ Nothing.
         changed["src/a.py"] = "c" * 32
         self.assertNotEqual(self.gm.fingerprint(files), self.gm.fingerprint(changed))
 
+    def test_extract_warnings_matches_standard_and_advisory_prefixes(self):
+        sample = (
+            "INFO: normal line\n"
+            "WARN: section 1: 1 research question(s); 3 or more is recommended\n"
+            "  WARN (advisory): Acceptance Walkthrough missing result\n"
+            "ERROR: real failure\n"
+        )
+        self.assertEqual(
+            [
+                "section 1: 1 research question(s); 3 or more is recommended",
+                "Acceptance Walkthrough missing result",
+            ],
+            self.gm.extract_warnings(sample),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -498,3 +498,24 @@ def parse_slice(design_text: str) -> dict:
         else:
             result[field] = value
     return result
+
+
+WARN_LINE_RE = re.compile(r"^\s*WARN(?:\s*\([^)]*\))?:\s*(.+)$")
+
+
+def warn(message: str, *, advisory: bool = False) -> None:
+    """Print a standardized non-blocking warning line."""
+    prefix = "WARN (advisory):" if advisory else "WARN:"
+    print(f"{prefix} {message}")
+
+
+def extract_warnings(text: str) -> list[str]:
+    """Extract standardized WARN: / WARN (advisory): messages from command output."""
+    found: list[str] = []
+    for line in text.splitlines():
+        match = WARN_LINE_RE.match(line)
+        if match:
+            item = match.group(1).strip()
+            if item:
+                found.append(item)
+    return found

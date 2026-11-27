@@ -49,29 +49,31 @@ The full Superpowers `brainstorming` process requires writing a standalone desig
 4. Only when the user explicitly requests a "standalone Superpowers design document" should the full `brainstorming` process be executed; in that case, the handoff report must state the out-of-band document path, and the stage artifacts must remain authoritative.
 5. When a skill is genuinely unavailable, use `mode=equivalent`, record `reason` and equivalent steps; do not treat "available" as "used."
 
-## Per-Stage Communication Checklist (Mandatory)
+## Per-Stage Communication Checklist (Infer When Clear, Confirm at Review)
+
+> When the repository or provided inputs make an item unambiguous, the Agent may adopt it directly and mark `ASSUMED: <basis>` in the stage artifact and handoff report for confirmation at stage review; ask the user first only when it cannot be reliably inferred. Inaccessible code remains `BLOCKED`.
 
 ### 03 Overall Project Architecture
 
-- System origin: new system, secondary development based on an existing system, or hybrid; do not default.
+- System origin: new system, secondary development based on an existing system, or hybrid (infer from the repository/inputs with `ASSUMED: <basis>` when clear; otherwise ask first).
 - If secondary development: require the code address (repository/local path/branch/commit), actually explore the code structure, technology stack, module boundaries, API/data models, build/test/release commands, existing conventions, and technical debt; write them into "Existing System Secondary-Development Constraints" in `technology-decisions.md`, and convert them into `LEGACY-*` constraints in `constraint-registry.json`; BLOCKED when the code is inaccessible.
 - Third-party interfaces: list the provider, purpose, protocol, authentication, SLA/quota, sandbox/test account, approval, data sharing/privacy, errors/timeouts, owner; write them into the "Third-Party Interface Dependency List," the EXTERNAL data flows in `data-flows.md`, and "Third-Party Interface and Integration Conventions" in `api-conventions.md`; if none, write NONE + reason.
 
 ### 07 Detailed Design
 
-- Change type: modifying existing feature code or new feature development; do not default.
+- Change type: modifying existing feature code or new feature development (infer from the repository/inputs with `ASSUMED: <basis>` when clear; otherwise ask first).
 - If modifying existing feature code: require the code address (repository/path/branch/commit), actually explore files/classes/functions/data structures/tests/migrations; write them into `### Existing Code Change Impact` in `design.md` (files/classes/functions/interfaces/tables/tests, modification strategy, compatibility, migration/rollback, risks, verification method); BLOCKED when the code is inaccessible.
 - Third-party interfaces: cross-check with the 03 list; create a `THIRD_PARTY_API` row in `interface-catalog.csv` for each third-party interface, recording provider/protocol/authentication/input-output/errors/timeout retry idempotency/SLA/quota/sandbox/data sharing privacy/test_ids/owner; tests cover sandbox, simulator, or manual verification via `interface_ids`/`fakes_env` in `test-cases.csv`.
 
 ## Method Evidence
 
-The stage evidence for 02-10 must include a `methods` block recording skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence. The policy is in `method_policy` of `process/STEP-ARTIFACT-CONTRACTS.json`; separate validation command:
+The stage evidence for 02-10 records a `methods` block (skill/mode/questions/alternatives/decisions/open_questions/artifact_section/evidence). The policy is in `method_policy` of `process/STEP-ARTIFACT-CONTRACTS.json` with per-skill `level: hard | advisory`; separate validation command:
 
 ```bash
 python scripts/check-method-evidence.py --step <step-id> --evidence <evidence.json>
 ```
 
-`workflow.py transition` automatically invokes the same validation; Section 4 of the handoff report must show key questions, alternatives, decisions, open items, and artifact locations. Without `methods`, without the required method skills, without a real evidence path, or without the required artifact landing section, the stage must not advance. Question/alternative/decision counts are not enforced.
+`workflow.py transition` automatically invokes the same validation; Section 4 of the handoff report shows key questions, alternatives, decisions, open items, and artifact locations. Only `level: hard` skills (05/10 `baseline-impact-classification`, 09/10 `verification-before-completion`) block advancement when missing or invalid; `level: advisory` skills emit non-blocking `WARN:` lines that `request-review` aggregates into the review packet's `warnings` field. Question/alternative/decision counts are not enforced.
 
 
 

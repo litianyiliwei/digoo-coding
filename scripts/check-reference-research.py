@@ -87,6 +87,9 @@ def main() -> int:
     text = path.read_text(encoding="utf-8")
     data = sections(text)
     errors: list[str] = []
+    # Advisory thresholds: recommended research depth. They are reported as
+    # WARN lines and never fail the check; the stage review judges sufficiency.
+    warnings: list[str] = []
     for prefix, titles in HEADINGS.items():
         if section(data, prefix) is None:
             errors.append(f"missing section: ## {prefix}. {titles[0]} / {titles[1]}")
@@ -97,8 +100,10 @@ def main() -> int:
                 errors.append(f"line {n}: unresolved placeholder: {line.strip()[:80]}")
 
     questions = table_rows(section(data, "1") or [])
-    if len(questions) < 3:
-        errors.append("section 1: need at least 3 research questions (table rows)")
+    if not questions:
+        errors.append("section 1: need at least 1 research question (table row)")
+    elif len(questions) < 3:
+        warnings.append(f"section 1: {len(questions)} research question(s); 3 or more is recommended")
 
     product_section = section(data, "2") or []
     status_line = next((line for line in product_section if "参考产品状态" in line or "Reference product status" in line), None)
@@ -136,8 +141,10 @@ def main() -> int:
                 errors.append(f"section 2: product row {index} needs a YYYY-MM-DD research date")
 
     research = table_rows(section(data, "3") or [])
-    if len(research) < 3:
-        errors.append("section 3: need at least 3 internet research records (table rows)")
+    if not research:
+        errors.append("section 3: need at least 1 internet research record (table row)")
+    elif len(research) < 3:
+        warnings.append(f"section 3: {len(research)} research record(s); 3 or more is recommended")
     urls: set[str] = set()
     for index, cells in enumerate(research, 1):
         joined = " | ".join(cells)
@@ -149,12 +156,16 @@ def main() -> int:
             errors.append(f"section 3: research row {index} needs a YYYY-MM-DD access date")
         if args.strict and has_placeholder(joined):
             errors.append(f"section 3: research row {index} has unresolved placeholder")
-    if len(urls) < 3:
-        errors.append("section 3: need at least 3 distinct source URLs from internet research")
+    if not urls:
+        errors.append("section 3: need at least 1 real source URL from internet research")
+    elif len(urls) < 3:
+        warnings.append(f"section 3: {len(urls)} distinct source URL(s); 3 or more is recommended")
 
     comparisons = table_rows(section(data, "4") or [])
-    if len(comparisons) < 2:
-        errors.append("section 4: need at least 2 comparison rows")
+    if not comparisons:
+        errors.append("section 4: need at least 1 comparison row")
+    elif len(comparisons) < 2:
+        warnings.append(f"section 4: {len(comparisons)} comparison row(s); 2 or more is recommended")
     for index, cells in enumerate(comparisons, 1):
         joined = " | ".join(cells)
         if not DECISION.search(joined):
@@ -220,10 +231,14 @@ def main() -> int:
                     "(理由 / Reason)"
                 )
         else:
-            if len(deviation_rows) < 2:
+            if not deviation_rows:
                 errors.append(
-                    "section 9: need at least 2 similar-product deviation rows "
+                    "section 9: need at least 1 similar-product deviation row "
                     "(对比项 / 本项目输出 / 同类产品做法 / 偏差等级 / 影响对象 / 确认状态)"
+                )
+            elif len(deviation_rows) < 2:
+                warnings.append(
+                    f"section 9: {len(deviation_rows)} deviation row(s); 2 or more is recommended"
                 )
             for index, cells in enumerate(deviation_rows, 1):
                 joined = " | ".join(cells)
@@ -271,6 +286,8 @@ def main() -> int:
                             "date as YYYY-MM-DD (确认日期 / Confirmed at)"
                         )
 
+    for warning in warnings:
+        print("WARN:", warning)
     if errors:
         for error in errors:
             print("ERROR:", error)

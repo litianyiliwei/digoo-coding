@@ -27,7 +27,7 @@
 3. OpenSpec 的核心文件由 OpenSpec schema 生成：`proposal.md`、`specs/**/spec.md`、`design.md`、`tasks.md`。不要另建一套同名“真相来源”。
 4. 辅助产物从 `templates/change-assets/` 拷贝，由 `scripts/new-change-assets.sh <change-id>` 无覆盖创建。
 5. CSV 用于清单和机器校验；Markdown 用于解释、决策与评审；OpenAPI 使用 YAML/JSON；示意图使用 Mermaid 并保留源文本。
-6. 不适用的字段不允许留空：填 `N/A` 并写原因。尚未决策的内容应填 `PENDING` 并标负责人/截止条件；严格门禁时不得有未决项。
+6. 不适用的字段不允许留空：填 `N/A` 并写原因（`governance_profile=lite` 时允许整节写一行 `N/A（lite）` 代替逐字段 N/A）。尚未决策的内容应填 `PENDING` 并标负责人/截止条件；严格门禁时不得有未决项（`PENDING`/`TODO`/`TBD`）。
 
 ## 4. 哪些输出必须模板化
 

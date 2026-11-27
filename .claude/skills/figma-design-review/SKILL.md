@@ -15,9 +15,7 @@ Establish the frozen per-platform PAGE set, self-contained HTML design documents
 ## Execution Flow
 
 ### Path A: No-UI Change (Conditional Skip)
-1. Write `- Design source status: N/A` and `- Reason for no UI: <reason>` in `openspec/changes/<change-id>/design/figma-audit.md`.
-2. Run `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<reason>"`.
-3. Skip via `python scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <change-id> --evidence workflow/evidence/<change-id>/06-figma-design-review-skip.json` and end the turn.
+- Run `python scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <change-id> --reason "<reason>"` (auto-generates minimal N/A `design/figma-audit.md`, runs `check-figma-audit.py --strict --no-ui`, and writes skip evidence when none exists) and end the turn. (Alternatively, supply a pre-built `--evidence` file after running `check-figma-audit.py --no-ui`.)
 
 ### Path B: UI Change (HTML-First Default)
 1. **Entry**: Run `python scripts/workflow.py check-entry --step 06-figma-design-review --change-id <change-id>` and `python scripts/agent-context.py --stage 06 --change <change-id>`. Read `- Target platforms:` from `design/user-stories.md` and `## Visual Conventions` from `docs/architecture/frontend-conventions.md`.
@@ -31,7 +29,7 @@ Establish the frozen per-platform PAGE set, self-contained HTML design documents
    - Determine target framework from `docs/architecture/technology-decisions.md` (e.g., Vue `.vue` + Element Plus / uni-app, or React `.tsx`).
    - Transcribe each PAGE into `design/figma-code/PAGE-00N.<ext>` preserving layout, tokens, copy, and `data-node-id` (static skeleton only; Stage 08 adds business logic without rewriting styles/layout/copy). Document framework, extension, substitutions, and deviations in `design/figma-code/README.md`.
 5. **Single UI Contract (`design/figma-audit.md`)**:
-   - Populate actual token values, text styles, PAGE list, design code notes, `## Assertion Scope` (naming `check-figma-layout.py`), state coverage, `## Requirements Coverage` (every AC/US per declared platform `FULL` or `N/A + reason`, every PAGE back-mapped), asset list (`design/figma-assets/` for real image/SVG only; **never save screenshots**), render/measure records, and UI review approval.
+   - Populate actual token values, text styles, PAGE list, design code notes, `## Assertion Scope` (referencing `figma-layout.csv`), state coverage (routine states such as loading/empty/error/toast/skeleton may be filled with project tokens and recorded as `UI-DERIVED (routine)` without an approver; non-routine derived modals/states still require a new PAGE or `UI-DERIVED` with approver), `## Requirements Coverage` (every AC/US per declared platform `FULL` or `N/A + reason`, every PAGE back-mapped), asset list (`design/figma-assets/` for real image/SVG only; **never save screenshots**), render/measure records, and UI review approval.
    - `docs/product/open-questions.md` is append-only for unresolved page questions.
 6. **Stage-End Gates**:
    - `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`

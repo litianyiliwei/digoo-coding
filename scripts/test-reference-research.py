@@ -103,11 +103,22 @@ class ReferenceResearchTests(unittest.TestCase):
         result = run_checker(VALID)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_requires_three_sources(self):
+    def test_fewer_than_three_sources_warns_and_passes(self):
         text = VALID.replace("https://example.com/b", "https://example.com/a")
         result = run_checker(text)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("WARN:", result.stdout)
+        self.assertIn("distinct source URL", result.stdout)
+
+    def test_zero_real_sources_fails(self):
+        text = (
+            VALID.replace("https://example.com/a", "none")
+            .replace("https://example.com/b", "none")
+            .replace("https://example.com/c", "none")
+        )
+        result = run_checker(text)
         self.assertNotEqual(result.returncode, 0)
-        self.assertIn("3 distinct source URLs", result.stdout)
+        self.assertIn("at least 1 real source URL", result.stdout)
 
     def test_requires_reference_product_status(self):
         text = VALID.replace("- 参考产品状态：PRESENT", "")

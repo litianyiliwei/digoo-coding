@@ -434,12 +434,12 @@ class RequirementsChangeTests(unittest.TestCase):
         self.assertIn("AC-999", out)
         self.assertIn("undefined", out)
 
-    def test_walkthrough_missing_position_fails(self):
+    def test_walkthrough_missing_position_warns_and_passes(self):
         self.valid_setup()
         self.stories(walkthrough=["AC-001", "AC-002"])
-        code, out = self.run_check("--change", "chg-a")
-        self.assertEqual(1, code, out)
-        self.assertIn("ERROR:", out)
+        code, out = self.run_check("--change", "chg-a", "--strict")
+        self.assertEqual(0, code, out)
+        self.assertIn("WARN (advisory):", out)
         self.assertIn("result", out)
 
     # -- budget ---------------------------------------------------------------

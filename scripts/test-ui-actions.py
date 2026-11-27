@@ -214,6 +214,39 @@ class UiActionsTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("missing ui-actions.csv", result.stdout)
 
+    def test_local_ui_passes_with_notes_without_approver(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            row = (
+                "PAGE-001,PAGE-001-E06,3:17,button,展开筛选,click,local-ui,,,,"
+                "toggleFilter,TEST-001,N/A,,,展开或收起筛选面板\n"
+            )
+            layout = (
+                "page_id,element_id,figma_node_id,dom_selector,notes\n"
+                "PAGE-001,PAGE-001-E06,3:17,.filter-toggle,筛选切换按钮\n"
+            )
+            write_change(
+                Path(tmp), actions=ACTIONS_HEADER + row, layout=layout, page_two=None
+            )
+            result = run_checker(Path(tmp))
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_local_ui_requires_notes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            row = (
+                "PAGE-001,PAGE-001-E06,3:17,button,展开筛选,click,local-ui,,,,"
+                "toggleFilter,TEST-001,N/A,,,\n"
+            )
+            layout = (
+                "page_id,element_id,figma_node_id,dom_selector,notes\n"
+                "PAGE-001,PAGE-001-E06,3:17,.filter-toggle,筛选切换按钮\n"
+            )
+            write_change(
+                Path(tmp), actions=ACTIONS_HEADER + row, layout=layout, page_two=None
+            )
+            result = run_checker(Path(tmp))
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("local-ui action requires a reason in `notes`", result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

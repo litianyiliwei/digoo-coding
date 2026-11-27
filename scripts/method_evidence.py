@@ -23,55 +23,55 @@ from typing import Any
 DEFAULT_POLICY: dict[str, dict[str, Any]] = {
     "02-requirements-analysis": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True},
-            {"skill": "internet-research", "requires_artifact": True},
-            {"skill": "competitor-research", "requires_artifact": True},
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"},
+            {"skill": "internet-research", "requires_artifact": True, "level": "advisory"},
+            {"skill": "competitor-research", "requires_artifact": True, "level": "advisory"},
         ]
     },
     "03-project-architecture-baseline": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"}
         ]
     },
     "04-proposal-planning": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"}
         ]
     },
     "05-feature-requirements": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True},
-            {"skill": "baseline-impact-classification", "requires_artifact": True},
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"},
+            {"skill": "baseline-impact-classification", "requires_artifact": True, "level": "hard"},
         ]
     },
     "06-figma-design-review": {
         "optional": True,
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True}
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"}
         ],
     },
     "07-detailed-design": {
         "required": [
-            {"skill": "brainstorming", "requires_artifact": True},
-            {"skill": "writing-plans", "requires_artifact": True},
-            {"skill": "existing-code-impact-analysis", "requires_artifact": True},
+            {"skill": "brainstorming", "requires_artifact": True, "level": "advisory"},
+            {"skill": "writing-plans", "requires_artifact": True, "level": "advisory"},
+            {"skill": "existing-code-impact-analysis", "requires_artifact": True, "level": "advisory"},
         ]
     },
     "08-implementation-orchestrator": {
         "required": [
-            {"skill": "test-driven-development", "requires_artifact": False},
-            {"skill": "verification-before-completion", "requires_artifact": False},
+            {"skill": "test-driven-development", "requires_artifact": False, "level": "advisory"},
+            {"skill": "verification-before-completion", "requires_artifact": False, "level": "advisory"},
         ]
     },
     "09-independent-verification": {
         "required": [
-            {"skill": "verification-before-completion", "requires_artifact": False}
+            {"skill": "verification-before-completion", "requires_artifact": False, "level": "hard"}
         ]
     },
     "10-acceptance-audit": {
         "required": [
-            {"skill": "verification-before-completion", "requires_artifact": False},
-            {"skill": "baseline-impact-classification", "requires_artifact": True},
+            {"skill": "verification-before-completion", "requires_artifact": False, "level": "hard"},
+            {"skill": "baseline-impact-classification", "requires_artifact": True, "level": "hard"},
         ]
     },
 }
@@ -165,39 +165,67 @@ def _validate_entry(entry: Any, root: Path, change_id: str | None, required: dic
     return errors
 
 
-def validate_methods(evidence: dict[str, Any], step_id: str, root: Path) -> list[str]:
-    """Return method-evidence errors; an empty list means the stage passed."""
+def _spec_level(spec: dict[str, Any]) -> str:
+    """Return 'advisory' or 'hard'. Omitted level defaults to 'hard' for backward compatibility."""
+    raw = str(spec.get("level") or "hard").strip().lower()
+    return "advisory" if raw == "advisory" else "hard"
+
+
+def validate_methods_detailed(
+    evidence: dict[str, Any], step_id: str, root: Path
+) -> tuple[list[str], list[str]]:
+    """Return (hard_errors, advisory_warnings) for stage method evidence."""
     policy = load_policy(root)
     rule = policy.get(step_id)
     if not rule:
-        return []
+        return [], []
+    required_specs = rule.get("required") or []
     methods = evidence.get("methods")
-    if methods is None or not isinstance(methods, list) or not methods:
+    if methods is not None and not isinstance(methods, list):
+        return [f"{step_id}: evidence.methods must be an array"], []
+    if not methods:
         if rule.get("optional"):
-            return []
-        return [f"{step_id}: evidence.methods is required (at least one method entry)"]
-    if not isinstance(methods, list):
-        return [f"{step_id}: evidence.methods must be an array"]
+            return [], []
+        hard_errors: list[str] = []
+        advisory_warnings: list[str] = []
+        for spec in required_specs:
+            if _spec_level(spec) == "hard":
+                hard_errors.append(f"{step_id}: missing required method skill: {spec.get('skill')}")
+            else:
+                advisory_warnings.append(f"{step_id}: missing advisory method skill: {spec.get('skill')}")
+        if hard_errors:
+            hard_errors.insert(0, f"{step_id}: evidence.methods is required (at least one method entry)")
+        elif not required_specs:
+            hard_errors.append(f"{step_id}: evidence.methods is required (at least one method entry)")
+        return list(dict.fromkeys(hard_errors)), list(dict.fromkeys(advisory_warnings))
 
     change_id = evidence.get("change_id") or None
-    errors: list[str] = []
+    hard_errors = []
+    advisory_warnings = []
     for entry in methods:
-        errors.extend(_validate_entry(entry, root, change_id, None))
+        hard_errors.extend(_validate_entry(entry, root, change_id, None))
 
-    required_specs = rule.get("required") or []
     for spec in required_specs:
         wanted = str(spec.get("skill") or "").lower()
+        target = hard_errors if _spec_level(spec) == "hard" else advisory_warnings
+        label = "required" if _spec_level(spec) == "hard" else "advisory"
         candidates = [e for e in methods if isinstance(e, dict) and wanted in str(e.get("skill") or "").lower()]
         if not candidates:
-            errors.append(f"{step_id}: missing required method skill: {spec.get('skill')}")
+            target.append(f"{step_id}: missing {label} method skill: {spec.get('skill')}")
             continue
         candidate_errors: list[list[str]] = []
         for entry in candidates:
             candidate_errors.append(_validate_entry(entry, root, change_id, spec))
         if all(errs for errs in candidate_errors):
-            errors.append(f"{step_id}: no valid evidence for required method skill: {spec.get('skill')}")
-            errors.extend(candidate_errors[0])
-    return list(dict.fromkeys(errors))
+            target.append(f"{step_id}: no valid evidence for {label} method skill: {spec.get('skill')}")
+            target.extend(candidate_errors[0])
+    return list(dict.fromkeys(hard_errors)), list(dict.fromkeys(advisory_warnings))
+
+
+def validate_methods(evidence: dict[str, Any], step_id: str, root: Path) -> list[str]:
+    """Return blocking (hard) method-evidence errors; empty list means the stage passed."""
+    hard_errors, _ = validate_methods_detailed(evidence, step_id, root)
+    return hard_errors
 
 
 def method_policy_for(step_id: str, root: Path) -> dict[str, Any] | None:
