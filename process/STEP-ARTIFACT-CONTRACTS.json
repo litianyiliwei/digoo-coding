@@ -147,30 +147,28 @@
       "04": {
         "lean": [
           "docs/product/BASELINE-BRIEF.md",
-          "docs/product/reference-research.md (reference product and internet research conclusions for Change breakdown and dependency decisions)",
           "docs/product/change-sizing.md",
-          "docs/architecture/baseline-manifest.json",
-          "docs/architecture/constraint-registry.json",
-          "docs/architecture/baseline-status.md",
+          "docs/architecture/baseline-manifest.json, constraint-registry.json, baseline-status.md",
+          "docs/architecture/code-layout.json (module/slice ownership rules)",
           "docs/project/baseline-audit-report.md",
           "docs/product/open-questions.md (relevant items only)",
           "matched FLOW/NODE/DO/BR rows"
         ],
-        "on_demand": ["docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/adr/*"],
+        "on_demand": ["docs/product/reference-research.md", "docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/adr/*"],
         "max_files": 8
       },
       "05": {
         "lean": [
           "docs/product/BASELINE-BRIEF.md",
           "docs/product/change-sizing.md, id-conventions.md",
-          "docs/product/proposal-roadmap.md (current row)",
-          "docs/architecture/baseline-status.md, baseline-manifest.json, constraint-registry.json",
+          "docs/product/proposal-roadmap.md (current row), capabilities.csv, modules.csv",
+          "docs/architecture/baseline-status.md, baseline-manifest.json, constraint-registry.json, code-layout.json",
           "matched FLOW/NODE/DO/RD/BR/ROLE/CAP rows",
           "openspec/specs/** (relevant capability only)",
           "docs/product/open-questions.md (relevant items only)",
-          "docs/product/reference-research.md (only when scope/scenarios require it)"
+          "docs/architecture/quality-gates.json (when present)"
         ],
-        "on_demand": ["docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/glossary.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/adr/*"],
+        "on_demand": ["docs/product/reference-research.md", "docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/glossary.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/adr/*"],
         "max_files": 8
       },
       "06": {
@@ -180,71 +178,61 @@
           "docs/architecture/frontend-conventions.md (Visual Conventions section), technology-decisions.md",
           "docs/architecture/baseline-status.md",
           "docs/product/BASELINE-BRIEF.md, id-conventions.md",
-          "docs/product/reference-research.md (reference product and internet research conclusions; used for page and state reference)",
           "matched FLOW/NODE/DO/RD/BR/ROLE/PAGE rows",
           "docs/product/open-questions.md (page-related only)",
-          "user-provided HTML files (User-provided provenance); HTML authoring/rendering capability (AI-authored or Figma-to-HTML provenance); Figma MCP accessibility only for Figma-to-HTML conversion or a legacy direct Figma source"
+          "user-provided HTML files or HTML authoring/rendering capability (Figma MCP only when Figma-to-HTML or legacy Figma is explicitly chosen)"
         ],
-        "on_demand": ["docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/role-permission-matrix.csv", "docs/product/reference-research.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/api-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
+        "on_demand": ["docs/product/reference-research.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/role-permission-matrix.csv", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/api-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
         "max_files": 8
       },
       "07": {
         "lean": [
-          "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design/user-stories.md, tasks.md, design.md",
+          "openspec/changes/<change-id>/proposal.md, specs/<capability>/spec.md, design/user-stories.md, tasks.md",
           "openspec/changes/<change-id>/design/baseline-impact.md, baseline-binding.json",
           "existing functionality code location/third-party interface list (provided by the user)",
-          "when UI is involved: openspec/changes/<change-id>/design/figma-audit.md, ui-html/, figma-code/, figma-layout.csv, HTML review entry (or the optional Figma review file)",
-          "docs/architecture/technology-decisions.md, docs/architecture/api-conventions.md, docs/architecture/frontend-conventions.md (Visual Conventions section), docs/architecture/test-strategy.md (by design domain)",
-          "docs/architecture/baseline-status.md",
-          "docs/product/BASELINE-BRIEF.md, docs/product/id-conventions.md",
+          "when UI is involved: openspec/changes/<change-id>/design/figma-audit.md, figma-code/, figma-layout.csv",
+          "docs/architecture/technology-decisions.md, api-conventions.md, frontend-conventions.md (Visual Conventions), test-strategy.md (by design domain)",
+          "docs/architecture/baseline-status.md, code-layout.json",
+          "docs/product/BASELINE-BRIEF.md, id-conventions.md",
           "matched FLOW/NODE/DO/RD/BR/ROLE/CAP/PAGE rows (read by ID on demand)"
         ],
-        "on_demand": ["docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/product/open-questions.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/containers-and-deployment.md", "docs/architecture/data-flows.md", "docs/architecture/logical-erd.md", "docs/adr/*", "docs/product/reference-research.md"],
+        "on_demand": ["openspec/changes/<change-id>/design/ui-html/", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/rd-matrix.csv", "docs/product/business-rules.md", "docs/product/acceptance-policy.md", "docs/product/role-permission-matrix.csv", "docs/product/open-questions.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/containers-and-deployment.md", "docs/architecture/data-flows.md", "docs/architecture/logical-erd.md", "docs/adr/*", "docs/product/reference-research.md"],
         "max_files": 8
       },
       "08": {
         "lean": [
+          "openspec/changes/<change-id>/design/context-manifest.json read_set (generated by scripts/code-context.py; primary code/contract read list when strategy != none)",
           "current Change's tasks.md, design.md, specs, user-stories, test-cases.csv, traceability.csv",
           "when applicable: api/openapi.yaml, api-io-mapping.csv, io-catalog.csv, interface-catalog.csv",
-          "figma-audit.md, figma-code/, figma-layout.csv when UI is involved",
+          "when UI is involved: figma-code/, figma-layout.csv, ui-actions.csv, figma-audit.md (tokens & state decisions only)",
           "current Change's design/baseline-impact.md, baseline-binding.json, baseline-status.md",
-          "architecture sections matched by design domain: system-context/domain-boundaries/logical-erd/data-flows/technology-decisions/api-conventions/frontend-conventions/test-strategy",
-          "docs/product/BASELINE-BRIEF.md",
-          "docs/product/capabilities.csv, docs/product/modules.csv, docs/architecture/code-layout.json (module ownership and slice/footprint rules used by the implementation gates)",
-          "docs/product/open-questions.md (relevant items only)",
-          "existing functionality code location (if modifying existing functionality)"
+          "docs/product/capabilities.csv, docs/product/modules.csv, docs/architecture/code-layout.json (and quality-gates.json when present)"
         ],
-        "on_demand": ["docs/product/acceptance-policy.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/logical-erd.md", "docs/architecture/data-flows.md", "docs/architecture/technology-decisions.md", "docs/architecture/api-conventions.md", "docs/architecture/frontend-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
+        "on_demand": ["openspec/changes/<change-id>/design/ui-html/", "docs/product/BASELINE-BRIEF.md", "docs/product/open-questions.md", "docs/product/acceptance-policy.md", "docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/logical-erd.md", "docs/architecture/data-flows.md", "docs/architecture/technology-decisions.md", "docs/architecture/api-conventions.md", "docs/architecture/frontend-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*"],
         "max_files": 8
       },
       "09": {
         "lean": [
-          "implemented code and revision/diff fingerprint",
-          "current Change's proposal/specs/design/user-stories/tasks",
+          "implemented code diff and openspec/changes/<change-id>/design/evidence/implementation-diff.json",
+          "current Change's specs, design/user-stories.md (ACs), design/test-cases.csv, design.md",
           "when applicable: api/openapi.yaml, api-io-mapping.csv, io-catalog.csv, interface-catalog.csv",
-          "figma-audit.md, figma-layout.csv, figma-layout-check.json when UI is involved",
-          "test-cases.csv, traceability.csv, code-review.md, Builder test evidence",
-          "docs/product/BASELINE-BRIEF.md",
-          "docs/product/capabilities.csv, docs/product/modules.csv, docs/architecture/code-layout.json (module ownership and layout read by the independent footprint recomputation)",
-          "openspec/changes/<change-id>/design/evidence/static-analysis-logs/ (when quality gates are adopted; independent static rerun log verification)",
-          "docs/product/acceptance-policy.md",
-          "current Change's baseline-impact.md, baseline-binding.json, baseline-status.md"
+          "when UI is involved: figma-audit.md (PAGE list), figma-layout.csv, ui-actions.csv",
+          "current Change's design/baseline-binding.json, baseline-status.md",
+          "docs/product/acceptance-policy.md"
         ],
-        "on_demand": ["docs/architecture/system-context.md", "docs/architecture/domain-boundaries.md", "docs/architecture/logical-erd.md", "docs/architecture/data-flows.md", "docs/architecture/technology-decisions.md", "docs/architecture/api-conventions.md", "docs/architecture/frontend-conventions.md", "docs/architecture/test-strategy.md", "docs/adr/*", "docs/product/open-questions.md"],
+        "on_demand": ["openspec/changes/<change-id>/proposal.md", "openspec/changes/<change-id>/tasks.md", "openspec/changes/<change-id>/design/evidence/code-review.md", "openspec/changes/<change-id>/design/evidence/static-analysis-logs/", "openspec/changes/<change-id>/design/ui-html/", "openspec/changes/<change-id>/design/figma-code/", "docs/product/BASELINE-BRIEF.md", "docs/product/capabilities.csv", "docs/product/modules.csv", "docs/architecture/code-layout.json", "docs/architecture/*", "docs/adr/*", "docs/product/open-questions.md"],
         "max_files": 8
       },
       "10": {
         "lean": [
           "independent-verification-report.md and independent-verification.json",
-          "current Change's specs, user-stories, traceability.csv, design.md, code-review.md",
-          "figma-audit.md, figma-layout.csv, figma-layout-check.json when UI is involved",
-          "test-cases.csv, interface-catalog.csv",
-          "current Change's baseline-impact.md, baseline-binding.json, baseline-status.md",
+          "current Change's design/user-stories.md (## Acceptance Walkthrough and ACs) and specs",
+          "current Change's design/baseline-impact.md, baseline-binding.json, baseline-status.md",
           "docs/product/acceptance-policy.md, BASELINE-BRIEF.md, change-sizing.md",
-          "docs/product/decisions.md, assumptions.md, id-conventions.md",
-          "running acceptance environment entry point"
+          "mutable write-back registries: docs/product/capabilities.csv, modules.csv, lessons.md, decisions.md, assumptions.md",
+          "running acceptance environment entry point (URL/route)"
         ],
-        "on_demand": ["design/figma-code/", "docs/adr/*", "docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/business-rules.md", "docs/product/lessons.md"],
+        "on_demand": ["openspec/changes/<change-id>/design.md", "openspec/changes/<change-id>/traceability.csv", "openspec/changes/<change-id>/design/evidence/code-review.md", "openspec/changes/<change-id>/design/figma-audit.md", "openspec/changes/<change-id>/design/figma-layout.csv", "openspec/changes/<change-id>/design/figma-code/", "openspec/changes/<change-id>/design/test-cases.csv", "openspec/changes/<change-id>/design/interface-catalog.csv", "docs/adr/*", "docs/product/requirements-analysis.md", "docs/product/workflows.md", "docs/product/data-objects.csv", "docs/product/business-rules.md"],
         "max_files": 8
       }
     }

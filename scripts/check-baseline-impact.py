@@ -40,7 +40,7 @@ if strict:
         'implementation gate recorded' if args.implementation else 'detailed design gate recorded': re.search(
             r'^- (?:' + '|'.join(map(re.escape, allowed_field)) + r')[:：]\s*(YES|NO)\s*$', text, re.M),
         'Change ID recorded': re.search(r'^- Change ID[:：](?!<change-id>\s*$).+', text, re.M),
-        'approval evidence recorded': re.search(r'^- (?:审批人及证据|Approver and evidence)[:：]\s*(?!\s*$).+', text, re.M),
+        'approval evidence recorded': re.search(r'^- (?:审批人及证据|Approver and evidence)[:：]\s*(?!\s*$|(?:PENDING|TODO|TBD)\b).+', text, re.M | re.I),
     }
     failed = [name for name, ok in checks.items() if not ok]
     if failed:

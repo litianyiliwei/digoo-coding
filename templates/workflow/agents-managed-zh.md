@@ -2,8 +2,8 @@
 
 ## 流程入口
 
-- 当用户说"下一步/继续/接着做"时，先加载 `workflow-orchestrator` Skill（或 `prompts/00-next-step.md`），依据 `workflow-state.json` 与真实产物判定唯一安全的下一阶段。
-- 每阶段开始前读取 `process/STEP-ARTIFACT-CONTRACTS-zh.md` 与 `process/STEP-ARTIFACT-CONTRACTS.json` 中对应 Skill 的契约记录。
+- 当用户说"下一步/继续/接着做"时，先运行 `python scripts/next-step.py`（并加载 `workflow-orchestrator` Skill / `prompts/00-next-step.md`），依据 `workflow-state.json` 与真实产物判定唯一安全的下一阶段。
+- 每阶段开始前运行 `python scripts/agent-context.py --stage <NN> [--change <change-id>]` 获取该阶段的精简输入、输出与门禁，避免整份读取 `STEP-ARTIFACT-CONTRACTS*.md/.json`。
 - 阶段结束使用 `templates/workflow/step-handoff-report.md` 展示交接报告；产物必须落盘到契约指定路径，不得只在聊天中输出。
 
 ## 阶段边界与评审停等（强制）
@@ -39,7 +39,7 @@
   - **框架对齐转码（强制）**：按 `docs/architecture/technology-decisions.md` 确定目标框架，并把每个 HTML 页面（或可选 Figma 来源在加载官方 `figma-design-to-code` Skill 后的 `get_design_context` 参考实现）转码为目标框架设计代码：Vue 栈 `.vue`，使用该端组件库（Web 为 Element Plus，移动端为 uni-app）与项目 token；React 栈 `.tsx`/`.jsx`。`design/figma-code/README.md` 记录目标框架、扩展名、替换与偏差；08 只补业务逻辑，不重写样式/布局/文案。
   - 契约：唯一单文件 `design/figma-audit.md`（设计来源/平台选择、token **实际值**、文字样式、每 PAGE 区块规格、设计代码说明、断言范围、状态覆盖与决策、需求覆盖矩阵（每个 AC/US 在每个声明平台 FULL 或 N/A + 理由，每个 PAGE 反向映射，覆盖评审 APPROVED）、资产清单、HTML 渲染量测记录或 MCP 读取记录、UI 评审 APPROVED）；`design/ui-html/`（默认 HTML 来源）；`design/figma-code/`；`design/figma-layout.csv`（每 PAGE 的 `platform`/`viewport` 与几何/文本/字体断言；HTML 模式下 `figma_node_id` 填 HTML `data-node-id`）。真实图片/SVG 资产放 `design/figma-assets/`。**截图不是契约、资产或门禁证据，且全程不保存。**
   - 06 一次性生成；07/08 默认离线消费，仅在来源变化或页面有歧义时按页重读（串行）。07 建 token → CSS/主题映射，填 `route`/`dom_selector`，创建 `design/ui-actions.csv` 把每个功能控件映射到跳转地址+入参、OpenAPI operationId 或用户已确认的本地动作，并定义响应式规则；`check-ui-actions.py --change <change-id> --strict` 必须通过。08 以目标框架设计代码为页面骨架，运行 `check-figma-layout.py`（各页视口取自 CSV）与 `check-design-tokens.py`，并从 JSON 抄录数值化 `## UI fidelity`（仅差异/`UI-DERIVED` PAGE 需人工说明）。09 独立重跑 `layout_checks`；10 逐 PAGE 签收，机器无差异的 PAGE 批量签收，差异/`UI-DERIVED` PAGE 并排核对。缺失 UI 数值证据不得推进阶段。
-  - PAGE ID 与按平台页面集合在 06 冻结；未定义的弹窗/状态必须新增设计页面，或以 `UI-DERIVED` 记录规格、审批人与理由。不再使用 pen.dev、`prototype.pen`、`PAGE-*.html` 交接原型、`prototype.md`、`manifest.json`、`design/design-tokens.json` 或分散 token/contract JSON。
+  - PAGE ID 与按平台页面集合在 06 冻结；未定义的弹窗/状态必须新增设计页面，或以 `UI-DERIVED` 记录规格、审批人与理由。不使用截图或旧版原型/分散 token JSON 文件。
 - 测试用例矩阵放 `openspec/changes/<change-id>/design/test-cases.csv`，TEST ID 必须回链 AC/PAGE/BLOCK/API/IO，并写入唯一 `traceability.csv`；不得只把测试写在 design.md 叙述里。
 
 ## 模块包与 Change 切片（强制）

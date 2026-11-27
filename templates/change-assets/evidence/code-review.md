@@ -45,4 +45,4 @@ TODO
 |---|---|---|---|---|---|---|---|
 | PAGE-001 | `3:2` | `8 elements / 0.0px (tol 2px)` | `evidence/figma-layout-check.json#PAGE-001` | None | PASS | — | machine evidence sign-off |
 
-> Conclusions may only be PASS / FIXED / APPROVED / DEVIATION_APPROVED / N/A; when there is a difference it must be DEVIATION_APPROVED with the approver named, otherwise stage 08 is blocked.
+> Conclusions may only be PASS / FIXED / APPROVED / DEVIATION_APPROVED; when there is a difference it must be DEVIATION_APPROVED with the approver named, otherwise stage 08 is blocked. For a no-UI Change, delete this section and write `- UI fidelity: N/A (no UI)`.

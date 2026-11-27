@@ -38,6 +38,9 @@ def emit(stage, cid=None):
     print(f"SKILL={s.relative_to(ROOT)}")
     contract = CONTRACT_BY_SKILL.get(stage["skill"])
     if contract:
+        profile = (CONTRACTS.get("input_policy") or {}).get("stage_profiles", {}).get(contract["step"])
+        if profile and profile.get("lean"):
+            print("LEAN_INPUTS=" + " ; ".join(profile["lean"]))
         print("REQUIRED_INPUTS=" + " ; ".join(contract["inputs"]))
         print("EXPECTED_OUTPUTS=" + " ; ".join(contract["outputs"]))
         print("NEXT_STAGE_INPUTS=" + " ; ".join(contract["next_inputs"]))
@@ -120,9 +123,6 @@ def main_v2(state):
         if str(lane.get("status", "")).upper() == "ACCEPTED" or current not in CHANGE_STEPS:
             print(f"CHANGE={cid} STATUS={lane.get('status')} CURRENT_STEP={current}")
             continue
-        lease = state.get("implementation_lease")
-        if lease:
-            print("IMPLEMENTATION_LEASE=" + json.dumps(lease, ensure_ascii=False))
         result = emit(BY_ID[current], cid)
         if result:
             return result

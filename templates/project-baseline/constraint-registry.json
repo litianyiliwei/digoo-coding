@@ -16,7 +16,7 @@
       "rationale": "保持模块边界稳定，降低跨模块变更的隐性影响。",
       "source": {
         "file": "docs/architecture/domain-boundaries.md",
-        "section": "领域边界与数据所有权"
+        "section": "Boundary Rules"
       },
       "enforcement": {
         "type": "MANUAL",
@@ -40,7 +40,7 @@
       "rationale": "保证数据所有权和业务不变量由唯一责任域维护。",
       "source": {
         "file": "docs/architecture/domain-boundaries.md",
-        "section": "领域边界与数据所有权"
+        "section": "Boundary Rules"
       },
       "enforcement": {
         "type": "MANUAL",
@@ -64,7 +64,7 @@
       "rationale": "避免 API 因遗漏鉴权定义而形成权限边界缺口。",
       "source": {
         "file": "docs/architecture/api-conventions.md",
-        "section": "API 契约规范"
+        "section": "Authentication and Authorization"
       },
       "enforcement": {
         "type": "MANUAL",
@@ -88,7 +88,7 @@
       "rationale": "保持客户端处理行为和监控告警的一致性。",
       "source": {
         "file": "docs/architecture/api-conventions.md",
-        "section": "API 契约规范"
+        "section": "Error Model"
       },
       "enforcement": {
         "type": "MANUAL",
@@ -112,7 +112,7 @@
       "rationale": "统一认证、错误处理、追踪、重试和请求治理。",
       "source": {
         "file": "docs/architecture/frontend-conventions.md",
-        "section": "前端工程规范"
+        "section": "Request Layer"
       },
       "enforcement": {
         "type": "MANUAL",
@@ -136,7 +136,7 @@
       "rationale": "保证需求、实现和验证之间可追踪。",
       "source": {
         "file": "docs/architecture/test-strategy.md",
-        "section": "测试策略"
+        "section": "Quality Gates"
       },
       "enforcement": {
         "type": "MANUAL",

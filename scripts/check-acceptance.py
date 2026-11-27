@@ -119,9 +119,11 @@ if ui_change:
                 errors.append(f"UI acceptance missing PAGE: {pid}")
 
     # The machine geometry evidence must exist and pass before human sign-off.
-    layout_check = base / "evidence/figma-layout-check.json"
+    # Prefer Stage 09's independent rerun evidence when present, falling back to Stage 08's.
+    indep_layout = base / "evidence/independent-figma-layout-check.json"
+    layout_check = indep_layout if indep_layout.is_file() else (base / "evidence/figma-layout-check.json")
     if not layout_check.is_file():
-        errors.append("UI acceptance requires evidence/figma-layout-check.json")
+        errors.append("UI acceptance requires evidence/independent-figma-layout-check.json (or evidence/figma-layout-check.json)")
     else:
         try:
             evidence = json.loads(layout_check.read_text(encoding="utf-8"))

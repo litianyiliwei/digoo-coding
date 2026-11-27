@@ -124,7 +124,7 @@ for field in ("Change ID", "Reviewer/tool", "Review date/commit"):
         errors.append(f"{field} must be filled with a real value")
 
 conclusion = re.search(r"^-\s*Review conclusion\s*[:：]\s*(.+?)\s*$", text, re.M)
-allowed_conclusions = {"pass", "passed", "approved", "no blocking findings", "no-blocking-findings"}
+allowed_conclusions = {"pass", "passed", "approved", "no blocking findings", "no-blocking-findings", "no_blocking_findings"}
 if not conclusion or conclusion.group(1).strip().lower() not in allowed_conclusions:
     errors.append("Review conclusion must be PASS/APPROVED/NO_BLOCKING_FINDINGS; unresolved findings block stage 08")
 

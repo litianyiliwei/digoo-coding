@@ -14,12 +14,6 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTRACTS = ROOT / 'process/STEP-ARTIFACT-CONTRACTS.json'
 
 RESIDENT = {
-    '02': [
-        'process/TEMPLATE-POLICY.md',
-        'process/OUTPUT-TEMPLATE-MATRIX.csv',
-        'process/STEP-ARTIFACT-CONTRACTS.md',
-        'process/STEP-ARTIFACT-CONTRACTS.json',
-    ],
     '03': [
         'docs/product/BASELINE-BRIEF.md',
         'docs/product/role-permission-matrix.csv',
@@ -45,7 +39,7 @@ RESIDENT = {
         'docs/product/lessons.md',
         'docs/product/id-conventions.md',
     ],
-    '16': [
+    '10': [
         'docs/product/BASELINE-BRIEF.md',
         'docs/product/change-sizing.md',
         'docs/product/lessons.md',

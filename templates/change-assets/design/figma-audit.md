@@ -140,7 +140,7 @@
 
 ## Assertion Scope
 
-> `figma-layout.csv` is the only subset of runtime assertions; elements not included in assertions are covered by the design code and manual acceptance. If there is a structural difference (present in the design source but absent in implementation, or different layout), it must be registered in `## Differences and Pending Confirmation` and wait for approval from the design owner.
+> `figma-layout.csv` is the only subset of runtime assertions executed by `check-figma-layout.py`; elements not included in assertions are covered by the design code and manual acceptance. If there is a structural difference (present in the design source but absent in implementation, or different layout), it must be registered in `## Differences and Pending Confirmation` and wait for approval from the design owner.
 > Each PAGE must have at least 1 assertion row; it is recommended to cover key blocks such as the top bar/sidebar/main area/title/primary action/table card. Non-web platforms use their own viewport values instead of 1440×900.
 
 | PAGE | Assertion coverage | Not asserted/notes |

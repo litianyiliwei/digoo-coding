@@ -50,4 +50,4 @@ The budget is not a hard number; when exceeded, the reason and approver must be 
 
 - During Step 04 roadmap splitting, read sections 1-3 and annotate the budget for each candidate Change.
 - Before Step 05 begins, read section 4 as the admission check for proposal-level requirements.
-- During Step 16 acceptance, verify the DoD item by item.
+- During Stage 10 acceptance, verify the DoD item by item.

@@ -1,60 +1,30 @@
 ---
 name: project-bootstrap
-description: Project initialization and toolchain check. Initializes repository context and tool status; does not overwrite user files.
+description: Initialize a project repository's workflow state, AGENTS.md project sections, toolchain report, and initial baseline status.
 ---
 
-# Project Initialization and Toolchain Check
+# Stage 01: Project Bootstrap and Toolchain Check
 
-## When to Use
-Load this Skill when the workflow enters "project initialization and toolchain check". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
-
-## Input
-Repository path, project summary, current tools, and IDE/Agent environment.
+## Role
+Inventory the repository and local toolchain, then initialize project-level governance files so Stage 02 can begin cleanly.
 
 ## Execution Flow
-1. Read the README, directory structure, build configuration, CI, Git status, and existing OpenSpec configuration.
-2. Run non-destructive tool probes; read `openspec --version`, `openspec init --help`, or related help output; do not guess parameters from memory.
-3. **Static analysis toolchain probe (no installation):** for every language selected or already present in the repository, probe the linters, formatters, and type/style checkers the repository already has or could use (for example ESLint/Prettier/tsc, Ruff/mypy, Checkstyle/SpotBugs, gofmt/golangci-lint, shellcheck, sqlfluff). Probe each with its real version/help command and record tool, installed (YES/NO), version, probe command, and result in the `Static Analysis Toolchain` table of `docs/project/toolchain-report.md`; also record the `Static analysis config present` note for `docs/architecture/quality-gates.json`. Probe only: never install, initialize, or modify package managers, and record missing tools as gaps with owner and blocking condition.
-4. Check whether the current Agent can discover `.claude/skills/<name>/SKILL.md`, and confirm that Superpowers is installed and its actual skill names.
-5. Propose a minimal supplementary plan for missing files; any overwrite, installation, deletion, commit, and CI change requires explicit user authorization.
+1. Run `python scripts/workflow.py check-entry --step 01-project-bootstrap` and `python scripts/agent-context.py --stage 01`.
+2. Inspect the repository directory layout, git state, installed CLIs (`python`, `node`/`npm`/`pnpm`, `git`, `openspec`, `playwright`/headless browser, language runtimes), and existing `AGENTS.md`.
+3. Ask for explicit user approval before modifying any existing `AGENTS.md` or repository configuration.
+4. Create or update the declared outputs:
+   - `AGENTS.md`: project-owned sections only (Goal, project conventions). Never edit inside `<!-- toolkit:begin -->` … `<!-- toolkit:end -->`.
+   - `workflow-state.json`: initialized via `scripts/workflow.py` (never hand-edited).
+   - `docs/project/toolchain-report.md` (from `templates/project-baseline/toolchain-report.md`): record actual versions, commands, exit codes, and real blockers; replace `PENDING` with `N/A + reason` for unused stacks.
+   - `docs/architecture/baseline-status.md` (from `templates/project-baseline/baseline-status.md`): initial `DRAFT` baseline status register.
+5. Run `python scripts/check-package.py` and verify all outputs exist on disk.
 
-## Output
-Tool status table (including the `Static Analysis Toolchain` table and the `Static analysis config present` note in `docs/project/toolchain-report.md`), summary of existing directories/rules, conflict and gap list, minimal initialization plan; when initializing `docs/architecture/baseline-status.md`, use `templates/project-baseline/baseline-status.md` as the template, and do not write only an unversioned TODO status.
-
-## Quality and Safety Boundaries
-Do not overwrite existing files; do not write "not found" as "installed"; explicitly mark every check that was not executed.
-
-## Boundaries with OpenSpec / Superpowers
-- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
-- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
-- UI design input (HTML design documents or Figma MCP) must be based on real readable files/links, nodes, and responses.
-- Do not automatically commit, publish, archive, or overwrite user files at this stage.
-
-## Recommended Checks
-`scripts/check-package.py`
-
-
-## Actual Tool Invocation Requirements
-
-- **Superpowers:** `using-superpowers` (if present) and check the Superpowers skills available to the current Agent; do not automatically install or overwrite tools. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, state it explicitly and perform equivalent steps.
-- **OpenSpec:** If `openspec/` exists, actually run `openspec version`, `openspec list --changes`, `openspec list --specs`; when uninitialized, only report and do not run init without user approval. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
-- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
-
-## Input/Output/Handoff Contract (Mandatory)
-
-Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="project-bootstrap"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
-
-- **Inputs for this stage:** Project goals and repository location provided by the user; existing repository directories/configuration/AGENTS.md (if present). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** AGENTS.md project-owned sections only (status header and Project Goal; the toolkit-managed block is installed/updated only by `scripts/toolkit-sync.py` and must not be edited inside); workflow-state.json; docs/architecture/baseline-status.md (establish domain version registration based on `templates/project-baseline/baseline-status.md`); toolchain check report (docs/project/toolchain-report.md, including its `Static Analysis Toolchain` table). Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
-- **Downstream handoff:** Repository conventions and toolchain report; workflow-state.json. Explicitly state which files/fields the next stage consumes.
-- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
-
-## Stage Boundaries and Review Stop (Mandatory)
-
-- Before starting, run `python scripts/workflow.py check-entry --step 01-project-bootstrap [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
-- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 01-project-bootstrap --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 01-project-bootstrap --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
-- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
-- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.
+## Input/Output/Handoff Contract
+- **Inputs**: User-provided project goal and repository location; existing repository layout/config/`AGENTS.md` (if present).
+- **Outputs**: `AGENTS.md` (project-owned sections), `workflow-state.json`, `docs/project/toolchain-report.md`, `docs/architecture/baseline-status.md`.
+- **Downstream Handoff**: Repository conventions, toolchain report, and initialized `workflow-state.json` for Stage 02.
+- **Review & Boundaries**:
+  - Generate `workflow/evidence/project/01-project-bootstrap.json` and run:
+    `python scripts/workflow.py request-review --step 01-project-bootstrap --evidence workflow/evidence/project/01-project-bootstrap.json --summary "<summary>"`
+  - Present `templates/workflow/step-handoff-report.md` and end the turn.
+  - Under `standard` policy, run `approve` and `transition` only after explicit user approval. Under `risk-based` policy (`STATUS=RISK_BASED_FAST_TRACK`), `transition` may run after gates pass. Follow `AGENTS.md` for all other boundary rules.

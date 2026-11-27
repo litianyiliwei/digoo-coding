@@ -24,7 +24,9 @@ contracts = contract_doc["steps"]
 consumption = contract_doc.get("output_consumption", [])
 stages = json.loads(DAG.read_text(encoding="utf-8"))["stages"]
 source_hash = hashlib.sha256(
-    CONTRACTS.read_bytes() + b"\n" + DAG.read_bytes()
+    CONTRACTS.read_text(encoding="utf-8").encode("utf-8")
+    + b"\n"
+    + DAG.read_text(encoding="utf-8").encode("utf-8")
 ).hexdigest()[:12]
 
 dag_ids = [s["id"] for s in stages]

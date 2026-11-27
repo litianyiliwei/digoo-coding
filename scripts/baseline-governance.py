@@ -765,6 +765,54 @@ def cmd_check_change(args):
     return 0
 
 
+def cmd_render_status(args):
+    manifest = load_json(MANIFEST)
+    out = ROOT / (args.out or "docs/architecture/baseline-status.md")
+    approval = manifest.get("approval") or {}
+    lines = [
+        "# Project Baseline Status and Version Register",
+        "",
+        "> Auto-rendered from `docs/architecture/baseline-manifest.json` by `scripts/baseline-governance.py render-status`. Governance rules live in `process/BASELINE-FEATURE-INTERACTION.md`.",
+        "",
+        f"- Overall baseline version: `{manifest.get('overall_version', '0.1.0')}`",
+        f"- Overall status: `{manifest.get('status', 'DRAFT')}`",
+        f"- Governance profile: `{manifest.get('governance_profile', 'standard')}`",
+        f"- Approver: `{approval.get('approver') or 'PENDING'}`",
+        f"- Last frozen at: `{approval.get('approved_at') or 'PENDING'}`",
+        "",
+        "## 1. Versions by Baseline Domain",
+        "",
+        "| Baseline domain | Authoritative files | Version | Status | Approver | Effective date |",
+        "|---|---|---|---|---|---|",
+    ]
+    for domain in DOMAINS:
+        d = (manifest.get("domains") or {}).get(domain) or {}
+        file_paths = [
+            f.get("path") if isinstance(f, dict) else str(f)
+            for f in (d.get("files") or [])
+        ]
+        files = ", ".join(f"`{p}`" for p in file_paths if p) or "—"
+        lines.append(
+            f"| {domain} | {files} | {d.get('version', '0.1.0')} | {d.get('status', 'DRAFT')} "
+            f"| {d.get('approver') or '—'} | {d.get('approved_at') or '—'} |"
+        )
+    lines.extend(["", "## 2. Open Amendments", ""])
+    open_amends = [
+        a for a in (manifest.get("amendment_history") or [])
+        if str(a.get("status", "")).upper() != "CLOSED"
+    ]
+    if open_amends:
+        lines.extend(["| Request ID | Domains | Status | Opened by |", "|---|---|---|---|"])
+        for a in open_amends:
+            lines.append(f"| {a.get('request_id', '—')} | {', '.join(a.get('domains') or [])} | {a.get('status', 'OPEN')} | {a.get('opened_by') or '—'} |")
+    else:
+        lines.append("- None")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"BASELINE_STATUS_RENDERED={out.relative_to(ROOT)}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -776,6 +824,7 @@ def main():
     p = sub.add_parser("init-binding"); p.add_argument("--change-id", required=True); p.add_argument("--force", action="store_true")
     p = sub.add_parser("refresh-binding"); p.add_argument("--change-id", required=True)
     p = sub.add_parser("check-change"); p.add_argument("--change-id", required=True); p.add_argument("--phase", choices=("requirement", "design", "implementation", "acceptance"), required=True)
+    p = sub.add_parser("render-status"); p.add_argument("--out", default="docs/architecture/baseline-status.md")
     args = ap.parse_args()
     try:
         return {
@@ -787,6 +836,7 @@ def main():
             "init-binding": cmd_init_binding,
             "refresh-binding": cmd_refresh_binding,
             "check-change": cmd_check_change,
+            "render-status": cmd_render_status,
         }[args.cmd](args)
     except Exception as exc:
         print(f"ERROR: {exc}", file=sys.stderr)

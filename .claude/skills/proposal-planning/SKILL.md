@@ -1,80 +1,37 @@
 ---
 name: proposal-planning
-description: Proposal decomposition, dependency ordering, and roadmap. Divides OpenSpec Changes by independently acceptable business capabilities and orders them.
+description: Slice project requirements into ordered, independently deliverable feature Changes, dependency DAG, and capability/module registries.
 ---
 
-# Proposal Decomposition, Dependency Ordering, and Roadmap
+# Stage 04: Proposal Planning and Roadmap
 
-## When to Use
-Load this Skill when the workflow enters "proposal decomposition, dependency ordering, and roadmap". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
+## Role
+Break the frozen project baseline into vertical, independently acceptable feature Changes, establish their dependency DAG, and initialize the capability and module ownership registries.
 
-## Input
-
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
-Reviewed and frozen project overall architecture baseline, business flows/nodes/RD matrix, business rules, acceptance policy, open-questions, `docs/product/reference-research.md` (Change breakdown and dependency decisions), `BASELINE-BRIEF.md`/`change-sizing.md`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md` (standing baselines), stage 03 baseline audit report, risks, dependencies, and product priorities.
+## Required Methods
+- Use `brainstorming` to evaluate slicing boundaries, dependency ordering, and incremental delivery value.
 
 ## Execution Flow
-1. Split Changes by business capabilities that users can perceive and that can be independently accepted, not horizontally by frontend/backend/database.
-1a. **Module registries and roadmap columns (module model):** Create or update `docs/product/capabilities.csv` (capability progress: `owner_module`/`related_modules`, `delivered_slices`/`remaining_slices`, `active_changes`) and `docs/product/modules.csv` (module ownership: `frontend_paths`/`backend_paths`/`shared_paths`, `capabilities`, `status`) in this stage, before the roadmap is reviewed. Every candidate Change row must fill `Primary Capability`, `Owner Module`, `Related Modules`, `Slice Type` (`initial`/`extend`), `Slice Coverage` (`partial`/`full`), `Code Target`, `Demo Path`, `Slice Budget`, `Dependencies`, and `Target Platforms`. `Primary Capability` must exist in the capability registry and `Owner Module` must be the capability's registered owner. `Target Platforms` is a semicolon-separated subset of `web|h5|mini-program|app|android|ios|harmonyos|desktop|pda`, derived from the Stage 02 platform inventory; each candidate Change must name the platforms it actually develops, and an amendment row without it is incomplete. `Dependencies` is `none` / `N/A` or a semicolon-separated list of Change IDs that must be **accepted and delivered** before this Change may start; unknown IDs, self-dependencies, duplicate edges, and cycles fail the roadmap check. Every dependency edge needs `- <change> ← <dependency>: <reason>` in `## Ordering Rationale`. A Change raised outside the roadmap in Stage 05 is recorded under `## Roadmap Amendments` with an approved `Depends On` cell and `Target Platforms`; only a `BASELINE_CHANGE_REQUIRED` classification needs BCR/ADR.
-2. For each item, state value, goals, non-goals, target platforms (web/h5/app/android/ios/harmonyos/mini-program/desktop/pda), associated FLOW/NODE/DO/BR, expected acceptance direction, dependencies, data migration, risks, and release strategy; dependencies must explicitly check platform/native/device/third-party preconditions (cross-platform approach, native plugins and JS Bridge, devices/gateways, third-party approvals such as maps/weather/payment/real-name verification/traceability, offline sync), and must not be hidden in notes. Proposal-level UC/US/AC are refined in stage 05 and must not be fabricated at this stage.
-3. Read open-questions and the stage 03 baseline audit report, bring open issues, audit gaps, and pending-approval items into the risks/dependencies/blocking conditions of candidate Changes, and do not unilaterally close them.
-4. Prefer vertical slices that span UI/API/domain/persistence/test as early as possible.
-5. Identify the independent rationale and prerequisite dependencies of infrastructure-type Changes.
-6. When ordering, explain business value, risks, unlock relationships, and parallelism.
-7. Check whether each item's size can be clearly designed, implemented, and accepted; continue splitting Changes that are too large.
+1. Run `python scripts/workflow.py check-entry --step 04-proposal-planning` and `python scripts/agent-context.py --stage 04`.
+2. **Initialize Registries** (aligned with `docs/architecture/code-layout.json`):
+   - `docs/product/modules.csv`: register `module_slug`, `module_name`, `domain_id`, `frontend_paths`, `backend_paths`, `shared_paths`, `capabilities`, `status`, `notes` (one module = one bounded business subdomain).
+   - `docs/product/capabilities.csv`: register `capability_slug`, `capability_name`, `domain_id`, `owner_module`, `related_modules`, `status`, `delivered_slices`, `remaining_slices`, `active_changes`, `notes`.
+3. **Author `docs/product/proposal-roadmap.md`** (using `templates/product/proposal-roadmap.md`):
+   - Fill every required column: `Change ID`, `Primary Capability`, `Owner Module`, `Related Modules`, `Slice Type` (`initial|extend`), `Slice Coverage` (`partial|full`), `Code Target`, `Demo Path`, `Slice Budget`, `Dependencies` (`none`/`N/A` or semicolon-separated prerequisite Change IDs), `Target Platforms` (semicolon subset of canonical platforms), `Value`, `Baseline Domains`, `Potential Amendment`.
+   - In `## Ordering Rationale`, explain every dependency edge using `- <change> ← <dependency>: <reason>` (DAG must be acyclic).
+   - Respect `docs/product/change-sizing.md` budgets; flag any potential baseline amendments explicitly.
+4. **Stage-End Gates**:
+   - `python scripts/check-capabilities.py`
+   - `python scripts/check-modules.py`
+   - `python scripts/check-roadmap.py --strict`
+   - `python scripts/check-method-evidence.py --step 04-proposal-planning --evidence workflow/evidence/project/04-proposal-planning.json`
 
-## Output
-Proposal roadmap (module-aware columns including `Target Platforms`), capability progress registry `docs/product/capabilities.csv`, module registry `docs/product/modules.csv`, dependency Mermaid diagram, Change list, and ordering rationale.
-
-## Quality and Safety Boundaries
-Each Change has independent acceptance conditions and an explicit `Target Platforms` set (no platform hidden in notes); no cyclic dependencies; do not hide unknown dependencies in notes. `Dependencies` is machine-checked at Stage 04 and re-checked when the Change starts (Stage 05) and before implementation (Stage 08); a dependency counts as delivered only after its Stage 10 acceptance.
-
-## Boundaries with OpenSpec / Superpowers
-- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
-- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
-- UI design input (HTML design documents or Figma MCP) must be based on real readable files/links, nodes, and responses.
-- Do not automatically commit, publish, archive, or overwrite user files at this stage.
-
-## Recommended Checks
-`scripts/check-roadmap.py --strict`; `python scripts/check-capabilities.py`; `python scripts/check-modules.py`
-
-
-## Actual Tool Invocation Requirements
-
-- **Superpowers:** The stage-scoped mode of `brainstorming`, first compare decomposition options, platform/native dependencies, and risks, write conclusions into `proposal-roadmap.md`, and create Changes only after approval. Stage evidence must write `methods` (brainstorming with a real evidence path and landing section) and run `python scripts/check-method-evidence.py --step 04-proposal-planning --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
-- **OpenSpec:** First run `openspec list --specs` and `openspec list --changes`; only after the proposal is approved may you run `openspec new change <id>`. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
-- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
-
-## Interaction Between Project Baselines and Feature Decomposition (Mandatory)
-
-- When splitting each Change, read `docs/architecture/baseline-status.md` and the frozen product/architecture/data/common contract/test baselines; check relevant sections according to the impact surface of the candidate feature.
-- In `docs/product/proposal-roadmap.md`, add for each candidate Change the columns "applicable baseline domains, baseline constraints to reuse, potential baseline conflicts/amendments, approval preconditions".
-- Initially classify changes as `CHANGE_ONLY`, `BASELINE_CHANGE_REQUIRED`, `BASELINE_UPDATE_AFTER_ACCEPTANCE`, or `N/A`. Do not automatically escalate to a baseline change just because a feature uses a new component/new field/new API.
-- If the baseline status is not FROZEN, or there are pending amendments or conflicts, explicitly list them as risks/blocks; do not treat DRAFT/PENDING rules as approved constraints.
-- For detailed rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
-
-## Input/Output/Handoff Contract (Mandatory)
-
-Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="proposal-planning"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
-
-- **Inputs for this stage:** Frozen project baseline (including `code-layout.json` strategy, roots, package pattern, integration/frozen paths); project requirements analysis, workflows, data objects, RD matrix, business rules, and acceptance policy (US/ACs are produced in Stage 05, not consumed here); docs/product/BASELINE-BRIEF.md, role-permission-matrix.csv, change-sizing.md, decisions.md, assumptions.md, lessons.md, id-conventions.md (baseline standing layer and lessons write-back); known technical debt and dependencies. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** docs/product/proposal-roadmap.md (module-aware columns including `Target Platforms`); docs/product/capabilities.csv (capability progress registry); docs/product/modules.csv (module ownership registry); scope/dependency/platform declaration/value description for each candidate Change. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
-- **Downstream handoff:** Approved Change list, priorities, dependency order, capability/module registries, and per-Change target platforms. Explicitly state which files/fields the next stage consumes; Stage 05 must copy the platform set into `proposal.md` and `design/user-stories.md`.
-- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
-
-
-## Machine Baseline Constraints (Mandatory)
-
-- Before roadmap decomposition, run `python scripts/baseline-governance.py audit --require-frozen` and read the Manifest and Constraint Registry.
-- Record for each candidate Change the Constraint IDs that may apply, potential exceptions, and baseline amendment candidates; do not treat DRAFT constraints as current rules, and do not skip ACTIVE constraints.
-- Do not modify the frozen baseline; baseline amendments may only go through BCR/ADR and `open-amendment`.
-
-## Stage Boundaries and Review Stop (Mandatory)
-
-- Before starting, run `python scripts/workflow.py check-entry --step 04-proposal-planning [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
-- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 04-proposal-planning --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 04-proposal-planning --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
-- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
-- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.
+## Input/Output/Handoff Contract
+- **Inputs**: Run `python scripts/agent-context.py --stage 04` for the lean read set (`BASELINE-BRIEF.md`, `change-sizing.md`, frozen baseline manifest/registry/status, `code-layout.json`, `baseline-audit-report.md`, matched IDs).
+- **Outputs**: `docs/product/proposal-roadmap.md`, `docs/product/capabilities.csv`, `docs/product/modules.csv`.
+- **Downstream Handoff**: Approved proposal roadmap, dependency DAG, target platforms, and capability/module registries for Stage 05.
+- **Review & Boundaries**:
+  - Generate `workflow/evidence/project/04-proposal-planning.json` and run:
+    `python scripts/workflow.py request-review --step 04-proposal-planning --evidence workflow/evidence/project/04-proposal-planning.json --summary "<summary>"`
+  - Present `templates/workflow/step-handoff-report.md` and end the turn.
+  - Under `standard` policy, run `approve` and `transition` only after explicit user approval. Under `risk-based` policy (`STATUS=RISK_BASED_FAST_TRACK`), `transition` may run after gates pass. Follow `AGENTS.md`.

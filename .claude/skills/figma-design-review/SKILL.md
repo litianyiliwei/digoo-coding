@@ -1,121 +1,48 @@
 ---
 name: figma-design-review
-description: HTML-first UI design and review (Figma optional). Produces per-platform design-to-HTML documents under design/ui-html/, target-framework design code, and the single UI contract figma-audit.md for stages 07–10.
+description: Author and review HTML-first (Figma optional) UI design documents, target-framework design code, layout assertions, and the UI design contract.
 ---
 
-# UI Design and Review (HTML-first, Figma Optional)
+# Stage 06: UI Design and Review (HTML-First, Figma Optional)
 
-## When to Use
+## Role
+Establish the frozen per-platform PAGE set, self-contained HTML design documents (`design/ui-html/`), target-framework static design code (`design/figma-code/`), runtime layout assertions (`design/figma-layout.csv`), and single UI contract (`design/figma-audit.md`).
 
-Load this Skill when the workflow enters stage 06 "UI design and review". Handle one Change at a time; do not execute detailed design or implementation in advance. The stage directory and skill name keep the historical `figma-design-review` identifier so existing workflow state and vendored projects stay compatible; the design source itself is now HTML-first.
-
-## Core Rules (Mandatory)
-
-- **Design source: HTML-first.** The deliverable is a set of self-contained, high-fidelity HTML design documents under `openspec/changes/<change-id>/design/ui-html/`: one file per PAGE per platform (`ui-html/<platform>/PAGE-00N.html`), a review entry `ui-html/index.html`, a `ui-html/README.md` index, and `ui-html/tokens.css` (or tokens embedded per page). The design owner reviews the HTML review entry. **HTML provenance is explicit**: `User-provided HTML` (the user/stakeholder directly supplies HTML design files), `AI-authored from requirements` (AI authors the HTML from approved requirements), or `Figma-to-HTML (AI conversion)` (AI reads an approved Figma file through Figma MCP and converts it to HTML; Figma is an upstream input, not the review deliverable). Record exactly one provenance in `## Design Source and Selection`; never require Figma MCP when the HTML is user-provided or AI-authored.
-- **Per-platform coverage (mandatory).** Read `- Target platforms:` from `design/user-stories.md` (declared in stage 05). Every declared platform (`web | h5 | mini-program | app | android | ios | harmonyos | desktop | pda`) must have at least one PAGE in this Change. PAGE IDs are globally unique across platforms and frozen at this stage; 07–10 must not add or rename them. A platform that needs no custom UI must still record why in `## Design Source and Selection`.
-- The sole UI contract remains the single file `openspec/changes/<change-id>/design/figma-audit.md` (design source/platform selection, token actual values, text styles, PAGE specifications per platform, design code, assertion scope, state coverage, assets, source read records, differences, UI review). The machine contracts remain `design/figma-code/` (one **target-framework-aligned** design code file per PAGE: Vue stack `.vue` + that platform's component library (Element Plus for Web, uni-app component library for mobile), React stack `.tsx`/`.jsx`; 08 ports it directly and only adds business logic) and `design/figma-layout.csv` (compact geometry/text/font assertion table, now with `platform` and `viewport` columns). The file names are historical; both sources share the same contract shape.
-- **Derive the contract from the real source, not memory.** HTML mode: render/measure the actual HTML files at their PAGE viewports, then write tokens, PAGE specifications and `figma-layout.csv` geometry from that measurement; record the render/measure steps under `## HTML Read Records`. Figma mode: read real files/nodes/variables through Figma MCP with `get_metadata` / `get_variable_defs` / `get_design_context` and record them under `## MCP Read Records`. Do not hand-write coordinates.
-- **Framework-aligned transcoding (mandatory)**: Before transcribing, read `docs/architecture/technology-decisions.md` and section 1 of `docs/architecture/frontend-conventions.md`, determine and record the target frontend framework/component library. HTML mode transcribes the HTML pages into target-framework design code; Figma mode loads the official `figma-design-to-code` Skill and transcodes the `get_design_context` reference implementation. Block if the technology selection is undecided or conflicts with the baseline; do not choose a stack yourself.
-- **HTML quality rules**: no external network dependencies (no CDN/remote fonts/images), real copy, real CSS token values, responsive rules per platform viewport, and `data-node-id` on every asserted block. Static high-fidelity designs only; do not connect business APIs or real authentication. `figma-layout.csv` stores the HTML `data-node-id` in its historical `figma_node_id` column in HTML mode.
-- **Do not use screenshots**: reference screenshots, implementation screenshots, and pixel screenshots are not design contracts or gate evidence. The HTML review entry is the design artifact; runtime fidelity is checked by numeric assertions in `figma-layout.csv` (`scripts/check-figma-layout.py`).
-- Block when the selected design source cannot actually be produced or read (HTML files cannot be rendered/measured, or the chosen Figma MCP is unavailable); do not substitute screenshots, fabricated text, or another source without recording the source change.
-- When there is no UI: in "Design Source and Selection" of `figma-audit.md`, write `- Design source status: N/A` and `- Reason for no UI: <reason>`; then run `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<reason>"` (the flag validates those two lines), keep its log for the skip evidence, and run `workflow.py skip-stage` as described in the prompt and P0 runtime governance. Both paths must not be mixed: the N/A line without `--no-ui` passes the strict check but does not create a skip handoff.
-
-## Input
-
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
-
-Approved proposal-level requirements and ACs (proposal/specs/design/user-stories, including `- Target platforms:`); project business flows, data objects, RD matrix, business rules, role permissions, ID conventions (workflows/data-objects/rd-matrix/business-rules/role-permission-matrix/id-conventions); `docs/product/open-questions.md` (read-only; do not make unauthorized decisions during generation); `docs/architecture/technology-decisions.md` (overall technology selection, determining the target frontend framework/component library) and sections 1 and 9 of `docs/architecture/frontend-conventions.md`; `docs/architecture/baseline-status.md`; the current Change's `design/baseline-impact.md` and `design/baseline-binding.json`; actual HTML design authoring/rendering capability (mandatory for the default source) and Figma MCP accessibility only for Figma-to-HTML conversion or a legacy direct Figma source.
+## Required Methods
+- Use `brainstorming` for UI structure, state coverage, and platform adaptation decisions.
+- Load `.claude/skills/figma-design-review/references/figma-source.md` **only** when `Figma-to-HTML` or legacy direct Figma is explicitly selected by the user.
 
 ## Execution Flow
 
-1. **Verify inputs**: Check each file for existence, version, and approval status; confirm `design/user-stories.md` declares target platforms; stop and report when missing or unapproved.
-2. **Determine the target framework (precondition for framework alignment)**: Read `docs/architecture/technology-decisions.md` and section 1 of `frontend-conventions.md`, and in `## Design Code` of `figma-audit.md` record `- Target framework: <Vue 3 + TypeScript + Element Plus / React + ...>`, `- Design code extension: <.vue / .tsx / .jsx>`, and the selection rationale (ADR/baseline version). Block when the technology selection is PENDING, mutually conflicting, or unreadable; do not choose yourself.
-3. **Determine page scope per platform**: Determine the PAGE list for every declared platform from the approved proposal/specs/user-stories and project FLOW/NODE/DO/BR. PAGE IDs and the platform coverage are frozen at this stage; 07–10 must not add or rename them.
-3a. **Requirements coverage matrix (mandatory, machine-checked)**: in `## Requirements Coverage` of `figma-audit.md`, map every AC and US from `design/user-stories.md` to at least one PAGE for every declared platform, or an explicit `N/A + reason` for that platform; every PAGE must map back to at least one requirement. Use `FULL` only when the page/block and states demonstrate the requirement; `PARTIAL` requires an approver note and does not satisfy the completion check; `N/A` requires a reason. The design owner must confirm completeness and consistency in `## UI Review` (`- Coverage review status: APPROVED` and `- Coverage reviewed by:`). `check-figma-audit.py --strict --require-framework` enforces the matrix against the PAGE list, `figma-layout.csv` element IDs, declared platforms, and the US/AC IDs.
-4. **Select the design source and HTML provenance**: Default to Design-to-HTML. Choose provenance: `User-provided HTML` when the user supplies HTML files, `Figma-to-HTML (AI conversion)` when an approved Figma file exists and the user wants it converted, otherwise `AI-authored from requirements`. Record the source, provenance, chooser/supplier, and date in `## Design Source and Selection` of `figma-audit.md`, and write `- Design source status: APPROVED`. Do not convert a Figma file when the user supplied HTML or asked for AI-authored HTML.
-5. **Produce the real HTML design**: For `User-provided HTML`, take the supplied files, normalize them into the per-PAGE/per-platform layout (copy or adapt with the supplier's approval), and verify they are real/readable. For `AI-authored from requirements`, create the self-contained HTML page for each PAGE and platform. For `Figma-to-HTML`, read the approved Figma file/nodes through Figma MCP and convert each PAGE into the self-contained HTML page; the HTML, not the Figma file, is the review deliverable. In all cases create `index.html`, `README.md`, `tokens.css`, and link every PAGE and platform.
-6. **One-time complete export and framework-aligned transcoding**: Render and measure each HTML PAGE at its viewport (including user-provided HTML), extract token values/text styles/block geometry, write the results into `figma-audit.md` and `figma-layout.csv`, and transcribe each HTML page into `figma-code/PAGE-001.vue … PAGE-00N.vue` (React stack `.tsx`/`.jsx`) using the target component library and tokens; preserve real copy, font size/weight, spacing, radius, hierarchy, and `data-node-id`; produce only static high-fidelity pages. For `Figma-to-HTML`, first load the official `figma-design-to-code` Skill and use `get_variable_defs`/`get_metadata`/`get_design_context` to read the real Figma source, then convert it to HTML and transcode the HTML. For both sources, download real image/SVG assets immediately to `design/figma-assets/` when needed, and do not keep temporary URLs. Call external tools serially; do not poll node by node or run multiple Agents on the same file.
-7. **Establish contracts**: In `figma-audit.md` write the source and platform selection, actual token values, text styles, PAGE → source reference/size per platform, block-level specifications for each PAGE, target framework and design code notes, assertion scope, state coverage and decisions, and the asset list; in `figma-code/README.md` write the source, target framework/extension, component and style/token replacement table, `data-node-id` correspondences, and transcription deviations; establish the assertion subset in `figma-layout.csv` (columns include `page_id,platform,viewport,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`; 06 may leave `route`/`dom_selector` as `PENDING`). Every layout row's platform/viewport must match its PAGE row.
-8. **UI review**: The design owner completes the review on the HTML review entry (or the real Figma review deliverable when that source is selected), and writes `- UI review status: APPROVED`, `- Reviewer: ...`, `- Review evidence: workflow/evidence/06-figma-ui-review.md` in `## UI Review`; the evidence file must actually exist.
-9. **Gate**: Run `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`; the exit code must be 0; if it fails, do not enter 07. The gate validates the `## Requirements Coverage` matrix (every AC/US per declared platform or N/A + reason, every PAGE back-mapped, block IDs present in `figma-layout.csv`, coverage review APPROVED) in addition to the UI contract itself.
-10. **When there is no UI**: in "Design Source and Selection" of `figma-audit.md`, write `- Design source status: N/A` and `- Reason for no UI: <reason>`, run `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<reason>"` (the flag requires those lines), keep the log, and then run `workflow.py skip-stage` with the skip evidence described in the prompt.
+### Path A: No-UI Change (Conditional Skip)
+1. Write `- Design source status: N/A` and `- Reason for no UI: <reason>` in `openspec/changes/<change-id>/design/figma-audit.md`.
+2. Run `python scripts/check-figma-audit.py --change <change-id> --strict --no-ui --reason "<reason>"`.
+3. Skip via `python scripts/workflow.py skip-stage --step 06-figma-design-review --change-id <change-id> --evidence workflow/evidence/<change-id>/06-figma-design-review-skip.json` and end the turn.
 
-## Output
+### Path B: UI Change (HTML-First Default)
+1. **Entry**: Run `python scripts/workflow.py check-entry --step 06-figma-design-review --change-id <change-id>` and `python scripts/agent-context.py --stage 06 --change <change-id>`. Read `- Target platforms:` from `design/user-stories.md` and `## Visual Conventions` from `docs/architecture/frontend-conventions.md`.
+2. **HTML Design Docs (`design/ui-html/`)**:
+   - Record one explicit HTML provenance: `User-provided HTML`, `AI-authored from requirements`, or `Figma-to-HTML`.
+   - Produce `README.md`, `index.html` (review entry), `tokens.css`, and one self-contained `<platform>/PAGE-00N.html` per PAGE per declared platform (with stable `data-node-id` attributes, real copy, zero external network dependencies). Every declared platform needs ≥ 1 PAGE; PAGE IDs freeze in Stage 06.
+3. **Render & Measure (`design/figma-layout.csv`)**:
+   - Render each HTML page at its platform viewport and extract actual geometry/text/font values (`figma_node_id` stores HTML `data-node-id`).
+   - Prefer setting `dom_selector` directly to `[data-node-id="<id>"]`; `route` may be finalized in Stage 07 (`PENDING` only in `route` if not yet routed).
+4. **Target-Framework Transcription (`design/figma-code/`)**:
+   - Determine target framework from `docs/architecture/technology-decisions.md` (e.g., Vue `.vue` + Element Plus / uni-app, or React `.tsx`).
+   - Transcribe each PAGE into `design/figma-code/PAGE-00N.<ext>` preserving layout, tokens, copy, and `data-node-id` (static skeleton only; Stage 08 adds business logic without rewriting styles/layout/copy). Document framework, extension, substitutions, and deviations in `design/figma-code/README.md`.
+5. **Single UI Contract (`design/figma-audit.md`)**:
+   - Populate actual token values, text styles, PAGE list, design code notes, `## Assertion Scope` (naming `check-figma-layout.py`), state coverage, `## Requirements Coverage` (every AC/US per declared platform `FULL` or `N/A + reason`, every PAGE back-mapped), asset list (`design/figma-assets/` for real image/SVG only; **never save screenshots**), render/measure records, and UI review approval.
+   - `docs/product/open-questions.md` is append-only for unresolved page questions.
+6. **Stage-End Gates**:
+   - `python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`
+   - `python scripts/check-method-evidence.py --step 06-figma-design-review --evidence workflow/evidence/<change-id>/06-figma-design-review.json`
 
-`openspec/changes/<change-id>/design/figma-audit.md` (sole UI contract, single file), containing:
-- `## Design Source and Selection`: source Design-to-HTML, HTML provenance (User-provided HTML / AI-authored from requirements / Figma-to-HTML), chooser/supplier and date, source version, target platforms, per-platform PAGE coverage.
-- `## Design Inputs and Style References`: requirements and ACs, HTML design docs (user-provided or AI-authored) and Figma-to-HTML conversion records when applicable, the Visual Conventions section of the design conventions.
-- `## Design Tokens (Actual Values)`: color hex, spacing/radius/shadow px, CSS variable/component-library mapping (derived from the rendered HTML or Figma variables).
-- `## Text Styles (Actual Values)`: font family, weight, size, line height, letter spacing.
-- `## PAGEs and Nodes`: PAGE → platform, source reference (HTML file or Figma node), viewport/frame size, state.
-- `## PAGE Key Specifications`: block-level position/size/layout/padding/gap/border/radius/font for each PAGE; the full design-source snapshot may be appended.
-- `## HTML Design Docs` and `## HTML Read Records` (HTML source, including Figma-to-HTML; replace with `## MCP Read Records` only for a legacy direct Figma source).
-- `## Design Code`: target framework and extension, selection rationale (ADR/baseline), source in `figma-code/README.md`, transcription method (HTML → target framework, or Figma reference implementation → target framework), component and style replacement table, transcription deviations, and the correspondence between `data-node-id` and `figma-layout.csv`.
-- `## Assertion Scope`: list the key blocks covered by `figma-layout.csv`; elements not included in assertions are covered by the target-framework design code and machine assertions; structural differences are written into `## Differences and Pending Confirmation`.
-- `## State Coverage`: default and applicable states for each PAGE and platform; for states with no design frame, write the 07 decision/approval.
-- `## Asset List`: only real image/SVG assets (file, source node/page, size); if there are no assets, write `- Assets: none`; do not register reference screenshots.
-- `## Differences and Pending Confirmation`, `## UI Review`.
-- `design/ui-html/index.html`, `design/ui-html/README.md`, `design/ui-html/tokens.css`, and `design/ui-html/<platform>/PAGE-001.html … PAGE-00N.html` (always present for Design-to-HTML, including Figma-to-HTML; omitted only for a legacy direct Figma source).
-- `design/figma-code/README.md`: explains the source, target framework/extension, transcription method, component and style/token replacement table, transcription deviations, `data-node-id` ↔ `figma_node_id` notes.
-- `design/figma-code/PAGE-001.vue … PAGE-00N.vue` (`.tsx`/`.jsx` for the React stack): one target-framework design code file per PAGE. 08 ports it directly as the page skeleton and only adds business logic.
-- `design/figma-layout.csv`: compact assertion table (`page_id,platform,viewport,route,element_id,figma_node_id,x,y,width,height,dom_selector,assert_geometry,assert_text,tolerance_px,text_content,font_size,font_weight,notes`); 06 may leave `route`/`dom_selector` as `PENDING`, and 07 must fill them completely.
-- `design/figma-assets/README.md`: generated only when real image/SVG assets exist (file, source node/page, sha256, size).
-
-Do not split subdirectories per page/per state beyond the platform grouping, do not generate scattered token/contract JSON, and do not save reference screenshots.
-
-## Quality and Safety Boundaries
-
-- PAGE IDs are stable and unique across platforms; every declared target platform has at least one PAGE; every PAGE is fully covered in `PAGEs and Nodes` and `PAGE Key Specifications`.
-- HTML design files (whether user-provided, AI-authored, or converted from Figma) are self-contained, use real copy and real tokens, tag asserted blocks with `data-node-id`, and have no external network dependency; user-provided HTML is accepted only as real readable files, and Figma-to-HTML includes a real Figma read/conversion record.
-- Tokens must record actual values; variable names/counts alone are not a specification; every PAGE has at least 3 block-level geometry/layout rows.
-- Every PAGE must have target-framework design code (Vue stack `figma-code/PAGE-00N.vue`, React stack `PAGE-00N.tsx`/`.jsx`), and `## Design Code` must state the target framework, extension, and selection rationale; `figma-layout.csv` must cover the key blocks and primary actions of every PAGE, with geometry/text/font values coming from the rendered HTML or Figma read; structural differences are written into `## Differences and Pending Confirmation`.
-- States must include default; for states without a design frame, the 07 decision, approver, and rationale must be written, and you must not claim they have been reproduced.
-- Real image/SVG assets must actually exist in `design/figma-assets/` and be registered by `README.md`; reference screenshots do not enter the asset list.
-- Source read records must correspond to actual successful render/measurement (HTML) or `get_metadata`/`get_variable_defs` calls (Figma); a tool name or "not executed" does not count as a read.
-- Do not use screenshots, fabricated links, or empty files to replace the real design source.
-- Pages, elements, and events must not bypass approved product/frontend/permission constraints; on conflict, record the constraint ID and submit an exception/BCR, and do not modify bindings yourself.
-- UI review not APPROVED must not enter 07.
-
-## Boundaries with OpenSpec / Superpowers
-
-- OpenSpec stores proposal, delta specs, design, and tasks; this Skill does not replace OpenSpec validation.
-- When interaction or multi-platform states need clarification, you may use the stage-scoped mode of Superpowers `brainstorming`, writing conclusions into the state coverage/differences sections of `figma-audit.md`, not a separate design document; claim use only when it is confirmed installed and callable. State coverage includes at least default, loading, empty, error, permission denied/degradation, offline/weak network, push/deep link (when applicable), and Android/iOS/HarmonyOS differences.
-- Do not automatically commit, publish, archive, or overwrite user files at this stage.
-
-## Recommended Checks
-
-`python scripts/check-figma-audit.py --change <change-id> --strict --require-framework`; when there is no UI, write `- Design source status: N/A` and `- Reason for no UI: <reason>` in `figma-audit.md`, then run the same command, or use `--no-ui --reason "<reason>" --strict`. When the HTML source is used, also render/measure the pages (for example with a headless browser) so `figma-layout.csv` values are real.
-
-## Actual Tool Invocation Requirements
-
-- **Superpowers:** `brainstorming` (if actually available); when unavailable, explain and perform equivalent clarification steps.
-- **OpenSpec:** Run `openspec status --change <id>` and read approved specs; commands must be actually executed and the exit code/result reported.
-- **HTML design source:** For user-provided HTML, actually read the supplied files and verify they are real; for AI-authored HTML, actually create them; for Figma-to-HTML, actually read the real Figma file/nodes and convert them to HTML. In all cases open/render the HTML in a real browser capability and measure the declared viewports; record the steps and results in `## HTML Read Records`; when rendering is unavailable, block rather than fabricate.
-- **Figma MCP (optional):** Only for `Figma-to-HTML` provenance or a legacy direct Figma source. Rely on actually accessible capabilities; generate/read real files, nodes, components, and variables; before the first call to `get_design_context` load the official `figma-design-to-code` Skill; when unavailable, mark "not executed/blocked" and do not fabricate results.
-- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly.
-
-## Input/Output/Handoff Contract (Mandatory)
-
-Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="figma-design-review"` in `process/STEP-ARTIFACT-CONTRACTS.json`.
-
-- **Inputs for this stage:** Approved proposal/specs/design/user-stories (including `- Target platforms:`); project business flows/data objects/RD matrix/business rules/role permissions/ID conventions (workflows, data-objects, rd-matrix, business-rules, role-permission-matrix, id-conventions); `docs/product/open-questions.md` (read-only); `docs/architecture/technology-decisions.md` (target frontend framework/component library) and sections 1 and 9 of frontend-conventions; `docs/architecture/baseline-status.md`; `design/baseline-impact.md` and `design/baseline-binding.json`; user-provided HTML design files (when provenance is User-provided HTML); actual HTML authoring/rendering capability (AI-authored or Figma-to-HTML provenance); Figma MCP capability only for Figma-to-HTML or a legacy direct Figma source. Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Requirements coverage (mandatory)**: every AC and US covers every declared platform through a `## Requirements Coverage` row (FULL or N/A + reason), every PAGE maps back to at least one requirement, block IDs resolve to `figma-layout.csv`, and the design owner records `- Coverage review status: APPROVED` with the reviewer.
-- **Outputs for this stage:** `openspec/changes/<change-id>/design/figma-audit.md` (sole UI contract: source/provenance/platform selection, target framework/transcription notes, actual token values, text styles, PAGE specifications, state decisions, design code, assertion scope, `## Requirements Coverage` completeness/consistency matrix, UI review), `design/ui-html/` (README, index, tokens, one self-contained HTML per PAGE per platform; user-provided HTML is normalized here with supplier/date recorded), `design/figma-code/README.md` and target-framework design code `PAGE-001.vue … PAGE-00N.vue` (React stack `.tsx`/`.jsx`), `design/figma-layout.csv` (compact assertion table with platform/viewport; `route`/`dom_selector` may be filled by 07); when real images/SVGs exist, append `design/figma-assets/README.md`; do not save reference screenshots (N/A + reason when there is no UI).
-- **Downstream handoff:** `figma-audit.md`, `figma-code/`, `figma-layout.csv`, and (HTML source) `design/ui-html/` are the sole UI inputs for 07/08/09/10; 07/08 consume them offline by default, and only reread the design source page by page in batches when it changes or a page is ambiguous (serially, to avoid rate limits). PAGE IDs and the per-platform page set are frozen in 06; `traceability.csv` is initialized by 07 from PAGE → AC and merges API/test mappings.
-- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **Blocker resolution:** If `blocked_items` exist for this stage in `workflow-state.json`, the `transition` evidence must add `resolved_blockers` (including `step_id`, `resolution`, and existing evidence paths); blocking items from other stages still need to be addressed first.
-
-## Project Baseline Constraints (Read-Only Inheritance)
-
-- Before execution, read `docs/architecture/baseline-manifest.json`, `docs/architecture/constraint-registry.json`, and the current Change's `design/baseline-binding.json`.
-- Pages, elements, and events must not bypass approved product/frontend/permission constraints; on conflict, record the constraint ID and submit an exception/BCR, and do not modify bindings yourself.
-- Before passing, run `python scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`.
-
-## Stage Boundaries and Review Stop (Mandatory)
-
-- Before starting, run `python scripts/workflow.py check-entry --step 06-figma-design-review [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
-- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 06-figma-design-review --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 06-figma-design-review --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
-- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
-- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.
+## Input/Output/Handoff Contract
+- **Inputs**: Run `python scripts/agent-context.py --stage 06 --change <change-id>` for the lean read set.
+- **Outputs**: `design/figma-audit.md`, `design/ui-html/` (omitted only for legacy direct Figma), `design/figma-code/`, `design/figma-layout.csv`, and `design/figma-assets/README.md` (only when real image/SVG assets exist).
+- **Downstream Handoff**: Frozen per-platform PAGEs, tokens, target-framework design code, and layout assertion table for Stage 07 (consumed offline by default).
+- **Review & Boundaries**:
+  - Generate `workflow/evidence/<change-id>/06-figma-design-review.json` (set `approval.required=true` for UI Changes) and run:
+    `python scripts/workflow.py request-review --step 06-figma-design-review --change-id <change-id> --evidence workflow/evidence/<change-id>/06-figma-design-review.json --summary "<summary>"`
+  - Present `templates/workflow/step-handoff-report.md` and end the turn.
+  - Under `standard` policy, run `approve` and `transition` only after explicit user approval. Under `risk-based` policy (`STATUS=RISK_BASED_FAST_TRACK`), `transition` may run after gates pass. Follow `AGENTS.md`.

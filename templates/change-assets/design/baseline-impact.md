@@ -1,7 +1,7 @@
 # Baseline Applicability and Impact Record
 
 - Change ID: `<change-id>`
-- Status: APPROVED
+- Status: DRAFT
 - Established in stage: 05-feature-requirements
 - Last review stage:
 - Current baseline version:
@@ -69,15 +69,15 @@
 
 Fill this section only when this Change is not in the main table of `docs/product/proposal-roadmap.md`. Mirror the approved amendment record from the roadmap's `## Roadmap Amendments` table and record the baseline impact classification.
 
-| Change ID | Primary Capability | Extends | Slice Type | Slice Coverage | Code Target | Reason | Requester | Approver | Date | Baseline Impact |
-|---|---|---|---|---|---|---|---|---|---|---|
-| N/A + reason (not an off-roadmap Change) | | | | | | | | | | CHANGE_ONLY / BASELINE_CHANGE_REQUIRED |
+| Change ID | Primary Capability | Owner Module | Related Modules | Slice Type | Slice Coverage | Code Target | Reason | Requester | Approver | Date | Baseline Impact | Depends On | Target Platforms |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| N/A + reason (not an off-roadmap Change) | | | | | | | | | | | CHANGE_ONLY / BASELINE_CHANGE_REQUIRED | | |
 
 ## 8. Conclusion and Gates
 
 - This Change baseline classification: CHANGE_ONLY
 - Overall conclusion: COMPATIBLE
-- Allowed to enter detailed design: YES
+- Allowed to enter detailed design: NO
 - Allowed to enter implementation: NO
 - Baseline amendments that must be completed first:
 - Approver and evidence: PENDING (owner and evidence path required before strict approval)

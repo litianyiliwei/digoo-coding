@@ -14,6 +14,14 @@
 |---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING |
 
+## Platform and Integration Boundary Interview Record
+
+> Record target platform architecture choices (web/h5/mini-program/app/desktop/pda), native/bridge capabilities, device/IoT/external integration boundaries, and NFR/BI constraints confirmed with the user; write `N/A + reason` for inapplicable items.
+
+| Topic | Decision | Rationale / Constraints | Confirmed by & Date |
+|---|---|---|---|
+| PENDING | PENDING | PENDING | PENDING |
+
 ## Candidate Comparison
 
 | Domain | Option | Pros | Cons | Cost | Existing-system Constraints | Verdict |

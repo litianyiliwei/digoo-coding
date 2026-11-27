@@ -1,92 +1,50 @@
 ---
 name: implementation-orchestrator
-description: Implementation, TDD, verification, and code review. Implements small tasks using the installed Superpowers workflow and accepts them based on real test results.
+description: Execute TDD implementation inside the declared Change slice, run verification/UI/static gates, and produce code review and footprint evidence.
 ---
 
-# Implementation, TDD, Verification, and Code Review
+# Stage 08: Implementation, TDD, Verification, and Code Review
 
-## When to Use
-Load this Skill when the workflow enters "implementation, TDD, verification, and code review". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
+## Role
+Implement the approved Change strictly inside its declared `### Implementation Slice`, verify behavior/UI/static quality gates, and hand off clean, reviewable code and footprint evidence to the independent Verifier (Stage 09).
 
-## Input
+## Required Methods
+- Use `test-driven-development` (red → green → refactor) and `verification-before-completion` (never claim pass without fresh command exit codes).
 
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
-Approved OpenSpec artifacts, detailed design, tasks, repository conventions, and available Superpowers.
+## Execution Flow (4-Phase Linear Pipeline)
 
-## Execution Flow
-1. First read `openspec instructions apply --change <id>` and the project development notes; verify the actually installed Superpowers skills.
-1a. **Stage 08 entry dependency + lease check:** `check-entry` re-runs the lane's proposal dependency gate and the implementation lease. If it reports an unmet dependency (`ACTIVE@<stage>`, `NOT_STARTED`, `ABANDONED`, `BROKEN`) or `IMPLEMENTATION_LEASE_HELD`, stop and report; do not write code and do not try to edit state to force entry. 07→08 acquired the lease; only the 10 transition, `abandon-change`, or `reopen` of an ACCEPTED lane releases it.
-1b. **Module execution snapshot and context (08 entry, 07→08 hard gate):** Before writing any code, run `python scripts/implementation-snapshot.py <change-id>` (on rework use `--force --reason "<reason>"`) to write `design/evidence/implementation-base.json`, then run `python scripts/code-context.py <change-id>` to generate `design/context-manifest.json`, and read the manifest's `read_set` (owner/related module owned files, the modules' `MODULE.md` cards, contracts, tests, integration paths, registries). A read outside the manifest must be recorded as a `CONTEXT_EXPANSION` entry (path + reason) in the stage evidence/report; other modules' paths stay out of context. The snapshot is script-generated evidence and is never hand-edited.
-2. Execute Superpowers' `brainstorming`, `using-git-worktrees`, `writing-plans`, `subagent-driven-development`, or `executing-plans` as needed based on complexity.
-3. When UI is involved, first read the target framework/transcoding notes, actual token values, PAGE specifications, and state decisions in `figma-audit.md`, plus `figma-code/` (target-framework design code transcoded in 06 according to the overall technology selection), `figma-layout.csv` (assertion mapping), and `ui-actions.csv` (navigation/API action mapping; local-only entries carry the user's confirmation); consume offline by default, and reread the design source page by page in batches only when the version changes or pages are ambiguous. **Implementation uses `figma-code/` directly as the page skeleton**: port the `.vue` (or `.tsx`/`.jsx` for the React stack) design code into the application directory, and only add routing, API calls, state, permissions, and business logic; do not rewrite styles, layout, or copy; when changes are truly needed, record the reason, impact, and approver per `UI-DEVIATION` and update assertions in sync. First establish global CSS variables/target component library theme/font stack; page styles must reference tokens, and hard-coded colors/font sizes must not be scattered; implementation must satisfy the `dom_selector` in `figma-layout.csv` (selectors should preferentially use stable `data-test` / `data-node-id` attributes). Implement routing/API exactly as mapped in `ui-actions.csv`: a mapped functional control must not be left inert. **Do not use screenshots as UI evidence.**
-4. For behavior changes, use `test-driven-development`'s RED-GREEN-REFACTOR: write the failing test first and observe the failure, then implement minimally.
-5. Implement in small tasks and update OpenSpec task checkboxes; run the relevant tests for each task.
-5a. **Static analysis gates (when `docs/architecture/quality-gates.json` exists):** copy/pin the config files from the rule packs in `templates/static-analysis/` into the approved stack roots per the 03 selection; dependency/package installation (for example `npm install` or `pip install`) is allowed only with explicit user authorization recorded in `tasks.md`, never automatically. Run `python scripts/check-quality-gates.py --root . --strict --require-materialized`, then `python scripts/run-quality-gates.py <change-id> --output openspec/changes/<change-id>/design/evidence/static-analysis.json --identity <builder>`, then `python scripts/check-static-analysis.py --change <change-id> --strict`; every non-zero exit is FAIL/BLOCKED. In `## Static analysis` of `code-review.md`, copy the stack/tool/command/config/result/exit-code rows directly from `static-analysis.json` (rows end with the literal `exit 0`), and list every applied waiver with its approver and expiry. `bash scripts/verify-before-completion.sh <change-id> --test-dir <test-dir>` (repeat `--test-dir` for each test root; the script exits 2 when no test dir is given unless `--skip-tests` is passed for an explicitly partial run; `STATIC_IDENTITY=<identity>` sets the recorded static-analysis identity) runs these static gates by default; `--skip-static` is explicitly not full verification and cannot be recorded as PASS evidence.
-6. Run `python scripts/check-figma-layout.py --change <change-id> --base-url <url>` for each PAGE, producing `design/evidence/figma-layout-check.json`; run `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`. **UI verification is primarily based on machine evidence**: in `## UI fidelity` of `code-review.md`, copy directly from the JSON per PAGE the design source reference (HTML data-node-id or Figma node), asserted element count/max deviation, layout evidence, conclusion, and approver; only PAGEs with differences or `UI-DERIVED` need supplementary manual explanation and approval, and PAGEs without differences are not visually rechecked page by page. Run `python scripts/check-code-review.py --change <change-id> --strict`. Any missing element, geometry out of tolerance, text/font mismatch, or token inconsistency is FAIL.
-7. On failure, use `systematic-debugging`, prioritize finding the root cause, and do not make random changes without evidence.
-8. Use `requesting-code-review` periodically; after receiving comments, verify and address them according to `receiving-code-review`.
-9. Before finishing, use `verification-before-completion`, run real tests/builds/contract checks, and report commands, exit codes, and unexecuted items.
-10. When `design/interface-catalog.csv` exists, implement the interface contracts row by row and run at least one TEST for each interface_id; for native/device/third-party boundaries, state real-device, simulator, double, or manual verification evidence; if unable to execute, write BLOCKED + reason, and do not falsely report success.
-11. Stage evidence must write `methods`: `test-driven-development` and `verification-before-completion`, each with a real evidence path; run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`.
-12. Do not claim to have used Superpowers skills that are not installed; do not change specs/OpenAPI without authorization. If specs truly need to change, pause and update the Change.
-13. **Slice containment and module cards (module model, 08→09 hard gate):** Keep every change inside the slice's `Owned paths` plus its declared `Integration paths`; a module `shared_paths` change must be covered by an owned entry in the slice; a change under `code-layout.json.frozen_paths` needs an approved BCR under `Frozen approvals`. Create or update the `MODULE.md` card for each module the slice creates or updates (module slugs, public entry points, served capabilities, allowed dependencies, data ownership, invariants, last updated Change), treat `docs/product/modules.csv`/`capabilities.csv` as read-only at this stage and report discrepancies for stage 10's write-back, and update the OpenSpec task checkboxes. Before completion run `python scripts/check-change-footprint.py <change-id>`; it diffs the workspace against `implementation-base.json`, writes `design/evidence/implementation-diff.json`, and must show the diff set inside the declared footprint. Both 07→08 (slice declaration) and 08→09 (footprint) are `workflow.py transition` hard gates; `strategy=none` skips them with an explicit SKIPPED marker.
+### Phase 1: Entry & Setup
+1. `python scripts/workflow.py check-entry --step 08-implementation-orchestrator --change-id <change-id>`
+2. `python scripts/baseline-governance.py check-change --change-id <change-id> --phase design`
+3. `python scripts/agent-context.py --stage 08 --change <change-id>`
+4. `python scripts/implementation-snapshot.py <change-id>` (records entry `implementation-base.json`)
+5. `python scripts/code-context.py <change-id>` (when `strategy != none`, use `design/context-manifest.json` `read_set` as the default read list; log any justified extra read as `CONTEXT_EXPANSION`).
+6. If `docs/architecture/quality-gates.json` exists and starter rule-pack configs are not yet materialized, copy them with explicit authorization as defined in Stage 03.
 
-## Output
-Code changes contained in the Implementation Slice, module cards (`<module_path>/MODULE.md`) for created/updated modules, tests, updated tasks, `design/evidence/implementation-base.json`, `design/context-manifest.json`, `design/evidence/implementation-diff.json`, code review report (including `## Static analysis` when `docs/architecture/quality-gates.json` exists), static-analysis evidence (`design/evidence/static-analysis.json` plus per-tool logs under `design/evidence/static-analysis-logs/`) when quality gates are adopted (`docs/architecture/quality-gates.json` exists), `design/evidence/figma-layout-check.json` and token check results when UI is involved, and verification evidence.
+### Phase 2: Implement & TDD
+7. Execute tasks in `openspec/changes/<change-id>/tasks.md` using TDD, keeping every modified file inside `Owned paths` ∪ `Integration paths` (`frozen_paths` require an approved BCR).
+8. Implement every row in `api/openapi.yaml`, `design/api-io-mapping.csv`, `design/io-catalog.csv`, and `design/interface-catalog.csv` with corresponding automated tests from `design/test-cases.csv`.
+9. For UI Changes: port `design/figma-code/PAGE-00N.<ext>` directly as the page skeleton, wiring routes/APIs/events from `design/ui-actions.csv` without rewriting styles, layout, or copy.
+10. Update `- [x]` checkboxes in `tasks.md` and create/update `<module_path>/MODULE.md` cards for touched modules.
 
-## Quality and Safety Boundaries
-Do not replace tests with code generation; do not report unexecuted checks as passing; unauthorized contract/requirement changes are prohibited. Dependency installation is never automatic: it requires explicit user authorization recorded in `tasks.md`. The implementation diff must stay inside the declared slice (owner/related module owned paths plus declared integration paths); shared-path and frozen-path changes follow the explain/BCR rules; do not read or edit other modules' paths without a recorded `CONTEXT_EXPANSION` reason. UI Changes use the 06 target-framework design code as the reproduction baseline: 08 only adds business logic and must not rewrite styles/layout/copy; visual deviations must have `UI-DEVIATION` approval, otherwise blocked.
+### Phase 3: Verify & Evidence (Fixed Order)
+11. Run the unified completion script once (do **not** manually re-run `run-quality-gates.py` separately, as `verify-before-completion.sh` runs it and uses `STATIC_IDENTITY`):
+    `STATIC_IDENTITY=<builder-id> bash scripts/verify-before-completion.sh <change-id> --test-dir <dir>`
+12. For UI Changes, run:
+    - `python scripts/check-figma-layout.py --change <change-id> --base-url <url>` → produces `design/evidence/figma-layout-check.json`
+    - `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`
+13. Write `openspec/changes/<change-id>/design/evidence/code-review.md` (using `templates/change-assets/evidence/code-review.md`; reference JSON paths and explain only differing/`UI-DERIVED` PAGEs; never use screenshots) and run `python scripts/check-code-review.py --change <change-id> --strict`.
+14. Update implementation evidence in `design/baseline-binding.json` and run `python scripts/baseline-governance.py check-change --change-id <change-id> --phase implementation`.
 
-## Boundaries with OpenSpec / Superpowers
-- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
-- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
-- HTML design input must be based on real readable files; Figma MCP input (optional) must be based on actually accessible links, nodes, and MCP responses.
-- Do not automatically commit, publish, archive, or overwrite user files at this stage.
+### Phase 4: Freeze Footprint & Submit (Run Last After All Edits)
+15. Run `python scripts/check-change-footprint.py <change-id>` (produces `design/evidence/implementation-diff.json` matching the final tree).
+16. Run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence workflow/evidence/<change-id>/08-implementation-orchestrator.json`.
 
-## Recommended Checks
-`python scripts/implementation-snapshot.py <change-id>` (before coding); `python scripts/code-context.py <change-id>`; `python scripts/check-change-footprint.py <change-id>` (08→09 hard gate); `bash scripts/test-all.sh <test-dir>...`; `bash scripts/verify-before-completion.sh <change-id> --test-dir <test-dir>`; `python scripts/check-figma-layout.py --change <change-id> --base-url <url>`; `python scripts/check-design-tokens.py --change <change-id> --tokens <token.css>`; `python scripts/check-code-review.py --change <change-id> --strict`; when `docs/architecture/quality-gates.json` exists: `python scripts/check-quality-gates.py --root . --strict --require-materialized; python scripts/run-quality-gates.py <change-id> --output openspec/changes/<change-id>/design/evidence/static-analysis.json --identity <builder>; python scripts/check-static-analysis.py --change <change-id> --strict`
-
-## Actual Tool Invocation Requirements
-
-- **Superpowers:** Check and load `using-superpowers`, `writing-plans`, and `test-driven-development` per the host mechanism; `systematic-debugging` on failures; `requesting-code-review`/`receiving-code-review` for review; `verification-before-completion` before completion. Stage evidence must write `methods` (`test-driven-development` and `verification-before-completion`, each with a real evidence path) and run `python scripts/check-method-evidence.py --step 08-implementation-orchestrator --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent. Report success only after actually loading/executing; when unavailable, use `mode=equivalent` and write `reason`.
-- **OpenSpec:** First execute `openspec instructions apply --change <id> --json` and `openspec status --change <id>`; after completion, `openspec validate <id> --strict`, without unauthorized spec changes. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
-- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
-
-## Baseline Discipline During Implementation (Mandatory)
-
-- Before development, re-verify `design/baseline-impact.md`, `docs/architecture/baseline-status.md`, and the approved baseline version; code, migrations, and configuration must follow approved constraints.
-- If a baseline is found to be inapplicable, conflicting, or missing during implementation, first record evidence in the current Change and pause affected tasks; do not directly edit the frozen baseline or bypass rules in code.
-- Create/update the baseline change request and ADR, and update the baseline version after approval by the corresponding owner; then refresh the current Change's baseline snapshot, detailed design, tasks, and verification. Independent, unaffected tasks may continue after owner confirmation.
-- Feature-local behavior/endpoints/table migrations/IO/implementation details remain in the Change, and must not be automatically promoted to the global baseline just because development is complete.
-- For detailed rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
-
-## Input/Output/Handoff Contract (Mandatory)
-
-Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="implementation-orchestrator"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
-
-- **Inputs for this stage:** Approved design/baseline-impact.md, `design/baseline-binding.json`, and current baseline-status.md; approved tasks.md/design.md (including the `### Implementation Slice` and frontend/backend/test design sections and `### Static Analysis`), design/test-cases.csv, OpenAPI, IO contracts, and traceability.csv; `docs/product/capabilities.csv`, `docs/product/modules.csv`, and `docs/architecture/code-layout.json` (owner/related modules, owned/integration/frozen paths); when quality gates are adopted (`docs/architecture/quality-gates.json` exists), `docs/architecture/quality-gates.json` (frozen static-analysis selection), the Change-scoped `design/static-waivers.json` when present, and the rule packs in `templates/static-analysis/`; when UI is involved, `design/figma-audit.md` (design source/platform selection, target framework/transcription notes, actual token values, PAGE specifications, state decisions), `design/ui-html/` (default HTML design documents), `design/figma-code/` (target-framework design code), `design/figma-layout.csv` (assertion mapping with platform/viewport), `design/ui-actions.csv` (navigation/API action mapping), and the project token file; `docs/architecture/technology-decisions.md` (target framework consistency); project-level engineering conventions/test strategy; docs/product/open-questions.md (append-only: new questions may be added; existing questions are closed only by their owner/user). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** Actual source code/migrations/configuration contained in the slice (including config files copied/pinned from `templates/static-analysis/` per the approved selection when quality gates are adopted); module cards (`<module_path>/MODULE.md`) for created/updated modules; `design/evidence/implementation-base.json` (entry snapshot); `design/context-manifest.json` (retrieval closure); `design/evidence/implementation-diff.json` (08 footprint); baseline change requests/ADR drafts when applicable (do not update the frozen baseline without approval); automated test code and run results; openspec/changes/<change-id>/design/evidence/code-review.md (including the `## Static analysis` machine-copied table when `docs/architecture/quality-gates.json` exists, and the `## UI fidelity` numeric table when UI is involved, with values taken directly from `figma-layout-check.json`; only PAGEs with differences/`UI-DERIVED` need manual explanation and approval); `design/evidence/static-analysis.json` and `design/evidence/static-analysis-logs/` when quality gates are adopted; `design/evidence/figma-layout-check.json`; implementation/verification evidence. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
-- **Downstream handoff:** Code diff and `implementation-base.json`/`implementation-diff.json` (input to 09's independent footprint recomputation), module cards, test report, review conclusion (including `## Static analysis` results when quality gates are adopted), static-analysis evidence when quality gates are adopted, unresolved issues, `figma-layout-check.json`, and token check results. Explicitly state which files/fields the next stage consumes.
-- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
-
-
-## Independent Verification Handoff (New Mandatory Requirement)
-
-Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) and `approve`/`transition` have completed may you hand off to the independent Skill `@independent-verifier` (stage `09-independent-verification`), using an independent Agent/context to read-only verify code, specs, ACs, and IO contracts and rerun tests. The Builder must not generate a PASS conclusion itself to replace the Verifier.
-
-
-## Machine Baseline Gates for the Implementation Stage (Mandatory)
-
-- Before coding, `python scripts/baseline-governance.py check-change --change-id <id> --phase design` must pass.
-- After implementation is complete, record `implementation_verification.status=PASS`, the verification method, and the real in-repository evidence path for each APPLICABLE constraint; purely design constraints need an explicit NOT_APPLICABLE and reason.
-- Before stage 08 transition-out, run `python scripts/baseline-governance.py check-change --change-id <id> --phase implementation`. Missing evidence, NOT_RUN, and PENDING all block.
-
-## Stage Boundaries and Review Stop (Mandatory)
-
-- Before starting, run `python scripts/workflow.py check-entry --step 08-implementation-orchestrator [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
-- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 08-implementation-orchestrator --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 08-implementation-orchestrator --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
-- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
-- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.
+## Input/Output/Handoff Contract
+- **Inputs**: Run `python scripts/agent-context.py --stage 08 --change <change-id>` plus `design/context-manifest.json` `read_set`.
+- **Outputs**: Source code/migrations/tests, updated `tasks.md`, `<module_path>/MODULE.md`, `design/evidence/code-review.md`, `implementation-base.json`, `implementation-diff.json`, `design/context-manifest.json`, and conditional `figma-layout-check.json`, `static-analysis.json`, `static-analysis-logs/`.
+- **Downstream Handoff**: Verified code revision, diff fingerprint, and Builder evidence for independent verification (Stage 09).
+- **Review & Boundaries**:
+  - Generate `workflow/evidence/<change-id>/08-implementation-orchestrator.json` and run:
+    `python scripts/workflow.py request-review --step 08-implementation-orchestrator --change-id <change-id> --evidence workflow/evidence/<change-id>/08-implementation-orchestrator.json --summary "<summary>"`
+  - Present `templates/workflow/step-handoff-report.md` and end the turn. Advance (`approve` → `transition`) only after explicit user approval. Never run Stage 09 in the Builder session. Follow `AGENTS.md`.

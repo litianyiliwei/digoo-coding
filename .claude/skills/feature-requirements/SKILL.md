@@ -1,94 +1,48 @@
 ---
 name: feature-requirements
-description: Proposal-level requirements analysis. Generates user stories and ACs per Change and refines them into testable OpenSpec behavioral specs; does not produce separate use case files, scenarios are written into the spec's Scenario.
+description: Author Change-scoped proposal, delta specs, user stories/ACs, initial tasks, baseline impact/binding, and capability/module updates.
 ---
 
-# Proposal-Level Requirements Analysis
+# Stage 05: Proposal-Level Requirements Analysis
 
-## When to Use
-Load this Skill when the workflow enters "proposal-level requirements analysis". Handle only one explicit stage at a time; do not execute later stages in advance, and do not modify approved content.
+## Role
+Define externally observable behavior, user stories, acceptance criteria, and baseline impact for a single Change. Do **not** create `design.md` here (Stage 07 is its single writer).
 
-## Input
-
-Reading order: first read `docs/product/BASELINE-BRIEF.md` and the current Change artifacts; read targetedly by matched IDs; read full baselines/architecture/ADR/full specs on demand only when necessary and record the reason (see `process/INPUT-OUTPUT-POLICY.md`).
-Change ID, approved roadmap, project requirements business analysis (FLOW/NODE/DO/RD/BR/acceptance policy), `BASELINE-BRIEF.md`/`change-sizing.md`/`role-permission-matrix.csv`/`decisions.md`/`assumptions.md`/`lessons.md`/`id-conventions.md` (standing baselines), open-questions (append-only: new questions may be added; existing questions are closed only by their owner/user), frozen baseline, relevant openspec/specs.
+## Required Methods & Guidance
+- Load `.claude/skills/baseline-impact-classification/SKILL.md` (`baseline-impact-classification`) and use `brainstorming`.
+- Consult `process/QUESTION-COVERAGE-CHECKLIST.md` (`05-*`) for Change-level edge cases.
 
 ## Execution Flow
-1. Read the Change's roadmap row (`Dependencies` / amendment `Depends On` and `Ordering Rationale`) before anything else. Every dependency must be ACCEPTED at stage 10; `check-entry` at 05 re-runs this gate. If it reports `ACTIVE@<stage>`, `NOT_STARTED`, `ABANDONED`, or `BROKEN` (a broken transitive chain), stop and report it; do not write requirements on an undelivered prerequisite. A waiver is valid only when the user explicitly instructed it with a reason and evidence.
-1a. First run `openspec status --change <id>`, `openspec list --specs` and read the full text of relevant specs; follow the current OpenSpec CLI/Schema guidance.
-1b. **Target platforms (mandatory)**: read the roadmap row's `Target Platforms` and the Stage 02 `## 10. Target Platforms and Client Forms` inventory, then write both of the following in this stage: a `## Target Platforms` section in `proposal.md` listing the platforms this Change develops, and a `- Target platforms: <list>` line in `design/user-stories.md`. Use the canonical vocabulary `web | h5 | mini-program | app | android | ios | harmonyos | desktop | pda`, semicolon-separated; the two declarations and (when present) the roadmap cell must match exactly, and at least one platform is required. If the roadmap has no platform cell, derive it from the Stage 02 inventory and add the roadmap cell (or an amendment row) rather than leaving it implicit. `check-requirements.py --change --strict` fails on a missing, unsupported, or inconsistent declaration.
-2. Derive **proposal-level user stories and ACs** from the project business flows, RD matrix, and Change scope (`design/user-stories.md`, US/AC IDs); do not copy the project-level historical story list; keep only entries relevant to this Change and keep stable IDs. specs are the sole source of normative behavior, and scenarios are written in the spec's Scenario; user-stories contain only USs, ACs, and traceability IDs, and do not copy full specs.
-3. Every user scenario must state trigger, role, preconditions, main flow, alternative/exception flows, and postconditions, and reference the project FLOW/NODE/DO/BR IDs; the scenario body is written into the Scenario of `specs/<capability>/spec.md`, and no separate `design/use-cases.md` is produced, nor are UC IDs used for traceability.
-4. Write verifiable Given/When/Then for every US; every key story has at least one AC covering permissions, null values, boundaries, exceptions, duplicate submission, and concurrency (when applicable). For Changes involving multiple platforms/native/device, scenarios must also cover **each declared target platform's** permissions (denial/degradation), offline/weak network, push/deep links, platform differences, failure retry, idempotency/concurrency; write N/A + reason when not applicable. A platform declared in `proposal.md`/`user-stories.md` but covered by no AC/Scenario is incomplete.
-4a. **Module-aware capabilities, ACs, and walkthrough (module model):** `proposal.md` must list under `### New Capabilities` / `### Modified Capabilities` the capability slugs declared in the roadmap row (`Primary Capability` for `initial` under New, for `extend` under Modified); the slugs must exist in `docs/product/capabilities.csv`. Every AC section in `design/user-stories.md` must carry `- Scenario: <spec Scenario title matching the spec's #### Scenario>` and `- Slice position: entry|behavior|result`. The file must contain `## Acceptance Walkthrough` covering at least one AC at each slice position, and `## Slice Budget` recording the AC count (a `Budget exception: <approver> — <reason>` line is required only above 12). Update the registries for the Change: when the proposal adds a new capability or module, update BOTH `docs/product/capabilities.csv` (capability slug, domain, `owner_module`, `related_modules`, status, `active_changes`, `remaining_slices`) and `docs/product/modules.csv` (module slug, domain, frontend/backend paths, `shared_paths`, `capabilities`, status); the owner module's `capabilities` column must list the capability, and a `partial` capability must declare remaining work. A Change that is not in the roadmap main table needs an approved `## Roadmap Amendments` row in `docs/product/proposal-roadmap.md` with `Reason`/`Requester`/`Approver`/`Date`/`Baseline Impact`/`Depends On`; only a `BASELINE_CHANGE_REQUIRED` classification goes on to BCR/ADR and `open-amendment` — a `CHANGE_ONLY` Change is recorded in the registries without a baseline amendment.
-5. Complete `proposal.md`'s Why, What Changes, Capabilities, Target Platforms, and Impact; capability paths use kebab-case and reuse existing paths.
-6. Write externally observable behavior into `specs/<capability>/spec.md`, using canonical ADDED/MODIFIED/REMOVED/RENAMED Requirements and Scenario.
-7. Put proposal-level design decisions in `proposal.md`; do not create `design.md` here (Stage 07 is its single writer), and put tasks only in `tasks.md` with checkboxes.
-8. Annotate the corresponding US/AC/BR/FLOW/NODE/DO IDs, permissions, failure paths, and boundary conditions.
-9. When beyond baseline scope, first propose ADR/baseline changes; for pure documentation/refactoring Changes with no behavior change, use `skip_specs: true` per OpenSpec conventions, and do not fabricate requirements.
-10. After completion, run `python scripts/check-requirements.py --change <change-id> --strict` and `openspec validate <change-id> --strict`, and address all errors/warnings.
+1. **Entry**:
+   - Ensure the Change lane was started via `python scripts/workflow.py start-change --change-id <change-id>` (verifies frozen baseline, roadmap/amendment presence, and transitive dependencies ACCEPTED at Stage 10).
+   - Run `python scripts/workflow.py check-entry --step 05-feature-requirements --change-id <change-id>` and `python scripts/agent-context.py --stage 05 --change <change-id>`.
+   - Scaffold Change assets via `bash scripts/new-change-assets.sh <change-id>` if not already present.
+2. **Proposal & Target Platforms**:
+   - Write `openspec/changes/<change-id>/proposal.md` with `### New Capabilities` / `### Modified Capabilities` aligned to `proposal-roadmap.md` and `## Target Platforms` matching the roadmap row verbatim.
+   - If the Change is outside the roadmap main table, add an approved `## Roadmap Amendments` row in `docs/product/proposal-roadmap.md` (`Reason`, `Requester`, `Approver`, `Date`, `Baseline Impact`, `Depends On`, `Target Platforms`, `Owner Module`, `Related Modules`).
+3. **Delta Specs & User Stories / ACs**:
+   - Write `openspec/changes/<change-id>/specs/<capability>/spec.md` describing observable behavior (`ADDED`/`MODIFIED`/`REMOVED`/`RENAMED` Requirements + `#### Scenario:`), with no implementation details (evaluate `skip_specs: true` only for pure doc/tooling/refactoring Changes).
+   - Write `openspec/changes/<change-id>/design/user-stories.md`:
+     - Declare `- Target platforms:` identical to `proposal.md` and roadmap.
+     - Every `### AC-xxx` includes `- Scenario: <exact spec Scenario title>` and `- Slice position: entry|behavior|result`.
+     - Cover every declared platform (or write `N/A + reason`), plus `## Acceptance Walkthrough` (one AC at each slice position) and `## Slice Budget` (exception requires `- Budget exception: <approver> — <reason>`).
+   - Write initial `- [ ]` checkboxes in `openspec/changes/<change-id>/tasks.md`.
+4. **Baseline Impact & Registries**:
+   - Follow `.claude/skills/baseline-impact-classification/SKILL.md` to fill `design/baseline-impact.md` and generate `design/baseline-binding.json` (`baseline-governance.py init-binding`).
+   - Update `docs/product/capabilities.csv` and `docs/product/modules.csv` when introducing/updating capabilities or modules (owner module must list the capability).
+5. **Stage-End Gates**:
+   - `python scripts/check-requirements.py --change <change-id> --strict`
+   - `openspec validate <change-id> --strict`
+   - `python scripts/check-capabilities.py` & `python scripts/check-modules.py`
+   - `python scripts/check-roadmap.py --strict` (when a roadmap amendment was added)
+   - `python scripts/baseline-governance.py check-change --change-id <change-id> --phase requirement`
+   - `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence workflow/evidence/<change-id>/05-feature-requirements.json`
 
-## Output
-OpenSpec proposal (New/Modified Capabilities aligned with the roadmap, `## Target Platforms`), delta specs, design, tasks, `design/user-stories.md` (US/ACs with `- Target platforms:`, `- Scenario:` and `- Slice position:`, `## Acceptance Walkthrough`, `## Slice Budget`), `design/baseline-impact.md`, `design/baseline-binding.json`, `docs/product/capabilities.csv` and `docs/product/modules.csv` (update both when a new capability or module is introduced; the owner module must list the capability), a `## Roadmap Amendments` row when the Change is outside the roadmap main table, baseline amendment requests (only when `BASELINE_CHANGE_REQUIRED`), and the pending-approval list.
-
-## Quality and Safety Boundaries
-Specs describe WHAT and do not carry implementation details such as class names/frameworks; every Requirement has at least one Scenario; tasks use `- [ ]`; proposal-level US/ACs must reference project FLOW/BR/DO and be verifiable by ACs; the declared target platforms are explicit, canonical, and identical across `proposal.md`, `design/user-stories.md`, and the roadmap; every declared platform has platform-specific AC/Scenario coverage or an explicit N/A + reason; every AC has `- Scenario:` and `- Slice position:`; the walkthrough covers all three slice positions and the budget is explicit; do not produce use case files, and scenarios are uniformly written in the spec's Scenario.
-
-## Boundaries with OpenSpec / Superpowers
-- OpenSpec stores a Change's proposal, behavioral delta specs, design, and tasks; this Skill does not replace OpenSpec's own validation.
-- Superpowers is used for R&D methodology and execution discipline; claim that a skill was used only when it is confirmed installed and callable by the Agent.
-- Figma MCP input must be based on actually accessible links, nodes, and MCP responses; HTML design input (when used) must be based on real readable files. Do not assume a Figma file exists when the default HTML-first UI source is used.
-- Do not automatically commit, publish, archive, or overwrite user files at this stage.
-
-## Recommended Checks
-`scripts/check-requirements.py --change <change-id> --strict`; `scripts/check-change.sh <change-id>`; `python scripts/check-capabilities.py`; `python scripts/check-modules.py` (when a module row was added or updated); `python scripts/check-roadmap.py --strict` (when a roadmap amendment was written)
-
-
-## Actual Tool Invocation Requirements
-
-- **Superpowers:** The stage-scoped mode of `brainstorming` checks the completeness of options, requirement boundaries, and multi-platform scenarios; write conclusions into `design/user-stories.md`, the spec's Scenario, or `proposal.md`, not a separate design document or `design.md`; do not start coding. Load and follow the local `baseline-impact-classification` method Skill to classify each affected item against the frozen baseline and write `design/baseline-impact.md` plus the constraint binding. Stage evidence must write `methods` (brainstorming and baseline-impact-classification with real evidence paths and landing sections) and run `python scripts/check-method-evidence.py --step 05-feature-requirements --evidence <evidence.json>`. You must check, read, or invoke skills according to the real mechanism of the current host Agent; when unavailable, use `mode=equivalent` and write `reason`.
-- **OpenSpec:** Actually execute `openspec status --change <id>`, `openspec instructions <artifact> --change <id> --json`, `openspec validate <id> --strict`. Commands must be actually executed and the exit code/result reported. When the CLI is unavailable, mark it "not executed/blocked", and do not fabricate validation results.
-- **Project Skill:** Load this Skill according to the actual mechanism of the host Agent; merely mentioning a skill name in a Prompt does not mean the skill was invoked.
-- **State Update:** `workflow-state.json` is written only by workflow commands; after artifacts and gates pass, run `request-review` and wait for user approval. Never edit state directly; pending approvals still block the next stage.
-
-## Project Baseline Reading and Applicability Determination (Mandatory)
-
-- Before starting requirements refinement, first read `docs/architecture/baseline-status.md`, relevant product baselines, `system-context.md`, `domain-boundaries.md`, and the architecture/data/API/frontend/test baselines of affected domains, and read relevant `openspec/specs/**`.
-- You must create `openspec/changes/<change-id>/design/baseline-impact.md` according to `templates/change-assets/design/baseline-impact.md`, recording baseline domain versions, actually read files/sections/IDs, constraints, reuse items, conflicts, and ownership classification.
-- Explain baseline impact in `proposal.md`. If changes to architecture, data ownership, common contracts, or global quality gates are prerequisites for the feature to exist, mark `BLOCKED_PENDING_BASELINE_CHANGE`; complete baseline amendment approval first, and do not design/code first and add paperwork later.
-- A single feature's behavior, API, pages, physical table migrations, and local IO stay in the Change; only cross-feature shared rules/common contracts/core domain models/system-level constraints warrant a baseline amendment.
-- When the frozen test_quality baseline contains `QUALITY-STATIC-001`, `design/baseline-impact.md` and `design/baseline-binding.json` must list it among the applicable constraints, marked APPLICABLE (or NOT_APPLICABLE with a specific reason); it binds this Change's 08/09 static-analysis gates, and every applied waiver must be Change-scoped (`design/static-waivers.json`).
-- For detailed determination rules, see `process/BASELINE-FEATURE-INTERACTION.md`.
-
-## Input/Output/Handoff Contract (Mandatory)
-
-Before and after executing this Skill, you must comply with `process/STEP-ARTIFACT-CONTRACTS.md` and read the contract record for `skill="feature-requirements"` in `process/STEP-ARTIFACT-CONTRACTS.json`. Do not infer that the handoff is complete merely from this Skill's brief "Input/Output" paragraphs.
-
-- **Inputs for this stage:** Approved roadmap/current Change scope; `docs/product/capabilities.csv` and `docs/product/modules.csv` (capability→owner module mapping); project requirements business analysis (workflows/data-objects/rd-matrix/business-rules/glossary/acceptance-policy) and frozen baseline; docs/product/BASELINE-BRIEF.md, change-sizing.md, role-permission-matrix.csv, decisions.md, assumptions.md, lessons.md, id-conventions.md (standing baselines); docs/product/acceptance-policy.md (project-level acceptance criteria; ACs align with the acceptance policy); associated FLOW/NODE/DO/BR IDs; existing OpenSpec specs; docs/product/open-questions.md (append-only: new questions may be added; existing questions are closed only by their owner/user). Verify existence, version, and approval status item by item; stop and report when missing or unapproved.
-- **Outputs for this stage:** openspec/changes/<change-id>/proposal.md (including `## Target Platforms`, proposal-level initial design decisions, and New/Modified Capabilities aligned with the roadmap); openspec/changes/<change-id>/specs/<capability>/spec.md (when applicable); openspec/changes/<change-id>/tasks.md (initial tasks); openspec/changes/<change-id>/design/user-stories.md (US/AC with `- Target platforms:`, `- Scenario:` and `- Slice position:`, `## Acceptance Walkthrough`, `## Slice Budget`); openspec/changes/<change-id>/design/baseline-impact.md (mandatory for every Change); openspec/changes/<change-id>/design/baseline-binding.json; updated `docs/product/capabilities.csv` and `docs/product/modules.csv` (both registries when a new capability or module is introduced); an approved `## Roadmap Amendments` row in `docs/product/proposal-roadmap.md` when the Change is outside the roadmap main table. Do not create `design.md` here; Stage 07 is its single writer. Generate according to templates and write to disk; if a path contains `<change-id>`, it must be replaced with the current real Change ID.
-- **Downstream handoff:** Approved proposal-level US/ACs (no separate use-case artifact; scenarios live in the spec `Scenario` section), target platforms for the per-platform HTML UI design in 06, scope boundaries, requirement traceability IDs, baseline snapshot, and constraint bindings. Explicitly state which files/fields the next stage consumes.
-- **End-of-stage presentation:** Use `templates/workflow/step-handoff-report.md` to present input verification, output paths and summaries, traceability relationships, self-check commands/exit codes, unexecuted items, pending-approval/blocked items, and next-stage inputs.
-- **State discipline:** `workflow-state.json` is written only by workflow commands. Drafts or artifacts pending review are never recorded as completed; run `request-review` and wait for approval.
-
-
-## Machine Baseline Constraint Binding (Mandatory)
-
-- Before starting requirements refinement, `python scripts/baseline-governance.py audit --require-frozen` must pass.
-- After the Change auxiliary assets are created, `design/baseline-binding.json` must exist; if `new-change-assets.sh` is used it is generated automatically from the frozen registry, or you may run `python scripts/baseline-governance.py init-binding --change-id <id>`.
-- Do not delete/merge/rewrite machine-generated constraint IDs; fill in APPLICABLE or NOT_APPLICABLE and a specific reason for each bound constraint (all ACTIVE in the standard profile, critical only in the lite profile).
-- After the stage 05 manual approval binding, run `python scripts/baseline-governance.py check-change --change-id <id> --phase requirement`; the handoff may occur only when this gate and the Markdown `baseline-impact.md` both pass.
-
-## Question Coverage (Recommended)
-
-- Skim the 05 section of `process/QUESTION-COVERAGE-CHECKLIST.md` and use the questions that apply; there is no requirement to fill every item or record a row per item.
-- Open questions must be recorded in `docs/product/open-questions.md` with an owner and blocking condition; do not leave them only in chat.
-- If the stage records coverage in evidence, `question_coverage` is optional: `answered` needs a real `landing` path; `open` needs `owner`/`blocking`/`open_question`; `n/a` needs a `reason`; `deferred` needs `reason`/`approver`/`target_step`. Unknown item IDs are allowed.
-- Optional validation: `python scripts/check-question-coverage.py --step 05-feature-requirements --evidence <evidence.json>`; `workflow.py request-review` and `transition` re-check the same optional block automatically.
-
-## Stage Boundaries and Review Stop (Mandatory)
-
-- Before starting, run `python scripts/workflow.py check-entry --step 05-feature-requirements [--change-id <id>]`; when the exit code is non-zero, stop immediately and report; do not bypass.
-- Artifacts written and checks passing only mean ready for review: run `python scripts/workflow.py request-review --step 05-feature-requirements --summary "<summary>"`, present the handoff report according to `templates/workflow/step-handoff-report.md`, and then **end the turn immediately**; do not read/execute the next stage's Prompt/Skill or create next-stage artifacts in the same session.
-- Only after the user explicitly approves the pending stage (any unambiguous approval wording counts; silence and check success do not) may you run `python scripts/workflow.py approve --step 05-feature-requirements --approver "<user>" --approved-at <YYYY-MM-DD> --evidence <approval-record>` and execute `transition`. Do not fill in approver/approved_at yourself, and do not treat self-check success as approval.
-- When `pending_approvals` is non-empty, advancing is prohibited; `workflow-state.json` may be managed only through `check-entry`/`request-review`/`approve`/`transition` and similar commands, and direct editing is prohibited.
-- Claude Code's PreToolUse hook rejects writes to stage artifacts after the current stage (except shared artifacts) and direct edits to the state file; it also rejects them while pending review. When rejected, you must stop and explain; do not change paths or disable the hook to bypass it.
+## Input/Output/Handoff Contract
+- **Inputs**: Run `python scripts/agent-context.py --stage 05 --change <change-id>` for the lean read set.
+- **Outputs**: `proposal.md`, `specs/<capability>/spec.md` (when applicable), `tasks.md`, `design/user-stories.md`, `design/baseline-impact.md`, `design/baseline-binding.json`, updated `docs/product/capabilities.csv`, `docs/product/modules.csv`, and optional `proposal-roadmap.md` amendment.
+- **Downstream Handoff**: Approved proposal, delta specs, US/ACs with target platforms, and baseline binding for Stage 06.
+- **Review & Boundaries**:
+  - Generate `workflow/evidence/<change-id>/05-feature-requirements.json` and run:
+    `python scripts/workflow.py request-review --step 05-feature-requirements --change-id <change-id> --evidence workflow/evidence/<change-id>/05-feature-requirements.json --summary "<summary>"`
+  - Present `templates/workflow/step-handoff-report.md` and end the turn. Advance (`approve` → `transition`) only after explicit user approval. Follow `AGENTS.md`.

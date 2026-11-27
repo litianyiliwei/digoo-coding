@@ -24,6 +24,8 @@ PENDING — what the system owns, what it explicitly does not own.
 
 ## External Dependencies
 
+> High-level topology index only; full auth/SLA/sandbox/owner details live in `docs/architecture/technology-decisions.md` (`## Third-Party Interface Dependency List`) — do not duplicate.
+
 | Dependency | Provider | Protocol | Failure Impact |
 |---|---|---|---|
 | PENDING | PENDING | PENDING | PENDING |

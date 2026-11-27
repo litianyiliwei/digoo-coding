@@ -20,9 +20,11 @@
 
 - PENDING — client location, error/timeout/retry policy, auth token handling.
 
-## UI Token Mapping
+## Multi-Platform and Native Capabilities
 
-- PENDING — Figma token → CSS variable / Element Plus theme / font mapping rules; responsive and viewport rules.
+> Record cross-platform sharing strategy, platform-specific adapters (web/h5/mini-program/app/desktop/pda), native bridge/offline/push/permission rules; write `N/A + reason` for single-platform web-only projects.
+
+- PENDING
 
 ## Accessibility and Internationalization
 
@@ -30,6 +32,6 @@
 
 ## Visual Conventions
 
-> The single visual authority consumed by stages 06 and 07: token source, typography/scale, spacing/radius/shadow rules, component-library theme mapping per platform, icon/imagery rules, and responsive/viewport rules. Write `N/A + reason` only when the project has no UI.
+> The single visual authority consumed by stages 06 and 07: token source and CSS/theme mapping (e.g. CSS variables / Element Plus / uni-app theme), typography/scale, spacing/radius/shadow rules, icon/imagery rules, and responsive/viewport baselines. Write `N/A + reason` only when the project has no UI.
 
-- PENDING — token source and naming, typography and scale, spacing/radius/shadow rules, component-library theme mapping per platform, icon/imagery rules, responsive/viewport baselines.
+- PENDING — token source and CSS/theme mapping, typography and scale, spacing/radius/shadow rules, component-library theme mapping per platform, icon/imagery rules, responsive/viewport baselines.

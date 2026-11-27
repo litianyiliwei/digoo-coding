@@ -598,10 +598,8 @@ def baseline_phase_for_entry(step_id):
         return 'requirement'
     if step_id in ('07-detailed-design','08-implementation-orchestrator'):
         return 'design'
-    if step_id=='09-independent-verification':
+    if step_id in ('09-independent-verification','10-acceptance-audit'):
         return 'implementation'
-    if step_id=='10-acceptance-audit':
-        return 'acceptance'
     return None
 
 def baseline_phase_for_transition(step_id):
